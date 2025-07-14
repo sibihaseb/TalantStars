@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeProvider } from "@/components/ui/theme-provider";
@@ -51,7 +51,13 @@ import {
   X,
   Sparkles,
   Users,
-  Video
+  Video,
+  Trophy,
+  Zap,
+  PartyPopper,
+  Medal,
+  Crown,
+  Rocket
 } from "lucide-react";
 
 const onboardingSchema = insertUserProfileSchema.extend({
@@ -80,6 +86,8 @@ export default function Onboarding() {
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(1);
   const [newSkill, setNewSkill] = useState("");
+  const [isStepChanging, setIsStepChanging] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
   const totalSteps = 6;
 
   // Redirect if not authenticated
@@ -154,12 +162,17 @@ export default function Onboarding() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      toast({
-        title: "Welcome to Talents & Stars!",
-        description: "Your profile has been created successfully.",
-      });
-      setLocation("/");
+      // Show final celebration
+      setShowCelebration(true);
+      
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        toast({
+          title: "🎉 Welcome to Talents & Stars!",
+          description: "Your profile has been created successfully. Get ready to shine!",
+        });
+        setLocation("/");
+      }, 1000);
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
@@ -279,16 +292,52 @@ export default function Onboarding() {
     return watchedRole === "talent" ? 6 : 4;
   };
 
+  const getStepInfo = (step: number) => {
+    const commonSteps = [
+      { title: "Role Selection", description: "Choose your role", icon: User },
+      { title: "Basic Information", description: "Personal details", icon: User },
+      { title: "Location & Contact", description: "Where you work", icon: Star },
+      { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
+    ];
+
+    const talentSteps = [
+      { title: "Role Selection", description: "Choose your role", icon: User },
+      { title: "Basic Information", description: "Personal details", icon: User },
+      { title: "Physical Details", description: "Appearance & stats", icon: Star },
+      { title: "Skills & Experience", description: "What you can do", icon: Medal },
+      { title: "Location & Contact", description: "Where you work", icon: Crown },
+      { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
+    ];
+
+    const steps = watchedRole === "talent" ? talentSteps : commonSteps;
+    return steps[step - 1] || { title: "Step", description: "", icon: User };
+  };
+
+  const getProgressPercentage = () => {
+    return Math.round((currentStep / getMaxSteps()) * 100);
+  };
+
   const nextStep = () => {
     const maxSteps = getMaxSteps();
     if (currentStep < maxSteps) {
-      setCurrentStep(currentStep + 1);
+      setIsStepChanging(true);
+      setShowCelebration(true);
+      
+      setTimeout(() => {
+        setCurrentStep(currentStep + 1);
+        setIsStepChanging(false);
+        setShowCelebration(false);
+      }, 300);
     }
   };
 
   const prevStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      setIsStepChanging(true);
+      setTimeout(() => {
+        setCurrentStep(currentStep - 1);
+        setIsStepChanging(false);
+      }, 200);
     }
   };
 
@@ -319,16 +368,77 @@ export default function Onboarding() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
         <Header />
         
-        {/* Progress Header */}
+        {/* Enhanced Progress Header */}
         <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 mt-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-center items-center py-4">
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Step {currentStep} of {getMaxSteps()}
-                </span>
-                <Progress value={progressPercentage} className="w-32" />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  showCelebration 
+                    ? 'bg-gradient-to-r from-yellow-400 to-orange-500 animate-pulse' 
+                    : 'bg-gradient-to-r from-blue-500 to-purple-600'
+                }`}>
+                  {showCelebration ? (
+                    <PartyPopper className="h-6 w-6 text-white animate-bounce" />
+                  ) : (
+                    React.createElement(getStepInfo(currentStep).icon, { className: "h-6 w-6 text-white" })
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {getStepInfo(currentStep).title}
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {getStepInfo(currentStep).description}
+                  </p>
+                </div>
               </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                  {getProgressPercentage()}%
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Step {currentStep} of {getMaxSteps()}
+                </div>
+              </div>
+            </div>
+            
+            <div className="relative mb-4">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${getProgressPercentage()}%` }}
+                />
+              </div>
+            </div>
+            
+            {/* Step indicators */}
+            <div className="flex justify-between">
+              {Array.from({ length: getMaxSteps() }).map((_, index) => (
+                <div
+                  key={index}
+                  className={`flex flex-col items-center transition-all duration-300 ${
+                    index + 1 <= currentStep ? 'opacity-100' : 'opacity-50'
+                  }`}
+                >
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                    index + 1 < currentStep
+                      ? 'bg-green-500 text-white'
+                      : index + 1 === currentStep
+                      ? 'bg-blue-600 text-white animate-pulse'
+                      : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400'
+                  }`}>
+                    {index + 1 < currentStep ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      index + 1
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-16 text-center">
+                    {getStepInfo(index + 1).title.split(' ')[0]}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -345,6 +455,10 @@ export default function Onboarding() {
             </div>
 
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* Content wrapper with smooth transitions */}
+              <div className={`transition-all duration-300 ${
+                isStepChanging ? 'opacity-50 transform translate-x-4' : 'opacity-100 transform translate-x-0'
+              }`}>
               {/* Step 1: Role Selection */}
               {currentStep === 1 && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
@@ -841,13 +955,24 @@ export default function Onboarding() {
                   <span>Previous</span>
                 </Button>
 
+                {/* Celebration Animation */}
+                {showCelebration && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="flex space-x-2">
+                      <Sparkles className="h-8 w-8 text-yellow-400 animate-bounce" />
+                      <Medal className="h-8 w-8 text-orange-400 animate-pulse" />
+                      <Trophy className="h-8 w-8 text-yellow-500 animate-bounce" />
+                    </div>
+                  </div>
+                )}
+                
                 <div className="flex items-center space-x-2">
                   {Array.from({ length: getMaxSteps() }).map((_, index) => (
                     <div
                       key={index}
-                      className={`w-3 h-3 rounded-full transition-colors ${
+                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
                         index + 1 <= currentStep
-                          ? "bg-blue-600"
+                          ? "bg-gradient-to-r from-blue-500 to-purple-600 animate-pulse"
                           : "bg-gray-300 dark:bg-gray-600"
                       }`}
                     />
@@ -858,7 +983,7 @@ export default function Onboarding() {
                   <Button
                     type="button"
                     onClick={nextStep}
-                    className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700"
+                    className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
                   >
                     <span>Next</span>
                     <ArrowRight className="h-4 w-4" />
@@ -867,7 +992,7 @@ export default function Onboarding() {
                   <Button
                     type="submit"
                     disabled={createProfileMutation.isPending}
-                    className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
                     onClick={() => {
                       console.log("Submit button clicked");
                       console.log("Current form values:", form.getValues());
@@ -877,9 +1002,14 @@ export default function Onboarding() {
                     <span>
                       {createProfileMutation.isPending ? "Creating Profile..." : "Complete Setup"}
                     </span>
-                    <Check className="h-4 w-4" />
+                    {createProfileMutation.isPending ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                    ) : (
+                      <Rocket className="h-4 w-4" />
+                    )}
                   </Button>
                 )}
+              </div>
               </div>
             </form>
           </div>
