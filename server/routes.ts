@@ -16,7 +16,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { requestPasswordReset, validatePasswordResetToken, resetPassword } from "./passwordUtils";
-import { sendMeetingInvitation, sendWelcomeEmail } from "./email";
+import { sendMeetingInvitation, sendWelcomeEmail, sendEmail } from "./email";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -366,6 +366,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error sending password reset:", error);
       res.status(500).json({ message: "Failed to send password reset", error: error.message });
+    }
+  });
+
+  // Mass email functionality
+  app.post('/api/admin/mass-email', isAuthenticated, async (req: any, res) => {
+    try {
+      const { subject, content, recipients } = req.body;
+      
+      if (!subject || !content || !recipients || !Array.isArray(recipients)) {
+        return res.status(400).json({ message: "Missing required fields: subject, content, and recipients array" });
+      }
+      
+      // Send emails to all recipients
+      const emailPromises = recipients.map(email => 
+        sendEmail({
+          to: email,
+          subject,
+          html: content,
+          text: content.replace(/<[^>]*>/g, '') // Simple HTML to text conversion
+        })
+      );
+      
+      const results = await Promise.allSettled(emailPromises);
+      const successCount = results.filter(result => result.status === 'fulfilled').length;
+      const failureCount = results.filter(result => result.status === 'rejected').length;
+      
+      res.json({ 
+        success: true,
+        message: `Mass email campaign completed`,
+        stats: {
+          total: recipients.length,
+          sent: successCount,
+          failed: failureCount
+        }
+      });
+    } catch (error) {
+      console.error("Error sending mass email:", error);
+      res.status(500).json({ message: "Failed to send mass email", error: error.message });
     }
   });
 

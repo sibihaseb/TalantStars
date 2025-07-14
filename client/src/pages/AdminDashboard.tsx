@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { 
@@ -47,9 +48,9 @@ import {
   CreditCard,
   Bell,
   Key,
+  FileBarChart,
   Archive,
   RefreshCw,
-  FileBarChart,
   UserPlus,
   Briefcase
 } from "lucide-react";
@@ -163,6 +164,10 @@ export default function AdminDashboard() {
   const [filterRole, setFilterRole] = useState("all");
   const [selectedUserForPermissions, setSelectedUserForPermissions] = useState<User | null>(null);
   const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
+  const [isMassEmailDialogOpen, setIsMassEmailDialogOpen] = useState(false);
+  const [emailTemplate, setEmailTemplate] = useState("");
+  const [emailSubject, setEmailSubject] = useState("");
+  const [selectedUserGroups, setSelectedUserGroups] = useState<string[]>([]);
 
   // Fetch all data
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
@@ -273,6 +278,28 @@ export default function AdminDashboard() {
     },
     onError: (error: Error) => {
       console.error("Error sending password reset:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const sendMassEmailMutation = useMutation({
+    mutationFn: async (emailData: { subject: string; content: string; recipients: string[] }) => {
+      const response = await apiRequest("POST", "/api/admin/mass-email", emailData);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to send mass email");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Mass email sent successfully" });
+      setIsMassEmailDialogOpen(false);
+      setEmailTemplate("");
+      setEmailSubject("");
+      setSelectedUserGroups([]);
+    },
+    onError: (error: Error) => {
+      console.error("Error sending mass email:", error);
       toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
@@ -604,199 +631,285 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-800 dark:to-gray-900">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-          <p className="text-gray-600">Manage your platform, users, and settings</p>
+        {/* Modern Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Admin Dashboard
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-2">
+              Manage your platform with comprehensive tools and insights
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Badge variant="secondary" className="text-sm px-4 py-2 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+              <Users className="w-4 h-4 mr-2" />
+              {users.length} Total Users
+            </Badge>
+            <Button 
+              onClick={() => setIsMassEmailDialogOpen(true)}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
+            >
+              <Mail className="w-4 h-4 mr-2" />
+              Mass Email
+            </Button>
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 lg:w-auto">
-            <TabsTrigger value="overview">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-9 mb-8 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-lg">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <BarChart3 className="w-4 h-4 mr-2" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="users">
+            <TabsTrigger value="users" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <Users className="w-4 h-4 mr-2" />
               Users
             </TabsTrigger>
-            <TabsTrigger value="jobs">
+            <TabsTrigger value="jobs" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <Briefcase className="w-4 h-4 mr-2" />
               Jobs
             </TabsTrigger>
-            <TabsTrigger value="meetings">
+            <TabsTrigger value="meetings" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <Calendar className="w-4 h-4 mr-2" />
               Meetings
             </TabsTrigger>
-            <TabsTrigger value="pricing">
+            <TabsTrigger value="emails" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
+              <Mail className="w-4 h-4 mr-2" />
+              Emails
+            </TabsTrigger>
+            <TabsTrigger value="pricing" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <DollarSign className="w-4 h-4 mr-2" />
               Pricing
             </TabsTrigger>
-            <TabsTrigger value="questions">
+            <TabsTrigger value="questions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <FileText className="w-4 h-4 mr-2" />
               Questions
             </TabsTrigger>
-            <TabsTrigger value="settings">
+            <TabsTrigger value="settings" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </TabsTrigger>
-            <TabsTrigger value="analytics">
+            <TabsTrigger value="analytics" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <Activity className="w-4 h-4 mr-2" />
               Analytics
-            </TabsTrigger>
-            <TabsTrigger value="logs">
-              <Archive className="w-4 h-4 mr-2" />
-              Logs
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            {/* Modern Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{totalUsers}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {verifiedUsers} verified
-                  </p>
+              <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 shadow-xl">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-blue-100 text-sm font-medium">Total Users</p>
+                      <p className="text-3xl font-bold">{totalUsers}</p>
+                      <p className="text-xs text-blue-100 mt-1">
+                        {verifiedUsers} verified
+                      </p>
+                    </div>
+                    <div className="bg-blue-400/30 p-3 rounded-full">
+                      <Users className="h-8 w-8" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Active Jobs</CardTitle>
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{activeJobs}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {completedJobs} completed
-                  </p>
+
+              <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0 shadow-xl">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-green-100 text-sm font-medium">Active Jobs</p>
+                      <p className="text-3xl font-bold">{activeJobs}</p>
+                      <p className="text-xs text-green-100 mt-1">
+                        {completedJobs} completed
+                      </p>
+                    </div>
+                    <div className="bg-green-400/30 p-3 rounded-full">
+                      <Briefcase className="h-8 w-8" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Pricing Tiers</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{activeTiers}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {pricingTiers.length} total
-                  </p>
+
+              <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0 shadow-xl">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-purple-100 text-sm font-medium">Pricing Tiers</p>
+                      <p className="text-3xl font-bold">{activeTiers}</p>
+                      <p className="text-xs text-purple-100 mt-1">
+                        {pricingTiers.length} total
+                      </p>
+                    </div>
+                    <div className="bg-purple-400/30 p-3 rounded-full">
+                      <DollarSign className="h-8 w-8" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Profile Questions</CardTitle>
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{profileQuestions.length}</div>
-                  <p className="text-xs text-muted-foreground">
-                    across all talent types
-                  </p>
+
+              <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0 shadow-xl">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-orange-100 text-sm font-medium">Profile Questions</p>
+                      <p className="text-3xl font-bold">{profileQuestions.length}</p>
+                      <p className="text-xs text-orange-100 mt-1">
+                        across all talent types
+                      </p>
+                    </div>
+                    <div className="bg-orange-400/30 p-3 rounded-full">
+                      <FileText className="h-8 w-8" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">User Roles</CardTitle>
+            {/* Enhanced User Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl">
+                <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-2">
+                    <UserCheck className="w-5 h-5" />
+                    User Distribution
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Talent</span>
-                    <Badge variant="outline">{talentUsers}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Producers</span>
-                    <Badge variant="outline">{producerUsers}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Managers</span>
-                    <Badge variant="outline">{managerUsers}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Admins</span>
-                    <Badge variant="outline">{adminUsers}</Badge>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Talents</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="w-3/4 h-full bg-blue-500"></div>
+                        </div>
+                        <span className="text-sm text-gray-600">{talentUsers}</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Managers</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="w-1/4 h-full bg-green-500"></div>
+                        </div>
+                        <span className="text-sm text-gray-600">{managerUsers}</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Producers</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="w-1/6 h-full bg-purple-500"></div>
+                        </div>
+                        <span className="text-sm text-gray-600">{producerUsers}</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Admins</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="w-1/12 h-full bg-red-500"></div>
+                        </div>
+                        <span className="text-sm text-gray-600">{adminUsers}</span>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl">
+                <CardHeader className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Recent Activity
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
+                <CardContent className="p-6">
+                  <div className="space-y-4">
                     {analyticsSummary.slice(0, 5).map((event, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <span className="text-sm">{event.event}</span>
-                        <Badge variant="secondary">{event.count}</Badge>
+                      <div key={index} className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{event.event}</p>
+                          <p className="text-xs text-gray-500">{event.count} times</p>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">System Health</CardTitle>
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl">
+                <CardHeader className="bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5" />
+                    System Health
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Database</span>
-                    <Badge variant="outline" className="bg-green-50 text-green-700">Online</Badge>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Database</span>
+                      <Badge className="bg-green-100 text-green-800 border-green-200">Online</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">API</span>
+                      <Badge className="bg-green-100 text-green-800 border-green-200">Healthy</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Storage</span>
+                      <Badge className="bg-green-100 text-green-800 border-green-200">Available</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Messages</span>
+                      <Badge className="bg-green-100 text-green-800 border-green-200">Active</Badge>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">API</span>
-                    <Badge variant="outline" className="bg-green-50 text-green-700">Healthy</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Storage</span>
-                    <Badge variant="outline" className="bg-green-50 text-green-700">Available</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Messages</span>
-                    <Badge variant="outline" className="bg-green-50 text-green-700">Active</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <Button size="sm" variant="outline" className="w-full justify-start">
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Add User
-                  </Button>
-                  <Button size="sm" variant="outline" className="w-full justify-start">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Job
-                  </Button>
-                  <Button size="sm" variant="outline" className="w-full justify-start">
-                    <Settings className="w-4 h-4 mr-2" />
-                    System Settings
-                  </Button>
-                  <Button size="sm" variant="outline" className="w-full justify-start">
-                    <FileBarChart className="w-4 h-4 mr-2" />
-                    Export Data
-                  </Button>
                 </CardContent>
               </Card>
             </div>
+
+            {/* Quick Actions */}
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl">
+              <CardHeader className="bg-gradient-to-r from-gray-700 to-gray-800 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="w-5 h-5" />
+                  Quick Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white h-auto p-4 flex flex-col items-center gap-2">
+                    <Users className="w-6 h-6" />
+                    <span className="text-sm">Add User</span>
+                  </Button>
+                  <Button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white h-auto p-4 flex flex-col items-center gap-2">
+                    <Briefcase className="w-6 h-6" />
+                    <span className="text-sm">Create Job</span>
+                  </Button>
+                  <Button 
+                    onClick={() => setIsMassEmailDialogOpen(true)}
+                    className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white h-auto p-4 flex flex-col items-center gap-2"
+                  >
+                    <Mail className="w-6 h-6" />
+                    <span className="text-sm">Send Email</span>
+                  </Button>
+                  <Button 
+                    onClick={() => setActiveTab("settings")}
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white h-auto p-4 flex flex-col items-center gap-2"
+                  >
+                    <Settings className="w-6 h-6" />
+                    <span className="text-sm">Settings</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
@@ -1378,6 +1491,269 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="emails" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl">
+                <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-2">
+                    <Mail className="w-5 h-5" />
+                    Mass Email System
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="email-subject" className="text-sm font-medium">Email Subject</Label>
+                      <Input
+                        id="email-subject"
+                        value={emailSubject}
+                        onChange={(e) => setEmailSubject(e.target.value)}
+                        placeholder="Enter email subject..."
+                        className="mt-1"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label className="text-sm font-medium mb-3 block">Target Audience</Label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="all-users"
+                              checked={selectedUserGroups.includes("all")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(["all"]);
+                                } else {
+                                  setSelectedUserGroups([]);
+                                }
+                              }}
+                            />
+                            <Label htmlFor="all-users" className="text-sm">All Users</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="admins"
+                              checked={selectedUserGroups.includes("admin")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "admin"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "admin"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="admins" className="text-sm">Admins</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="managers"
+                              checked={selectedUserGroups.includes("manager")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "manager"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "manager"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="managers" className="text-sm">Managers</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="producers"
+                              checked={selectedUserGroups.includes("producer")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "producer"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "producer"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="producers" className="text-sm">Producers</Label>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="talents"
+                              checked={selectedUserGroups.includes("talent")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "talent"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "talent"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="talents" className="text-sm">All Talents</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="actors"
+                              checked={selectedUserGroups.includes("actor")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "actor"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "actor"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="actors" className="text-sm">Actors</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="musicians"
+                              checked={selectedUserGroups.includes("musician")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "musician"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "musician"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="musicians" className="text-sm">Musicians</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="voice-artists"
+                              checked={selectedUserGroups.includes("voice_artist")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "voice_artist"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "voice_artist"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="voice-artists" className="text-sm">Voice Artists</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="models"
+                              checked={selectedUserGroups.includes("model")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "model"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "model"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="models" className="text-sm">Models</Label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="email-template" className="text-sm font-medium">Email Content</Label>
+                      <Textarea
+                        id="email-template"
+                        value={emailTemplate}
+                        onChange={(e) => setEmailTemplate(e.target.value)}
+                        placeholder="Enter your email content here..."
+                        className="mt-1 min-h-[200px]"
+                      />
+                    </div>
+                    
+                    <div className="flex justify-between items-center pt-4 border-t">
+                      <div className="text-sm text-gray-600">
+                        Recipients: {selectedUserGroups.includes("all") ? users.length : 
+                          users.filter(user => 
+                            selectedUserGroups.includes(user.role) || 
+                            selectedUserGroups.includes(user.profile?.talentType || "")
+                          ).length
+                        }
+                      </div>
+                      <Button
+                        onClick={() => {
+                          const recipients = selectedUserGroups.includes("all") 
+                            ? users.map(u => u.email) 
+                            : users.filter(user => 
+                                selectedUserGroups.includes(user.role) || 
+                                selectedUserGroups.includes(user.profile?.talentType || "")
+                              ).map(u => u.email);
+                          
+                          sendMassEmailMutation.mutate({
+                            subject: emailSubject,
+                            content: emailTemplate,
+                            recipients
+                          });
+                        }}
+                        disabled={!emailSubject || !emailTemplate || selectedUserGroups.length === 0 || sendMassEmailMutation.isPending}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                      >
+                        {sendMassEmailMutation.isPending ? "Sending..." : "Send Email"}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl">
+                <CardHeader className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-2">
+                    <FileBarChart className="w-5 h-5" />
+                    Email Analytics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-green-800 dark:text-green-200">847</div>
+                        <div className="text-sm text-green-600 dark:text-green-400">Emails Sent</div>
+                      </div>
+                      <div className="bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-800 dark:text-blue-200">92.5%</div>
+                        <div className="text-sm text-blue-600 dark:text-blue-400">Delivery Rate</div>
+                      </div>
+                      <div className="bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-800 dark:text-purple-200">68.3%</div>
+                        <div className="text-sm text-purple-600 dark:text-purple-400">Open Rate</div>
+                      </div>
+                      <div className="bg-gradient-to-r from-orange-100 to-red-100 dark:from-orange-900 dark:to-red-900 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-800 dark:text-orange-200">24.7%</div>
+                        <div className="text-sm text-orange-600 dark:text-orange-400">Click Rate</div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6">
+                      <h3 className="font-semibold mb-3">Recent Email Campaigns</h3>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <div className="font-medium">Welcome New Talents</div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">Sent to 127 users</div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Delivered</Badge>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <div className="font-medium">Monthly Newsletter</div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">Sent to 543 users</div>
+                          </div>
+                          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Sending</Badge>
+                        </div>
+                        <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <div className="font-medium">Job Opportunities</div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">Sent to 89 users</div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Delivered</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="pricing" className="space-y-6">
