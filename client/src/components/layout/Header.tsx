@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { useAuth } from "@/hooks/useAuth";
-import { Star, Search, Briefcase, Plus, Menu } from "lucide-react";
+import { Star, Search, Briefcase, Plus, Menu, Calendar } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -58,6 +58,12 @@ export function Header() {
                 <Link href="/dashboard">
                   <Button variant="ghost" size="sm">
                     Dashboard
+                  </Button>
+                </Link>
+                <Link href="/meetings">
+                  <Button variant="ghost" size="sm">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Meetings
                   </Button>
                 </Link>
                 <Link href="/profile">
@@ -116,6 +122,45 @@ export function Header() {
                       <span>{item.name}</span>
                     </Link>
                   ))}
+                  
+                  {isAuthenticated && (
+                    <>
+                      <Link
+                        href="/meetings"
+                        className={`flex items-center space-x-2 text-sm font-medium p-2 rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                          isActive("/meetings")
+                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                            : "text-gray-700 dark:text-gray-300"
+                        }`}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <Calendar className="h-4 w-4" />
+                        <span>Meetings</span>
+                      </Link>
+                      <Link
+                        href="/dashboard"
+                        className={`flex items-center space-x-2 text-sm font-medium p-2 rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                          isActive("/dashboard")
+                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                            : "text-gray-700 dark:text-gray-300"
+                        }`}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <span>Dashboard</span>
+                      </Link>
+                      <Link
+                        href="/profile"
+                        className={`flex items-center space-x-2 text-sm font-medium p-2 rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                          isActive("/profile")
+                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                            : "text-gray-700 dark:text-gray-300"
+                        }`}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <span>Profile</span>
+                      </Link>
+                    </>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>

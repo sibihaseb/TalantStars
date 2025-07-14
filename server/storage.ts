@@ -11,6 +11,10 @@ import {
   systemSettings,
   adminLogs,
   analytics,
+  meetings,
+  passwordResetTokens,
+  userPermissions,
+  notifications,
   type User,
   type UpsertUser,
   type UserProfile,
@@ -34,6 +38,14 @@ import {
   type InsertAdminLog,
   type Analytics,
   type InsertAnalytics,
+  type Meeting,
+  type InsertMeeting,
+  type PasswordResetToken,
+  type InsertPasswordResetToken,
+  type UserPermission,
+  type InsertUserPermission,
+  type Notification,
+  type InsertNotification,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc, like, ilike } from "drizzle-orm";
@@ -111,6 +123,30 @@ export interface IStorage {
   createAnalytics(analytics: InsertAnalytics): Promise<Analytics>;
   getAnalytics(startDate?: Date, endDate?: Date): Promise<Analytics[]>;
   getAnalyticsSummary(): Promise<{ event: string; count: number }[]>;
+  
+  // Meeting operations
+  createMeeting(meeting: InsertMeeting): Promise<Meeting>;
+  getMeetings(userId: string): Promise<Meeting[]>;
+  getMeeting(id: number): Promise<Meeting | undefined>;
+  updateMeeting(id: number, meeting: Partial<InsertMeeting>): Promise<Meeting>;
+  deleteMeeting(id: number): Promise<void>;
+  
+  // Password reset operations
+  createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken>;
+  getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
+  usePasswordResetToken(token: string): Promise<void>;
+  
+  // User permissions
+  createUserPermission(permission: InsertUserPermission): Promise<UserPermission>;
+  getUserPermissions(userId: string): Promise<UserPermission[]>;
+  updateUserPermission(id: number, permission: Partial<InsertUserPermission>): Promise<UserPermission>;
+  deleteUserPermission(id: number): Promise<void>;
+  
+  // Notifications
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getUserNotifications(userId: string): Promise<Notification[]>;
+  markNotificationAsRead(id: number): Promise<void>;
+  deleteNotification(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -541,6 +577,98 @@ export class DatabaseStorage implements IStorage {
     });
     
     return Object.entries(eventCounts).map(([event, count]) => ({ event, count }));
+  }
+
+  // Meeting operations
+  async createMeeting(meeting: InsertMeeting): Promise<Meeting> {
+    const [result] = await db.insert(meetings).values(meeting).returning();
+    return result;
+  }
+
+  async getMeetings(userId: string): Promise<Meeting[]> {
+    return await db.select().from(meetings)
+      .where(or(eq(meetings.organizerId, userId), eq(meetings.attendeeId, userId)))
+      .orderBy(desc(meetings.meetingDate));
+  }
+
+  async getMeeting(id: number): Promise<Meeting | undefined> {
+    const [result] = await db.select().from(meetings).where(eq(meetings.id, id));
+    return result;
+  }
+
+  async updateMeeting(id: number, meeting: Partial<InsertMeeting>): Promise<Meeting> {
+    const [result] = await db.update(meetings)
+      .set({ ...meeting, updatedAt: new Date() })
+      .where(eq(meetings.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteMeeting(id: number): Promise<void> {
+    await db.delete(meetings).where(eq(meetings.id, id));
+  }
+
+  // Password reset operations
+  async createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    const [result] = await db.insert(passwordResetTokens).values(token).returning();
+    return result;
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    const [result] = await db.select().from(passwordResetTokens)
+      .where(and(eq(passwordResetTokens.token, token), eq(passwordResetTokens.used, false)));
+    return result;
+  }
+
+  async usePasswordResetToken(token: string): Promise<void> {
+    await db.update(passwordResetTokens)
+      .set({ used: true })
+      .where(eq(passwordResetTokens.token, token));
+  }
+
+  // User permissions
+  async createUserPermission(permission: InsertUserPermission): Promise<UserPermission> {
+    const [result] = await db.insert(userPermissions).values(permission).returning();
+    return result;
+  }
+
+  async getUserPermissions(userId: string): Promise<UserPermission[]> {
+    return await db.select().from(userPermissions)
+      .where(eq(userPermissions.userId, userId));
+  }
+
+  async updateUserPermission(id: number, permission: Partial<InsertUserPermission>): Promise<UserPermission> {
+    const [result] = await db.update(userPermissions)
+      .set(permission)
+      .where(eq(userPermissions.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteUserPermission(id: number): Promise<void> {
+    await db.delete(userPermissions).where(eq(userPermissions.id, id));
+  }
+
+  // Notifications
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [result] = await db.insert(notifications).values(notification).returning();
+    return result;
+  }
+
+  async getUserNotifications(userId: string): Promise<Notification[]> {
+    return await db.select().from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async markNotificationAsRead(id: number): Promise<void> {
+    await db.update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.id, id));
+  }
+
+  async deleteNotification(id: number): Promise<void> {
+    await db.delete(notifications).where(eq(notifications.id, id));
   }
 }
 

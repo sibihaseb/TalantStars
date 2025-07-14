@@ -9,9 +9,14 @@ import {
   insertMediaFileSchema, 
   insertJobSchema, 
   insertJobApplicationSchema, 
-  insertMessageSchema 
+  insertMessageSchema,
+  insertMeetingSchema,
+  insertNotificationSchema,
+  insertUserPermissionSchema
 } from "@shared/schema";
 import { z } from "zod";
+import { requestPasswordReset, validatePasswordResetToken, resetPassword } from "./passwordUtils";
+import { sendMeetingInvitation, sendWelcomeEmail } from "./email";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -340,6 +345,141 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting user:", error);
       res.status(500).json({ message: "Failed to delete user", error: error.message });
+    }
+  });
+
+  // Password reset routes
+  app.post('/api/admin/users/:userId/reset-password', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const success = await requestPasswordReset(user.email);
+      if (success) {
+        res.json({ success: true, message: "Password reset email sent" });
+      } else {
+        res.status(500).json({ message: "Failed to send password reset email" });
+      }
+    } catch (error) {
+      console.error("Error sending password reset:", error);
+      res.status(500).json({ message: "Failed to send password reset", error: error.message });
+    }
+  });
+
+  // Meeting routes
+  app.post('/api/meetings', isAuthenticated, async (req: any, res) => {
+    try {
+      const organizerId = req.user.claims.sub;
+      const meetingData = { ...req.body, organizerId };
+      
+      const meeting = await storage.createMeeting(meetingData);
+      
+      // Send meeting invitation email
+      const attendee = await storage.getUser(meetingData.attendeeId);
+      if (attendee) {
+        await sendMeetingInvitation(attendee.email, {
+          title: meeting.title,
+          date: new Date(meeting.meetingDate).toLocaleDateString(),
+          time: new Date(meeting.meetingDate).toLocaleTimeString(),
+          location: meeting.location,
+          virtualLink: meeting.virtualLink,
+          organizer: req.user.claims.name || req.user.claims.email,
+          description: meeting.description,
+        });
+      }
+      
+      res.json(meeting);
+    } catch (error) {
+      console.error("Error creating meeting:", error);
+      res.status(500).json({ message: "Failed to create meeting", error: error.message });
+    }
+  });
+
+  app.get('/api/meetings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const meetings = await storage.getMeetings(userId);
+      res.json(meetings);
+    } catch (error) {
+      console.error("Error fetching meetings:", error);
+      res.status(500).json({ message: "Failed to fetch meetings" });
+    }
+  });
+
+  app.put('/api/meetings/:meetingId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { meetingId } = req.params;
+      const meeting = await storage.updateMeeting(parseInt(meetingId), req.body);
+      res.json(meeting);
+    } catch (error) {
+      console.error("Error updating meeting:", error);
+      res.status(500).json({ message: "Failed to update meeting", error: error.message });
+    }
+  });
+
+  app.delete('/api/meetings/:meetingId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { meetingId } = req.params;
+      await storage.deleteMeeting(parseInt(meetingId));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting meeting:", error);
+      res.status(500).json({ message: "Failed to delete meeting", error: error.message });
+    }
+  });
+
+  // User permissions routes
+  app.get('/api/admin/users/:userId/permissions', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const permissions = await storage.getUserPermissions(userId);
+      res.json(permissions);
+    } catch (error) {
+      console.error("Error fetching user permissions:", error);
+      res.status(500).json({ message: "Failed to fetch user permissions" });
+    }
+  });
+
+  app.post('/api/admin/users/:userId/permissions', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const grantedBy = req.user.claims.sub;
+      const permission = await storage.createUserPermission({
+        userId,
+        permission: req.body.permission,
+        granted: req.body.granted,
+        grantedBy,
+      });
+      res.json(permission);
+    } catch (error) {
+      console.error("Error creating user permission:", error);
+      res.status(500).json({ message: "Failed to create user permission", error: error.message });
+    }
+  });
+
+  // Notifications routes
+  app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const notifications = await storage.getUserNotifications(userId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.put('/api/notifications/:notificationId/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const { notificationId } = req.params;
+      await storage.markNotificationAsRead(parseInt(notificationId));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read", error: error.message });
     }
   });
 

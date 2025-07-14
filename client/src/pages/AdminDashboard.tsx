@@ -161,6 +161,8 @@ export default function AdminDashboard() {
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
+  const [selectedUserForPermissions, setSelectedUserForPermissions] = useState<User | null>(null);
+  const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
 
   // Fetch all data
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
@@ -253,6 +255,24 @@ export default function AdminDashboard() {
     },
     onError: (error: Error) => {
       console.error("Error deleting user:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const sendPasswordResetMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await apiRequest("POST", `/api/admin/users/${userId}/reset-password`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to send password reset");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Password reset email sent successfully" });
+    },
+    onError: (error: Error) => {
+      console.error("Error sending password reset:", error);
       toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
@@ -607,6 +627,10 @@ export default function AdminDashboard() {
               <Briefcase className="w-4 h-4 mr-2" />
               Jobs
             </TabsTrigger>
+            <TabsTrigger value="meetings">
+              <Calendar className="w-4 h-4 mr-2" />
+              Meetings
+            </TabsTrigger>
             <TabsTrigger value="pricing">
               <DollarSign className="w-4 h-4 mr-2" />
               Pricing
@@ -892,6 +916,25 @@ export default function AdminDashboard() {
                               <Button
                                 size="sm"
                                 variant="outline"
+                                onClick={() => sendPasswordResetMutation.mutate(user.id)}
+                                title="Send password reset email"
+                              >
+                                <Key className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedUserForPermissions(user);
+                                  setIsPermissionsDialogOpen(true);
+                                }}
+                                title="Manage permissions"
+                              >
+                                <Shield className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
                                 onClick={() => deleteUserMutation.mutate(user.id)}
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -969,6 +1012,71 @@ export default function AdminDashboard() {
                     </Button>
                   </div>
                 </form>
+              </DialogContent>
+            </Dialog>
+
+            {/* User Permissions Dialog */}
+            <Dialog open={isPermissionsDialogOpen} onOpenChange={setIsPermissionsDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    Manage Permissions - {selectedUserForPermissions?.firstName} {selectedUserForPermissions?.lastName}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Admin Permissions</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="admin-users" />
+                          <Label htmlFor="admin-users">Manage Users</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="admin-jobs" />
+                          <Label htmlFor="admin-jobs">Manage Jobs</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="admin-settings" />
+                          <Label htmlFor="admin-settings">System Settings</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="admin-analytics" />
+                          <Label htmlFor="admin-analytics">View Analytics</Label>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Content Permissions</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="content-create" />
+                          <Label htmlFor="content-create">Create Content</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="content-edit" />
+                          <Label htmlFor="content-edit">Edit Content</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="content-delete" />
+                          <Label htmlFor="content-delete">Delete Content</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="content-publish" />
+                          <Label htmlFor="content-publish">Publish Content</Label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button type="button" variant="outline" onClick={() => setIsPermissionsDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="button">
+                      Save Permissions
+                    </Button>
+                  </div>
+                </div>
               </DialogContent>
             </Dialog>
           </TabsContent>
@@ -1170,6 +1278,106 @@ export default function AdminDashboard() {
                 </form>
               </DialogContent>
             </Dialog>
+          </TabsContent>
+
+          <TabsContent value="meetings" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5" />
+                    Meeting Management
+                  </span>
+                  <Button onClick={() => {
+                    // TODO: Add meeting creation dialog
+                  }}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Schedule Meeting
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-semibold">Talent Interview</h3>
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Scheduled</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-1">Jane Doe</p>
+                      <p className="text-sm text-gray-600 mb-1">July 15, 2025 at 2:00 PM</p>
+                      <p className="text-sm text-gray-600 mb-3">Virtual - Zoom</p>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-semibold">Producer Meeting</h3>
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Confirmed</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-1">Project X Discussion</p>
+                      <p className="text-sm text-gray-600 mb-1">July 16, 2025 at 10:00 AM</p>
+                      <p className="text-sm text-gray-600 mb-3">In-Person - Studio A, Los Angeles</p>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-semibold">Manager Check-in</h3>
+                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Pending</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-1">Team Review</p>
+                      <p className="text-sm text-gray-600 mb-1">July 17, 2025 at 3:30 PM</p>
+                      <p className="text-sm text-gray-600 mb-3">Virtual - Google Meet</p>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6">
+                    <h3 className="font-semibold mb-3">Meeting Statistics</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="text-sm font-medium text-blue-700">Total Meetings</p>
+                        <p className="text-2xl font-bold text-blue-900">24</p>
+                      </div>
+                      <div className="p-3 bg-green-50 rounded-lg">
+                        <p className="text-sm font-medium text-green-700">Completed</p>
+                        <p className="text-2xl font-bold text-green-900">18</p>
+                      </div>
+                      <div className="p-3 bg-yellow-50 rounded-lg">
+                        <p className="text-sm font-medium text-yellow-700">Upcoming</p>
+                        <p className="text-2xl font-bold text-yellow-900">6</p>
+                      </div>
+                      <div className="p-3 bg-red-50 rounded-lg">
+                        <p className="text-sm font-medium text-red-700">Cancelled</p>
+                        <p className="text-2xl font-bold text-red-900">2</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="pricing" className="space-y-6">

@@ -225,6 +225,56 @@ export const analytics = pgTable("analytics", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const meetingStatusEnum = pgEnum("meeting_status", ["scheduled", "confirmed", "cancelled", "completed"]);
+export const meetingTypeEnum = pgEnum("meeting_type", ["in_person", "virtual"]);
+
+export const meetings = pgTable("meetings", {
+  id: serial("id").primaryKey(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  organizerId: varchar("organizer_id").references(() => users.id).notNull(),
+  attendeeId: varchar("attendee_id").references(() => users.id).notNull(),
+  meetingDate: timestamp("meeting_date").notNull(),
+  duration: integer("duration").default(60), // duration in minutes
+  type: meetingTypeEnum("type").notNull(),
+  status: meetingStatusEnum("status").default("scheduled").notNull(),
+  location: text("location"), // for in-person meetings
+  virtualLink: text("virtual_link"), // for virtual meetings (Zoom, Meet, Teams, etc.)
+  platform: varchar("platform"), // zoom, meet, teams, etc.
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  token: varchar("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userPermissions = pgTable("user_permissions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  permission: varchar("permission").notNull(), // e.g., "admin.users.create", "admin.jobs.edit"
+  granted: boolean("granted").default(true).notNull(),
+  grantedBy: varchar("granted_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  type: varchar("type").notNull(), // meeting_request, password_reset, job_application, etc.
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  read: boolean("read").default(false).notNull(),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(userProfiles, {
@@ -238,6 +288,11 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   receivedMessages: many(messages, { relationName: "receivedMessages" }),
   talents: many(talentManagers, { relationName: "managerTalents" }),
   managers: many(talentManagers, { relationName: "talentManagers" }),
+  organizedMeetings: many(meetings, { relationName: "organizedMeetings" }),
+  attendedMeetings: many(meetings, { relationName: "attendedMeetings" }),
+  passwordResetTokens: many(passwordResetTokens),
+  permissions: many(userPermissions),
+  notifications: many(notifications),
 }));
 
 export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
@@ -320,6 +375,44 @@ export const analyticsRelations = relations(analytics, ({ one }) => ({
   }),
 }));
 
+export const meetingsRelations = relations(meetings, ({ one }) => ({
+  organizer: one(users, {
+    fields: [meetings.organizerId],
+    references: [users.id],
+    relationName: "organizedMeetings",
+  }),
+  attendee: one(users, {
+    fields: [meetings.attendeeId],
+    references: [users.id],
+    relationName: "attendedMeetings",
+  }),
+}));
+
+export const passwordResetTokensRelations = relations(passwordResetTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [passwordResetTokens.userId],
+    references: [users.id],
+  }),
+}));
+
+export const userPermissionsRelations = relations(userPermissions, ({ one }) => ({
+  user: one(users, {
+    fields: [userPermissions.userId],
+    references: [users.id],
+  }),
+  grantedBy: one(users, {
+    fields: [userPermissions.grantedBy],
+    references: [users.id],
+  }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
   id: true,
@@ -375,6 +468,27 @@ export const insertAnalyticsSchema = createInsertSchema(analytics).omit({
   createdAt: true,
 });
 
+export const insertMeetingSchema = createInsertSchema(meetings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserPermissionSchema = createInsertSchema(userPermissions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -400,3 +514,11 @@ export type AdminLog = typeof adminLogs.$inferSelect;
 export type InsertAdminLog = z.infer<typeof insertAdminLogSchema>;
 export type Analytics = typeof analytics.$inferSelect;
 export type InsertAnalytics = z.infer<typeof insertAnalyticsSchema>;
+export type Meeting = typeof meetings.$inferSelect;
+export type InsertMeeting = z.infer<typeof insertMeetingSchema>;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
+export type UserPermission = typeof userPermissions.$inferSelect;
+export type InsertUserPermission = z.infer<typeof insertUserPermissionSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
