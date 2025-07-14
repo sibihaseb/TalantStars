@@ -17,6 +17,7 @@ import PostGig from "@/pages/PostGig";
 import FindTalent from "@/pages/FindTalent";
 import BrowseJobs from "@/pages/BrowseJobs";
 import Admin from "@/pages/Admin";
+import TalentProfile from "@/pages/TalentProfile";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/post-gig" component={PostGig} />
       <Route path="/find-talent" component={FindTalent} />
+      <Route path="/talent/:id" component={TalentProfile} />
       <Route path="/admin" component={Admin} />
       <Route path="/how-it-works" component={HowItWorks} />
       

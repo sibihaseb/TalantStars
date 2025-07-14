@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { 
   Search, 
   MapPin, 
@@ -27,12 +28,33 @@ import {
 
 export default function FindTalent() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
   const [searchFilters, setSearchFilters] = useState({
     query: "",
     talentType: "",
     location: "",
     availability: "",
   });
+
+  // Fetch real talent data from API
+  const { data: talents = [], isLoading: isTalentsLoading } = useQuery({
+    queryKey: ['/api/search/talents', searchFilters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (searchFilters.query) params.append('q', searchFilters.query);
+      if (searchFilters.talentType) params.append('talentType', searchFilters.talentType);
+      if (searchFilters.location) params.append('location', searchFilters.location);
+      
+      const response = await fetch(`/api/search/talents?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch talents');
+      return response.json();
+    },
+    enabled: isAuthenticated,
+  });
+
+  const handleViewTalent = (userId: string) => {
+    setLocation(`/talent/${userId}`);
+  };
 
   // Redirect if not authenticated
   if (!isLoading && !isAuthenticated) {
@@ -62,74 +84,14 @@ export default function FindTalent() {
     );
   }
 
-  // Mock talent data for demonstration
-  const mockTalents = [
-    {
-      id: 1,
-      name: "Sarah Chen",
-      type: "Actor",
-      location: "Los Angeles, CA",
-      rating: 4.9,
-      reviews: 127,
-      profileImageUrl: "https://images.unsplash.com/photo-1494790108755-2616b86e390?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400",
-      verified: true,
-      bio: "Professional Broadway and film actor with 10+ years experience",
-      skills: ["Acting", "Dancing", "Singing", "Stage Combat"],
-      availability: "Available",
-      hourlyRate: "$150-250/hour"
-    },
-    {
-      id: 2,
-      name: "Marcus Rodriguez",
-      type: "Musician",
-      location: "Nashville, TN",
-      rating: 4.8,
-      reviews: 89,
-      profileImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400",
-      verified: true,
-      bio: "Singer-songwriter specializing in country and folk music",
-      skills: ["Guitar", "Vocals", "Songwriting", "Piano"],
-      availability: "Available",
-      hourlyRate: "$100-200/hour"
-    },
-    {
-      id: 3,
-      name: "Elena Volkov",
-      type: "Model",
-      location: "New York, NY",
-      rating: 5.0,
-      reviews: 156,
-      profileImageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400",
-      verified: true,
-      bio: "Professional fashion and editorial model",
-      skills: ["Fashion Modeling", "Editorial", "Commercial", "Runway"],
-      availability: "Busy",
-      hourlyRate: "$200-400/hour"
-    },
-    {
-      id: 4,
-      name: "David Kim",
-      type: "Voice Artist",
-      location: "Chicago, IL",
-      rating: 4.9,
-      reviews: 203,
-      profileImageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400",
-      verified: true,
-      bio: "Professional voice actor for commercials and animations",
-      skills: ["Voice Acting", "Narration", "Character Voices", "Commercial VO"],
-      availability: "Available",
-      hourlyRate: "$80-150/hour"
-    }
-  ];
-
-  const filteredTalents = mockTalents.filter(talent => {
+  const filteredTalents = talents.filter((talent: any) => {
     const matchesQuery = !searchFilters.query || 
-      talent.name.toLowerCase().includes(searchFilters.query.toLowerCase()) ||
-      talent.skills.some(skill => skill.toLowerCase().includes(searchFilters.query.toLowerCase()));
+      talent.displayName?.toLowerCase().includes(searchFilters.query.toLowerCase()) ||
+      (talent.skills && talent.skills.some((skill: string) => skill.toLowerCase().includes(searchFilters.query.toLowerCase())));
     
-    const matchesType = !searchFilters.talentType || talent.type.toLowerCase() === searchFilters.talentType;
-    const matchesLocation = !searchFilters.location || talent.location.toLowerCase().includes(searchFilters.location.toLowerCase());
-    const matchesAvailability = !searchFilters.availability || talent.availability.toLowerCase() === searchFilters.availability.toLowerCase();
+    const matchesType = !searchFilters.talentType || talent.talentType?.toLowerCase() === searchFilters.talentType.toLowerCase();
+    const matchesLocation = !searchFilters.location || talent.location?.toLowerCase().includes(searchFilters.location.toLowerCase());
+    const matchesAvailability = !searchFilters.availability || talent.availability?.toLowerCase() === searchFilters.availability.toLowerCase();
     
     return matchesQuery && matchesType && matchesLocation && matchesAvailability;
   });
@@ -240,18 +202,43 @@ export default function FindTalent() {
 
           {/* Results */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTalents.map((talent) => (
+            {isTalentsLoading ? (
+              // Loading skeleton
+              [...Array(6)].map((_, i) => (
+                <Card key={i} className="glass-card animate-pulse">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                        <div>
+                          <div className="w-24 h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                          <div className="w-16 h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        </div>
+                      </div>
+                      <div className="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="w-3/4 h-3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="w-full h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : filteredTalents.map((talent) => (
               <Card key={talent.id} className="glass-card hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
                       <Avatar className="w-12 h-12">
-                        <AvatarImage src={talent.profileImageUrl} alt={talent.name} />
-                        <AvatarFallback>{talent.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        <AvatarImage src={talent.profileImageUrl} alt={talent.displayName} />
+                        <AvatarFallback>{talent.displayName?.split(' ').map((n: string) => n[0]).join('') || 'T'}</AvatarFallback>
                       </Avatar>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-gray-900 dark:text-white">{talent.name}</h3>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">{talent.displayName}</h3>
                           {talent.verified && (
                             <Badge variant="secondary" className="text-xs">
                               ✓ Verified
@@ -259,13 +246,13 @@ export default function FindTalent() {
                           )}
                         </div>
                         <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                          {getTalentIcon(talent.type)}
-                          <span className="ml-1">{talent.type}</span>
+                          {getTalentIcon(talent.talentType)}
+                          <span className="ml-1">{talent.talentType}</span>
                         </div>
                       </div>
                     </div>
-                    <Badge className={getAvailabilityColor(talent.availability)}>
-                      {talent.availability}
+                    <Badge className={getAvailabilityColor(talent.availability || 'unavailable')}>
+                      {talent.availability || 'Unavailable'}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -274,41 +261,46 @@ export default function FindTalent() {
                   <div className="space-y-3">
                     <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                       <MapPin className="w-4 h-4 mr-1" />
-                      {talent.location}
-                    </div>
-                    
-                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                      <Star className="w-4 h-4 mr-1 fill-yellow-400 text-yellow-400" />
-                      {talent.rating} ({talent.reviews} reviews)
+                      {talent.location || 'Location not specified'}
                     </div>
                     
                     <p className="text-sm text-gray-600 dark:text-gray-300">
-                      {talent.bio}
+                      {talent.bio || 'No bio available'}
                     </p>
                     
-                    <div className="flex flex-wrap gap-1">
-                      {talent.skills.slice(0, 3).map((skill) => (
-                        <Badge key={skill} variant="outline" className="text-xs">
-                          {skill}
-                        </Badge>
-                      ))}
-                      {talent.skills.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{talent.skills.length - 3} more
-                        </Badge>
-                      )}
-                    </div>
+                    {talent.skills && talent.skills.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {talent.skills.slice(0, 3).map((skill: string) => (
+                          <Badge key={skill} variant="outline" className="text-xs">
+                            {skill}
+                          </Badge>
+                        ))}
+                        {talent.skills.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{talent.skills.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+                    )}
                     
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">
-                      {talent.hourlyRate}
-                    </div>
+                    {(talent.dailyRate || talent.weeklyRate || talent.projectRate) && (
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        {talent.dailyRate && `$${talent.dailyRate}/day`}
+                        {talent.weeklyRate && `$${talent.weeklyRate}/week`}
+                        {talent.projectRate && `$${talent.projectRate}/project`}
+                      </div>
+                    )}
                     
                     <div className="flex gap-2 pt-2">
                       <Button size="sm" className="flex-1">
                         <MessageSquare className="w-4 h-4 mr-1" />
                         Message
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleViewTalent(talent.userId)}
+                      >
                         <ExternalLink className="w-4 h-4 mr-1" />
                         View
                       </Button>
