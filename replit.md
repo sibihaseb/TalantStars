@@ -29,10 +29,11 @@ Preferred communication style: Simple, everyday language.
 ## Key Components
 
 ### Authentication System
-- **Provider**: Replit Auth with OpenID Connect
+- **Provider**: Traditional username/password authentication with bcrypt
 - **Session Management**: Express sessions with PostgreSQL storage
-- **User Management**: Automatic user creation/updates via `upsertUser`
-- **Route Protection**: Middleware-based authentication checks
+- **User Management**: Admin account creation and login system
+- **Route Protection**: Passport.js middleware-based authentication checks
+- **Password Security**: bcrypt hashing with salt for secure password storage
 
 ### User Profile Management
 - **Multi-Role Support**: Talent, Manager, Producer roles

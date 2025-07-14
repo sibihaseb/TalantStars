@@ -15,7 +15,14 @@ import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Session storage table for Replit Auth
+// Enums (define first before tables)
+export const userRoleEnum = pgEnum("user_role", ["talent", "manager", "producer", "admin"]);
+export const talentTypeEnum = pgEnum("talent_type", ["actor", "musician", "voice_artist", "model", "profile"]);
+export const availabilityStatusEnum = pgEnum("availability_status", ["available", "busy", "unavailable"]);
+export const jobStatusEnum = pgEnum("job_status", ["open", "in_progress", "completed", "cancelled"]);
+export const messageStatusEnum = pgEnum("message_status", ["sent", "delivered", "read"]);
+
+// Session storage table for auth
 export const sessions = pgTable(
   "sessions",
   {
@@ -26,28 +33,24 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table for Replit Auth
+// User storage table for username/password auth
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(),
+  id: serial("id").primaryKey(),
+  username: varchar("username").unique().notNull(),
+  password: varchar("password").notNull(),
   email: varchar("email").unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  role: userRoleEnum("role").default("talent"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Enums
-export const userRoleEnum = pgEnum("user_role", ["talent", "manager", "producer", "admin"]);
-export const talentTypeEnum = pgEnum("talent_type", ["actor", "musician", "voice_artist", "model", "profile"]);
-export const availabilityStatusEnum = pgEnum("availability_status", ["available", "busy", "unavailable"]);
-export const jobStatusEnum = pgEnum("job_status", ["open", "in_progress", "completed", "cancelled"]);
-export const messageStatusEnum = pgEnum("message_status", ["sent", "delivered", "read"]);
-
 // User profiles with role-specific data
 export const userProfiles = pgTable("user_profiles", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
   role: userRoleEnum("role").notNull(),
   talentType: talentTypeEnum("talent_type"),
   displayName: varchar("display_name"),
@@ -112,7 +115,7 @@ export const userProfiles = pgTable("user_profiles", {
 // Media files for portfolios
 export const mediaFiles = pgTable("media_files", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
   filename: varchar("filename"),
   originalName: varchar("original_name"),
   mimeType: varchar("mime_type"),
