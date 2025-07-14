@@ -15,6 +15,7 @@ import Onboarding from "@/pages/Onboarding";
 import HowItWorks from "@/pages/HowItWorks";
 import PostGig from "@/pages/PostGig";
 import FindTalent from "@/pages/FindTalent";
+import Admin from "@/pages/Admin";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -49,6 +50,7 @@ function Router() {
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/post-gig" component={PostGig} />
           <Route path="/find-talent" component={FindTalent} />
+          <Route path="/admin" component={Admin} />
           <Route path="/how-it-works" component={HowItWorks} />
         </>
       )}

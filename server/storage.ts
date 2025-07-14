@@ -63,6 +63,11 @@ export interface IStorage {
   
   // Search operations
   searchTalents(query: string, filters?: { talentType?: string; location?: string }): Promise<UserProfile[]>;
+  
+  // Admin operations
+  getAllUsers(): Promise<User[]>;
+  updateUserRole(userId: string, role: string): Promise<User>;
+  updateUserVerification(userId: string, verified: boolean): Promise<UserProfile>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -328,6 +333,41 @@ export class DatabaseStorage implements IStorage {
       .from(userProfiles)
       .where(and(...conditions))
       .orderBy(desc(userProfiles.profileViews));
+  }
+
+  // Admin operations
+  async getAllUsers(): Promise<User[]> {
+    const result = await db
+      .select()
+      .from(users)
+      .leftJoin(userProfiles, eq(users.id, userProfiles.userId));
+    
+    return result.map(row => ({
+      ...row.users,
+      profile: row.user_profiles
+    }));
+  }
+
+  async updateUserRole(userId: string, role: string): Promise<User> {
+    // Update the role in the user profile, not the users table
+    await db
+      .update(userProfiles)
+      .set({ role: role as any })
+      .where(eq(userProfiles.userId, userId));
+    
+    // Return the updated user
+    const user = await this.getUser(userId);
+    return user!;
+  }
+
+  async updateUserVerification(userId: string, verified: boolean): Promise<UserProfile> {
+    const [profile] = await db
+      .update(userProfiles)
+      .set({ isVerified: verified })
+      .where(eq(userProfiles.userId, userId))
+      .returning();
+    
+    return profile;
   }
 }
 

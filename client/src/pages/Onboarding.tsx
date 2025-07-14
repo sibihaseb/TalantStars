@@ -142,14 +142,6 @@ export default function Onboarding() {
       eyeColor: [],
       hairColor: [],
       unionStatus: [],
-      languages: [],
-      accents: [],
-      instruments: [],
-      genres: [],
-      affiliations: [],
-      stunts: [],
-      activities: [],
-      dancingStyles: [],
       shoeSize: "",
       vocalRange: [],
       bodyStats: "",
@@ -251,12 +243,10 @@ export default function Onboarding() {
 
   const addFromDropdown = (field: keyof OnboardingFormData, value: string) => {
     const currentSkills = form.getValues(field) as string[] || [];
-    console.log(`Adding ${value} to ${field}. Current values:`, currentSkills);
     if (!currentSkills.includes(value)) {
       const newValues = [...currentSkills, value];
       form.setValue(field, newValues);
       form.trigger(field); // Trigger validation/re-render
-      console.log(`Updated ${field} with:`, newValues);
     }
   };
 
@@ -355,8 +345,6 @@ export default function Onboarding() {
   };
 
   const onSubmit = (data: OnboardingFormData) => {
-    console.log("Form validation passed, submitting:", data);
-    console.log("Form errors:", form.formState.errors);
     createProfileMutation.mutate(data);
   };
 
@@ -1017,9 +1005,7 @@ export default function Onboarding() {
                     disabled={createProfileMutation.isPending}
                     className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
                     onClick={() => {
-                      console.log("Submit button clicked");
-                      console.log("Current form values:", form.getValues());
-                      console.log("Form errors:", form.formState.errors);
+                      form.handleSubmit(onSubmit)();
                     }}
                   >
                     <span>

@@ -261,6 +261,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin routes (for user management, pricing, etc.)
+  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.put('/api/admin/users/:userId/role', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { role } = req.body;
+      const updatedUser = await storage.updateUserRole(userId, role);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      res.status(500).json({ message: "Failed to update user role" });
+    }
+  });
+
+  app.put('/api/admin/users/:userId/verify', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { verified } = req.body;
+      const updatedProfile = await storage.updateUserVerification(userId, verified);
+      res.json(updatedProfile);
+    } catch (error) {
+      console.error("Error updating user verification:", error);
+      res.status(500).json({ message: "Failed to update user verification" });
+    }
+  });
+
+  // Pricing tiers management
+  app.get('/api/admin/pricing-tiers', isAuthenticated, async (req: any, res) => {
+    try {
+      const tiers = [
+        { id: 1, name: "Basic", price: 29.99, duration: 30, features: ["Basic profile", "Limited searches"], active: true },
+        { id: 2, name: "Premium", price: 99.99, duration: 30, features: ["Enhanced profile", "Unlimited searches", "AI optimization"], active: true },
+        { id: 3, name: "Pro", price: 199.99, duration: 30, features: ["Premium features", "Priority support", "Analytics"], active: true }
+      ];
+      res.json(tiers);
+    } catch (error) {
+      console.error("Error fetching pricing tiers:", error);
+      res.status(500).json({ message: "Failed to fetch pricing tiers" });
+    }
+  });
+
+  app.post('/api/admin/pricing-tiers', isAuthenticated, async (req: any, res) => {
+    try {
+      const tier = { id: Date.now(), ...req.body };
+      res.json(tier);
+    } catch (error) {
+      console.error("Error creating pricing tier:", error);
+      res.status(500).json({ message: "Failed to create pricing tier" });
+    }
+  });
+
+  app.put('/api/admin/pricing-tiers/:tierId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { tierId } = req.params;
+      const tier = { id: parseInt(tierId), ...req.body };
+      res.json(tier);
+    } catch (error) {
+      console.error("Error updating pricing tier:", error);
+      res.status(500).json({ message: "Failed to update pricing tier" });
+    }
+  });
+
+  app.delete('/api/admin/pricing-tiers/:tierId', isAuthenticated, async (req: any, res) => {
+    try {
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting pricing tier:", error);
+      res.status(500).json({ message: "Failed to delete pricing tier" });
+    }
+  });
+
+  // Profile questions management
+  app.get('/api/admin/profile-questions', isAuthenticated, async (req: any, res) => {
+    try {
+      const questions = [
+        { id: 1, question: "What is your height?", fieldName: "height", fieldType: "text", talentType: "actor", required: false, order: 1 },
+        { id: 2, question: "What instruments do you play?", fieldName: "instruments", fieldType: "multiselect", talentType: "musician", required: false, order: 2 },
+        { id: 3, question: "What is your vocal range?", fieldName: "vocalRange", fieldType: "select", talentType: "voice_artist", required: false, order: 3 }
+      ];
+      res.json(questions);
+    } catch (error) {
+      console.error("Error fetching profile questions:", error);
+      res.status(500).json({ message: "Failed to fetch profile questions" });
+    }
+  });
+
+  app.post('/api/admin/profile-questions', isAuthenticated, async (req: any, res) => {
+    try {
+      const question = { id: Date.now(), ...req.body };
+      res.json(question);
+    } catch (error) {
+      console.error("Error creating profile question:", error);
+      res.status(500).json({ message: "Failed to create profile question" });
+    }
+  });
+
+  app.put('/api/admin/profile-questions/:questionId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { questionId } = req.params;
+      const question = { id: parseInt(questionId), ...req.body };
+      res.json(question);
+    } catch (error) {
+      console.error("Error updating profile question:", error);
+      res.status(500).json({ message: "Failed to update profile question" });
+    }
+  });
+
+  app.delete('/api/admin/profile-questions/:questionId', isAuthenticated, async (req: any, res) => {
+    try {
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting profile question:", error);
+      res.status(500).json({ message: "Failed to delete profile question" });
+    }
+  });
+
   // Talent-Manager routes
   app.post('/api/talent-manager', isAuthenticated, async (req: any, res) => {
     try {
