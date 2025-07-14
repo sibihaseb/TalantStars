@@ -152,8 +152,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getJobs(filters?: { talentType?: string; location?: string; status?: string }): Promise<Job[]> {
-    let query = db.select().from(jobs);
-    
     const conditions = [];
     if (filters?.talentType) {
       conditions.push(eq(jobs.talentType, filters.talentType as any));
@@ -166,10 +164,17 @@ export class DatabaseStorage implements IStorage {
     }
     
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return await db
+        .select()
+        .from(jobs)
+        .where(and(...conditions))
+        .orderBy(desc(jobs.createdAt));
     }
     
-    return await query.orderBy(desc(jobs.createdAt));
+    return await db
+      .select()
+      .from(jobs)
+      .orderBy(desc(jobs.createdAt));
   }
 
   async getJob(id: number): Promise<Job | undefined> {
@@ -258,7 +263,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     const conversations = [];
-    for (const [otherUserId, lastMessage] of conversationMap.entries()) {
+    for (const [otherUserId, lastMessage] of Array.from(conversationMap.entries())) {
       const user = await this.getUser(otherUserId);
       if (user) {
         conversations.push({ user, lastMessage });
@@ -306,7 +311,7 @@ export class DatabaseStorage implements IStorage {
         or(
           ilike(userProfiles.displayName, `%${query}%`),
           ilike(userProfiles.bio, `%${query}%`)
-        )
+        )!
       );
     }
 

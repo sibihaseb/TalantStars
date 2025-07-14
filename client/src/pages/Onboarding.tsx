@@ -131,11 +131,11 @@ export default function Onboarding() {
       drivingLicenses: [],
       height: "",
       weight: "",
-      eyeColor: "",
-      hairColor: "",
-      unionStatus: "",
+      eyeColor: [],
+      hairColor: [],
+      unionStatus: [],
       shoeSize: "",
-      vocalRange: "",
+      vocalRange: [],
       bodyStats: "",
       walkType: "",
       tattoos: "",
@@ -577,7 +577,7 @@ export default function Onboarding() {
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="eyeColor">Eye Color</Label>
-                            <Select onValueChange={(value) => form.setValue("eyeColor", value)}>
+                            <Select onValueChange={(value) => addFromDropdown("eyeColor", value)}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select eye color" />
                               </SelectTrigger>
@@ -589,10 +589,23 @@ export default function Onboarding() {
                                 ))}
                               </SelectContent>
                             </Select>
+                            {(form.watch("eyeColor") as string[])?.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {(form.watch("eyeColor") as string[]).map((color) => (
+                                  <Badge key={color} variant="secondary" className="flex items-center gap-1">
+                                    {EYE_COLOR_OPTIONS.find(opt => opt.value === color)?.label || color}
+                                    <X 
+                                      className="h-3 w-3 cursor-pointer hover:text-red-500" 
+                                      onClick={() => removeSkill("eyeColor", color)}
+                                    />
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="hairColor">Hair Color</Label>
-                            <Select onValueChange={(value) => form.setValue("hairColor", value)}>
+                            <Select onValueChange={(value) => addFromDropdown("hairColor", value)}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select hair color" />
                               </SelectTrigger>
@@ -604,6 +617,19 @@ export default function Onboarding() {
                                 ))}
                               </SelectContent>
                             </Select>
+                            {(form.watch("hairColor") as string[])?.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {(form.watch("hairColor") as string[]).map((color) => (
+                                  <Badge key={color} variant="secondary" className="flex items-center gap-1">
+                                    {HAIR_COLOR_OPTIONS.find(opt => opt.value === color)?.label || color}
+                                    <X 
+                                      className="h-3 w-3 cursor-pointer hover:text-red-500" 
+                                      onClick={() => removeSkill("hairColor", color)}
+                                    />
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -626,21 +652,7 @@ export default function Onboarding() {
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                           Voice Artist Information
                         </h3>
-                        <div className="space-y-2">
-                          <Label htmlFor="vocalRange">Vocal Range</Label>
-                          <Select onValueChange={(value) => form.setValue("vocalRange", value)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select vocal range" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {VOCAL_RANGE_OPTIONS.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        {renderMultiSelectField("vocalRange", "Vocal Range", VOCAL_RANGE_OPTIONS, "Select vocal range...")}
                       </div>
                     )}
 
@@ -674,21 +686,7 @@ export default function Onboarding() {
                         {renderMultiSelectField("languages", "Languages", LANGUAGE_OPTIONS, "Select languages...")}
                         {renderMultiSelectField("accents", "Accents", ACCENT_OPTIONS, "Select accents...")}
                         
-                        <div className="space-y-2">
-                          <Label htmlFor="unionStatus">Union Status</Label>
-                          <Select onValueChange={(value) => form.setValue("unionStatus", value)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select union status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {UNION_STATUS_OPTIONS.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        {renderMultiSelectField("unionStatus", "Union Status", UNION_STATUS_OPTIONS, "Select union status...")}
                       </div>
                     )}
                   </CardContent>
