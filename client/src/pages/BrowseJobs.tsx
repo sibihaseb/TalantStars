@@ -44,7 +44,7 @@ export default function BrowseJobs() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [searchFilters, setSearchFilters] = useState({
     query: "",
-    talentType: "",
+    talentType: "all",
     location: "",
     status: "open",
   });
@@ -84,9 +84,9 @@ export default function BrowseJobs() {
       const filters = queryKey[1] as typeof searchFilters;
       const params = new URLSearchParams();
       
-      if (filters.talentType) params.append("talentType", filters.talentType);
+      if (filters.talentType && filters.talentType !== "all") params.append("talentType", filters.talentType);
       if (filters.location) params.append("location", filters.location);
-      if (filters.status) params.append("status", filters.status);
+      if (filters.status && filters.status !== "all") params.append("status", filters.status);
       
       const response = await fetch(`/api/jobs?${params.toString()}`);
       if (!response.ok) throw new Error(`${response.status}: ${response.statusText}`);
@@ -192,7 +192,7 @@ export default function BrowseJobs() {
                       <SelectValue placeholder="All types" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Types</SelectItem>
+                      <SelectItem value="all">All Types</SelectItem>
                       <SelectItem value="actor">Actor</SelectItem>
                       <SelectItem value="musician">Musician</SelectItem>
                       <SelectItem value="voice_artist">Voice Artist</SelectItem>
@@ -230,7 +230,7 @@ export default function BrowseJobs() {
                       <SelectValue placeholder="All statuses" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Statuses</SelectItem>
+                      <SelectItem value="all">All Statuses</SelectItem>
                       <SelectItem value="open">Open</SelectItem>
                       <SelectItem value="in_progress">In Progress</SelectItem>
                       <SelectItem value="completed">Completed</SelectItem>
@@ -294,7 +294,7 @@ export default function BrowseJobs() {
                     variant="outline"
                     onClick={() => setSearchFilters({
                       query: "",
-                      talentType: "",
+                      talentType: "all",
                       location: "",
                       status: "open",
                     })}
