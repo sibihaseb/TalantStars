@@ -32,29 +32,23 @@ function Router() {
 
   return (
     <Switch>
-      {/* Public routes */}
+      {/* Always accessible routes */}
+      <Route path="/jobs" component={BrowseJobs} />
+      <Route path="/onboarding" component={Onboarding} />
+      <Route path="/profile" component={Profile} />
+      <Route path="/search" component={Search} />
+      <Route path="/messages" component={Messages} />
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/post-gig" component={PostGig} />
+      <Route path="/find-talent" component={FindTalent} />
+      <Route path="/admin" component={Admin} />
+      <Route path="/how-it-works" component={HowItWorks} />
+      
+      {/* Conditional home route */}
       {!isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/how-it-works" component={HowItWorks} />
-          <Route path="/find-talent" component={FindTalent} />
-          <Route path="/post-gig" component={PostGig} />
-        </>
+        <Route path="/" component={Landing} />
       ) : (
-        <>
-          {/* Authenticated routes */}
-          <Route path="/" component={Home} />
-          <Route path="/onboarding" component={Onboarding} />
-          <Route path="/profile" component={Profile} />
-          <Route path="/search" component={Search} />
-          <Route path="/messages" component={Messages} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/post-gig" component={PostGig} />
-          <Route path="/find-talent" component={FindTalent} />
-          <Route path="/jobs" component={BrowseJobs} />
-          <Route path="/admin" component={Admin} />
-          <Route path="/how-it-works" component={HowItWorks} />
-        </>
+        <Route path="/" component={Home} />
       )}
       
       {/* Fallback to 404 */}
