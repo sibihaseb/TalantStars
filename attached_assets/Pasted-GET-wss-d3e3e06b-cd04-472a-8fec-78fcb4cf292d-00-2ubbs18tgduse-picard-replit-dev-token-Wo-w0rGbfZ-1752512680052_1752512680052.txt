@@ -1,0 +1,98 @@
+GET
+wss://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/?token=_Wo_w0rGbfZU
+NS_ERROR_WEBSOCKET_CONNECTION_REFUSED
+
+Firefox can’t establish a connection to the server at wss://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/?token=_Wo_w0rGbfZU. client:536:19
+Uncaught (in promise) DOMException: An invalid or illegal string was specified
+    setupWebSocket client:536
+    fallback client:509
+    setupWebSocket client:555
+    setupWebSocket client:552
+    <anonymous> client:531
+client:536
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools react-dom.development.js:29895:17
+Submit button clicked Onboarding.tsx:1136:31
+Current step: 6 Onboarding.tsx:1137:31
+Max steps: 6 Onboarding.tsx:1138:31
+Form values: 
+Object { role: "talent", talentType: "actor", displayName: "Name here", bio: "bio here and must be at least 10 characters.  now we are getting somehwere", location: "Location", website: "", phoneNumber: "", availabilityStatus: "available", languages: [], accents: [], … }
+Onboarding.tsx:1139:31
+Raw form values: 
+Object { role: "talent", talentType: "actor", displayName: "Name here", bio: "bio here and must be at least 10 characters.  now we are getting somehwere", location: "Location", website: "", phoneNumber: "", availabilityStatus: "available", languages: [], accents: [], … }
+Onboarding.tsx:1143:31
+Direct schema validation result: 
+Object { success: false, error: Getter }
+Onboarding.tsx:1148:33
+Schema validation errors: 
+Array [ {…} ]
+Onboarding.tsx:1151:35
+All validation errors: Onboarding.tsx:1163:35
+1. userId: Required Onboarding.tsx:1165:37
+Submit button clicked Onboarding.tsx:1136:31
+Current step: 6 Onboarding.tsx:1137:31
+Max steps: 6 Onboarding.tsx:1138:31
+Form values: 
+Object { role: "talent", talentType: "actor", displayName: "Name here", bio: "bio here and must be at least 10 characters.  now we are getting somehwere", location: "Location, Florida", website: "", phoneNumber: "", availabilityStatus: "available", languages: [], accents: [], … }
+Onboarding.tsx:1139:31
+Raw form values: 
+Object { role: "talent", talentType: "actor", displayName: "Name here", bio: "bio here and must be at least 10 characters.  now we are getting somehwere", location: "Location, Florida", website: "", phoneNumber: "", availabilityStatus: "available", languages: [], accents: [], … }
+Onboarding.tsx:1143:31
+Direct schema validation result: 
+Object { success: false, error: Getter }
+Onboarding.tsx:1148:33
+Schema validation errors: 
+Array [ {…} ]
+Onboarding.tsx:1151:35
+All validation errors: Onboarding.tsx:1163:35
+1. userId: Required Onboarding.tsx:1165:37
+Submit button clicked Onboarding.tsx:1136:31
+Current step: 6 Onboarding.tsx:1137:31
+Max steps: 6 Onboarding.tsx:1138:31
+Form values: 
+Object { role: "talent", talentType: "actor", displayName: "Name here", bio: "bio here and must be at least 10 characters.  now we are getting somehwere", location: "Location, Florida", website: "", phoneNumber: "", availabilityStatus: "available", languages: [], accents: [], … }
+Onboarding.tsx:1139:31
+Raw form values: 
+Object { role: "talent", talentType: "actor", displayName: "Name here", bio: "bio here and must be at least 10 characters.  now we are getting somehwere", location: "Location, Florida", website: "", phoneNumber: "", availabilityStatus: "available", languages: [], accents: [], … }
+Onboarding.tsx:1143:31
+Direct schema validation result: 
+Object { success: false, error: Getter }
+Onboarding.tsx:1148:33
+Schema validation errors: 
+Array [ {…} ]
+Onboarding.tsx:1151:35
+All validation errors: Onboarding.tsx:1163:35
+1. userId: Required Onboarding.tsx:1165:37
+Submit button clicked Onboarding.tsx:1136:31
+Current step: 6 Onboarding.tsx:1137:31
+Max steps: 6 Onboarding.tsx:1138:31
+Form values: 
+Object { role: "talent", talentType: "actor", displayName: "Marty Jean-Louis", bio: "I am in orlando florida and I love it here.  don you think it's great?  I do", location: "Orlando, Florida", website: "", phoneNumber: "", availabilityStatus: "available", languages: [], accents: [], … }
+Onboarding.tsx:1139:31
+Raw form values: 
+Object { role: "talent", talentType: "actor", displayName: "Marty Jean-Louis", bio: "I am in orlando florida and I love it here.  don you think it's great?  I do", location: "Orlando, Florida", website: "", phoneNumber: "", availabilityStatus: "available", languages: [], accents: [], … }
+Onboarding.tsx:1143:31
+Direct schema validation result: 
+Object { success: false, error: Getter }
+Onboarding.tsx:1148:33
+Schema validation errors: 
+Array [ {…} ]
+Onboarding.tsx:1151:35
+All validation errors: Onboarding.tsx:1163:35
+1. userId: Required Onboarding.tsx:1165:37
+Submit button clicked Onboarding.tsx:1136:31
+Current step: 6 Onboarding.tsx:1137:31
+Max steps: 6 Onboarding.tsx:1138:31
+Form values: 
+Object { role: "talent", talentType: "actor", displayName: "Marty Jean-Louis", bio: "I am in orlando florida and I love it here.  don you think it's great?  I do", location: "Orlando, Florida", website: "", phoneNumber: "", availabilityStatus: "available", languages: [], accents: [], … }
+Onboarding.tsx:1139:31
+Raw form values: 
+Object { role: "talent", talentType: "actor", displayName: "Marty Jean-Louis", bio: "I am in orlando florida and I love it here.  don you think it's great?  I do", location: "Orlando, Florida", website: "", phoneNumber: "", availabilityStatus: "available", languages: [], accents: [], … }
+Onboarding.tsx:1143:31
+Direct schema validation result: 
+Object { success: false, error: Getter }
+Onboarding.tsx:1148:33
+Schema validation errors: 
+Array [ {…} ]
+Onboarding.tsx:1151:35
+All validation errors: Onboarding.tsx:1163:35
+1. userId: Required

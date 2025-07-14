@@ -1134,36 +1134,44 @@ export default function Onboarding() {
                     onClick={async (e) => {
                       e.preventDefault();
                       console.log("Submit button clicked");
-                      console.log("Current step:", currentStep);
-                      console.log("Max steps:", getMaxSteps());
-                      console.log("Form values:", form.getValues());
                       
-                      // Get form values and validate
+                      // Get form values
                       const formValues = form.getValues();
-                      console.log("Raw form values:", formValues);
+                      console.log("Form values:", formValues);
                       
-                      // Validate required fields for final submission
-                      const requiredFields = ['displayName', 'bio', 'location'];
-                      const missingFields = requiredFields.filter(field => {
-                        const value = formValues[field];
-                        return !value || (typeof value === 'string' && value.trim().length === 0);
-                      });
+                      // Simple validation for required fields
+                      const displayName = formValues.displayName?.trim();
+                      const bio = formValues.bio?.trim();
+                      const location = formValues.location?.trim();
                       
-                      // Check bio length
-                      if (formValues.bio && formValues.bio.length < 10) {
-                        missingFields.push('bio (minimum 10 characters)');
-                      }
-                      
-                      if (missingFields.length > 0) {
+                      if (!displayName) {
                         toast({
-                          title: "Required Fields Missing",
-                          description: `Please fill out: ${missingFields.join(', ')}`,
+                          title: "Required Field Missing",
+                          description: "Please enter your display name",
                           variant: "destructive",
                         });
                         return;
                       }
                       
-                      console.log("Form validation passed, submitting...");
+                      if (!bio || bio.length < 10) {
+                        toast({
+                          title: "Required Field Missing",
+                          description: "Please enter a bio with at least 10 characters",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      
+                      if (!location) {
+                        toast({
+                          title: "Required Field Missing",
+                          description: "Please enter your location",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      
+                      console.log("Submitting profile...");
                       createProfileMutation.mutate(formValues);
                     }}
                   >
