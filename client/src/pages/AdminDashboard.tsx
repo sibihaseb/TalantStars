@@ -195,22 +195,38 @@ export default function AdminDashboard() {
   const updateUserRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
       const response = await apiRequest("PUT", `/api/admin/users/${userId}/role`, { role });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update user role");
+      }
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({ title: "Success", description: "User role updated successfully" });
     },
+    onError: (error: Error) => {
+      console.error("Error updating user role:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
   });
 
   const verifyUserMutation = useMutation({
     mutationFn: async ({ userId, verified }: { userId: string; verified: boolean }) => {
       const response = await apiRequest("PUT", `/api/admin/users/${userId}/verify`, { verified });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update user verification");
+      }
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({ title: "Success", description: "User verification status updated" });
+    },
+    onError: (error: Error) => {
+      console.error("Error updating user verification:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
@@ -219,6 +235,10 @@ export default function AdminDashboard() {
       const method = tier.id ? "PUT" : "POST";
       const url = tier.id ? `/api/admin/pricing-tiers/${tier.id}` : "/api/admin/pricing-tiers";
       const response = await apiRequest(method, url, tier);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to save pricing tier");
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -227,16 +247,28 @@ export default function AdminDashboard() {
       setEditingTier(null);
       toast({ title: "Success", description: "Pricing tier saved successfully" });
     },
+    onError: (error: Error) => {
+      console.error("Error saving pricing tier:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
   });
 
   const deletePricingTierMutation = useMutation({
     mutationFn: async (tierId: number) => {
       const response = await apiRequest("DELETE", `/api/admin/pricing-tiers/${tierId}`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete pricing tier");
+      }
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/pricing-tiers"] });
       toast({ title: "Success", description: "Pricing tier deleted successfully" });
+    },
+    onError: (error: Error) => {
+      console.error("Error deleting pricing tier:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
@@ -245,6 +277,10 @@ export default function AdminDashboard() {
       const method = question.id ? "PUT" : "POST";
       const url = question.id ? `/api/admin/profile-questions/${question.id}` : "/api/admin/profile-questions";
       const response = await apiRequest(method, url, question);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to save profile question");
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -253,16 +289,28 @@ export default function AdminDashboard() {
       setEditingQuestion(null);
       toast({ title: "Success", description: "Profile question saved successfully" });
     },
+    onError: (error: Error) => {
+      console.error("Error saving profile question:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
   });
 
   const deleteProfileQuestionMutation = useMutation({
     mutationFn: async (questionId: number) => {
       const response = await apiRequest("DELETE", `/api/admin/profile-questions/${questionId}`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete profile question");
+      }
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/profile-questions"] });
       toast({ title: "Success", description: "Profile question deleted successfully" });
+    },
+    onError: (error: Error) => {
+      console.error("Error deleting profile question:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
@@ -271,6 +319,10 @@ export default function AdminDashboard() {
       const method = setting.id ? "PUT" : "POST";
       const url = setting.id ? `/api/admin/settings/${setting.key}` : "/api/admin/settings";
       const response = await apiRequest(method, url, setting);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to save system setting");
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -279,16 +331,28 @@ export default function AdminDashboard() {
       setEditingSetting(null);
       toast({ title: "Success", description: "System setting saved successfully" });
     },
+    onError: (error: Error) => {
+      console.error("Error saving system setting:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
   });
 
   const deleteSystemSettingMutation = useMutation({
     mutationFn: async (key: string) => {
       const response = await apiRequest("DELETE", `/api/admin/settings/${key}`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete system setting");
+      }
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/settings"] });
       toast({ title: "Success", description: "System setting deleted successfully" });
+    },
+    onError: (error: Error) => {
+      console.error("Error deleting system setting:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
@@ -336,19 +400,20 @@ export default function AdminDashboard() {
 
   const handleSaveTier = (formData: FormData) => {
     const tierData = {
-      ...editingTier,
+      ...(editingTier?.id && { id: editingTier.id }),
       name: formData.get("name") as string,
       price: parseFloat(formData.get("price") as string),
       duration: parseInt(formData.get("duration") as string),
       features: (formData.get("features") as string).split("\n").filter(f => f.trim()),
       active: formData.get("active") === "on",
     };
+    console.log("Saving tier:", tierData);
     savePricingTierMutation.mutate(tierData);
   };
 
   const handleSaveQuestion = (formData: FormData) => {
     const questionData = {
-      ...editingQuestion,
+      ...(editingQuestion?.id && { id: editingQuestion.id }),
       talentType: formData.get("talentType") as string,
       question: formData.get("question") as string,
       fieldName: formData.get("fieldName") as string,
@@ -358,18 +423,21 @@ export default function AdminDashboard() {
       order: parseInt(formData.get("order") as string) || 0,
       active: formData.get("active") === "on",
     };
+    console.log("Saving question:", questionData);
     saveProfileQuestionMutation.mutate(questionData);
   };
 
   const handleSaveSetting = (formData: FormData) => {
     const settingData = {
-      ...editingSetting,
+      ...(editingSetting?.id && { id: editingSetting.id }),
       key: formData.get("key") as string,
       value: formData.get("value") as string,
       description: formData.get("description") as string,
       category: formData.get("category") as string,
       dataType: formData.get("dataType") as string,
+      updatedBy: user?.id || "admin",
     };
+    console.log("Saving setting:", settingData);
     saveSystemSettingMutation.mutate(settingData);
   };
 
@@ -928,17 +996,18 @@ export default function AdminDashboard() {
                         <div className="space-y-4">
                           <div>
                             <Label htmlFor="talentType">Talent Type</Label>
-                            <Select name="talentType" defaultValue={editingQuestion?.talentType || ""}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select talent type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="actor">Actor</SelectItem>
-                                <SelectItem value="musician">Musician</SelectItem>
-                                <SelectItem value="voice_artist">Voice Artist</SelectItem>
-                                <SelectItem value="model">Model</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <select 
+                              name="talentType" 
+                              defaultValue={editingQuestion?.talentType || ""}
+                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              required
+                            >
+                              <option value="">Select talent type</option>
+                              <option value="actor">Actor</option>
+                              <option value="musician">Musician</option>
+                              <option value="voice_artist">Voice Artist</option>
+                              <option value="model">Model</option>
+                            </select>
                           </div>
                           <div>
                             <Label htmlFor="question">Question</Label>
@@ -960,19 +1029,20 @@ export default function AdminDashboard() {
                           </div>
                           <div>
                             <Label htmlFor="fieldType">Field Type</Label>
-                            <Select name="fieldType" defaultValue={editingQuestion?.fieldType || ""}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select field type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="text">Text</SelectItem>
-                                <SelectItem value="textarea">Textarea</SelectItem>
-                                <SelectItem value="select">Select</SelectItem>
-                                <SelectItem value="multiselect">Multi-select</SelectItem>
-                                <SelectItem value="checkbox">Checkbox</SelectItem>
-                                <SelectItem value="number">Number</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <select 
+                              name="fieldType" 
+                              defaultValue={editingQuestion?.fieldType || ""}
+                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              required
+                            >
+                              <option value="">Select field type</option>
+                              <option value="text">Text</option>
+                              <option value="textarea">Textarea</option>
+                              <option value="select">Select</option>
+                              <option value="multiselect">Multi-select</option>
+                              <option value="checkbox">Checkbox</option>
+                              <option value="number">Number</option>
+                            </select>
                           </div>
                           <div>
                             <Label htmlFor="options">Options (one per line, for select/multiselect)</Label>
@@ -1145,33 +1215,35 @@ export default function AdminDashboard() {
                           </div>
                           <div>
                             <Label htmlFor="category">Category</Label>
-                            <Select name="category" defaultValue={editingSetting?.category || ""}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select category" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="general">General</SelectItem>
-                                <SelectItem value="security">Security</SelectItem>
-                                <SelectItem value="email">Email</SelectItem>
-                                <SelectItem value="payment">Payment</SelectItem>
-                                <SelectItem value="notifications">Notifications</SelectItem>
-                                <SelectItem value="integration">Integration</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <select 
+                              name="category" 
+                              defaultValue={editingSetting?.category || ""}
+                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              required
+                            >
+                              <option value="">Select category</option>
+                              <option value="general">General</option>
+                              <option value="security">Security</option>
+                              <option value="email">Email</option>
+                              <option value="payment">Payment</option>
+                              <option value="notifications">Notifications</option>
+                              <option value="integration">Integration</option>
+                            </select>
                           </div>
                           <div>
                             <Label htmlFor="dataType">Data Type</Label>
-                            <Select name="dataType" defaultValue={editingSetting?.dataType || ""}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select data type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="string">String</SelectItem>
-                                <SelectItem value="number">Number</SelectItem>
-                                <SelectItem value="boolean">Boolean</SelectItem>
-                                <SelectItem value="json">JSON</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <select 
+                              name="dataType" 
+                              defaultValue={editingSetting?.dataType || ""}
+                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              required
+                            >
+                              <option value="">Select data type</option>
+                              <option value="string">String</option>
+                              <option value="number">Number</option>
+                              <option value="boolean">Boolean</option>
+                              <option value="json">JSON</option>
+                            </select>
                           </div>
                         </div>
                         <div className="flex justify-end mt-6">

@@ -344,11 +344,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/pricing-tiers', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("Creating pricing tier:", req.body);
       const tier = await storage.createPricingTier(req.body);
       res.json(tier);
     } catch (error) {
       console.error("Error creating pricing tier:", error);
-      res.status(500).json({ message: "Failed to create pricing tier" });
+      res.status(500).json({ message: "Failed to create pricing tier", error: error.message });
     }
   });
 
@@ -387,11 +388,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/profile-questions', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("Creating profile question:", req.body);
       const question = await storage.createProfileQuestion(req.body);
       res.json(question);
     } catch (error) {
       console.error("Error creating profile question:", error);
-      res.status(500).json({ message: "Failed to create profile question" });
+      res.status(500).json({ message: "Failed to create profile question", error: error.message });
     }
   });
 
@@ -430,11 +432,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/settings', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("Creating system setting:", req.body);
       const setting = await storage.createSystemSetting(req.body);
       res.json(setting);
     } catch (error) {
       console.error("Error creating system setting:", error);
-      res.status(500).json({ message: "Failed to create system setting" });
+      res.status(500).json({ message: "Failed to create system setting", error: error.message });
     }
   });
 
