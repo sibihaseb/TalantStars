@@ -15,6 +15,7 @@ import Onboarding from "@/pages/Onboarding";
 import HowItWorks from "@/pages/HowItWorks";
 import PostGig from "@/pages/PostGig";
 import FindTalent from "@/pages/FindTalent";
+import BrowseJobs from "@/pages/BrowseJobs";
 import Admin from "@/pages/Admin";
 
 function Router() {
@@ -50,6 +51,7 @@ function Router() {
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/post-gig" component={PostGig} />
           <Route path="/find-talent" component={FindTalent} />
+          <Route path="/jobs" component={BrowseJobs} />
           <Route path="/admin" component={Admin} />
           <Route path="/how-it-works" component={HowItWorks} />
         </>
