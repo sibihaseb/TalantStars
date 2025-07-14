@@ -142,6 +142,14 @@ export default function Onboarding() {
       eyeColor: [],
       hairColor: [],
       unionStatus: [],
+      languages: [],
+      accents: [],
+      instruments: [],
+      genres: [],
+      affiliations: [],
+      stunts: [],
+      activities: [],
+      dancingStyles: [],
       shoeSize: "",
       vocalRange: [],
       bodyStats: "",
@@ -238,12 +246,17 @@ export default function Onboarding() {
   const removeSkill = (field: keyof OnboardingFormData, skill: string) => {
     const currentSkills = form.getValues(field) as string[] || [];
     form.setValue(field, currentSkills.filter(s => s !== skill));
+    form.trigger(field); // Trigger validation/re-render
   };
 
   const addFromDropdown = (field: keyof OnboardingFormData, value: string) => {
     const currentSkills = form.getValues(field) as string[] || [];
+    console.log(`Adding ${value} to ${field}. Current values:`, currentSkills);
     if (!currentSkills.includes(value)) {
-      form.setValue(field, [...currentSkills, value]);
+      const newValues = [...currentSkills, value];
+      form.setValue(field, newValues);
+      form.trigger(field); // Trigger validation/re-render
+      console.log(`Updated ${field} with:`, newValues);
     }
   };
 
@@ -253,7 +266,7 @@ export default function Onboarding() {
     options: Array<{ value: string; label: string }>,
     placeholder: string = "Select options..."
   ) => {
-    const currentValues = form.getValues(field) as string[] || [];
+    const currentValues = form.watch(field) as string[] || [];
     
     return (
       <div className="space-y-2">
@@ -722,6 +735,16 @@ export default function Onboarding() {
                               </SelectContent>
                             </Select>
                           </div>
+                        </div>
+                        
+                        {/* Musical abilities for actors */}
+                        <div className="space-y-4">
+                          <h4 className="text-md font-medium text-gray-900 dark:text-white">
+                            Musical Abilities (Optional)
+                          </h4>
+                          {renderMultiSelectField("instruments", "Instruments", INSTRUMENT_OPTIONS, "Select instruments you can play...")}
+                          {renderMultiSelectField("genres", "Singing Genres", GENRE_OPTIONS, "Select singing genres...")}
+                          {renderMultiSelectField("vocalRange", "Vocal Range", VOCAL_RANGE_OPTIONS, "Select vocal range...")}
                         </div>
                       </div>
                     )}
