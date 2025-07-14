@@ -5,6 +5,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { MediaUpload } from "@/components/talent/MediaUpload";
+import { AvailabilityCalendar } from "@/components/talent/AvailabilityCalendar";
+import { AIProfileEnhancer } from "@/components/talent/AIProfileEnhancer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +57,7 @@ export default function Profile() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("profile");
   const [newSkill, setNewSkill] = useState("");
+  const [showVerifiedBadge, setShowVerifiedBadge] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -361,9 +364,11 @@ export default function Profile() {
               {/* Profile Form */}
               <div className="lg:col-span-3">
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid w-full grid-cols-3">
+                  <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="profile">Profile</TabsTrigger>
                     <TabsTrigger value="media">Media</TabsTrigger>
+                    <TabsTrigger value="availability">Availability</TabsTrigger>
+                    <TabsTrigger value="ai-enhance">AI Enhance</TabsTrigger>
                     <TabsTrigger value="settings">Settings</TabsTrigger>
                   </TabsList>
 
@@ -714,6 +719,14 @@ export default function Profile() {
                         )}
                       </CardContent>
                     </Card>
+                  </TabsContent>
+
+                  <TabsContent value="availability" className="space-y-6">
+                    <AvailabilityCalendar />
+                  </TabsContent>
+
+                  <TabsContent value="ai-enhance" className="space-y-6">
+                    <AIProfileEnhancer />
                   </TabsContent>
 
                   <TabsContent value="settings" className="space-y-6">

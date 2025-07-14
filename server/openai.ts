@@ -149,3 +149,63 @@ export async function suggestTalentMatches(jobDetails: any): Promise<string[]> {
     throw new Error("Failed to suggest talent matches");
   }
 }
+
+export async function enhanceProfileWithAI(profile: any): Promise<any> {
+  try {
+    const prompt = `You are an AI assistant helping to enhance a talent profile for the entertainment industry. Based on the current profile data, provide suggestions for improvements and generate enhanced content.
+
+Current Profile:
+- Name: ${profile.displayName || 'Not provided'}
+- Role: ${profile.role || 'Not provided'}
+- Talent Type: ${profile.talentType || 'Not provided'}
+- Bio: ${profile.bio || 'Not provided'}
+- Skills: ${profile.skills ? profile.skills.join(', ') : 'Not provided'}
+- Experience: ${profile.experiences ? profile.experiences.join(', ') : 'Not provided'}
+- Location: ${profile.location || 'Not provided'}
+- Languages: ${profile.languages ? profile.languages.join(', ') : 'Not provided'}
+- Instruments: ${profile.instruments ? profile.instruments.join(', ') : 'Not provided'}
+- Genres: ${profile.genres ? profile.genres.join(', ') : 'Not provided'}
+
+Please provide enhanced content in JSON format with the following fields:
+{
+  "enhancedBio": "A professional, engaging bio that highlights the talent's strengths and unique qualities",
+  "suggestedSkills": ["array", "of", "relevant", "skills", "to", "add"],
+  "careerSuggestions": ["array", "of", "career", "development", "suggestions"],
+  "profileOptimization": ["array", "of", "specific", "improvements", "for", "the", "profile"],
+  "industryTags": ["array", "of", "relevant", "industry", "tags"],
+  "resumeEnhancement": "Enhanced resume/credits section content",
+  "marketingPoints": ["array", "of", "key", "marketing", "points", "to", "highlight"]
+}`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert entertainment industry consultant who helps talents optimize their profiles for maximum visibility and booking opportunities. Focus on being specific and actionable."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 1500,
+      temperature: 0.7,
+    });
+
+    const enhancedData = JSON.parse(response.choices[0].message.content || '{}');
+    return enhancedData;
+  } catch (error) {
+    console.error("Error enhancing profile with AI:", error);
+    return {
+      enhancedBio: "AI enhancement temporarily unavailable. Please try again later.",
+      suggestedSkills: [],
+      careerSuggestions: [],
+      profileOptimization: [],
+      industryTags: [],
+      resumeEnhancement: "",
+      marketingPoints: []
+    };
+  }
+}

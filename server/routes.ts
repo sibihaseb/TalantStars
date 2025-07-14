@@ -138,6 +138,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/media/external', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const mediaData = await storage.createMediaFile({
+        userId,
+        filename: `external_${Date.now()}`,
+        originalName: req.body.title || 'External Video',
+        mimeType: 'video/external',
+        size: 0,
+        url: req.body.external_url,
+        thumbnailUrl: null,
+        mediaType: 'video',
+        tags: [],
+        description: req.body.description || '',
+        isPublic: true,
+        external_url: req.body.external_url,
+        external_platform: req.body.external_platform,
+        external_id: req.body.external_id,
+        is_external: true,
+      });
+      res.json(mediaData);
+    } catch (error) {
+      console.error("Error creating external media file:", error);
+      res.status(500).json({ message: "Failed to create external media file" });
+    }
+  });
+
   app.get('/api/media', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -805,6 +832,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching manager talents:", error);
       res.status(500).json({ message: "Failed to fetch manager talents" });
+    }
+  });
+
+  // Availability Calendar routes
+  app.get('/api/availability', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const availability = await storage.getUserAvailability(userId);
+      res.json(availability);
+    } catch (error) {
+      console.error("Error fetching availability:", error);
+      res.status(500).json({ message: "Failed to fetch availability" });
+    }
+  });
+
+  app.post('/api/availability', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const availability = await storage.createAvailabilityEntry({
+        ...req.body,
+        userId
+      });
+      res.json(availability);
+    } catch (error) {
+      console.error("Error creating availability:", error);
+      res.status(500).json({ message: "Failed to create availability" });
+    }
+  });
+
+  app.put('/api/availability/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const availability = await storage.updateAvailabilityEntry(id, req.body);
+      res.json(availability);
+    } catch (error) {
+      console.error("Error updating availability:", error);
+      res.status(500).json({ message: "Failed to update availability" });
+    }
+  });
+
+  app.delete('/api/availability/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteAvailabilityEntry(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting availability:", error);
+      res.status(500).json({ message: "Failed to delete availability" });
+    }
+  });
+
+  // AI Profile Enhancement route
+  app.post('/api/profile/ai-enhance', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const profile = await storage.getUserProfile(userId);
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      
+      const enhancedProfile = await storage.enhanceProfileWithAI(userId, profile);
+      res.json(enhancedProfile);
+    } catch (error) {
+      console.error("Error enhancing profile:", error);
+      res.status(500).json({ message: "Failed to enhance profile" });
     }
   });
 

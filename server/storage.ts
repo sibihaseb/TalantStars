@@ -46,6 +46,9 @@ import {
   type InsertUserPermission,
   type Notification,
   type InsertNotification,
+  type AvailabilityCalendar,
+  type InsertAvailabilityCalendar,
+  availabilityCalendar,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc, like, ilike } from "drizzle-orm";
@@ -147,6 +150,16 @@ export interface IStorage {
   getUserNotifications(userId: string): Promise<Notification[]>;
   markNotificationAsRead(id: number): Promise<void>;
   deleteNotification(id: number): Promise<void>;
+  
+  // Availability Calendar
+  createAvailabilityEntry(entry: InsertAvailabilityCalendar): Promise<AvailabilityCalendar>;
+  getUserAvailability(userId: string): Promise<AvailabilityCalendar[]>;
+  getAvailabilityEntry(id: number): Promise<AvailabilityCalendar | undefined>;
+  updateAvailabilityEntry(id: number, entry: Partial<InsertAvailabilityCalendar>): Promise<AvailabilityCalendar>;
+  deleteAvailabilityEntry(id: number): Promise<void>;
+  
+  // AI Profile Enhancement
+  enhanceProfileWithAI(userId: string, profile: UserProfile): Promise<UserProfile>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -669,6 +682,48 @@ export class DatabaseStorage implements IStorage {
 
   async deleteNotification(id: number): Promise<void> {
     await db.delete(notifications).where(eq(notifications.id, id));
+  }
+  
+  // Availability Calendar operations
+  async createAvailabilityEntry(entry: InsertAvailabilityCalendar): Promise<AvailabilityCalendar> {
+    const [result] = await db.insert(availabilityCalendar).values(entry).returning();
+    return result;
+  }
+  
+  async getUserAvailability(userId: string): Promise<AvailabilityCalendar[]> {
+    return await db.select().from(availabilityCalendar).where(eq(availabilityCalendar.userId, userId)).orderBy(asc(availabilityCalendar.startDate));
+  }
+  
+  async getAvailabilityEntry(id: number): Promise<AvailabilityCalendar | undefined> {
+    const [result] = await db.select().from(availabilityCalendar).where(eq(availabilityCalendar.id, id));
+    return result;
+  }
+  
+  async updateAvailabilityEntry(id: number, entry: Partial<InsertAvailabilityCalendar>): Promise<AvailabilityCalendar> {
+    const [result] = await db.update(availabilityCalendar)
+      .set({ ...entry, updatedAt: new Date() })
+      .where(eq(availabilityCalendar.id, id))
+      .returning();
+    return result;
+  }
+  
+  async deleteAvailabilityEntry(id: number): Promise<void> {
+    await db.delete(availabilityCalendar).where(eq(availabilityCalendar.id, id));
+  }
+  
+  // AI Profile Enhancement
+  async enhanceProfileWithAI(userId: string, profile: UserProfile): Promise<UserProfile> {
+    const { enhanceProfileWithAI } = await import("./openai");
+    const enhancedData = await enhanceProfileWithAI(profile);
+    
+    // Update profile with AI-enhanced content
+    const updatedProfile = await this.updateUserProfile(userId, {
+      bio: enhancedData.enhancedBio || profile.bio,
+      resume: enhancedData.resumeEnhancement || profile.resume,
+      skills: enhancedData.suggestedSkills || profile.skills,
+    });
+    
+    return updatedProfile;
   }
 }
 

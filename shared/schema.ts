@@ -39,7 +39,7 @@ export const users = pgTable("users", {
 
 // Enums
 export const userRoleEnum = pgEnum("user_role", ["talent", "manager", "producer", "admin"]);
-export const talentTypeEnum = pgEnum("talent_type", ["actor", "musician", "voice_artist", "model"]);
+export const talentTypeEnum = pgEnum("talent_type", ["actor", "musician", "voice_artist", "model", "profile"]);
 export const availabilityStatusEnum = pgEnum("availability_status", ["available", "busy", "unavailable"]);
 export const jobStatusEnum = pgEnum("job_status", ["open", "in_progress", "completed", "cancelled"]);
 export const messageStatusEnum = pgEnum("message_status", ["sent", "delivered", "read"]);
@@ -97,6 +97,11 @@ export const userProfiles = pgTable("user_profiles", {
   weeklyRate: decimal("weekly_rate", { precision: 10, scale: 2 }),
   projectRate: decimal("project_rate", { precision: 10, scale: 2 }),
   
+  // Professional details
+  resume: text("resume"),
+  credits: jsonb("credits"), // Past work credits
+  representations: jsonb("representations"), // Manager/agency info
+  
   // Analytics
   profileViews: integer("profile_views").default(0),
   
@@ -108,17 +113,36 @@ export const userProfiles = pgTable("user_profiles", {
 export const mediaFiles = pgTable("media_files", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").references(() => users.id).notNull(),
-  filename: varchar("filename").notNull(),
-  originalName: varchar("original_name").notNull(),
-  mimeType: varchar("mime_type").notNull(),
-  size: integer("size").notNull(),
+  filename: varchar("filename"),
+  originalName: varchar("original_name"),
+  mimeType: varchar("mime_type"),
+  size: integer("size"),
   url: varchar("url").notNull(),
   thumbnailUrl: varchar("thumbnail_url"),
-  mediaType: varchar("media_type").notNull(), // 'image', 'video', 'audio'
+  mediaType: varchar("media_type").notNull(), // 'image', 'video', 'audio', 'external'
   tags: text("tags").array(),
   description: text("description"),
   isPublic: boolean("is_public").default(true),
+  // External video links
+  externalUrl: varchar("external_url"), // For YouTube, Vimeo, etc.
+  externalPlatform: varchar("external_platform"), // 'youtube', 'vimeo', 'tiktok', etc.
+  externalId: varchar("external_id"), // Video ID from platform
+  duration: integer("duration"), // in seconds
+  isExternal: boolean("is_external").default(false),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Availability calendar for talent
+export const availabilityCalendar = pgTable("availability_calendar", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  status: availabilityStatusEnum("status").notNull().default("available"),
+  notes: text("notes"),
+  allDay: boolean("all_day").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Job postings
@@ -413,6 +437,13 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
 }));
 
+export const availabilityCalendarRelations = relations(availabilityCalendar, ({ one }) => ({
+  user: one(users, {
+    fields: [availabilityCalendar.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
   id: true,
@@ -489,6 +520,12 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   createdAt: true,
 });
 
+export const insertAvailabilityCalendarSchema = createInsertSchema(availabilityCalendar).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -522,3 +559,5 @@ export type UserPermission = typeof userPermissions.$inferSelect;
 export type InsertUserPermission = z.infer<typeof insertUserPermissionSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type AvailabilityCalendar = typeof availabilityCalendar.$inferSelect;
+export type InsertAvailabilityCalendar = z.infer<typeof insertAvailabilityCalendarSchema>;
