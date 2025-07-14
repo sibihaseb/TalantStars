@@ -38,7 +38,7 @@ export const users = pgTable("users", {
 });
 
 // Enums
-export const userRoleEnum = pgEnum("user_role", ["talent", "manager", "producer"]);
+export const userRoleEnum = pgEnum("user_role", ["talent", "manager", "producer", "admin"]);
 export const talentTypeEnum = pgEnum("talent_type", ["actor", "musician", "voice_artist", "model"]);
 export const availabilityStatusEnum = pgEnum("availability_status", ["available", "busy", "unavailable"]);
 export const jobStatusEnum = pgEnum("job_status", ["open", "in_progress", "completed", "cancelled"]);
@@ -168,6 +168,63 @@ export const talentManagers = pgTable("talent_managers", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Admin-specific tables
+export const pricingTiers = pgTable("pricing_tiers", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  duration: integer("duration").notNull(), // in days
+  features: text("features").array().notNull(),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const profileQuestions = pgTable("profile_questions", {
+  id: serial("id").primaryKey(),
+  talentType: talentTypeEnum("talent_type").notNull(),
+  question: text("question").notNull(),
+  fieldName: varchar("field_name").notNull(),
+  fieldType: varchar("field_type").notNull(), // text, select, checkbox, textarea, number
+  required: boolean("required").default(false),
+  options: text("options").array(), // for select/checkbox fields
+  order: integer("order").default(0),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const systemSettings = pgTable("system_settings", {
+  id: serial("id").primaryKey(),
+  key: varchar("key").notNull().unique(),
+  value: text("value").notNull(),
+  description: text("description"),
+  category: varchar("category").notNull(), // general, email, payment, security, etc.
+  dataType: varchar("data_type").notNull(), // string, number, boolean, json
+  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedBy: varchar("updated_by").references(() => users.id),
+});
+
+export const adminLogs = pgTable("admin_logs", {
+  id: serial("id").primaryKey(),
+  adminId: varchar("admin_id").references(() => users.id).notNull(),
+  action: varchar("action").notNull(), // create, update, delete, login, etc.
+  resource: varchar("resource").notNull(), // user, job, pricing, etc.
+  resourceId: varchar("resource_id"),
+  details: jsonb("details"),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const analytics = pgTable("analytics", {
+  id: serial("id").primaryKey(),
+  event: varchar("event").notNull(), // page_view, user_signup, job_post, etc.
+  userId: varchar("user_id").references(() => users.id),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(userProfiles, {
@@ -242,6 +299,27 @@ export const talentManagersRelations = relations(talentManagers, ({ one }) => ({
   }),
 }));
 
+export const adminLogsRelations = relations(adminLogs, ({ one }) => ({
+  admin: one(users, {
+    fields: [adminLogs.adminId],
+    references: [users.id],
+  }),
+}));
+
+export const systemSettingsRelations = relations(systemSettings, ({ one }) => ({
+  updatedBy: one(users, {
+    fields: [systemSettings.updatedBy],
+    references: [users.id],
+  }),
+}));
+
+export const analyticsRelations = relations(analytics, ({ one }) => ({
+  user: one(users, {
+    fields: [analytics.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
   id: true,
@@ -270,6 +348,33 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
   createdAt: true,
 });
 
+export const insertPricingTierSchema = createInsertSchema(pricingTiers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProfileQuestionSchema = createInsertSchema(profileQuestions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSystemSettingSchema = createInsertSchema(systemSettings).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export const insertAdminLogSchema = createInsertSchema(adminLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAnalyticsSchema = createInsertSchema(analytics).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -285,3 +390,13 @@ export type InsertJobApplication = z.infer<typeof insertJobApplicationSchema>;
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type TalentManager = typeof talentManagers.$inferSelect;
+export type PricingTier = typeof pricingTiers.$inferSelect;
+export type InsertPricingTier = z.infer<typeof insertPricingTierSchema>;
+export type ProfileQuestion = typeof profileQuestions.$inferSelect;
+export type InsertProfileQuestion = z.infer<typeof insertProfileQuestionSchema>;
+export type SystemSetting = typeof systemSettings.$inferSelect;
+export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
+export type AdminLog = typeof adminLogs.$inferSelect;
+export type InsertAdminLog = z.infer<typeof insertAdminLogSchema>;
+export type Analytics = typeof analytics.$inferSelect;
+export type InsertAnalytics = z.infer<typeof insertAnalyticsSchema>;

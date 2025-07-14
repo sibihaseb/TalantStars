@@ -17,6 +17,7 @@ import PostGig from "@/pages/PostGig";
 import FindTalent from "@/pages/FindTalent";
 import BrowseJobs from "@/pages/BrowseJobs";
 import Admin from "@/pages/Admin";
+import AdminDashboard from "@/pages/AdminDashboard";
 import TalentProfile from "@/pages/TalentProfile";
 
 function Router() {
@@ -44,6 +45,7 @@ function Router() {
       <Route path="/find-talent" component={FindTalent} />
       <Route path="/talent/:id" component={TalentProfile} />
       <Route path="/admin" component={Admin} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/how-it-works" component={HowItWorks} />
       
       {/* Conditional home route */}

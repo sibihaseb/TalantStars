@@ -6,6 +6,11 @@ import {
   jobApplications,
   messages,
   talentManagers,
+  pricingTiers,
+  profileQuestions,
+  systemSettings,
+  adminLogs,
+  analytics,
   type User,
   type UpsertUser,
   type UserProfile,
@@ -19,6 +24,16 @@ import {
   type Message,
   type InsertMessage,
   type TalentManager,
+  type PricingTier,
+  type InsertPricingTier,
+  type ProfileQuestion,
+  type InsertProfileQuestion,
+  type SystemSetting,
+  type InsertSystemSetting,
+  type AdminLog,
+  type InsertAdminLog,
+  type Analytics,
+  type InsertAnalytics,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc, like, ilike } from "drizzle-orm";
@@ -68,6 +83,34 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   updateUserRole(userId: string, role: string): Promise<User>;
   updateUserVerification(userId: string, verified: boolean): Promise<UserProfile>;
+  
+  // Admin - Pricing Tiers
+  createPricingTier(tier: InsertPricingTier): Promise<PricingTier>;
+  getPricingTiers(): Promise<PricingTier[]>;
+  updatePricingTier(id: number, tier: Partial<InsertPricingTier>): Promise<PricingTier>;
+  deletePricingTier(id: number): Promise<void>;
+  
+  // Admin - Profile Questions
+  createProfileQuestion(question: InsertProfileQuestion): Promise<ProfileQuestion>;
+  getProfileQuestions(): Promise<ProfileQuestion[]>;
+  updateProfileQuestion(id: number, question: Partial<InsertProfileQuestion>): Promise<ProfileQuestion>;
+  deleteProfileQuestion(id: number): Promise<void>;
+  
+  // Admin - System Settings
+  createSystemSetting(setting: InsertSystemSetting): Promise<SystemSetting>;
+  getSystemSettings(): Promise<SystemSetting[]>;
+  getSystemSetting(key: string): Promise<SystemSetting | undefined>;
+  updateSystemSetting(key: string, value: string, updatedBy: string): Promise<SystemSetting>;
+  deleteSystemSetting(key: string): Promise<void>;
+  
+  // Admin - Logs
+  createAdminLog(log: InsertAdminLog): Promise<AdminLog>;
+  getAdminLogs(limit?: number): Promise<AdminLog[]>;
+  
+  // Admin - Analytics
+  createAnalytics(analytics: InsertAnalytics): Promise<Analytics>;
+  getAnalytics(startDate?: Date, endDate?: Date): Promise<Analytics[]>;
+  getAnalyticsSummary(): Promise<{ event: string; count: number }[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -378,6 +421,126 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return profile;
+  }
+
+  // Admin - Pricing Tiers
+  async createPricingTier(tier: InsertPricingTier): Promise<PricingTier> {
+    const [pricingTier] = await db.insert(pricingTiers).values(tier).returning();
+    return pricingTier;
+  }
+
+  async getPricingTiers(): Promise<PricingTier[]> {
+    return await db.select().from(pricingTiers).orderBy(asc(pricingTiers.price));
+  }
+
+  async updatePricingTier(id: number, tier: Partial<InsertPricingTier>): Promise<PricingTier> {
+    const [pricingTier] = await db
+      .update(pricingTiers)
+      .set({ ...tier, updatedAt: new Date() })
+      .where(eq(pricingTiers.id, id))
+      .returning();
+    return pricingTier;
+  }
+
+  async deletePricingTier(id: number): Promise<void> {
+    await db.delete(pricingTiers).where(eq(pricingTiers.id, id));
+  }
+
+  // Admin - Profile Questions
+  async createProfileQuestion(question: InsertProfileQuestion): Promise<ProfileQuestion> {
+    const [profileQuestion] = await db.insert(profileQuestions).values(question).returning();
+    return profileQuestion;
+  }
+
+  async getProfileQuestions(): Promise<ProfileQuestion[]> {
+    return await db.select().from(profileQuestions).orderBy(asc(profileQuestions.talentType), asc(profileQuestions.order));
+  }
+
+  async updateProfileQuestion(id: number, question: Partial<InsertProfileQuestion>): Promise<ProfileQuestion> {
+    const [profileQuestion] = await db
+      .update(profileQuestions)
+      .set({ ...question, updatedAt: new Date() })
+      .where(eq(profileQuestions.id, id))
+      .returning();
+    return profileQuestion;
+  }
+
+  async deleteProfileQuestion(id: number): Promise<void> {
+    await db.delete(profileQuestions).where(eq(profileQuestions.id, id));
+  }
+
+  // Admin - System Settings
+  async createSystemSetting(setting: InsertSystemSetting): Promise<SystemSetting> {
+    const [systemSetting] = await db.insert(systemSettings).values(setting).returning();
+    return systemSetting;
+  }
+
+  async getSystemSettings(): Promise<SystemSetting[]> {
+    return await db.select().from(systemSettings).orderBy(asc(systemSettings.category), asc(systemSettings.key));
+  }
+
+  async getSystemSetting(key: string): Promise<SystemSetting | undefined> {
+    const [setting] = await db.select().from(systemSettings).where(eq(systemSettings.key, key));
+    return setting;
+  }
+
+  async updateSystemSetting(key: string, value: string, updatedBy: string): Promise<SystemSetting> {
+    const [setting] = await db
+      .update(systemSettings)
+      .set({ value, updatedBy, updatedAt: new Date() })
+      .where(eq(systemSettings.key, key))
+      .returning();
+    return setting;
+  }
+
+  async deleteSystemSetting(key: string): Promise<void> {
+    await db.delete(systemSettings).where(eq(systemSettings.key, key));
+  }
+
+  // Admin - Logs
+  async createAdminLog(log: InsertAdminLog): Promise<AdminLog> {
+    const [adminLog] = await db.insert(adminLogs).values(log).returning();
+    return adminLog;
+  }
+
+  async getAdminLogs(limit = 100): Promise<AdminLog[]> {
+    return await db.select().from(adminLogs).orderBy(desc(adminLogs.createdAt)).limit(limit);
+  }
+
+  // Admin - Analytics
+  async createAnalytics(analyticsData: InsertAnalytics): Promise<Analytics> {
+    const [analytics] = await db.insert(analytics).values(analyticsData).returning();
+    return analytics;
+  }
+
+  async getAnalytics(startDate?: Date, endDate?: Date): Promise<Analytics[]> {
+    let query = db.select().from(analytics);
+    
+    if (startDate && endDate) {
+      query = query.where(and(
+        eq(analytics.createdAt, startDate),
+        eq(analytics.createdAt, endDate)
+      ));
+    }
+    
+    return await query.orderBy(desc(analytics.createdAt));
+  }
+
+  async getAnalyticsSummary(): Promise<{ event: string; count: number }[]> {
+    const result = await db
+      .select({
+        event: analytics.event,
+        count: analytics.event
+      })
+      .from(analytics);
+    
+    // Group by event and count
+    const eventCounts: { [key: string]: number } = {};
+    result.forEach(row => {
+      eventCounts[row.event] = (eventCounts[row.event] || 0) + 1;
+    });
+    
+    return Object.entries(eventCounts).map(([event, count]) => ({ event, count }));
   }
 }
 

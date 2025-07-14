@@ -334,11 +334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Pricing tiers management
   app.get('/api/admin/pricing-tiers', isAuthenticated, async (req: any, res) => {
     try {
-      const tiers = [
-        { id: 1, name: "Basic", price: 29.99, duration: 30, features: ["Basic profile", "Limited searches"], active: true },
-        { id: 2, name: "Premium", price: 99.99, duration: 30, features: ["Enhanced profile", "Unlimited searches", "AI optimization"], active: true },
-        { id: 3, name: "Pro", price: 199.99, duration: 30, features: ["Premium features", "Priority support", "Analytics"], active: true }
-      ];
+      const tiers = await storage.getPricingTiers();
       res.json(tiers);
     } catch (error) {
       console.error("Error fetching pricing tiers:", error);
@@ -348,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/pricing-tiers', isAuthenticated, async (req: any, res) => {
     try {
-      const tier = { id: Date.now(), ...req.body };
+      const tier = await storage.createPricingTier(req.body);
       res.json(tier);
     } catch (error) {
       console.error("Error creating pricing tier:", error);
@@ -358,8 +354,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/admin/pricing-tiers/:tierId', isAuthenticated, async (req: any, res) => {
     try {
-      const { tierId } = req.params;
-      const tier = { id: parseInt(tierId), ...req.body };
+      const tierId = parseInt(req.params.tierId);
+      const tier = await storage.updatePricingTier(tierId, req.body);
       res.json(tier);
     } catch (error) {
       console.error("Error updating pricing tier:", error);
@@ -369,6 +365,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/admin/pricing-tiers/:tierId', isAuthenticated, async (req: any, res) => {
     try {
+      const tierId = parseInt(req.params.tierId);
+      await storage.deletePricingTier(tierId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting pricing tier:", error);
@@ -379,11 +377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Profile questions management
   app.get('/api/admin/profile-questions', isAuthenticated, async (req: any, res) => {
     try {
-      const questions = [
-        { id: 1, question: "What is your height?", fieldName: "height", fieldType: "text", talentType: "actor", required: false, order: 1 },
-        { id: 2, question: "What instruments do you play?", fieldName: "instruments", fieldType: "multiselect", talentType: "musician", required: false, order: 2 },
-        { id: 3, question: "What is your vocal range?", fieldName: "vocalRange", fieldType: "select", talentType: "voice_artist", required: false, order: 3 }
-      ];
+      const questions = await storage.getProfileQuestions();
       res.json(questions);
     } catch (error) {
       console.error("Error fetching profile questions:", error);
@@ -393,7 +387,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/profile-questions', isAuthenticated, async (req: any, res) => {
     try {
-      const question = { id: Date.now(), ...req.body };
+      const question = await storage.createProfileQuestion(req.body);
       res.json(question);
     } catch (error) {
       console.error("Error creating profile question:", error);
@@ -403,8 +397,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/admin/profile-questions/:questionId', isAuthenticated, async (req: any, res) => {
     try {
-      const { questionId } = req.params;
-      const question = { id: parseInt(questionId), ...req.body };
+      const questionId = parseInt(req.params.questionId);
+      const question = await storage.updateProfileQuestion(questionId, req.body);
       res.json(question);
     } catch (error) {
       console.error("Error updating profile question:", error);
@@ -414,10 +408,149 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/admin/profile-questions/:questionId', isAuthenticated, async (req: any, res) => {
     try {
+      const questionId = parseInt(req.params.questionId);
+      await storage.deleteProfileQuestion(questionId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting profile question:", error);
       res.status(500).json({ message: "Failed to delete profile question" });
+    }
+  });
+
+  // System Settings management
+  app.get('/api/admin/settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const settings = await storage.getSystemSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching system settings:", error);
+      res.status(500).json({ message: "Failed to fetch system settings" });
+    }
+  });
+
+  app.post('/api/admin/settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const setting = await storage.createSystemSetting(req.body);
+      res.json(setting);
+    } catch (error) {
+      console.error("Error creating system setting:", error);
+      res.status(500).json({ message: "Failed to create system setting" });
+    }
+  });
+
+  app.put('/api/admin/settings/:key', isAuthenticated, async (req: any, res) => {
+    try {
+      const key = req.params.key;
+      const { value } = req.body;
+      const updatedBy = req.user.claims.sub;
+      const setting = await storage.updateSystemSetting(key, value, updatedBy);
+      res.json(setting);
+    } catch (error) {
+      console.error("Error updating system setting:", error);
+      res.status(500).json({ message: "Failed to update system setting" });
+    }
+  });
+
+  app.delete('/api/admin/settings/:key', isAuthenticated, async (req: any, res) => {
+    try {
+      const key = req.params.key;
+      await storage.deleteSystemSetting(key);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting system setting:", error);
+      res.status(500).json({ message: "Failed to delete system setting" });
+    }
+  });
+
+  // Admin Logs
+  app.get('/api/admin/logs', isAuthenticated, async (req: any, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const logs = await storage.getAdminLogs(limit);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching admin logs:", error);
+      res.status(500).json({ message: "Failed to fetch admin logs" });
+    }
+  });
+
+  app.post('/api/admin/logs', isAuthenticated, async (req: any, res) => {
+    try {
+      const adminId = req.user.claims.sub;
+      const logData = { ...req.body, adminId, ipAddress: req.ip, userAgent: req.get('User-Agent') };
+      const log = await storage.createAdminLog(logData);
+      res.json(log);
+    } catch (error) {
+      console.error("Error creating admin log:", error);
+      res.status(500).json({ message: "Failed to create admin log" });
+    }
+  });
+
+  // Analytics
+  app.get('/api/admin/analytics', isAuthenticated, async (req: any, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      const analytics = await storage.getAnalytics(
+        startDate ? new Date(startDate as string) : undefined,
+        endDate ? new Date(endDate as string) : undefined
+      );
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  app.get('/api/admin/analytics/summary', isAuthenticated, async (req: any, res) => {
+    try {
+      const summary = await storage.getAnalyticsSummary();
+      res.json(summary);
+    } catch (error) {
+      console.error("Error fetching analytics summary:", error);
+      res.status(500).json({ message: "Failed to fetch analytics summary" });
+    }
+  });
+
+  app.post('/api/admin/analytics', isAuthenticated, async (req: any, res) => {
+    try {
+      const analytics = await storage.createAnalytics(req.body);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error creating analytics:", error);
+      res.status(500).json({ message: "Failed to create analytics" });
+    }
+  });
+
+  // Admin Job Management
+  app.get('/api/admin/jobs', isAuthenticated, async (req: any, res) => {
+    try {
+      const jobs = await storage.getJobs();
+      res.json(jobs);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+      res.status(500).json({ message: "Failed to fetch jobs" });
+    }
+  });
+
+  app.put('/api/admin/jobs/:jobId', isAuthenticated, async (req: any, res) => {
+    try {
+      const jobId = parseInt(req.params.jobId);
+      const job = await storage.updateJob(jobId, req.body);
+      res.json(job);
+    } catch (error) {
+      console.error("Error updating job:", error);
+      res.status(500).json({ message: "Failed to update job" });
+    }
+  });
+
+  app.delete('/api/admin/jobs/:jobId', isAuthenticated, async (req: any, res) => {
+    try {
+      const jobId = parseInt(req.params.jobId);
+      await storage.deleteJob(jobId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting job:", error);
+      res.status(500).json({ message: "Failed to delete job" });
     }
   });
 
