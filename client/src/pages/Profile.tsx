@@ -411,19 +411,14 @@ export default function Profile() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                               <Label htmlFor="role">Role</Label>
-                              <Select
-                                value={form.watch("role")}
-                                onValueChange={(value) => form.setValue("role", value as any)}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="talent">Talent</SelectItem>
-                                  <SelectItem value="manager">Manager</SelectItem>
-                                  <SelectItem value="producer">Producer</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              <div className="flex items-center space-x-2 p-3 bg-gray-50 dark:bg-gray-900 rounded-md border">
+                                <Badge variant="secondary" className="capitalize">
+                                  {form.watch("role") || "talent"}
+                                </Badge>
+                                <span className="text-sm text-gray-600 dark:text-gray-400">
+                                  Role is set during account setup
+                                </span>
+                              </div>
                             </div>
 
                             <div className="space-y-2">
