@@ -52,7 +52,8 @@ import {
   Archive,
   RefreshCw,
   UserPlus,
-  Briefcase
+  Briefcase,
+  X
 } from "lucide-react";
 
 interface User {
@@ -2039,8 +2040,14 @@ export default function AdminDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                {/* Questions by Category */}
-                <div className="space-y-6">
+                {questionsLoading ? (
+                  <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                    <span className="ml-2 text-gray-600">Loading questions...</span>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Questions by Category */}
                   {/* Filter and Search */}
                   <div className="flex gap-4 items-center flex-wrap">
                     <div className="flex-1">
@@ -2282,7 +2289,8 @@ export default function AdminDashboard() {
                       </Button>
                     </div>
                   )}
-                </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
