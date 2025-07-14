@@ -158,8 +158,16 @@ export default function Onboarding() {
   const createProfileMutation = useMutation({
     mutationFn: async (data: OnboardingFormData) => {
       console.log("Submitting profile data:", data);
-      const response = await apiRequest("POST", "/api/profile", data);
-      return response.json();
+      try {
+        const response = await apiRequest("POST", "/api/profile", data);
+        console.log("API response status:", response.status);
+        const result = await response.json();
+        console.log("API response data:", result);
+        return result;
+      } catch (error) {
+        console.error("API request failed:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       // Show final celebration
@@ -345,6 +353,8 @@ export default function Onboarding() {
   };
 
   const onSubmit = (data: OnboardingFormData) => {
+    console.log("Form submitted with data:", data);
+    console.log("Form errors:", form.formState.errors);
     createProfileMutation.mutate(data);
   };
 
@@ -1001,10 +1011,11 @@ export default function Onboarding() {
                   </Button>
                 ) : (
                   <Button
-                    type="submit"
+                    type="button"
                     disabled={createProfileMutation.isPending}
                     className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
                     onClick={() => {
+                      console.log("Submit button clicked");
                       form.handleSubmit(onSubmit)();
                     }}
                   >
