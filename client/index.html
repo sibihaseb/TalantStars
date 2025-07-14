@@ -3,6 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <script>
+      // Early WebSocket error suppression for Vite HMR
+      window.addEventListener('error', function(event) {
+        if (event.message && (
+          event.message.includes('WebSocket') ||
+          event.message.includes('NS_ERROR_WEBSOCKET_CONNECTION_REFUSED') ||
+          event.message.includes('picard.replit.dev')
+        )) {
+          event.preventDefault();
+          return false;
+        }
+      });
+      
+      // Override WebSocket constructor early to prevent errors
+      const originalWebSocket = window.WebSocket;
+      window.WebSocket = function(url, protocols) {
+        const ws = new originalWebSocket(url, protocols);
+        ws.addEventListener('error', function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+        });
+        return ws;
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>
