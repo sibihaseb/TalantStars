@@ -601,6 +601,8 @@ export default function Onboarding() {
       questionTypes.push(watchedTalentType);
     } else if (watchedRole === 'manager') {
       questionTypes.push('manager');
+    } else if (watchedRole === 'agent') {
+      questionTypes.push('agent');
     } else if (watchedRole === 'producer') {
       questionTypes.push('producer');
     }
@@ -775,6 +777,12 @@ export default function Onboarding() {
         { title: "Role Selection", description: "Choose your role", icon: User },
         { title: "Basic Information", description: "Personal details", icon: User },
         { title: "Management Details", description: "Your experience & services", icon: Star },
+        { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
+      ],
+      agent: [
+        { title: "Role Selection", description: "Choose your role", icon: User },
+        { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Agent Details", description: "Your agency & experience", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ],
       producer: [
@@ -997,7 +1005,7 @@ export default function Onboarding() {
                     </p>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                       {[
                         {
                           value: "talent",
@@ -1012,6 +1020,13 @@ export default function Onboarding() {
                           description: "Represent and manage talent careers",
                           icon: <Users className="h-12 w-12" />,
                           gradient: "from-emerald-500 to-teal-600"
+                        },
+                        {
+                          value: "agent",
+                          title: "Agent",
+                          description: "Connect talent with opportunities",
+                          icon: <Theater className="h-12 w-12" />,
+                          gradient: "from-purple-500 to-pink-600"
                         },
                         {
                           value: "producer",
@@ -1402,11 +1417,13 @@ export default function Onboarding() {
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">
                       {watchedRole === 'manager' && 'Management Details'}
+                      {watchedRole === 'agent' && 'Agent Details'}
                       {watchedRole === 'producer' && 'Production Details'}
                       {!watchedRole && 'Professional Details'}
                     </CardTitle>
                     <p className="text-gray-600 dark:text-gray-400">
                       {watchedRole === 'manager' && 'Tell us about your management experience and services'}
+                      {watchedRole === 'agent' && 'Tell us about your agency experience and specializations'}
                       {watchedRole === 'producer' && 'Tell us about your production experience and projects'}
                       {!watchedRole && 'Tell us about your professional background'}
                     </p>

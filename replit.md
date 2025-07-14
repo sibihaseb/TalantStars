@@ -46,7 +46,10 @@ Preferred communication style: Simple, everyday language.
 - **Step Information**: Dynamic step titles, descriptions, and icons
 - **Visual Feedback**: Animated progress bars, step indicators, and success celebrations
 - **Responsive Design**: Mobile-friendly progress tracking interface
-- **Talent-Specific Questions**: Dynamic form fields based on talent type (actor, musician, voice artist, model)
+- **Role-Specific Questions**: Dynamic form fields based on user role (talent, manager, agent, producer)
+- **Talent-Specific Questions**: Additional questions based on talent type (actor, musician, voice artist, model)
+- **Database-Driven Questions**: All questions stored in database and managed through admin panel
+- **65+ Comprehensive Questions**: Covering all roles and talent types with proper validation
 - **Intelligent Form Validation**: Real-time validation with contextual suggestions and feedback
 - **Smart Validation System**: Field-specific validation rules with helpful error messages and success indicators
 
@@ -54,6 +57,7 @@ Preferred communication style: Simple, everyday language.
 - **Talent Dashboard**: Profile completion tracking, application management, job discovery, and availability calendar
 - **Producer Dashboard**: Project management, talent search, application tracking, and casting analytics
 - **Manager Dashboard**: Talent roster management, opportunity tracking, meeting scheduling, and client coordination
+- **Agent Dashboard**: Talent representation, casting connections, and deal negotiation tools
 - **Admin Dashboard**: Platform administration, user management, and system analytics
 - **Smart Routing**: Automatic dashboard selection based on user role with fallback to talent dashboard
 - **Unified Navigation**: Consistent header and footer across all dashboard types

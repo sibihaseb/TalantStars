@@ -1938,12 +1938,21 @@ export default function AdminDashboard() {
                               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                               required
                             >
-                              <option value="">Select talent type</option>
-                              <option value="profile">Profile (General)</option>
-                              <option value="actor">Actor</option>
-                              <option value="musician">Musician</option>
-                              <option value="voice_artist">Voice Artist</option>
-                              <option value="model">Model</option>
+                              <option value="">Select question category</option>
+                              <optgroup label="General">
+                                <option value="profile">Profile (General)</option>
+                              </optgroup>
+                              <optgroup label="Talent Types">
+                                <option value="actor">Actor</option>
+                                <option value="musician">Musician</option>
+                                <option value="voice_artist">Voice Artist</option>
+                                <option value="model">Model</option>
+                              </optgroup>
+                              <optgroup label="Professional Roles">
+                                <option value="manager">Manager</option>
+                                <option value="agent">Agent</option>
+                                <option value="producer">Producer</option>
+                              </optgroup>
                             </select>
                           </div>
                           <div>
@@ -2071,6 +2080,9 @@ export default function AdminDashboard() {
                         <SelectItem value="musician">Musician</SelectItem>
                         <SelectItem value="voice_artist">Voice Artist</SelectItem>
                         <SelectItem value="model">Model</SelectItem>
+                        <SelectItem value="manager">Manager</SelectItem>
+                        <SelectItem value="agent">Agent</SelectItem>
+                        <SelectItem value="producer">Producer</SelectItem>
                       </SelectContent>
                     </Select>
                     
