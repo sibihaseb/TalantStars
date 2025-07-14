@@ -53,17 +53,19 @@ export default function Home() {
     );
   }
 
+  const userRole = user?.profile?.role || "talent";
+
   // Fetch recent talents for producers/managers
   const { data: recentTalents = [] } = useQuery({
     queryKey: ["/api/search/talents"],
-    enabled: isAuthenticated && user?.profile?.role !== "talent",
+    enabled: isAuthenticated && userRole !== "talent",
     retry: false,
   });
 
   // Fetch recent jobs for talents
   const { data: recentJobs = [] } = useQuery({
     queryKey: ["/api/jobs"],
-    enabled: isAuthenticated && user?.profile?.role === "talent",
+    enabled: isAuthenticated && userRole === "talent",
     retry: false,
   });
 
@@ -87,8 +89,6 @@ export default function Home() {
   if (!isAuthenticated) {
     return null; // Will redirect to login
   }
-
-  const userRole = user?.profile?.role || "talent";
 
   return (
     <ThemeProvider>
