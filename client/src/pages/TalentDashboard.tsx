@@ -138,7 +138,14 @@ export default function TalentDashboard() {
                         </p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => window.location.href = "/profile"}>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      // Check if user has a profile, if not go to onboarding
+                      if (!profile?.profile?.displayName) {
+                        window.location.href = "/onboarding";
+                      } else {
+                        window.location.href = "/profile";
+                      }
+                    }}>
                       Complete Profile
                     </Button>
                   </div>
@@ -265,10 +272,17 @@ export default function TalentDashboard() {
                         <Button 
                           className="w-full justify-start" 
                           variant="outline"
-                          onClick={() => window.location.href = "/profile"}
+                          onClick={() => {
+                            // Check if user has a profile, if not go to onboarding
+                            if (!profile?.profile?.displayName) {
+                              window.location.href = "/onboarding";
+                            } else {
+                              window.location.href = "/profile";
+                            }
+                          }}
                         >
                           <User className="h-4 w-4 mr-2" />
-                          Edit Profile
+                          {!profile?.profile?.displayName ? "Complete Profile" : "Edit Profile"}
                         </Button>
                         <Button 
                           className="w-full justify-start" 
@@ -386,16 +400,30 @@ export default function TalentDashboard() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                         <Button 
                           className="w-full" 
-                          onClick={() => window.location.href = "/profile"}
+                          onClick={() => {
+                            // Check if user has a profile, if not go to onboarding
+                            if (!profile?.profile?.displayName) {
+                              window.location.href = "/onboarding";
+                            } else {
+                              window.location.href = "/profile";
+                            }
+                          }}
                         >
-                          Edit Profile
+                          {!profile?.profile?.displayName ? "Complete Profile" : "Edit Profile"}
                         </Button>
                         <Button 
                           className="w-full" 
                           variant="outline"
-                          onClick={() => window.location.href = "/profile"}
+                          onClick={() => {
+                            // Check if user has a profile, if not go to onboarding
+                            if (!profile?.profile?.displayName) {
+                              window.location.href = "/onboarding";
+                            } else {
+                              window.location.href = "/profile";
+                            }
+                          }}
                         >
-                          Upload Media
+                          {!profile?.profile?.displayName ? "Setup Profile" : "Upload Media"}
                         </Button>
                       </div>
                     </div>
