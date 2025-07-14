@@ -303,7 +303,7 @@ export default function TalentDashboard() {
                         <Button 
                           className="w-full justify-start" 
                           variant="outline"
-                          onClick={() => window.location.href = "/profile"}
+                          onClick={() => window.location.href = "/availability"}
                         >
                           <Calendar className="h-4 w-4 mr-2" />
                           Manage Availability

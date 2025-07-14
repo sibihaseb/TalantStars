@@ -24,6 +24,7 @@ import ProfileViewer from "@/pages/ProfileViewer";
 import TalentDashboard from "@/pages/TalentDashboard";
 import ProducerDashboard from "@/pages/ProducerDashboard";
 import ManagerDashboard from "@/pages/ManagerDashboard";
+import Availability from "@/pages/Availability";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/dashboard/manager" component={ManagerDashboard} />
       <Route path="/dashboard/admin" component={AdminDashboard} />
       <Route path="/meetings" component={MeetingManagement} />
+      <Route path="/availability" component={Availability} />
       <Route path="/how-it-works" component={HowItWorks} />
       
       {/* Conditional home route */}

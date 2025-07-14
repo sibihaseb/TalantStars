@@ -53,6 +53,8 @@ export function MessageThread({
     // WebSocket connection for real-time messages
     let socket: WebSocket | null = null;
     let reconnectTimeout: NodeJS.Timeout | null = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 3;
 
     const connectWebSocket = () => {
       try {
@@ -64,6 +66,7 @@ export function MessageThread({
         socket.onopen = () => {
           console.log("WebSocket connected");
           setIsWebSocketConnected(true);
+          reconnectAttempts = 0;
           socket?.send(JSON.stringify({
             type: "auth",
             userId: user?.id
@@ -71,21 +74,39 @@ export function MessageThread({
         };
 
         socket.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          if (data.type === "message") {
-            queryClient.invalidateQueries({ queryKey: ["/api/messages", conversationUserId] });
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === "message") {
+              queryClient.invalidateQueries({ queryKey: ["/api/messages", conversationUserId] });
+            }
+          } catch (error) {
+            console.log("Error parsing WebSocket message:", error);
           }
         };
 
         socket.onclose = () => {
           console.log("WebSocket disconnected");
           setIsWebSocketConnected(false);
-          // Don't try to reconnect immediately to avoid spam
+          
+          // Attempt to reconnect if under limit
+          if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            reconnectTimeout = setTimeout(() => {
+              console.log(`Reconnecting WebSocket (attempt ${reconnectAttempts}/${maxReconnectAttempts})`);
+              connectWebSocket();
+            }, 2000 * reconnectAttempts); // Exponential backoff
+          } else {
+            console.log("Max reconnect attempts reached, falling back to polling");
+            // Fall back to polling for messages
+            reconnectTimeout = setTimeout(() => {
+              queryClient.invalidateQueries({ queryKey: ["/api/messages", conversationUserId] });
+            }, 5000);
+          }
         };
 
         socket.onerror = (error) => {
-          console.log("WebSocket error (this is normal in Replit deployments):", error);
-          // Silently handle WebSocket errors since they're common in Replit
+          console.log("WebSocket error (falling back to polling):", error);
+          setIsWebSocketConnected(false);
         };
 
       } catch (error) {
