@@ -16,13 +16,39 @@
         }
       });
       
-      // Override WebSocket constructor early to prevent errors
+      // Override WebSocket constructor early to prevent external connection attempts
       const originalWebSocket = window.WebSocket;
       window.WebSocket = function(url, protocols) {
+        const urlString = url.toString();
+        
+        // Prevent Vite HMR WebSocket connections to external Replit URLs
+        if (urlString.includes('picard.replit.dev') || urlString.includes('wss://')) {
+          // Return a mock WebSocket that doesn't actually connect
+          return {
+            readyState: 3, // CLOSED
+            close: function() {},
+            send: function() {},
+            addEventListener: function() {},
+            removeEventListener: function() {},
+            dispatchEvent: function() { return false; },
+            onopen: null,
+            onclose: null,
+            onerror: null,
+            onmessage: null,
+            CONNECTING: 0,
+            OPEN: 1,
+            CLOSING: 2,
+            CLOSED: 3
+          };
+        }
+        
+        // For other WebSocket connections, proceed normally
         const ws = new originalWebSocket(url, protocols);
         ws.addEventListener('error', function(event) {
-          event.preventDefault();
-          event.stopPropagation();
+          if (urlString.includes('picard.replit.dev')) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
         });
         return ws;
       };

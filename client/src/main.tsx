@@ -70,24 +70,49 @@ window.addEventListener('unhandledrejection', (event) => {
   }
 });
 
-// Override WebSocket constructor to handle connection attempts gracefully
+// Override WebSocket constructor to prevent Vite HMR connection attempts to external URLs
 const OriginalWebSocket = window.WebSocket;
 window.WebSocket = class extends OriginalWebSocket {
   constructor(url: string | URL, protocols?: string | string[]) {
-    super(url, protocols);
+    const urlString = url.toString();
     
-    // Add silent error handling to prevent console spam
-    this.addEventListener('error', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-    });
+    // If this is a Vite HMR WebSocket connection to external Replit URL, redirect to localhost
+    if (urlString.includes('picard.replit.dev') || urlString.includes('wss://')) {
+      // Create a mock WebSocket that immediately closes to prevent connection attempts
+      const mockWS = {
+        readyState: WebSocket.CLOSED,
+        close: () => {},
+        send: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+        onopen: null,
+        onclose: null,
+        onerror: null,
+        onmessage: null,
+        CONNECTING: 0,
+        OPEN: 1,
+        CLOSING: 2,
+        CLOSED: 3
+      };
+      
+      // Return the mock WebSocket to prevent actual connection
+      return mockWS as any;
+    }
     
-    this.addEventListener('close', (event) => {
-      if (event.code === 1006) { // Connection failed
-        // Silently handle connection failures
-        return;
+    // For other WebSocket connections (like our messaging system), proceed normally
+    const ws = new OriginalWebSocket(url, protocols);
+    
+    // Add silent error handling for legitimate WebSocket connections
+    ws.addEventListener('error', (event) => {
+      // Only suppress errors for external URLs, allow our internal WebSocket errors
+      if (urlString.includes('picard.replit.dev')) {
+        event.preventDefault();
+        event.stopPropagation();
       }
     });
+    
+    return ws;
   }
 };
 
