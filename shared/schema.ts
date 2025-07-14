@@ -255,6 +255,7 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type UserProfile = typeof userProfiles.$inferSelect;
+export type UserWithProfile = User & { profile?: UserProfile };
 export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
 export type MediaFile = typeof mediaFiles.$inferSelect;
 export type InsertMediaFile = z.infer<typeof insertMediaFileSchema>;

@@ -154,14 +154,19 @@ export class DatabaseStorage implements IStorage {
   async getJobs(filters?: { talentType?: string; location?: string; status?: string }): Promise<Job[]> {
     let query = db.select().from(jobs);
     
+    const conditions = [];
     if (filters?.talentType) {
-      query = query.where(eq(jobs.talentType, filters.talentType as any));
+      conditions.push(eq(jobs.talentType, filters.talentType as any));
     }
     if (filters?.location) {
-      query = query.where(like(jobs.location, `%${filters.location}%`));
+      conditions.push(like(jobs.location, `%${filters.location}%`));
     }
     if (filters?.status) {
-      query = query.where(eq(jobs.status, filters.status as any));
+      conditions.push(eq(jobs.status, filters.status as any));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
     }
     
     return await query.orderBy(desc(jobs.createdAt));
@@ -253,7 +258,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     const conversations = [];
-    for (const [otherUserId, lastMessage] of conversationMap) {
+    for (const [otherUserId, lastMessage] of conversationMap.entries()) {
       const user = await this.getUser(otherUserId);
       if (user) {
         conversations.push({ user, lastMessage });
@@ -294,13 +299,10 @@ export class DatabaseStorage implements IStorage {
 
   // Search operations
   async searchTalents(query: string, filters?: { talentType?: string; location?: string }): Promise<UserProfile[]> {
-    let dbQuery = db
-      .select()
-      .from(userProfiles)
-      .where(eq(userProfiles.role, "talent"));
+    const conditions = [eq(userProfiles.role, "talent")];
 
     if (query) {
-      dbQuery = dbQuery.where(
+      conditions.push(
         or(
           ilike(userProfiles.displayName, `%${query}%`),
           ilike(userProfiles.bio, `%${query}%`)
@@ -309,14 +311,18 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (filters?.talentType) {
-      dbQuery = dbQuery.where(eq(userProfiles.talentType, filters.talentType as any));
+      conditions.push(eq(userProfiles.talentType, filters.talentType as any));
     }
 
     if (filters?.location) {
-      dbQuery = dbQuery.where(ilike(userProfiles.location, `%${filters.location}%`));
+      conditions.push(ilike(userProfiles.location, `%${filters.location}%`));
     }
 
-    return await dbQuery.orderBy(desc(userProfiles.profileViews));
+    return await db
+      .select()
+      .from(userProfiles)
+      .where(and(...conditions))
+      .orderBy(desc(userProfiles.profileViews));
   }
 }
 

@@ -287,7 +287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     ws.on('message', (message) => {
       try {
         const data = JSON.parse(message.toString());
-        if (data.type === 'auth') {
+        if (data.type === 'auth' && data.userId) {
           userId = data.userId;
           clients.set(userId, ws);
         }

@@ -476,7 +476,7 @@ export default function Onboarding() {
                             <Label htmlFor="height">Height</Label>
                             <Input
                               {...form.register("height")}
-                              placeholder="5'8\""
+                              placeholder="5'8&quot;"
                             />
                           </div>
                           <div className="space-y-2">
@@ -599,7 +599,7 @@ export default function Onboarding() {
                             <Label htmlFor="height">Height</Label>
                             <Input
                               {...form.register("height")}
-                              placeholder="5'8\""
+                              placeholder="5'8&quot;"
                             />
                           </div>
                           <div className="space-y-2">

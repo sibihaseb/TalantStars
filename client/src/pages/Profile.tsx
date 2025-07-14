@@ -477,7 +477,7 @@ export default function Profile() {
                                   <Label htmlFor="height">Height</Label>
                                   <Input
                                     {...form.register("height")}
-                                    placeholder="5'8\""
+                                    placeholder="5'8&quot;"
                                   />
                                 </div>
                                 <div className="space-y-2">
