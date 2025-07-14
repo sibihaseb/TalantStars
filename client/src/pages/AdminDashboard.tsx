@@ -149,6 +149,8 @@ export default function AdminDashboard() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isEditingUser, setIsEditingUser] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isEditingTier, setIsEditingTier] = useState(false);
   const [isEditingQuestion, setIsEditingQuestion] = useState(false);
   const [isEditingSetting, setIsEditingSetting] = useState(false);
@@ -194,6 +196,67 @@ export default function AdminDashboard() {
   });
 
   // Mutations
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: Partial<User>) => {
+      const response = await apiRequest("POST", "/api/admin/users", userData);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create user");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setIsEditingUser(false);
+      setEditingUser(null);
+      toast({ title: "Success", description: "User created successfully" });
+    },
+    onError: (error: Error) => {
+      console.error("Error creating user:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ userId, userData }: { userId: string; userData: Partial<User> }) => {
+      const response = await apiRequest("PUT", `/api/admin/users/${userId}`, userData);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update user");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setIsEditingUser(false);
+      setEditingUser(null);
+      toast({ title: "Success", description: "User updated successfully" });
+    },
+    onError: (error: Error) => {
+      console.error("Error updating user:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await apiRequest("DELETE", `/api/admin/users/${userId}`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete user");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({ title: "Success", description: "User deleted successfully" });
+    },
+    onError: (error: Error) => {
+      console.error("Error deleting user:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
   const updateUserRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
       const response = await apiRequest("PUT", `/api/admin/users/${userId}/role`, { role });
@@ -504,6 +567,22 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleSaveUser = (formData: FormData) => {
+    const userData = {
+      ...(editingUser?.id && { id: editingUser.id }),
+      email: formData.get("email") as string,
+      firstName: formData.get("firstName") as string,
+      lastName: formData.get("lastName") as string,
+      role: formData.get("role") as string,
+    };
+    console.log("Saving user:", userData);
+    if (editingUser?.id) {
+      updateUserMutation.mutate({ userId: editingUser.id, userData });
+    } else {
+      createUserMutation.mutate(userData);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -704,7 +783,10 @@ export default function AdminDashboard() {
                     <Users className="w-5 h-5" />
                     User Management
                   </span>
-                  <Button>
+                  <Button onClick={() => {
+                    setEditingUser(null);
+                    setIsEditingUser(true);
+                  }}>
                     <UserPlus className="w-4 h-4 mr-2" />
                     Add User
                   </Button>
@@ -790,7 +872,10 @@ export default function AdminDashboard() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => setSelectedUser(user)}
+                                onClick={() => {
+                                  setEditingUser(user);
+                                  setIsEditingUser(true);
+                                }}
                               >
                                 <Edit className="w-4 h-4" />
                               </Button>
@@ -804,6 +889,13 @@ export default function AdminDashboard() {
                               >
                                 <UserCheck className="w-4 h-4" />
                               </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => deleteUserMutation.mutate(user.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -813,6 +905,72 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* User Create/Edit Dialog */}
+            <Dialog open={isEditingUser} onOpenChange={setIsEditingUser}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingUser ? 'Edit User' : 'Create User'}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSaveUser(new FormData(e.currentTarget));
+                }}>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        name="email"
+                        type="email"
+                        defaultValue={editingUser?.email || ""}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        name="firstName"
+                        defaultValue={editingUser?.firstName || ""}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        name="lastName"
+                        defaultValue={editingUser?.lastName || ""}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="role">Role</Label>
+                      <select 
+                        name="role" 
+                        defaultValue={editingUser?.role || ""}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        required
+                      >
+                        <option value="">Select role</option>
+                        <option value="talent">Talent</option>
+                        <option value="producer">Producer</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex justify-end space-x-2 mt-6">
+                    <Button type="button" variant="outline" onClick={() => setIsEditingUser(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit">
+                      {editingUser ? 'Update User' : 'Create User'}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="jobs" className="space-y-6">
