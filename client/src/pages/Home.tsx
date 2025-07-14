@@ -108,7 +108,7 @@ export default function Home() {
                       Update Profile
                     </Button>
                   </Link>
-                  <Link href="/search">
+                  <Link href="/jobs">
                     <Button variant="outline" className="w-full h-16">
                       <Search className="h-5 w-5 mr-2" />
                       Browse Opportunities
@@ -164,7 +164,7 @@ export default function Home() {
                       Find Talent
                     </Button>
                   </Link>
-                  <Link href="/jobs/new">
+                  <Link href="/post-gig">
                     <Button variant="outline" className="w-full h-16">
                       <Plus className="h-5 w-5 mr-2" />
                       Post New Job
@@ -208,7 +208,7 @@ export default function Home() {
                           <p className="text-gray-500 dark:text-gray-400 mb-4">
                             No opportunities available at the moment
                           </p>
-                          <Link href="/search">
+                          <Link href="/jobs">
                             <Button variant="outline">
                               <Search className="h-4 w-4 mr-2" />
                               Browse All Jobs

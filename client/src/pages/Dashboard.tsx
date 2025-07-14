@@ -209,7 +209,7 @@ export default function Dashboard() {
                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                       Browse and apply to casting calls and gigs
                     </p>
-                    <Button size="sm" className="w-full" onClick={() => setLocation("/search")}>
+                    <Button size="sm" className="w-full" onClick={() => setLocation("/jobs")}>
                       Browse Jobs
                     </Button>
                   </CardContent>
