@@ -67,11 +67,8 @@ export default function BrowseJobs() {
   // Job application mutation
   const applyToJobMutation = useMutation({
     mutationFn: async (jobData: { jobId: number; message: string }) => {
-      return await apiRequest(`/api/jobs/${jobData.jobId}/apply`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: jobData.message }),
-      });
+      const response = await apiRequest("POST", `/api/jobs/${jobData.jobId}/apply`, { message: jobData.message });
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -442,20 +439,21 @@ export default function BrowseJobs() {
                                   {job.title}
                                 </DialogTitle>
                                 <DialogDescription>
-                                  <div className="flex items-center space-x-2 mb-4">
-                                    {getTalentIcon(job.talentType)}
-                                    <Badge variant="outline" className="capitalize">
-                                      {job.talentType.replace('_', ' ')}
-                                    </Badge>
-                                    <Badge 
-                                      variant={job.status === 'open' ? 'default' : 'secondary'}
-                                      className="capitalize"
-                                    >
-                                      {job.status.replace('_', ' ')}
-                                    </Badge>
-                                  </div>
+                                  Job Details
                                 </DialogDescription>
                               </DialogHeader>
+                              <div className="flex items-center space-x-2 mb-4">
+                                {getTalentIcon(job.talentType)}
+                                <Badge variant="outline" className="capitalize">
+                                  {job.talentType.replace('_', ' ')}
+                                </Badge>
+                                <Badge 
+                                  variant={job.status === 'open' ? 'default' : 'secondary'}
+                                  className="capitalize"
+                                >
+                                  {job.status.replace('_', ' ')}
+                                </Badge>
+                              </div>
                               <div className="space-y-4">
                                 <div>
                                   <h4 className="font-medium mb-2">Description</h4>
