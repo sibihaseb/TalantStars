@@ -61,6 +61,12 @@ import {
 } from "lucide-react";
 
 const onboardingSchema = insertUserProfileSchema.extend({
+  // Required fields
+  displayName: z.string().min(1, "Display name is required"),
+  bio: z.string().min(10, "Bio must be at least 10 characters"),
+  location: z.string().min(1, "Location is required"),
+  
+  // Optional arrays
   languages: z.array(z.string()).optional(),
   accents: z.array(z.string()).optional(),
   instruments: z.array(z.string()).optional(),
@@ -78,6 +84,29 @@ const onboardingSchema = insertUserProfileSchema.extend({
 });
 
 type OnboardingFormData = z.infer<typeof onboardingSchema>;
+
+// Required fields by step
+const requiredFieldsByStep = {
+  1: ['role'], // Role selection
+  2: ['talentType'], // Talent Type (for talent role)
+  3: ['displayName', 'bio', 'location'], // Basic Info
+  4: [], // Experience & Skills (optional)
+  5: [], // Media & Portfolio (optional)
+  6: [], // Preferences & Availability (optional)
+};
+
+// Helper function to check if field is required
+const isFieldRequired = (fieldName: string, step: number): boolean => {
+  return requiredFieldsByStep[step]?.includes(fieldName) || false;
+};
+
+// Helper component for required field label
+const RequiredFieldLabel = ({ children, required = false }: { children: React.ReactNode; required?: boolean }) => (
+  <div className="flex items-center gap-1">
+    {children}
+    {required && <span className="text-red-500 text-sm">*</span>}
+  </div>
+);
 
 export default function Onboarding() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -332,9 +361,42 @@ export default function Onboarding() {
     return Math.round((currentStep / getMaxSteps()) * 100);
   };
 
-  const nextStep = () => {
+  // Function to validate required fields for current step
+  const validateCurrentStep = async (): Promise<{ isValid: boolean; errors: string[] }> => {
+    const requiredFields = requiredFieldsByStep[currentStep] || [];
+    const errors: string[] = [];
+    
+    for (const field of requiredFields) {
+      const value = form.getValues(field as keyof OnboardingFormData);
+      
+      if (!value || (typeof value === 'string' && value.trim() === '')) {
+        errors.push(`${field.charAt(0).toUpperCase() + field.slice(1)} is required`);
+      }
+      
+      // Special validation for bio minimum length
+      if (field === 'bio' && typeof value === 'string' && value.trim().length < 10) {
+        errors.push('Bio must be at least 10 characters');
+      }
+    }
+    
+    return { isValid: errors.length === 0, errors };
+  };
+
+  const nextStep = async () => {
     const maxSteps = getMaxSteps();
     if (currentStep < maxSteps) {
+      // Validate current step before proceeding
+      const validation = await validateCurrentStep();
+      
+      if (!validation.isValid) {
+        toast({
+          title: "Required Fields Missing",
+          description: validation.errors.join(', '),
+          variant: "destructive",
+        });
+        return;
+      }
+      
       setIsStepChanging(true);
       setShowCelebration(true);
       
@@ -487,7 +549,11 @@ export default function Onboarding() {
               {currentStep === 1 && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">Choose Your Role</CardTitle>
+                    <CardTitle className="text-2xl">
+                      <RequiredFieldLabel required={isFieldRequired("role", currentStep)}>
+                        Choose Your Role
+                      </RequiredFieldLabel>
+                    </CardTitle>
                     <p className="text-gray-600 dark:text-gray-400">
                       Select the role that best describes you
                     </p>
@@ -547,7 +613,9 @@ export default function Onboarding() {
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">
-                      {watchedRole === "talent" ? "What type of talent are you?" : "Basic Information"}
+                      <RequiredFieldLabel required={watchedRole === "talent" && isFieldRequired("talentType", currentStep)}>
+                        {watchedRole === "talent" ? "What type of talent are you?" : "Basic Information"}
+                      </RequiredFieldLabel>
                     </CardTitle>
                     <p className="text-gray-600 dark:text-gray-400">
                       {watchedRole === "talent" 
@@ -614,27 +682,45 @@ export default function Onboarding() {
                       <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="displayName">Display Name</Label>
+                            <RequiredFieldLabel required={isFieldRequired("displayName", currentStep)}>
+                              <Label htmlFor="displayName">Display Name</Label>
+                            </RequiredFieldLabel>
                             <Input
                               {...form.register("displayName")}
                               placeholder="Your professional name"
+                              className={form.formState.errors.displayName ? "border-red-500" : ""}
                             />
+                            {form.formState.errors.displayName && (
+                              <p className="text-red-500 text-sm">{form.formState.errors.displayName.message}</p>
+                            )}
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="location">Location</Label>
+                            <RequiredFieldLabel required={isFieldRequired("location", currentStep)}>
+                              <Label htmlFor="location">Location</Label>
+                            </RequiredFieldLabel>
                             <Input
                               {...form.register("location")}
                               placeholder="City, State"
+                              className={form.formState.errors.location ? "border-red-500" : ""}
                             />
+                            {form.formState.errors.location && (
+                              <p className="text-red-500 text-sm">{form.formState.errors.location.message}</p>
+                            )}
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="bio">Professional Bio</Label>
+                          <RequiredFieldLabel required={isFieldRequired("bio", currentStep)}>
+                            <Label htmlFor="bio">Professional Bio</Label>
+                          </RequiredFieldLabel>
                           <Textarea
                             {...form.register("bio")}
-                            placeholder="Tell us about your experience and expertise"
+                            placeholder="Tell us about your experience and expertise (minimum 10 characters)"
                             rows={4}
+                            className={form.formState.errors.bio ? "border-red-500" : ""}
                           />
+                          {form.formState.errors.bio && (
+                            <p className="text-red-500 text-sm">{form.formState.errors.bio.message}</p>
+                          )}
                         </div>
                       </div>
                     )}
@@ -654,28 +740,46 @@ export default function Onboarding() {
                   <CardContent className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="displayName">Display Name</Label>
+                        <RequiredFieldLabel required={isFieldRequired("displayName", currentStep)}>
+                          <Label htmlFor="displayName">Display Name</Label>
+                        </RequiredFieldLabel>
                         <Input
                           {...form.register("displayName")}
                           placeholder="Your professional name"
+                          className={form.formState.errors.displayName ? "border-red-500" : ""}
                         />
+                        {form.formState.errors.displayName && (
+                          <p className="text-red-500 text-sm">{form.formState.errors.displayName.message}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="location">Location</Label>
+                        <RequiredFieldLabel required={isFieldRequired("location", currentStep)}>
+                          <Label htmlFor="location">Location</Label>
+                        </RequiredFieldLabel>
                         <Input
                           {...form.register("location")}
                           placeholder="City, State"
+                          className={form.formState.errors.location ? "border-red-500" : ""}
                         />
+                        {form.formState.errors.location && (
+                          <p className="text-red-500 text-sm">{form.formState.errors.location.message}</p>
+                        )}
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="bio">Professional Bio</Label>
+                      <RequiredFieldLabel required={isFieldRequired("bio", currentStep)}>
+                        <Label htmlFor="bio">Professional Bio</Label>
+                      </RequiredFieldLabel>
                       <Textarea
                         {...form.register("bio")}
-                        placeholder="Tell us about your experience and what makes you unique"
+                        placeholder="Tell us about your experience and what makes you unique (minimum 10 characters)"
                         rows={4}
+                        className={form.formState.errors.bio ? "border-red-500" : ""}
                       />
+                      {form.formState.errors.bio && (
+                        <p className="text-red-500 text-sm">{form.formState.errors.bio.message}</p>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
