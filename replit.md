@@ -34,6 +34,8 @@ Preferred communication style: Simple, everyday language.
 - **User Management**: Admin account creation and login system
 - **Route Protection**: Passport.js middleware-based authentication checks
 - **Password Security**: bcrypt hashing with salt for secure password storage
+- **Admin Endpoints**: Fully functional admin user management API with JSON response handling
+- **Vite Compatibility**: Resolved Vite dev server middleware conflicts for API routes
 
 ### User Profile Management
 - **Multi-Role Support**: Talent, Manager, Producer roles

@@ -2,7 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
+import { storage as simpleStorage } from "./simple-storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth as setupTraditionalAuth, isAuthenticated as isTraditionalAuthenticated } from "./auth";
 import { enhanceProfile, generateBio } from "./openai";
 import { 
   insertUserProfileSchema, 
@@ -18,10 +20,23 @@ import {
 import { z } from "zod";
 import { requestPasswordReset, validatePasswordResetToken, resetPassword } from "./passwordUtils";
 import { sendMeetingInvitation, sendWelcomeEmail, sendEmail } from "./email";
+import { scrypt, randomBytes } from 'crypto';
+import { promisify } from 'util';
+
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
+  // Auth middleware (Replit OAuth for main app)
   await setupAuth(app);
+  
+  // Traditional auth setup for admin routes
+  setupTraditionalAuth(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -330,28 +345,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes (for user management, pricing, etc.)
-  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/users', isTraditionalAuthenticated, async (req: any, res) => {
     try {
-      const users = await storage.getAllUsers();
-      res.json(users);
+      const users = await simpleStorage.getAllUsers();
+      res.setHeader('Content-Type', 'application/json');
+      res.send(JSON.stringify(users));
     } catch (error) {
       console.error("Error fetching users:", error);
-      res.status(500).json({ message: "Failed to fetch users" });
+      res.status(500).setHeader('Content-Type', 'application/json').send(JSON.stringify({ message: "Failed to fetch users" }));
     }
   });
 
-  app.post('/api/admin/users', isAuthenticated, async (req: any, res) => {
+  app.post('/api/admin/users', isTraditionalAuthenticated, async (req: any, res) => {
     try {
       console.log("Creating user:", req.body);
-      const user = await storage.upsertUser(req.body);
-      res.json(user);
+      
+      // Validate required fields
+      const { email, firstName, lastName, role } = req.body;
+      if (!email || !firstName || !lastName || !role) {
+        res.status(400).setHeader('Content-Type', 'application/json').send(JSON.stringify({ 
+          message: "Missing required fields", 
+          required: ["email", "firstName", "lastName", "role"] 
+        }));
+        return;
+      }
+      
+      // Create user data with proper schema mapping
+      const hashedPassword = await hashPassword("defaultPassword123");
+      const userData = {
+        email,
+        firstName,
+        lastName,
+        role,
+        username: email, // Use email as username
+        password: hashedPassword // Hashed default password for admin-created users
+      };
+      
+      console.log("Mapped user data:", userData);
+      const user = await simpleStorage.createUser(userData);
+      console.log("Created user successfully:", user);
+      res.setHeader('Content-Type', 'application/json');
+      res.send(JSON.stringify(user));
     } catch (error) {
       console.error("Error creating user:", error);
-      res.status(500).json({ message: "Failed to create user", error: error.message });
+      res.status(500).setHeader('Content-Type', 'application/json').send(JSON.stringify({ message: "Failed to create user", error: error.message }));
     }
   });
 
-  app.put('/api/admin/users/:userId', isAuthenticated, async (req: any, res) => {
+  app.put('/api/admin/users/:userId', isTraditionalAuthenticated, async (req: any, res) => {
     try {
       const { userId } = req.params;
       console.log("Updating user:", userId, req.body);
@@ -363,7 +404,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/admin/users/:userId', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/admin/users/:userId', isTraditionalAuthenticated, async (req: any, res) => {
     try {
       const { userId } = req.params;
       console.log("Deleting user:", userId);
@@ -377,7 +418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Password reset routes
-  app.post('/api/admin/users/:userId/reset-password', isAuthenticated, async (req: any, res) => {
+  app.post('/api/admin/users/:userId/reset-password', isTraditionalAuthenticated, async (req: any, res) => {
     try {
       const { userId } = req.params;
       const user = await storage.getUser(userId);
