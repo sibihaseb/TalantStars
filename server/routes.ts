@@ -37,6 +37,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Creating profile for user:", userId);
       console.log("Request body:", req.body);
       
+      // Validate that userId exists
+      if (!userId) {
+        console.error("No userId found in request");
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
       const profileData = insertUserProfileSchema.parse({ ...req.body, userId });
       console.log("Parsed profile data:", profileData);
       
@@ -50,7 +56,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Error message:", error.message);
         console.error("Error stack:", error.stack);
       }
-      res.status(500).json({ message: "Failed to create profile", error: error.message });
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      res.status(500).json({ message: "Failed to create profile", error: errorMessage });
     }
   });
 

@@ -183,6 +183,8 @@ export default function Onboarding() {
       }, 1000);
     },
     onError: (error) => {
+      console.error("Profile creation error:", error);
+      
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -194,9 +196,11 @@ export default function Onboarding() {
         }, 500);
         return;
       }
+      
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       toast({
         title: "Error",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -355,6 +359,15 @@ export default function Onboarding() {
   const onSubmit = (data: OnboardingFormData) => {
     console.log("Form submitted with data:", data);
     console.log("Form errors:", form.formState.errors);
+    console.log("Form is valid:", form.formState.isValid);
+    
+    // Check if form is valid
+    if (!form.formState.isValid) {
+      console.log("Form validation failed, not submitting");
+      return;
+    }
+    
+    console.log("Calling mutation...");
     createProfileMutation.mutate(data);
   };
 
@@ -1014,13 +1027,22 @@ export default function Onboarding() {
                     type="button"
                     disabled={createProfileMutation.isPending}
                     className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
-                    onClick={(e) => {
+                    onClick={async (e) => {
                       e.preventDefault();
                       console.log("Submit button clicked");
                       console.log("Current step:", currentStep);
                       console.log("Max steps:", getMaxSteps());
                       console.log("Form values:", form.getValues());
-                      form.handleSubmit(onSubmit)();
+                      
+                      // Validate form before submitting
+                      const isValid = await form.trigger();
+                      console.log("Form validation result:", isValid);
+                      
+                      if (isValid) {
+                        form.handleSubmit(onSubmit)();
+                      } else {
+                        console.log("Form validation failed, errors:", form.formState.errors);
+                      }
                     }}
                   >
                     <span>
