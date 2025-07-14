@@ -142,6 +142,18 @@ export default function Landing() {
                 Post a Gig
               </Button>
             </div>
+            
+            {/* Admin Login Link */}
+            <div className="mt-8 animate-fade-in">
+              <Button 
+                variant="ghost"
+                size="sm"
+                className="text-white/70 hover:text-white hover:bg-white/10 px-4 py-2 text-sm"
+                onClick={() => window.location.href = "/admin"}
+              >
+                Admin Login
+              </Button>
+            </div>
           </div>
           
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">

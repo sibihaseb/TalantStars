@@ -25,6 +25,7 @@ import TalentDashboard from "@/pages/TalentDashboard";
 import ProducerDashboard from "@/pages/ProducerDashboard";
 import ManagerDashboard from "@/pages/ManagerDashboard";
 import Availability from "@/pages/Availability";
+import Login from "@/pages/Login";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -40,8 +41,22 @@ function Router() {
 
   return (
     <Switch>
-      {/* Always accessible routes */}
+      {/* Login route - always accessible */}
+      <Route path="/login" component={Login} />
+      
+      {/* Public routes */}
       <Route path="/jobs" component={BrowseJobs} />
+      <Route path="/how-it-works" component={HowItWorks} />
+      
+      {/* Protected admin routes */}
+      <Route path="/admin">
+        {isAuthenticated ? <Admin /> : <Login />}
+      </Route>
+      <Route path="/admin/dashboard">
+        {isAuthenticated ? <AdminDashboard /> : <Login />}
+      </Route>
+      
+      {/* Other protected routes */}
       <Route path="/onboarding" component={Onboarding} />
       <Route path="/profile" component={Profile} />
       <Route path="/search" component={Search} />
@@ -51,15 +66,12 @@ function Router() {
       <Route path="/find-talent" component={FindTalent} />
       <Route path="/talent/:id" component={TalentProfile} />
       <Route path="/profile/:userId" component={ProfileViewer} />
-      <Route path="/admin" component={Admin} />
-      <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/dashboard/talent" component={TalentDashboard} />
       <Route path="/dashboard/producer" component={ProducerDashboard} />
       <Route path="/dashboard/manager" component={ManagerDashboard} />
       <Route path="/dashboard/admin" component={AdminDashboard} />
       <Route path="/meetings" component={MeetingManagement} />
       <Route path="/availability" component={Availability} />
-      <Route path="/how-it-works" component={HowItWorks} />
       
       {/* Conditional home route */}
       {!isAuthenticated ? (
