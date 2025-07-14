@@ -1,64 +1,36 @@
-import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/ui/theme-provider";
-import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { 
-  BarChart3,
-  Users,
-  TrendingUp,
-  Calendar,
-  Star,
-  MessageSquare,
+  Users, 
+  TrendingUp, 
+  Calendar, 
+  MessageSquare, 
+  Star, 
+  Briefcase,
+  Plus,
+  Search,
+  FileText,
+  Settings,
+  Bell,
   Eye,
+  Heart,
+  DollarSign,
   Clock,
-  CheckCircle,
-  AlertCircle,
-  Activity,
-  Target,
-  Zap
+  Theater,
+  Music,
+  Camera,
+  Mic
 } from "lucide-react";
 
 export default function Dashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
-  const { toast } = useToast();
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
-
-  const { data: analytics } = useQuery({
-    queryKey: ["/api/analytics"],
-    enabled: isAuthenticated,
-    retry: false,
-  });
-
-  const { data: recentActivity } = useQuery({
-    queryKey: ["/api/activity"],
-    enabled: isAuthenticated,
-    retry: false,
-  });
+  const [, setLocation] = useLocation();
 
   if (isLoading) {
     return (
@@ -71,292 +43,371 @@ export default function Dashboard() {
   }
 
   if (!isAuthenticated) {
-    return null;
+    return (
+      <ThemeProvider>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900 flex items-center justify-center">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle className="text-center text-gray-900 dark:text-white">
+                Authentication Required
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                Please log in to access your dashboard
+              </p>
+              <Button 
+                onClick={() => window.location.href = "/api/login"}
+                className="w-full"
+              >
+                Log In
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </ThemeProvider>
+    );
   }
 
+  // Default to talent role if profile doesn't exist or role is undefined
   const userRole = user?.profile?.role || "talent";
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case "talent":
+        return <Star className="w-5 h-5" />;
+      case "manager":
+        return <Users className="w-5 h-5" />;
+      case "producer":
+        return <Briefcase className="w-5 h-5" />;
+      default:
+        return <Star className="w-5 h-5" />;
+    }
+  };
 
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
         <Header />
         
-        <main className="pt-20 pb-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Dashboard
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300">
-                {userRole === "talent" && "Track your performance and discover opportunities"}
-                {userRole === "manager" && "Manage your talents and monitor their success"}
-                {userRole === "producer" && "Oversee your projects and talent pipeline"}
-              </p>
+        <main className="container mx-auto px-4 py-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Dashboard
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300">
+              Welcome back, {user?.firstName || user?.profile?.displayName || "User"}!
+            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant="outline" className="flex items-center gap-1">
+                {getRoleIcon(userRole)}
+                {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Account
+              </Badge>
+              {!user?.profile && (
+                <Badge variant="destructive">
+                  Profile Incomplete
+                </Badge>
+              )}
             </div>
+          </div>
 
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-blue-100 text-sm font-medium">Profile Views</p>
-                      <p className="text-2xl font-bold">2,543</p>
-                    </div>
-                    <Eye className="h-8 w-8 text-blue-200" />
+          {/* Stats Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <Card className="glass-card">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Profile Views</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {user?.profile ? "1,247" : "0"}
+                    </p>
                   </div>
-                  <div className="mt-4 flex items-center">
-                    <TrendingUp className="h-4 w-4 text-blue-200 mr-1" />
-                    <span className="text-blue-100 text-sm">+12% from last month</span>
-                  </div>
-                </CardContent>
-              </Card>
+                  <Eye className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
 
-              <Card className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-emerald-100 text-sm font-medium">Messages</p>
-                      <p className="text-2xl font-bold">47</p>
-                    </div>
-                    <MessageSquare className="h-8 w-8 text-emerald-200" />
+            <Card className="glass-card">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Messages</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {user?.profile ? "12" : "0"}
+                    </p>
                   </div>
-                  <div className="mt-4 flex items-center">
-                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
-                      5 unread
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
+                  <MessageSquare className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
 
-              <Card className="bg-gradient-to-r from-amber-500 to-amber-600 text-white">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-amber-100 text-sm font-medium">Opportunities</p>
-                      <p className="text-2xl font-bold">12</p>
-                    </div>
-                    <Target className="h-8 w-8 text-amber-200" />
+            <Card className="glass-card">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Opportunities</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {user?.profile ? "8" : "0"}
+                    </p>
                   </div>
-                  <div className="mt-4 flex items-center">
-                    <Clock className="h-4 w-4 text-amber-200 mr-1" />
-                    <span className="text-amber-100 text-sm">3 expiring soon</span>
-                  </div>
-                </CardContent>
-              </Card>
+                  <Briefcase className="h-8 w-8 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
 
-              <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-purple-100 text-sm font-medium">Bookings</p>
-                      <p className="text-2xl font-bold">8</p>
-                    </div>
-                    <Star className="h-8 w-8 text-purple-200" />
+            <Card className="glass-card">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Rating</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {user?.profile ? "4.8" : "N/A"}
+                    </p>
                   </div>
-                  <div className="mt-4 flex items-center">
-                    <CheckCircle className="h-4 w-4 text-purple-200 mr-1" />
-                    <span className="text-purple-100 text-sm">2 completed</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <Star className="h-8 w-8 text-yellow-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-            {/* Main Dashboard Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Main Stats */}
-              <div className="lg:col-span-2">
-                <DashboardStats userRole={userRole} />
-                
-                {/* Performance Chart */}
-                <Card className="mt-8 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <BarChart3 className="h-5 w-5" />
-                      <span>Performance Overview</span>
+          {/* Profile Completion Alert */}
+          {!user?.profile && (
+            <Card className="glass-card border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20 mb-8">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-yellow-800 dark:text-yellow-200">
+                      Complete Your Profile
+                    </h3>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                      Set up your profile to start connecting with opportunities
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={() => setLocation("/onboarding")}
+                    className="bg-yellow-600 hover:bg-yellow-700"
+                  >
+                    Complete Profile
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Quick Actions */}
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            {userRole === "talent" && (
+              <>
+                <Card className="glass-card hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center">
+                      <Search className="w-5 h-5 mr-2 text-blue-600" />
+                      Find Opportunities
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Tabs defaultValue="views" className="w-full">
-                      <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="views">Views</TabsTrigger>
-                        <TabsTrigger value="messages">Messages</TabsTrigger>
-                        <TabsTrigger value="bookings">Bookings</TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="views" className="space-y-4">
-                        <div className="h-64 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                          <div className="text-center">
-                            <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-600 dark:text-gray-400">
-                              Profile views chart would be displayed here
-                            </p>
-                          </div>
-                        </div>
-                      </TabsContent>
-                      <TabsContent value="messages" className="space-y-4">
-                        <div className="h-64 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                          <div className="text-center">
-                            <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-600 dark:text-gray-400">
-                              Message activity chart would be displayed here
-                            </p>
-                          </div>
-                        </div>
-                      </TabsContent>
-                      <TabsContent value="bookings" className="space-y-4">
-                        <div className="h-64 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                          <div className="text-center">
-                            <Star className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-600 dark:text-gray-400">
-                              Booking statistics chart would be displayed here
-                            </p>
-                          </div>
-                        </div>
-                      </TabsContent>
-                    </Tabs>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                      Browse and apply to casting calls and gigs
+                    </p>
+                    <Button size="sm" className="w-full" onClick={() => setLocation("/search")}>
+                      Browse Jobs
+                    </Button>
                   </CardContent>
                 </Card>
-              </div>
 
-              {/* Sidebar */}
-              <div className="space-y-6">
-                {/* Recent Activity */}
-                <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Activity className="h-5 w-5" />
-                      <span>Recent Activity</span>
+                <Card className="glass-card hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center">
+                      <FileText className="w-5 h-5 mr-2 text-green-600" />
+                      Update Profile
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                          <Eye className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            Profile viewed by casting director
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            2 minutes ago
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                          <MessageSquare className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            New message received
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            15 minutes ago
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
-                          <Star className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            New opportunity matched
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            1 hour ago
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center">
-                          <Zap className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            AI profile enhancement completed
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            2 hours ago
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                      Keep your profile current and attractive
+                    </p>
+                    <Button size="sm" className="w-full" variant="outline" onClick={() => setLocation("/profile")}>
+                      Edit Profile
+                    </Button>
                   </CardContent>
                 </Card>
 
-                {/* Goals */}
-                <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Target className="h-5 w-5" />
-                      <span>Monthly Goals</span>
+                <Card className="glass-card hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center">
+                      <MessageSquare className="w-5 h-5 mr-2 text-purple-600" />
+                      Messages
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Profile Views</span>
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">2,543 / 3,000</span>
-                      </div>
-                      <Progress value={85} className="h-2" />
-                    </div>
-                    
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">New Connections</span>
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">47 / 50</span>
-                      </div>
-                      <Progress value={94} className="h-2" />
-                    </div>
-                    
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Bookings</span>
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">8 / 10</span>
-                      </div>
-                      <Progress value={80} className="h-2" />
-                    </div>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                      Connect with producers and managers
+                    </p>
+                    <Button size="sm" className="w-full" variant="outline" onClick={() => setLocation("/messages")}>
+                      View Messages
+                    </Button>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+
+            {userRole === "producer" && (
+              <>
+                <Card className="glass-card hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center">
+                      <Plus className="w-5 h-5 mr-2 text-blue-600" />
+                      Post New Gig
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                      Create casting calls and find talent
+                    </p>
+                    <Button size="sm" className="w-full" onClick={() => setLocation("/post-gig")}>
+                      Post Gig
+                    </Button>
                   </CardContent>
                 </Card>
 
-                {/* Quick Actions */}
-                <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
-                  <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
+                <Card className="glass-card hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center">
+                      <Users className="w-5 h-5 mr-2 text-green-600" />
+                      Find Talent
+                    </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Link href="/profile">
-                      <Button variant="outline" className="w-full justify-start">
-                        <Users className="h-4 w-4 mr-2" />
-                        Update Profile
-                      </Button>
-                    </Link>
-                    <Link href="/search">
-                      <Button variant="outline" className="w-full justify-start">
-                        <Target className="h-4 w-4 mr-2" />
-                        Find Opportunities
-                      </Button>
-                    </Link>
-                    <Link href="/messages">
-                      <Button variant="outline" className="w-full justify-start">
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        Check Messages
-                      </Button>
-                    </Link>
-                    <Button variant="outline" className="w-full justify-start">
-                      <BarChart3 className="h-4 w-4 mr-2" />
+                  <CardContent>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                      Search through talent profiles
+                    </p>
+                    <Button size="sm" className="w-full" variant="outline" onClick={() => setLocation("/find-talent")}>
+                      Browse Talent
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-card hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center">
+                      <Briefcase className="w-5 h-5 mr-2 text-purple-600" />
+                      Manage Projects
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                      Track your active projects
+                    </p>
+                    <Button size="sm" className="w-full" variant="outline" onClick={() => setLocation("/search")}>
+                      View Projects
+                    </Button>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+
+            {userRole === "manager" && (
+              <>
+                <Card className="glass-card hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center">
+                      <Users className="w-5 h-5 mr-2 text-blue-600" />
+                      Manage Talent
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                      Oversee your talent roster
+                    </p>
+                    <Button size="sm" className="w-full" onClick={() => setLocation("/find-talent")}>
+                      View Talent
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-card hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center">
+                      <Search className="w-5 h-5 mr-2 text-green-600" />
+                      Find Opportunities
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                      Discover gigs for your talent
+                    </p>
+                    <Button size="sm" className="w-full" variant="outline" onClick={() => setLocation("/search")}>
+                      Browse Gigs
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-card hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center">
+                      <TrendingUp className="w-5 h-5 mr-2 text-purple-600" />
+                      Analytics
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                      Track performance metrics
+                    </p>
+                    <Button size="sm" className="w-full" variant="outline" onClick={() => setLocation("/dashboard")}>
                       View Analytics
                     </Button>
                   </CardContent>
                 </Card>
-              </div>
-            </div>
+              </>
+            )}
           </div>
+
+          {/* Recent Activity */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-xl text-gray-900 dark:text-white">
+                Recent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {user?.profile ? (
+                  <>
+                    <div className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-900 dark:text-white">
+                          Profile created successfully
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Today
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                      <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-900 dark:text-white">
+                          Account verified
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Today
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <Bell className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Complete your profile to see activity updates
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </main>
 
         <Footer />

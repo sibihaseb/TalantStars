@@ -12,6 +12,9 @@ import Search from "@/pages/Search";
 import Messages from "@/pages/Messages";
 import Dashboard from "@/pages/Dashboard";
 import Onboarding from "@/pages/Onboarding";
+import HowItWorks from "@/pages/HowItWorks";
+import PostGig from "@/pages/PostGig";
+import FindTalent from "@/pages/FindTalent";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -29,7 +32,10 @@ function Router() {
     <Switch>
       {/* Public routes */}
       {!isAuthenticated ? (
-        <Route path="/" component={Landing} />
+        <>
+          <Route path="/" component={Landing} />
+          <Route path="/how-it-works" component={HowItWorks} />
+        </>
       ) : (
         <>
           {/* If authenticated but no profile, show onboarding */}
@@ -43,6 +49,8 @@ function Router() {
               <Route path="/search" component={Search} />
               <Route path="/messages" component={Messages} />
               <Route path="/dashboard" component={Dashboard} />
+              <Route path="/post-gig" component={PostGig} />
+              <Route path="/find-talent" component={FindTalent} />
             </>
           )}
           

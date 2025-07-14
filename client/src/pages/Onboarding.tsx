@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -221,16 +222,12 @@ export default function Onboarding() {
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
-        {/* Header */}
-        <header className="fixed w-full top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+        <Header />
+        
+        {/* Progress Header */}
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 mt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-2">
-                <Star className="h-8 w-8 text-yellow-500 fill-current" />
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Talents & Stars
-                </h1>
-              </div>
+            <div className="flex justify-center items-center py-4">
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-600 dark:text-gray-400">
                   Step {currentStep} of {totalSteps}
@@ -239,9 +236,9 @@ export default function Onboarding() {
               </div>
             </div>
           </div>
-        </header>
+        </div>
 
-        <main className="pt-20 pb-12">
+        <main className="pb-12">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">

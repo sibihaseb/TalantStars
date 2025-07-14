@@ -127,8 +127,8 @@ export default function Landing() {
               <Button 
                 size="lg"
                 variant="outline" 
-                className="border-2 border-white text-white hover:bg-white hover:text-blue-900 px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all duration-300"
-                onClick={() => window.location.href = "/api/login"}
+                className="border-2 border-white bg-white/10 text-white hover:bg-white hover:text-blue-900 px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all duration-300"
+                onClick={() => window.location.href = "/find-talent"}
               >
                 <Search className="h-5 w-5 mr-2" />
                 Find Talent
