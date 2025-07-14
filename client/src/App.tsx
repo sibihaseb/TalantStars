@@ -21,6 +21,9 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import MeetingManagement from "@/pages/MeetingManagement";
 import TalentProfile from "@/pages/TalentProfile";
 import ProfileViewer from "@/pages/ProfileViewer";
+import TalentDashboard from "@/pages/TalentDashboard";
+import ProducerDashboard from "@/pages/ProducerDashboard";
+import ManagerDashboard from "@/pages/ManagerDashboard";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -49,6 +52,10 @@ function Router() {
       <Route path="/profile/:userId" component={ProfileViewer} />
       <Route path="/admin" component={Admin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/dashboard/talent" component={TalentDashboard} />
+      <Route path="/dashboard/producer" component={ProducerDashboard} />
+      <Route path="/dashboard/manager" component={ManagerDashboard} />
+      <Route path="/dashboard/admin" component={AdminDashboard} />
       <Route path="/meetings" component={MeetingManagement} />
       <Route path="/how-it-works" component={HowItWorks} />
       
