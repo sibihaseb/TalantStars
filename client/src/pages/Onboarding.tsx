@@ -149,6 +149,7 @@ export default function Onboarding() {
 
   const createProfileMutation = useMutation({
     mutationFn: async (data: OnboardingFormData) => {
+      console.log("Submitting profile data:", data);
       const response = await apiRequest("POST", "/api/profile", data);
       return response.json();
     },
@@ -292,6 +293,8 @@ export default function Onboarding() {
   };
 
   const onSubmit = (data: OnboardingFormData) => {
+    console.log("Form validation passed, submitting:", data);
+    console.log("Form errors:", form.formState.errors);
     createProfileMutation.mutate(data);
   };
 
@@ -577,7 +580,7 @@ export default function Onboarding() {
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="eyeColor">Eye Color</Label>
-                            <Select onValueChange={(value) => addFromDropdown("eyeColor", value)}>
+                            <Select onValueChange={(value) => form.setValue("eyeColor", [value])}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select eye color" />
                               </SelectTrigger>
@@ -589,23 +592,10 @@ export default function Onboarding() {
                                 ))}
                               </SelectContent>
                             </Select>
-                            {(form.watch("eyeColor") as string[])?.length > 0 && (
-                              <div className="flex flex-wrap gap-2">
-                                {(form.watch("eyeColor") as string[]).map((color) => (
-                                  <Badge key={color} variant="secondary" className="flex items-center gap-1">
-                                    {EYE_COLOR_OPTIONS.find(opt => opt.value === color)?.label || color}
-                                    <X 
-                                      className="h-3 w-3 cursor-pointer hover:text-red-500" 
-                                      onClick={() => removeSkill("eyeColor", color)}
-                                    />
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="hairColor">Hair Color</Label>
-                            <Select onValueChange={(value) => addFromDropdown("hairColor", value)}>
+                            <Select onValueChange={(value) => form.setValue("hairColor", [value])}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select hair color" />
                               </SelectTrigger>
@@ -617,19 +607,6 @@ export default function Onboarding() {
                                 ))}
                               </SelectContent>
                             </Select>
-                            {(form.watch("hairColor") as string[])?.length > 0 && (
-                              <div className="flex flex-wrap gap-2">
-                                {(form.watch("hairColor") as string[]).map((color) => (
-                                  <Badge key={color} variant="secondary" className="flex items-center gap-1">
-                                    {HAIR_COLOR_OPTIONS.find(opt => opt.value === color)?.label || color}
-                                    <X 
-                                      className="h-3 w-3 cursor-pointer hover:text-red-500" 
-                                      onClick={() => removeSkill("hairColor", color)}
-                                    />
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -891,6 +868,11 @@ export default function Onboarding() {
                     type="submit"
                     disabled={createProfileMutation.isPending}
                     className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    onClick={() => {
+                      console.log("Submit button clicked");
+                      console.log("Current form values:", form.getValues());
+                      console.log("Form errors:", form.formState.errors);
+                    }}
                   >
                     <span>
                       {createProfileMutation.isPending ? "Creating Profile..." : "Complete Setup"}

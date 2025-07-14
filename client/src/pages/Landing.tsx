@@ -122,7 +122,7 @@ export default function Landing() {
                 onClick={() => window.location.href = "/api/login"}
               >
                 <UserPlus className="h-5 w-5 mr-2" />
-                Join as Talent
+                Join Now
               </Button>
               <Button 
                 size="lg"

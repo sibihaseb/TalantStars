@@ -34,12 +34,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/profile', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      console.log("Creating profile for user:", userId);
+      console.log("Request body:", req.body);
+      
       const profileData = insertUserProfileSchema.parse({ ...req.body, userId });
+      console.log("Parsed profile data:", profileData);
+      
       const profile = await storage.createUserProfile(profileData);
+      console.log("Created profile:", profile);
+      
       res.json(profile);
     } catch (error) {
       console.error("Error creating profile:", error);
-      res.status(500).json({ message: "Failed to create profile" });
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+      res.status(500).json({ message: "Failed to create profile", error: error.message });
     }
   });
 
