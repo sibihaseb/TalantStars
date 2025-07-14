@@ -23,6 +23,7 @@ export function MessageThread({
 }: MessageThreadProps) {
   const [message, setMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -50,28 +51,80 @@ export function MessageThread({
 
   useEffect(() => {
     // WebSocket connection for real-time messages
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
-    const socket = new WebSocket(wsUrl);
+    let socket: WebSocket | null = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
 
-    socket.onopen = () => {
-      socket.send(JSON.stringify({
-        type: "auth",
-        userId: user?.id
-      }));
-    };
+    const connectWebSocket = () => {
+      try {
+        // Try to connect to WebSocket
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const wsUrl = `${protocol}//${window.location.host}/ws`;
+        socket = new WebSocket(wsUrl);
 
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === "message") {
-        queryClient.invalidateQueries({ queryKey: ["/api/messages", conversationUserId] });
+        socket.onopen = () => {
+          console.log("WebSocket connected");
+          setIsWebSocketConnected(true);
+          socket?.send(JSON.stringify({
+            type: "auth",
+            userId: user?.id
+          }));
+        };
+
+        socket.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          if (data.type === "message") {
+            queryClient.invalidateQueries({ queryKey: ["/api/messages", conversationUserId] });
+          }
+        };
+
+        socket.onclose = () => {
+          console.log("WebSocket disconnected");
+          setIsWebSocketConnected(false);
+          // Don't try to reconnect immediately to avoid spam
+        };
+
+        socket.onerror = (error) => {
+          console.log("WebSocket error (this is normal in Replit deployments):", error);
+          // Silently handle WebSocket errors since they're common in Replit
+        };
+
+      } catch (error) {
+        console.log("WebSocket connection failed (falling back to polling):", error);
+        setIsWebSocketConnected(false);
+        // Fall back to polling by refreshing messages periodically
+        reconnectTimeout = setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ["/api/messages", conversationUserId] });
+        }, 5000);
       }
     };
 
+    // Only try to connect if user is authenticated
+    if (user?.id) {
+      connectWebSocket();
+    }
+
     return () => {
-      socket.close();
+      if (socket) {
+        socket.close();
+      }
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
     };
   }, [user?.id, conversationUserId, queryClient]);
+
+  // Fallback polling mechanism when WebSocket is not connected
+  useEffect(() => {
+    if (!isWebSocketConnected && conversationUserId) {
+      const pollingInterval = setInterval(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/messages", conversationUserId] });
+      }, 10000); // Poll every 10 seconds
+
+      return () => {
+        clearInterval(pollingInterval);
+      };
+    }
+  }, [isWebSocketConnected, conversationUserId, queryClient]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -122,9 +175,9 @@ export function MessageThread({
               {conversationUserName}
             </h3>
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className={`w-2 h-2 rounded-full ${isWebSocketConnected ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                Active now
+                {isWebSocketConnected ? 'Real-time' : 'Polling mode'}
               </span>
             </div>
           </div>
