@@ -1034,26 +1034,39 @@ export default function Onboarding() {
                       console.log("Max steps:", getMaxSteps());
                       console.log("Form values:", form.getValues());
                       
-                      // Validate form before submitting
-                      const isValid = await form.trigger();
-                      console.log("Form validation result:", isValid);
+                      // Get form values and clean them
+                      const formValues = form.getValues();
+                      console.log("Raw form values:", formValues);
                       
-                      if (isValid) {
-                        form.handleSubmit(onSubmit)();
-                      } else {
-                        console.log("Form validation failed, errors:", form.formState.errors);
-                        console.log("Form validation errors (stringified):", JSON.stringify(form.formState.errors, null, 2));
+                      // Test validation directly with schema
+                      try {
+                        const validationResult = onboardingSchema.safeParse(formValues);
+                        console.log("Direct schema validation result:", validationResult);
                         
-                        // Show validation errors to user
-                        const firstError = Object.values(form.formState.errors)[0];
-                        if (firstError && typeof firstError === 'object' && 'message' in firstError) {
+                        if (!validationResult.success) {
+                          console.log("Schema validation errors:", validationResult.error.issues);
+                          
+                          // Show first validation error
+                          const firstError = validationResult.error.issues[0];
                           toast({
                             title: "Form Validation Error",
-                            description: firstError.message as string,
+                            description: `${firstError.path.join('.')}: ${firstError.message}`,
                             variant: "destructive",
                           });
+                          return;
                         }
+                      } catch (error) {
+                        console.error("Schema validation error:", error);
+                        toast({
+                          title: "Validation Error",
+                          description: "There was an error validating your form data",
+                          variant: "destructive",
+                        });
+                        return;
                       }
+                      
+                      // If validation passes, submit the form
+                      form.handleSubmit(onSubmit)();
                     }}
                   >
                     <span>
