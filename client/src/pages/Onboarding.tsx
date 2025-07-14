@@ -1042,6 +1042,17 @@ export default function Onboarding() {
                         form.handleSubmit(onSubmit)();
                       } else {
                         console.log("Form validation failed, errors:", form.formState.errors);
+                        console.log("Form validation errors (stringified):", JSON.stringify(form.formState.errors, null, 2));
+                        
+                        // Show validation errors to user
+                        const firstError = Object.values(form.formState.errors)[0];
+                        if (firstError && typeof firstError === 'object' && 'message' in firstError) {
+                          toast({
+                            title: "Form Validation Error",
+                            description: firstError.message as string,
+                            variant: "destructive",
+                          });
+                        }
                       }
                     }}
                   >
