@@ -8,9 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Upload, File, X, Check, Play, Image as ImageIcon, Music, Link, Youtube, Video } from "lucide-react";
+import { Upload, File, X, Check, Play, Image as ImageIcon, Music, Link, Youtube, Video, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 interface MediaUploadProps {
@@ -35,9 +35,26 @@ export function MediaUpload({ onUploadComplete }: MediaUploadProps) {
   const [files, setFiles] = useState<UploadFile[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const [showExternalDialog, setShowExternalDialog] = useState(false);
+  const [activeMediaTab, setActiveMediaTab] = useState("images");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch existing media files
+  const { data: existingMedia = [], isLoading: isLoadingMedia } = useQuery({
+    queryKey: ["/api/media"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/media");
+      return response.json();
+    },
+  });
+
+  // Categorize media by type
+  const categorizedMedia = {
+    images: existingMedia.filter((media: any) => media.mediaType === "image"),
+    videos: existingMedia.filter((media: any) => media.mediaType === "video"),
+    audio: existingMedia.filter((media: any) => media.mediaType === "audio"),
+  };
 
   const uploadMutation = useMutation({
     mutationFn: async (fileData: any) => {
@@ -85,6 +102,26 @@ export function MediaUpload({ onUploadComplete }: MediaUploadProps) {
     onError: (error) => {
       toast({
         title: "Failed to add external video",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (mediaId: number) => {
+      await apiRequest("DELETE", `/api/media/${mediaId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/media"] });
+      toast({
+        title: "Media deleted",
+        description: "Media file has been removed successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Delete failed",
         description: error.message,
         variant: "destructive",
       });
@@ -260,20 +297,61 @@ export function MediaUpload({ onUploadComplete }: MediaUploadProps) {
     });
   };
 
+  const renderMediaCard = (media: any) => (
+    <Card key={media.id} className="group relative overflow-hidden">
+      <CardContent className="p-4">
+        <div className="aspect-video bg-gray-100 dark:bg-gray-700 rounded-lg mb-3 relative overflow-hidden">
+          {media.mediaType === "image" ? (
+            <img 
+              src={media.url} 
+              alt={media.originalName}
+              className="w-full h-full object-cover"
+            />
+          ) : media.mediaType === "video" ? (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500">
+              <Play className="h-8 w-8 text-white" />
+            </div>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-500">
+              <Music className="h-8 w-8 text-white" />
+            </div>
+          )}
+          <Button
+            variant="destructive"
+            size="sm"
+            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={() => deleteMutation.mutate(media.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+          {media.originalName}
+        </p>
+        {media.external_url && (
+          <Badge variant="outline" className="mt-2">
+            {media.external_platform || 'External'}
+          </Badge>
+        )}
+      </CardContent>
+    </Card>
+  );
+
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Upload className="h-5 w-5" />
-          <span>Media Portfolio</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="upload" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="upload">Upload Files</TabsTrigger>
-            <TabsTrigger value="external">External Videos</TabsTrigger>
-          </TabsList>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Upload className="h-5 w-5" />
+            <span>Media Portfolio</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="upload" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="upload">Upload Files</TabsTrigger>
+              <TabsTrigger value="external">External Videos</TabsTrigger>
+            </TabsList>
           
           <TabsContent value="upload" className="space-y-4">
             <div
@@ -465,5 +543,76 @@ export function MediaUpload({ onUploadComplete }: MediaUploadProps) {
         )}
       </CardContent>
     </Card>
+
+    {/* Categorized Media Display */}
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center space-x-2">
+          <File className="h-5 w-5" />
+          <span>Your Media Portfolio</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs value={activeMediaTab} onValueChange={setActiveMediaTab}>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="images" className="flex items-center gap-2">
+              <ImageIcon className="h-4 w-4" />
+              Images ({categorizedMedia.images.length})
+            </TabsTrigger>
+            <TabsTrigger value="videos" className="flex items-center gap-2">
+              <Play className="h-4 w-4" />
+              Videos ({categorizedMedia.videos.length})
+            </TabsTrigger>
+            <TabsTrigger value="audio" className="flex items-center gap-2">
+              <Music className="h-4 w-4" />
+              Audio ({categorizedMedia.audio.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="images" className="mt-6">
+            {categorizedMedia.images.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {categorizedMedia.images.map(renderMediaCard)}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <ImageIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium">No images uploaded yet</p>
+                <p className="text-sm">Upload your headshots, portfolio images, and behind-the-scenes photos</p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="videos" className="mt-6">
+            {categorizedMedia.videos.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {categorizedMedia.videos.map(renderMediaCard)}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <Play className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium">No videos uploaded yet</p>
+                <p className="text-sm">Upload demo reels, performance videos, or add external links</p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="audio" className="mt-6">
+            {categorizedMedia.audio.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {categorizedMedia.audio.map(renderMediaCard)}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <Music className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium">No audio files uploaded yet</p>
+                <p className="text-sm">Upload voice samples, music recordings, or audio demos</p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  </div>
   );
 }

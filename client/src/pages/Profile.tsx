@@ -350,6 +350,30 @@ export default function Profile() {
                     )}
                   </div>
 
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Quick Actions
+                    </h3>
+                    <div className="space-y-2">
+                      <Button
+                        onClick={() => setActiveTab("profile")}
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Profile
+                      </Button>
+                      <Button
+                        onClick={() => setActiveTab("media")}
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Media
+                      </Button>
+                    </div>
+                  </div>
+
                   <Button
                     onClick={() => enhanceProfileMutation.mutate()}
                     disabled={enhanceProfileMutation.isPending}
@@ -668,57 +692,9 @@ export default function Profile() {
                   </TabsContent>
 
                   <TabsContent value="media" className="space-y-6">
-                    <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
-                      <CardHeader>
-                        <CardTitle className="flex items-center space-x-2">
-                          <Camera className="h-5 w-5" />
-                          <span>Media Portfolio</span>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <MediaUpload onUploadComplete={() => {
-                          queryClient.invalidateQueries({ queryKey: ["/api/media"] });
-                        }} />
-                        
-                        {mediaFiles.length > 0 && (
-                          <div className="mt-8">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                              Your Media Files
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                              {mediaFiles.map((file: any) => (
-                                <Card key={file.id} className="overflow-hidden">
-                                  <CardContent className="p-4">
-                                    <div className="aspect-video bg-gray-100 dark:bg-gray-700 rounded-lg mb-3 flex items-center justify-center">
-                                      {file.mediaType === "image" ? (
-                                        <img 
-                                          src={file.url} 
-                                          alt={file.originalName}
-                                          className="w-full h-full object-cover rounded-lg"
-                                        />
-                                      ) : (
-                                        <div className="text-center">
-                                          <Camera className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                                          <p className="text-sm text-gray-500">
-                                            {file.mediaType.toUpperCase()}
-                                          </p>
-                                        </div>
-                                      )}
-                                    </div>
-                                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                      {file.originalName}
-                                    </p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                                      {(file.size / 1024 / 1024).toFixed(2)} MB
-                                    </p>
-                                  </CardContent>
-                                </Card>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                    <MediaUpload onUploadComplete={() => {
+                      queryClient.invalidateQueries({ queryKey: ["/api/media"] });
+                    }} />
                   </TabsContent>
 
                   <TabsContent value="availability" className="space-y-6">

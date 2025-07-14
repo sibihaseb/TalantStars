@@ -887,9 +887,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/profile/ai-enhance', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const profile = await storage.getUserProfile(userId);
+      let profile = await storage.getUserProfile(userId);
+      
+      // If profile doesn't exist, create a basic one first
       if (!profile) {
-        return res.status(404).json({ message: "Profile not found" });
+        const user = await storage.getUser(userId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        
+        profile = await storage.createUserProfile({
+          userId,
+          displayName: user.firstName || "User",
+          bio: "",
+          location: "",
+          role: "talent",
+          talentType: "actor",
+          languages: [],
+          accents: [],
+          instruments: [],
+          genres: [],
+          availabilityStatus: "available",
+          dailyRate: null,
+          weeklyRate: null,
+          projectRate: null,
+          skills: [],
+          experience: "",
+          education: "",
+          socialLinks: {},
+          verified: false,
+          isPublic: true,
+          resume: null,
+          credits: null,
+          representations: null,
+        });
       }
       
       const enhancedProfile = await storage.enhanceProfileWithAI(userId, profile);
