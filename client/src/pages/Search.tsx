@@ -115,7 +115,7 @@ export default function Search() {
         
         <main className="pt-20 pb-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-8">
+            <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 Discover Talent
               </h1>
@@ -124,17 +124,19 @@ export default function Search() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
               {/* Filters Sidebar */}
               <div className={`lg:col-span-1 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-                <SearchFilters 
-                  onSearch={handleSearch} 
-                  onAIMatch={handleAIMatch}
-                />
+                <div className="sticky top-4">
+                  <SearchFilters 
+                    onSearch={handleSearch} 
+                    onAIMatch={handleAIMatch}
+                  />
+                </div>
               </div>
 
               {/* Results */}
-              <div className="lg:col-span-3 space-y-6">
+              <div className="lg:col-span-4 space-y-4">
                 {/* Search Header */}
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardContent className="p-4">
@@ -151,7 +153,7 @@ export default function Search() {
                             "{searchFilters.query}"
                           </Badge>
                         )}
-                        {searchFilters.talentType && (
+                        {searchFilters.talentType && searchFilters.talentType !== "all" && (
                           <Badge variant="outline">
                             {searchFilters.talentType.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase())}
                           </Badge>
