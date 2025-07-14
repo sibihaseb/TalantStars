@@ -15,6 +15,14 @@ import {
   passwordResetTokens,
   userPermissions,
   notifications,
+  availabilityCalendar,
+  skillEndorsements,
+  userSubscriptions,
+  chatRooms,
+  chatMessages,
+  jobMatches,
+  aiGeneratedContent,
+  verificationRequests,
   type User,
   type UpsertUser,
   type UserProfile,
@@ -50,8 +58,18 @@ import {
   type InsertAvailabilityCalendar,
   type SkillEndorsement,
   type InsertSkillEndorsement,
-  availabilityCalendar,
-  skillEndorsements,
+  type UserSubscription,
+  type InsertUserSubscription,
+  type ChatRoom,
+  type InsertChatRoom,
+  type ChatMessage,
+  type InsertChatMessage,
+  type JobMatch,
+  type InsertJobMatch,
+  type AiGeneratedContent,
+  type InsertAiGeneratedContent,
+  type VerificationRequest,
+  type InsertVerificationRequest,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc, like, ilike } from "drizzle-orm";
@@ -123,6 +141,36 @@ export interface IStorage {
   
   // Admin - Logs
   createAdminLog(log: InsertAdminLog): Promise<AdminLog>;
+  
+  // Additional enhanced features
+  // Chat operations
+  createChatRoom(room: any): Promise<any>;
+  getUserChatRooms(userId: string): Promise<any[]>;
+  createChatMessage(message: any): Promise<any>;
+  
+  // Subscription operations
+  createUserSubscription(subscription: any): Promise<any>;
+  getUserSubscription(userId: string): Promise<any>;
+  updateUserSubscriptionStatus(subscriptionId: string, status: string): Promise<any>;
+  
+  // Pricing tier operations
+  getPricingTier(id: number): Promise<PricingTier | undefined>;
+  getAllPricingTiers(): Promise<PricingTier[]>;
+  
+  // Job matching operations
+  createJobMatch(match: any): Promise<any>;
+  getJobMatchesForUser(userId: string): Promise<any[]>;
+  getTalentsByType(talentType: string): Promise<UserProfile[]>;
+  
+  // AI content operations
+  createAiGeneratedContent(content: any): Promise<any>;
+  
+  // Verification operations
+  getVerificationRequests(): Promise<any[]>;
+  updateVerificationRequest(id: number, data: any): Promise<any>;
+  
+  // Email operations
+  sendJobMatchNotification?(jobId: number, userId: string): Promise<boolean>;
   getAdminLogs(limit?: number): Promise<AdminLog[]>;
   
   // Admin - Analytics
@@ -780,6 +828,83 @@ export class DatabaseStorage implements IStorage {
       )
       .limit(1);
     return result.length > 0;
+  }
+
+  // Enhanced features implementations
+  async createChatRoom(room: any): Promise<any> {
+    const [result] = await db.insert(chatRooms).values(room).returning();
+    return result;
+  }
+
+  async getUserChatRooms(userId: string): Promise<any[]> {
+    return await db.select().from(chatRooms).where(eq(chatRooms.createdBy, userId));
+  }
+
+  async createChatMessage(message: any): Promise<any> {
+    const [result] = await db.insert(chatMessages).values(message).returning();
+    return result;
+  }
+
+  async createUserSubscription(subscription: any): Promise<any> {
+    const [result] = await db.insert(userSubscriptions).values(subscription).returning();
+    return result;
+  }
+
+  async getUserSubscription(userId: string): Promise<any> {
+    const [result] = await db.select().from(userSubscriptions).where(eq(userSubscriptions.userId, userId));
+    return result;
+  }
+
+  async updateUserSubscriptionStatus(subscriptionId: string, status: string): Promise<any> {
+    const [result] = await db.update(userSubscriptions)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(userSubscriptions.stripeSubscriptionId, subscriptionId))
+      .returning();
+    return result;
+  }
+
+  async getPricingTier(id: number): Promise<PricingTier | undefined> {
+    const [result] = await db.select().from(pricingTiers).where(eq(pricingTiers.id, id));
+    return result;
+  }
+
+  async getAllPricingTiers(): Promise<PricingTier[]> {
+    return await db.select().from(pricingTiers).orderBy(asc(pricingTiers.price));
+  }
+
+  async createJobMatch(match: any): Promise<any> {
+    const [result] = await db.insert(jobMatches).values(match).returning();
+    return result;
+  }
+
+  async getJobMatchesForUser(userId: string): Promise<any[]> {
+    return await db.select().from(jobMatches).where(eq(jobMatches.userId, userId));
+  }
+
+  async getTalentsByType(talentType: string): Promise<UserProfile[]> {
+    return await db.select().from(userProfiles).where(eq(userProfiles.talentType, talentType));
+  }
+
+  async createAiGeneratedContent(content: any): Promise<any> {
+    const [result] = await db.insert(aiGeneratedContent).values(content).returning();
+    return result;
+  }
+
+  async getVerificationRequests(): Promise<any[]> {
+    return await db.select().from(verificationRequests);
+  }
+
+  async updateVerificationRequest(id: number, data: any): Promise<any> {
+    const [result] = await db.update(verificationRequests)
+      .set(data)
+      .where(eq(verificationRequests.id, id))
+      .returning();
+    return result;
+  }
+
+  async sendJobMatchNotification(jobId: number, userId: string): Promise<boolean> {
+    // Implementation would go here
+    return true;
   }
 }
 

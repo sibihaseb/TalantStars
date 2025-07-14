@@ -312,6 +312,124 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// User subscriptions for tiered pricing
+export const userSubscriptions = pgTable("user_subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  pricingTierId: integer("pricing_tier_id").references(() => pricingTiers.id).notNull(),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  status: varchar("status").default("active"), // active, cancelled, expired, pending
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Chat rooms for group messaging
+export const chatRooms = pgTable("chat_rooms", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  type: varchar("type").default("group"), // group, broadcast, direct
+  createdBy: varchar("created_by").references(() => users.id).notNull(),
+  isPublic: boolean("is_public").default(false),
+  maxMembers: integer("max_members").default(50),
+  encrypted: boolean("encrypted").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Chat room participants
+export const chatRoomParticipants = pgTable("chat_room_participants", {
+  id: serial("id").primaryKey(),
+  chatRoomId: integer("chat_room_id").references(() => chatRooms.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  role: varchar("role").default("member"), // admin, moderator, member
+  joinedAt: timestamp("joined_at").defaultNow(),
+  leftAt: timestamp("left_at"),
+  isActive: boolean("is_active").default(true),
+});
+
+// Enhanced messages table for chat rooms
+export const chatMessages = pgTable("chat_messages", {
+  id: serial("id").primaryKey(),
+  chatRoomId: integer("chat_room_id").references(() => chatRooms.id),
+  senderId: varchar("sender_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  messageType: varchar("message_type").default("text"), // text, image, video, audio, file, system
+  metadata: jsonb("metadata"), // For file attachments, media info, etc.
+  encrypted: boolean("encrypted").default(true),
+  editedAt: timestamp("edited_at"),
+  replyToId: integer("reply_to_id"),
+  status: messageStatusEnum("status").default("sent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Job matching system
+export const jobMatches = pgTable("job_matches", {
+  id: serial("id").primaryKey(),
+  jobId: integer("job_id").references(() => jobs.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  matchScore: decimal("match_score", { precision: 5, scale: 2 }), // AI-generated match score
+  matchReasons: text("match_reasons").array(), // Why they match
+  notified: boolean("notified").default(false),
+  viewed: boolean("viewed").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Email templates for notifications
+export const emailTemplates = pgTable("email_templates", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull().unique(),
+  subject: varchar("subject").notNull(),
+  htmlContent: text("html_content").notNull(),
+  textContent: text("text_content"),
+  category: varchar("category").notNull(), // welcome, job_alert, password_reset, etc.
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// AI-generated content cache
+export const aiGeneratedContent = pgTable("ai_generated_content", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  contentType: varchar("content_type").notNull(), // bio, job_description, profile_summary, etc.
+  prompt: text("prompt").notNull(),
+  generatedContent: text("generated_content").notNull(),
+  model: varchar("model").notNull(), // gpt-4o, gpt-3.5-turbo, etc.
+  tokens: integer("tokens"),
+  approved: boolean("approved").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Media processing queue
+export const mediaProcessingQueue = pgTable("media_processing_queue", {
+  id: serial("id").primaryKey(),
+  mediaFileId: integer("media_file_id").references(() => mediaFiles.id).notNull(),
+  status: varchar("status").default("pending"), // pending, processing, completed, failed
+  processingType: varchar("processing_type").notNull(), // thumbnail, transcoding, analysis
+  progress: integer("progress").default(0), // 0-100
+  errorMessage: text("error_message"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User verification requests
+export const verificationRequests = pgTable("verification_requests", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  documentType: varchar("document_type").notNull(), // id, passport, professional_license, etc.
+  documentUrl: varchar("document_url").notNull(),
+  status: varchar("status").default("pending"), // pending, approved, rejected, requires_review
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewNotes: text("review_notes"),
+  submittedAt: timestamp("submitted_at").defaultNow(),
+  reviewedAt: timestamp("reviewed_at"),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(userProfiles, {
@@ -457,6 +575,85 @@ export const availabilityCalendarRelations = relations(availabilityCalendar, ({ 
   }),
 }));
 
+// Additional relations for new tables
+export const userSubscriptionsRelations = relations(userSubscriptions, ({ one }) => ({
+  user: one(users, {
+    fields: [userSubscriptions.userId],
+    references: [users.id],
+  }),
+  pricingTier: one(pricingTiers, {
+    fields: [userSubscriptions.pricingTierId],
+    references: [pricingTiers.id],
+  }),
+}));
+
+export const chatRoomsRelations = relations(chatRooms, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [chatRooms.createdBy],
+    references: [users.id],
+  }),
+  participants: many(chatRoomParticipants),
+  messages: many(chatMessages),
+}));
+
+export const chatRoomParticipantsRelations = relations(chatRoomParticipants, ({ one }) => ({
+  chatRoom: one(chatRooms, {
+    fields: [chatRoomParticipants.chatRoomId],
+    references: [chatRooms.id],
+  }),
+  user: one(users, {
+    fields: [chatRoomParticipants.userId],
+    references: [users.id],
+  }),
+}));
+
+export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
+  chatRoom: one(chatRooms, {
+    fields: [chatMessages.chatRoomId],
+    references: [chatRooms.id],
+  }),
+  sender: one(users, {
+    fields: [chatMessages.senderId],
+    references: [users.id],
+  }),
+}));
+
+export const jobMatchesRelations = relations(jobMatches, ({ one }) => ({
+  job: one(jobs, {
+    fields: [jobMatches.jobId],
+    references: [jobs.id],
+  }),
+  user: one(users, {
+    fields: [jobMatches.userId],
+    references: [users.id],
+  }),
+}));
+
+export const aiGeneratedContentRelations = relations(aiGeneratedContent, ({ one }) => ({
+  user: one(users, {
+    fields: [aiGeneratedContent.userId],
+    references: [users.id],
+  }),
+}));
+
+export const mediaProcessingQueueRelations = relations(mediaProcessingQueue, ({ one }) => ({
+  mediaFile: one(mediaFiles, {
+    fields: [mediaProcessingQueue.mediaFileId],
+    references: [mediaFiles.id],
+  }),
+}));
+
+export const verificationRequestsRelations = relations(verificationRequests, ({ one }) => ({
+  user: one(users, {
+    fields: [verificationRequests.userId],
+    references: [users.id],
+  }),
+  reviewer: one(users, {
+    fields: [verificationRequests.reviewedBy],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
   id: true,
@@ -544,6 +741,56 @@ export const insertSkillEndorsementSchema = createInsertSchema(skillEndorsements
   createdAt: true,
 });
 
+// Insert schemas for new tables
+export const insertUserSubscriptionSchema = createInsertSchema(userSubscriptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertChatRoomSchema = createInsertSchema(chatRooms).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertChatRoomParticipantSchema = createInsertSchema(chatRoomParticipants).omit({
+  id: true,
+  joinedAt: true,
+});
+
+export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertJobMatchSchema = createInsertSchema(jobMatches).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAiGeneratedContentSchema = createInsertSchema(aiGeneratedContent).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertMediaProcessingQueueSchema = createInsertSchema(mediaProcessingQueue).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertVerificationRequestSchema = createInsertSchema(verificationRequests).omit({
+  id: true,
+  submittedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -581,3 +828,23 @@ export type AvailabilityCalendar = typeof availabilityCalendar.$inferSelect;
 export type InsertAvailabilityCalendar = z.infer<typeof insertAvailabilityCalendarSchema>;
 export type SkillEndorsement = typeof skillEndorsements.$inferSelect;
 export type InsertSkillEndorsement = z.infer<typeof insertSkillEndorsementSchema>;
+
+// Types for new tables
+export type UserSubscription = typeof userSubscriptions.$inferSelect;
+export type InsertUserSubscription = z.infer<typeof insertUserSubscriptionSchema>;
+export type ChatRoom = typeof chatRooms.$inferSelect;
+export type InsertChatRoom = z.infer<typeof insertChatRoomSchema>;
+export type ChatRoomParticipant = typeof chatRoomParticipants.$inferSelect;
+export type InsertChatRoomParticipant = z.infer<typeof insertChatRoomParticipantSchema>;
+export type ChatMessage = typeof chatMessages.$inferSelect;
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+export type JobMatch = typeof jobMatches.$inferSelect;
+export type InsertJobMatch = z.infer<typeof insertJobMatchSchema>;
+export type EmailTemplate = typeof emailTemplates.$inferSelect;
+export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
+export type AiGeneratedContent = typeof aiGeneratedContent.$inferSelect;
+export type InsertAiGeneratedContent = z.infer<typeof insertAiGeneratedContentSchema>;
+export type MediaProcessingQueue = typeof mediaProcessingQueue.$inferSelect;
+export type InsertMediaProcessingQueue = z.infer<typeof insertMediaProcessingQueueSchema>;
+export type VerificationRequest = typeof verificationRequests.$inferSelect;
+export type InsertVerificationRequest = z.infer<typeof insertVerificationRequestSchema>;

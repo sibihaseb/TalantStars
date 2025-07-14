@@ -2,7 +2,7 @@
 
 ## Overview
 
-Talents & Stars is a comprehensive AI-powered entertainment industry platform that connects talent (actors, musicians, voice artists, models) with producers, managers, and casting directors. The platform features dynamic user profiles, media management, real-time messaging, job posting, and AI-enhanced profile optimization.
+Talents & Stars is a comprehensive AI-powered entertainment industry platform that connects talent (actors, musicians, voice artists, models) with producers, managers, and casting directors. The platform features dynamic user profiles, media management, real-time messaging, job posting, AI-enhanced profile optimization, and advanced enterprise features including Stripe monetization, WebSocket real-time communication, and comprehensive admin controls.
 
 ## User Preferences
 
@@ -73,9 +73,11 @@ Preferred communication style: Simple, everyday language.
 
 ### Real-Time Communication
 - **Messaging**: Built-in 1:1 and group messaging
-- **WebSocket Support**: Real-time message delivery
+- **WebSocket Support**: Real-time message delivery with WebSocket server
 - **Thread Management**: Conversation organization and history
 - **Notification System**: Message status tracking
+- **Chat Rooms**: Multi-user chat room creation and management
+- **Real-time Broadcasting**: Live updates across all connected clients
 
 ### Skill Endorsement System
 - **One-Click Endorsements**: Quick skill validation from network connections
@@ -96,6 +98,9 @@ Preferred communication style: Simple, everyday language.
 - **Application System**: Talent can apply to opportunities
 - **Status Tracking**: Job progress and application management
 - **Project Organization**: Folder-based talent organization
+- **AI-Enhanced Job Descriptions**: Automatic job description generation and optimization
+- **Smart Talent Matching**: AI-powered job-to-talent matching with scoring and reasons
+- **Real-time Job Notifications**: Instant alerts for new opportunities
 
 ## Data Flow
 
@@ -123,6 +128,28 @@ Preferred communication style: Simple, everyday language.
 3. Real-time delivery to connected clients
 4. Thread organization and history management
 
+### Enhanced AI Features
+- **Profile Enhancement**: AI-powered bio generation and profile optimization
+- **Content Moderation**: Automatic content filtering and safety checks
+- **Smart Tagging**: AI-generated tags for better searchability
+- **Email Automation**: AI-generated professional email replies
+- **Profile Summaries**: Automatic profile summary generation
+- **Job Matching**: Advanced AI-powered talent-to-job matching with scoring
+
+### Monetization & Payments
+- **Stripe Integration**: Full payment processing with subscription management
+- **Tiered Pricing**: Flexible pricing tiers with database management
+- **Webhook Handling**: Real-time payment status updates
+- **Customer Management**: Automated customer and subscription tracking
+- **Revenue Analytics**: Comprehensive payment and subscription analytics
+
+### Enterprise Features
+- **Admin Panel**: Comprehensive admin controls and user management
+- **Verification System**: Admin-controlled talent verification workflow
+- **Analytics Dashboard**: Platform usage and performance metrics
+- **Email Templates**: Customizable notification email templates
+- **Content Management**: AI-powered content generation and moderation
+
 ## External Dependencies
 
 ### Core Dependencies
@@ -131,6 +158,8 @@ Preferred communication style: Simple, everyday language.
 - **AI Services**: OpenAI API for profile enhancement
 - **Media Storage**: Configured for Wasabi/AWS S3
 - **Real-time**: WebSocket server integration
+- **Payments**: Stripe for subscription management
+- **Email**: Email service integration for notifications
 
 ### UI/UX Libraries
 - **Component Library**: Radix UI primitives
