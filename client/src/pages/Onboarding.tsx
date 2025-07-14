@@ -14,7 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -586,39 +586,101 @@ export default function Onboarding() {
     );
   };
 
-  const renderTalentSpecificQuestions = () => {
-    const questions = getTalentSpecificQuestions(watchedTalentType);
-    
+  // Fetch role-specific questions from database
+  const { data: profileQuestions = [] } = useQuery({
+    queryKey: ["/api/admin/profile-questions"],
+    enabled: !!watchedRole,
+  });
+
+  const renderRoleSpecificQuestions = () => {
+    if (!watchedRole) return null;
+
+    // Filter questions based on role
+    let questionTypes = ['profile'];
+    if (watchedRole === 'talent' && watchedTalentType) {
+      questionTypes.push(watchedTalentType);
+    } else if (watchedRole === 'manager') {
+      questionTypes.push('manager');
+    } else if (watchedRole === 'producer') {
+      questionTypes.push('producer');
+    }
+
+    const relevantQuestions = profileQuestions
+      .filter(q => questionTypes.includes(q.talentType) && q.active)
+      .sort((a, b) => a.order - b.order);
+
+    if (relevantQuestions.length === 0) {
+      return <div className="text-gray-500 text-center py-8">No questions available for this role.</div>;
+    }
+
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {questions.map((question) => (
-          <div key={question.field} className="space-y-2">
-            {question.type === 'input' && (
-              <>
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {question.label}
-                </Label>
-                <Input
-                  {...form.register(question.field as keyof OnboardingFormData)}
-                  placeholder={question.placeholder}
-                />
-              </>
-            )}
-            {question.type === 'multiSelect' && (
-              renderMultiSelectField(
-                question.field as keyof OnboardingFormData,
-                question.label,
-                question.options,
-                `Select ${question.label.toLowerCase()}...`
-              )
-            )}
-            {question.type === 'custom' && (
-              renderCustomField(question.field as keyof OnboardingFormData, question.label)
-            )}
+        {relevantQuestions.map((question) => (
+          <div key={question.id} className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {question.question}
+              {question.required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+            {renderDynamicFormField(question)}
           </div>
         ))}
       </div>
     );
+  };
+
+  const renderDynamicFormField = (question: any) => {
+    const fieldName = question.fieldName as keyof OnboardingFormData;
+    
+    switch (question.fieldType) {
+      case 'text':
+        return (
+          <Input
+            {...form.register(fieldName)}
+            placeholder={`Enter ${question.question.toLowerCase()}...`}
+          />
+        );
+      
+      case 'textarea':
+        return (
+          <Textarea
+            {...form.register(fieldName)}
+            placeholder={`Enter ${question.question.toLowerCase()}...`}
+            rows={3}
+          />
+        );
+      
+      case 'select':
+        return (
+          <Select onValueChange={(value) => form.setValue(fieldName, value)}>
+            <SelectTrigger>
+              <SelectValue placeholder={`Select ${question.question.toLowerCase()}...`} />
+            </SelectTrigger>
+            <SelectContent>
+              {question.options?.map((option: string) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      
+      case 'multiselect':
+        return renderMultiSelectField(
+          fieldName,
+          question.question,
+          question.options || [],
+          `Select ${question.question.toLowerCase()}...`
+        );
+      
+      default:
+        return (
+          <Input
+            {...form.register(fieldName)}
+            placeholder={`Enter ${question.question.toLowerCase()}...`}
+          />
+        );
+    }
   };
 
   const getMaxSteps = () => {
@@ -700,23 +762,36 @@ export default function Onboarding() {
   };
 
   const getStepInfo = (step: number) => {
-    const commonSteps = [
-      { title: "Role Selection", description: "Choose your role", icon: User },
-      { title: "Basic Information", description: "Personal details", icon: User },
-      { title: "Location & Contact", description: "Where you work", icon: Star },
-      { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
-    ];
+    const roleSteps = {
+      talent: [
+        { title: "Role Selection", description: "Choose your role", icon: User },
+        { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Physical Details", description: "Appearance & stats", icon: Star },
+        { title: "Skills & Experience", description: "What you can do", icon: Medal },
+        { title: "Location & Contact", description: "Where you work", icon: Crown },
+        { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
+      ],
+      manager: [
+        { title: "Role Selection", description: "Choose your role", icon: User },
+        { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Management Details", description: "Your experience & services", icon: Star },
+        { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
+      ],
+      producer: [
+        { title: "Role Selection", description: "Choose your role", icon: User },
+        { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Production Details", description: "Your projects & experience", icon: Star },
+        { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
+      ],
+      default: [
+        { title: "Role Selection", description: "Choose your role", icon: User },
+        { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Professional Details", description: "Your experience", icon: Star },
+        { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
+      ]
+    };
 
-    const talentSteps = [
-      { title: "Role Selection", description: "Choose your role", icon: User },
-      { title: "Basic Information", description: "Personal details", icon: User },
-      { title: "Physical Details", description: "Appearance & stats", icon: Star },
-      { title: "Skills & Experience", description: "What you can do", icon: Medal },
-      { title: "Location & Contact", description: "Where you work", icon: Crown },
-      { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
-    ];
-
-    const steps = watchedRole === "talent" ? talentSteps : commonSteps;
+    const steps = roleSteps[watchedRole as keyof typeof roleSteps] || roleSteps.default;
     return steps[step - 1] || { title: "Step", description: "", icon: User };
   };
 
@@ -1321,6 +1396,27 @@ export default function Onboarding() {
                 </Card>
               )}
 
+              {/* Step 3: Role-Specific Details */}
+              {currentStep === 3 && watchedRole !== "talent" && (
+                <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-2xl">
+                      {watchedRole === 'manager' && 'Management Details'}
+                      {watchedRole === 'producer' && 'Production Details'}
+                      {!watchedRole && 'Professional Details'}
+                    </CardTitle>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {watchedRole === 'manager' && 'Tell us about your management experience and services'}
+                      {watchedRole === 'producer' && 'Tell us about your production experience and projects'}
+                      {!watchedRole && 'Tell us about your professional background'}
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {renderRoleSpecificQuestions()}
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Step 4: Talent-Specific Details */}
               {currentStep === 4 && watchedRole === "talent" && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
@@ -1341,7 +1437,7 @@ export default function Onboarding() {
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {renderTalentSpecificQuestions()}
+                    {renderRoleSpecificQuestions()}
                   </CardContent>
                 </Card>
               )}
