@@ -57,14 +57,39 @@ import {
   PartyPopper,
   Medal,
   Crown,
-  Rocket
+  Rocket,
+  AlertCircle,
+  CheckCircle,
+  Info,
+  Lightbulb,
+  Zap as ZapIcon
 } from "lucide-react";
 
 const onboardingSchema = insertUserProfileSchema.extend({
-  // Required fields
-  displayName: z.string().min(1, "Display name is required"),
-  bio: z.string().min(10, "Bio must be at least 10 characters"),
-  location: z.string().min(1, "Location is required"),
+  // Required fields with enhanced validation
+  displayName: z.string()
+    .min(1, "Display name is required")
+    .min(2, "Display name must be at least 2 characters")
+    .max(50, "Display name must be less than 50 characters")
+    .regex(/^[a-zA-Z\s'-]+$/, "Display name can only contain letters, spaces, hyphens, and apostrophes"),
+  
+  bio: z.string()
+    .min(10, "Bio must be at least 10 characters")
+    .max(500, "Bio must be less than 500 characters"),
+  
+  location: z.string()
+    .min(1, "Location is required")
+    .min(2, "Location must be at least 2 characters")
+    .max(100, "Location must be less than 100 characters"),
+  
+  // Optional fields with validation
+  website: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  phoneNumber: z.string().regex(/^[\+]?[1-9][\d]{0,15}$/, "Invalid phone number format").optional().or(z.literal("")),
+  
+  // Rate validation
+  dailyRate: z.string().regex(/^\d*\.?\d*$/, "Must be a valid number").optional().or(z.literal("")),
+  weeklyRate: z.string().regex(/^\d*\.?\d*$/, "Must be a valid number").optional().or(z.literal("")),
+  projectRate: z.string().regex(/^\d*\.?\d*$/, "Must be a valid number").optional().or(z.literal("")),
   
   // Optional arrays
   languages: z.array(z.string()).optional(),
@@ -98,6 +123,200 @@ const requiredFieldsByStep = {
 // Helper function to check if field is required
 const isFieldRequired = (fieldName: string, step: number): boolean => {
   return requiredFieldsByStep[step]?.includes(fieldName) || false;
+};
+
+// Validation helpers and suggestions
+const getFieldSuggestions = (fieldName: string, value: string, talentType?: string) => {
+  const suggestions = [];
+  
+  switch (fieldName) {
+    case 'displayName':
+      if (value.length < 2) {
+        suggestions.push({
+          type: 'error',
+          message: 'Display name should be at least 2 characters',
+          icon: AlertCircle
+        });
+      } else if (value.length > 50) {
+        suggestions.push({
+          type: 'error',
+          message: 'Display name is too long (max 50 characters)',
+          icon: AlertCircle
+        });
+      } else if (!/^[a-zA-Z\s'-]+$/.test(value)) {
+        suggestions.push({
+          type: 'error',
+          message: 'Only letters, spaces, hyphens, and apostrophes allowed',
+          icon: AlertCircle
+        });
+      } else if (value.length >= 2 && value.length <= 50) {
+        suggestions.push({
+          type: 'success',
+          message: 'Great! Your display name looks good',
+          icon: CheckCircle
+        });
+      }
+      break;
+      
+    case 'bio':
+      if (value.length < 10) {
+        suggestions.push({
+          type: 'warning',
+          message: `Add ${10 - value.length} more characters to describe yourself better`,
+          icon: Info
+        });
+      } else if (value.length > 500) {
+        suggestions.push({
+          type: 'error',
+          message: 'Bio is too long (max 500 characters)',
+          icon: AlertCircle
+        });
+      } else if (value.length >= 10 && value.length <= 100) {
+        suggestions.push({
+          type: 'info',
+          message: 'Consider adding more details about your experience',
+          icon: Lightbulb
+        });
+      } else if (value.length > 100) {
+        suggestions.push({
+          type: 'success',
+          message: 'Excellent! Your bio provides great detail',
+          icon: CheckCircle
+        });
+      }
+      
+      // Talent-specific bio suggestions
+      if (talentType === 'musician' && value.length >= 10) {
+        if (!value.toLowerCase().includes('music') && !value.toLowerCase().includes('instrument')) {
+          suggestions.push({
+            type: 'info',
+            message: 'Consider mentioning your musical instruments or genres',
+            icon: Lightbulb
+          });
+        }
+      } else if (talentType === 'actor' && value.length >= 10) {
+        if (!value.toLowerCase().includes('act') && !value.toLowerCase().includes('perform')) {
+          suggestions.push({
+            type: 'info',
+            message: 'Consider mentioning your acting experience or training',
+            icon: Lightbulb
+          });
+        }
+      }
+      break;
+      
+    case 'location':
+      if (value.length < 2) {
+        suggestions.push({
+          type: 'error',
+          message: 'Location should be at least 2 characters',
+          icon: AlertCircle
+        });
+      } else if (value.length > 100) {
+        suggestions.push({
+          type: 'error',
+          message: 'Location is too long (max 100 characters)',
+          icon: AlertCircle
+        });
+      } else if (value.length >= 2) {
+        suggestions.push({
+          type: 'success',
+          message: 'Location looks good',
+          icon: CheckCircle
+        });
+      }
+      break;
+      
+    case 'website':
+      if (value && value.length > 0) {
+        try {
+          new URL(value);
+          suggestions.push({
+            type: 'success',
+            message: 'Valid website URL',
+            icon: CheckCircle
+          });
+        } catch {
+          suggestions.push({
+            type: 'error',
+            message: 'Please enter a valid URL (e.g., https://yoursite.com)',
+            icon: AlertCircle
+          });
+        }
+      }
+      break;
+      
+    case 'phoneNumber':
+      if (value && value.length > 0) {
+        if (!/^[\+]?[1-9][\d]{0,15}$/.test(value)) {
+          suggestions.push({
+            type: 'error',
+            message: 'Invalid phone number format',
+            icon: AlertCircle
+          });
+        } else {
+          suggestions.push({
+            type: 'success',
+            message: 'Valid phone number',
+            icon: CheckCircle
+          });
+        }
+      }
+      break;
+      
+    case 'dailyRate':
+    case 'weeklyRate':
+    case 'projectRate':
+      if (value && value.length > 0) {
+        if (!/^\d*\.?\d*$/.test(value)) {
+          suggestions.push({
+            type: 'error',
+            message: 'Please enter a valid number',
+            icon: AlertCircle
+          });
+        } else {
+          const numValue = parseFloat(value);
+          if (numValue < 1) {
+            suggestions.push({
+              type: 'warning',
+              message: 'Consider setting a higher rate to value your work',
+              icon: Info
+            });
+          } else if (numValue > 0) {
+            suggestions.push({
+              type: 'success',
+              message: 'Rate looks good',
+              icon: CheckCircle
+            });
+          }
+        }
+      }
+      break;
+  }
+  
+  return suggestions;
+};
+
+const ValidationFeedback = ({ fieldName, value, talentType }: { fieldName: string, value: string, talentType?: string }) => {
+  const suggestions = getFieldSuggestions(fieldName, value, talentType);
+  
+  if (suggestions.length === 0) return null;
+  
+  return (
+    <div className="mt-2 space-y-1">
+      {suggestions.map((suggestion, index) => (
+        <div key={index} className={`flex items-center gap-2 text-sm ${
+          suggestion.type === 'error' ? 'text-red-600 dark:text-red-400' :
+          suggestion.type === 'warning' ? 'text-yellow-600 dark:text-yellow-400' :
+          suggestion.type === 'success' ? 'text-green-600 dark:text-green-400' :
+          'text-blue-600 dark:text-blue-400'
+        }`}>
+          <suggestion.icon className="h-4 w-4" />
+          <span>{suggestion.message}</span>
+        </div>
+      ))}
+    </div>
+  );
 };
 
 // Helper component for required field label
@@ -895,6 +1114,11 @@ export default function Onboarding() {
                         {form.formState.errors.displayName && (
                           <p className="text-red-500 text-sm">{form.formState.errors.displayName.message}</p>
                         )}
+                        <ValidationFeedback 
+                          fieldName="displayName" 
+                          value={form.watch("displayName") || ""} 
+                          talentType={watchedTalentType}
+                        />
                       </div>
                       <div className="space-y-2">
                         <RequiredFieldLabel required={isFieldRequired("location", currentStep)}>
@@ -908,6 +1132,11 @@ export default function Onboarding() {
                         {form.formState.errors.location && (
                           <p className="text-red-500 text-sm">{form.formState.errors.location.message}</p>
                         )}
+                        <ValidationFeedback 
+                          fieldName="location" 
+                          value={form.watch("location") || ""} 
+                          talentType={watchedTalentType}
+                        />
                       </div>
                     </div>
 
@@ -924,6 +1153,14 @@ export default function Onboarding() {
                       {form.formState.errors.bio && (
                         <p className="text-red-500 text-sm">{form.formState.errors.bio.message}</p>
                       )}
+                      <ValidationFeedback 
+                        fieldName="bio" 
+                        value={form.watch("bio") || ""} 
+                        talentType={watchedTalentType}
+                      />
+                      <div className="text-xs text-gray-500 mt-1">
+                        {form.watch("bio")?.length || 0}/500 characters
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -932,6 +1169,15 @@ export default function Onboarding() {
                         <Input
                           {...form.register("website")}
                           placeholder="https://yourwebsite.com"
+                          className={form.formState.errors.website ? "border-red-500" : ""}
+                        />
+                        {form.formState.errors.website && (
+                          <p className="text-red-500 text-sm">{form.formState.errors.website.message}</p>
+                        )}
+                        <ValidationFeedback 
+                          fieldName="website" 
+                          value={form.watch("website") || ""} 
+                          talentType={watchedTalentType}
                         />
                       </div>
                       <div className="space-y-2">
@@ -939,6 +1185,15 @@ export default function Onboarding() {
                         <Input
                           {...form.register("phoneNumber")}
                           placeholder="+1 (555) 123-4567"
+                          className={form.formState.errors.phoneNumber ? "border-red-500" : ""}
+                        />
+                        {form.formState.errors.phoneNumber && (
+                          <p className="text-red-500 text-sm">{form.formState.errors.phoneNumber.message}</p>
+                        )}
+                        <ValidationFeedback 
+                          fieldName="phoneNumber" 
+                          value={form.watch("phoneNumber") || ""} 
+                          talentType={watchedTalentType}
                         />
                       </div>
                     </div>
@@ -1145,6 +1400,15 @@ export default function Onboarding() {
                               {...form.register("dailyRate")}
                               placeholder="500"
                               type="number"
+                              className={form.formState.errors.dailyRate ? "border-red-500" : ""}
+                            />
+                            {form.formState.errors.dailyRate && (
+                              <p className="text-red-500 text-sm">{form.formState.errors.dailyRate.message}</p>
+                            )}
+                            <ValidationFeedback 
+                              fieldName="dailyRate" 
+                              value={form.watch("dailyRate") || ""} 
+                              talentType={watchedTalentType}
                             />
                           </div>
                           <div className="space-y-2">
@@ -1153,6 +1417,15 @@ export default function Onboarding() {
                               {...form.register("weeklyRate")}
                               placeholder="2500"
                               type="number"
+                              className={form.formState.errors.weeklyRate ? "border-red-500" : ""}
+                            />
+                            {form.formState.errors.weeklyRate && (
+                              <p className="text-red-500 text-sm">{form.formState.errors.weeklyRate.message}</p>
+                            )}
+                            <ValidationFeedback 
+                              fieldName="weeklyRate" 
+                              value={form.watch("weeklyRate") || ""} 
+                              talentType={watchedTalentType}
                             />
                           </div>
                           <div className="space-y-2">
@@ -1161,6 +1434,15 @@ export default function Onboarding() {
                               {...form.register("projectRate")}
                               placeholder="10000"
                               type="number"
+                              className={form.formState.errors.projectRate ? "border-red-500" : ""}
+                            />
+                            {form.formState.errors.projectRate && (
+                              <p className="text-red-500 text-sm">{form.formState.errors.projectRate.message}</p>
+                            )}
+                            <ValidationFeedback 
+                              fieldName="projectRate" 
+                              value={form.watch("projectRate") || ""} 
+                              talentType={watchedTalentType}
                             />
                           </div>
                         </div>
