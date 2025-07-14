@@ -1898,21 +1898,24 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="questions" className="space-y-6">
-            <Card>
-              <CardHeader>
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl">
+              <CardHeader className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white rounded-t-lg">
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <FileText className="w-5 h-5" />
-                    Profile Questions
+                    Profile Questions Management
                   </span>
                   <Dialog open={isEditingQuestion} onOpenChange={setIsEditingQuestion}>
                     <DialogTrigger asChild>
-                      <Button onClick={() => setEditingQuestion(null)}>
+                      <Button 
+                        onClick={() => setEditingQuestion(null)}
+                        className="bg-white/20 hover:bg-white/30 text-white border-white/20"
+                      >
                         <Plus className="w-4 h-4 mr-2" />
                         Add Question
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-2xl">
                       <DialogHeader>
                         <DialogTitle>
                           {editingQuestion ? "Edit Profile Question" : "Create Profile Question"}
@@ -1936,6 +1939,7 @@ export default function AdminDashboard() {
                               <option value="musician">Musician</option>
                               <option value="voice_artist">Voice Artist</option>
                               <option value="model">Model</option>
+                              <option value="all">All Types</option>
                             </select>
                           </div>
                           <div>
@@ -1944,6 +1948,7 @@ export default function AdminDashboard() {
                               id="question"
                               name="question"
                               defaultValue={editingQuestion?.question || ""}
+                              placeholder="Enter the question to ask users..."
                               required
                             />
                           </div>
@@ -1953,6 +1958,7 @@ export default function AdminDashboard() {
                               id="fieldName"
                               name="fieldName"
                               defaultValue={editingQuestion?.fieldName || ""}
+                              placeholder="e.g., experience_years, height, vocal_range"
                               required
                             />
                           </div>
@@ -1970,7 +1976,11 @@ export default function AdminDashboard() {
                               <option value="select">Select</option>
                               <option value="multiselect">Multi-select</option>
                               <option value="checkbox">Checkbox</option>
+                              <option value="radio">Radio</option>
                               <option value="number">Number</option>
+                              <option value="date">Date</option>
+                              <option value="email">Email</option>
+                              <option value="url">URL</option>
                             </select>
                           </div>
                           <div>
@@ -1979,6 +1989,8 @@ export default function AdminDashboard() {
                               id="options"
                               name="options"
                               defaultValue={editingQuestion?.options?.join("\n") || ""}
+                              placeholder="Option 1\nOption 2\nOption 3"
+                              rows={4}
                             />
                           </div>
                           <div>
@@ -1988,6 +2000,7 @@ export default function AdminDashboard() {
                               name="order"
                               type="number"
                               defaultValue={editingQuestion?.order || 0}
+                              placeholder="Display order (0 = first)"
                             />
                           </div>
                           <div className="flex items-center space-x-2">
@@ -1997,7 +2010,7 @@ export default function AdminDashboard() {
                               name="required"
                               defaultChecked={editingQuestion?.required ?? false}
                             />
-                            <Label htmlFor="required">Required</Label>
+                            <Label htmlFor="required">Required Field</Label>
                           </div>
                           <div className="flex items-center space-x-2">
                             <input
@@ -2009,9 +2022,12 @@ export default function AdminDashboard() {
                             <Label htmlFor="active">Active</Label>
                           </div>
                         </div>
-                        <div className="flex justify-end mt-6">
+                        <div className="flex justify-end mt-6 gap-2">
+                          <Button type="button" variant="outline" onClick={() => setIsEditingQuestion(false)}>
+                            Cancel
+                          </Button>
                           <Button type="submit">
-                            {editingQuestion ? "Update" : "Create"}
+                            {editingQuestion ? "Update Question" : "Create Question"}
                           </Button>
                         </div>
                       </form>
@@ -2019,72 +2035,132 @@ export default function AdminDashboard() {
                   </Dialog>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Question</TableHead>
-                        <TableHead>Talent Type</TableHead>
-                        <TableHead>Field Type</TableHead>
-                        <TableHead>Required</TableHead>
-                        <TableHead>Order</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {profileQuestions.map((question) => (
-                        <TableRow key={question.id}>
-                          <TableCell>
-                            <div className="max-w-xs truncate">{question.question}</div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{question.talentType}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="secondary">{question.fieldType}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            {question.required ? (
-                              <Badge variant="outline" className="bg-red-50 text-red-700">
-                                Required
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline">Optional</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>{question.order}</TableCell>
-                          <TableCell>
-                            <Badge variant={question.active ? "default" : "secondary"}>
-                              {question.active ? "Active" : "Inactive"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setEditingQuestion(question);
-                                  setIsEditingQuestion(true);
-                                }}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => deleteProfileQuestionMutation.mutate(question.id)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
+              <CardContent className="p-6">
+                {/* Questions by Category */}
+                <div className="space-y-6">
+                  {/* Filter and Search */}
+                  <div className="flex gap-4 items-center">
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Search questions..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="max-w-sm"
+                      />
+                    </div>
+                    <Select value={filterRole} onValueChange={setFilterRole}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Filter by type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="actor">Actor</SelectItem>
+                        <SelectItem value="musician">Musician</SelectItem>
+                        <SelectItem value="voice_artist">Voice Artist</SelectItem>
+                        <SelectItem value="model">Model</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Questions organized by talent type */}
+                  {['actor', 'musician', 'voice_artist', 'model', 'all'].map(talentType => {
+                    const typeQuestions = profileQuestions.filter(q => 
+                      q.talentType === talentType && 
+                      (filterRole === 'all' || filterRole === talentType) &&
+                      (searchTerm === '' || q.question.toLowerCase().includes(searchTerm.toLowerCase()))
+                    );
+                    
+                    if (typeQuestions.length === 0) return null;
+                    
+                    return (
+                      <div key={talentType} className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
+                        <h3 className="font-semibold mb-4 text-lg flex items-center gap-2">
+                          {talentType === 'actor' && <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Actor Questions</span>}
+                          {talentType === 'musician' && <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">Musician Questions</span>}
+                          {talentType === 'voice_artist' && <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">Voice Artist Questions</span>}
+                          {talentType === 'model' && <span className="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm">Model Questions</span>}
+                          {talentType === 'all' && <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">General Questions</span>}
+                          <span className="text-sm text-gray-600">({typeQuestions.length})</span>
+                        </h3>
+                        
+                        <div className="space-y-2">
+                          {typeQuestions.sort((a, b) => a.order - b.order).map((question) => (
+                            <div 
+                              key={question.id} 
+                              className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border hover:shadow-md transition-shadow"
+                            >
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-medium">{question.question}</span>
+                                  {question.required && (
+                                    <Badge variant="outline" className="bg-red-50 text-red-700 text-xs">
+                                      Required
+                                    </Badge>
+                                  )}
+                                  {!question.active && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      Inactive
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="text-sm text-gray-600 flex items-center gap-4">
+                                  <span>Field: <code className="bg-gray-100 px-1 rounded">{question.fieldName}</code></span>
+                                  <span>Type: <Badge variant="secondary" className="text-xs">{question.fieldType}</Badge></span>
+                                  <span>Order: {question.order}</span>
+                                  {question.options && question.options.length > 0 && (
+                                    <span>Options: {question.options.slice(0, 2).join(', ')}{question.options.length > 2 ? '...' : ''}</span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setEditingQuestion(question);
+                                    setIsEditingQuestion(true);
+                                  }}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    if (confirm('Are you sure you want to delete this question?')) {
+                                      deleteProfileQuestionMutation.mutate(question.id);
+                                    }
+                                  }}
+                                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  
+                  {profileQuestions.length === 0 && (
+                    <div className="text-center py-12">
+                      <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-700 mb-2">No questions found</h3>
+                      <p className="text-gray-500 mb-4">Create your first profile question to get started.</p>
+                      <Button 
+                        onClick={() => {
+                          setEditingQuestion(null);
+                          setIsEditingQuestion(true);
+                        }}
+                        className="bg-gradient-to-r from-indigo-500 to-blue-500"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add First Question
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
