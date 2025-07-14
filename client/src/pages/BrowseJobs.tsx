@@ -9,7 +9,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Search, 
   MapPin, 
@@ -42,12 +53,57 @@ interface Job {
 
 export default function BrowseJobs() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [searchFilters, setSearchFilters] = useState({
     query: "",
     talentType: "all",
     location: "",
     status: "open",
   });
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [applicationMessage, setApplicationMessage] = useState("");
+
+  // Job application mutation
+  const applyToJobMutation = useMutation({
+    mutationFn: async (jobData: { jobId: number; message: string }) => {
+      return await apiRequest(`/api/jobs/${jobData.jobId}/apply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: jobData.message }),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Application Submitted",
+        description: "Your application has been successfully submitted!",
+      });
+      setSelectedJob(null);
+      setApplicationMessage("");
+      queryClient.invalidateQueries({ queryKey: ["/api/jobs"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Application Failed",
+        description: "Failed to submit application. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleApplyToJob = (job: Job) => {
+    setSelectedJob(job);
+    setApplicationMessage("");
+  };
+
+  const handleSubmitApplication = () => {
+    if (selectedJob) {
+      applyToJobMutation.mutate({
+        jobId: selectedJob.id,
+        message: applicationMessage,
+      });
+    }
+  };
 
   // Redirect if not authenticated
   if (!isLoading && !isAuthenticated) {
@@ -365,17 +421,91 @@ export default function BrowseJobs() {
                             size="sm"
                             className="bg-blue-600 hover:bg-blue-700"
                             disabled={job.status !== 'open'}
+                            onClick={() => handleApplyToJob(job)}
                           >
                             Apply Now
                           </Button>
-                          <Button 
-                            size="sm"
-                            variant="outline"
-                            className="flex items-center space-x-1"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                            <span>View Details</span>
-                          </Button>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                size="sm"
+                                variant="outline"
+                                className="flex items-center space-x-1"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                                <span>View Details</span>
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle className="text-xl font-semibold">
+                                  {job.title}
+                                </DialogTitle>
+                                <DialogDescription>
+                                  <div className="flex items-center space-x-2 mb-4">
+                                    {getTalentIcon(job.talentType)}
+                                    <Badge variant="outline" className="capitalize">
+                                      {job.talentType.replace('_', ' ')}
+                                    </Badge>
+                                    <Badge 
+                                      variant={job.status === 'open' ? 'default' : 'secondary'}
+                                      className="capitalize"
+                                    >
+                                      {job.status.replace('_', ' ')}
+                                    </Badge>
+                                  </div>
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <h4 className="font-medium mb-2">Description</h4>
+                                  <p className="text-gray-600 dark:text-gray-400">{job.description}</p>
+                                </div>
+                                
+                                {job.requirements && (
+                                  <div>
+                                    <h4 className="font-medium mb-2">Requirements</h4>
+                                    <p className="text-gray-600 dark:text-gray-400">{job.requirements}</p>
+                                  </div>
+                                )}
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                  {job.location && (
+                                    <div>
+                                      <h4 className="font-medium mb-1">Location</h4>
+                                      <p className="text-gray-600 dark:text-gray-400">{job.location}</p>
+                                    </div>
+                                  )}
+                                  {job.budget && (
+                                    <div>
+                                      <h4 className="font-medium mb-1">Budget</h4>
+                                      <p className="text-gray-600 dark:text-gray-400">{formatCurrency(job.budget)}</p>
+                                    </div>
+                                  )}
+                                  {job.projectDate && (
+                                    <div>
+                                      <h4 className="font-medium mb-1">Project Date</h4>
+                                      <p className="text-gray-600 dark:text-gray-400">{formatDate(job.projectDate)}</p>
+                                    </div>
+                                  )}
+                                  <div>
+                                    <h4 className="font-medium mb-1">Posted</h4>
+                                    <p className="text-gray-600 dark:text-gray-400">{formatDate(job.createdAt)}</p>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex justify-end space-x-2 pt-4">
+                                  <Button 
+                                    onClick={() => handleApplyToJob(job)}
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                    disabled={job.status !== 'open'}
+                                  >
+                                    Apply Now
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                         </div>
                       </div>
                     </CardContent>
@@ -387,6 +517,44 @@ export default function BrowseJobs() {
         </main>
         <Footer />
       </div>
+
+      {/* Application Dialog */}
+      <Dialog open={!!selectedJob} onOpenChange={(open) => !open && setSelectedJob(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Apply for Position</DialogTitle>
+            <DialogDescription>
+              {selectedJob && `Submit your application for "${selectedJob.title}"`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="application-message">Cover Message</Label>
+              <Textarea
+                id="application-message"
+                placeholder="Tell the employer why you're perfect for this role..."
+                value={applicationMessage}
+                onChange={(e) => setApplicationMessage(e.target.value)}
+                rows={4}
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setSelectedJob(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitApplication}
+                disabled={applyToJobMutation.isPending || !applicationMessage.trim()}
+              >
+                {applyToJobMutation.isPending ? "Submitting..." : "Submit Application"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </ThemeProvider>
   );
 }

@@ -43,7 +43,7 @@ function Router() {
       ) : (
         <>
           {/* Authenticated routes */}
-          <Route path="/" component={user?.profile ? Home : Landing} />
+          <Route path="/" component={Home} />
           <Route path="/onboarding" component={Onboarding} />
           <Route path="/profile" component={Profile} />
           <Route path="/search" component={Search} />
