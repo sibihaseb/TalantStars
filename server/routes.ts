@@ -47,7 +47,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const dataWithUserId = { ...req.body, userId };
       console.log("Data with userId:", dataWithUserId);
       
-      const profileData = insertUserProfileSchema.parse(dataWithUserId);
+      // Clean empty strings to null for numeric fields
+      const cleanedData = {
+        ...dataWithUserId,
+        dailyRate: dataWithUserId.dailyRate === '' ? null : dataWithUserId.dailyRate,
+        weeklyRate: dataWithUserId.weeklyRate === '' ? null : dataWithUserId.weeklyRate,
+        projectRate: dataWithUserId.projectRate === '' ? null : dataWithUserId.projectRate,
+        profileViews: dataWithUserId.profileViews === '' ? null : dataWithUserId.profileViews,
+      };
+      
+      const profileData = insertUserProfileSchema.parse(cleanedData);
       console.log("Parsed profile data:", profileData);
       
       const profile = await storage.createUserProfile(profileData);
