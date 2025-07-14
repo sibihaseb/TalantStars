@@ -162,6 +162,9 @@ export default function AdminDashboard() {
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
+  const [filterFieldType, setFilterFieldType] = useState("all");
+  const [filterRequired, setFilterRequired] = useState("all");
+  const [filterActive, setFilterActive] = useState("all");
   const [selectedUserForPermissions, setSelectedUserForPermissions] = useState<User | null>(null);
   const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
   const [isMassEmailDialogOpen, setIsMassEmailDialogOpen] = useState(false);
@@ -2039,7 +2042,7 @@ export default function AdminDashboard() {
                 {/* Questions by Category */}
                 <div className="space-y-6">
                   {/* Filter and Search */}
-                  <div className="flex gap-4 items-center">
+                  <div className="flex gap-4 items-center flex-wrap">
                     <div className="flex-1">
                       <Input
                         placeholder="Search questions..."
@@ -2048,6 +2051,8 @@ export default function AdminDashboard() {
                         className="max-w-sm"
                       />
                     </div>
+                    
+                    {/* Talent Type Filter */}
                     <Select value={filterRole} onValueChange={setFilterRole}>
                       <SelectTrigger className="w-40">
                         <SelectValue placeholder="Filter by type" />
@@ -2061,6 +2066,111 @@ export default function AdminDashboard() {
                         <SelectItem value="model">Model</SelectItem>
                       </SelectContent>
                     </Select>
+                    
+                    {/* Field Type Filter */}
+                    <Select value={filterFieldType} onValueChange={setFilterFieldType}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Field type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Fields</SelectItem>
+                        <SelectItem value="text">Text</SelectItem>
+                        <SelectItem value="textarea">Textarea</SelectItem>
+                        <SelectItem value="select">Select</SelectItem>
+                        <SelectItem value="multiselect">Multi-select</SelectItem>
+                        <SelectItem value="radio">Radio</SelectItem>
+                        <SelectItem value="checkbox">Checkbox</SelectItem>
+                        <SelectItem value="number">Number</SelectItem>
+                        <SelectItem value="date">Date</SelectItem>
+                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="url">URL</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Required Filter */}
+                    <Select value={filterRequired} onValueChange={setFilterRequired}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Required" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Questions</SelectItem>
+                        <SelectItem value="required">Required Only</SelectItem>
+                        <SelectItem value="optional">Optional Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Active Status Filter */}
+                    <Select value={filterActive} onValueChange={setFilterActive}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="active">Active Only</SelectItem>
+                        <SelectItem value="inactive">Inactive Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Clear Filters Button */}
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setSearchTerm("");
+                        setFilterRole("all");
+                        setFilterFieldType("all");
+                        setFilterRequired("all");
+                        setFilterActive("all");
+                      }}
+                      className="whitespace-nowrap"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Clear Filters
+                    </Button>
+                  </div>
+
+                  {/* Questions Summary */}
+                  <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+                    {['profile', 'actor', 'musician', 'voice_artist', 'model', 'total'].map(type => {
+                      const count = type === 'total' 
+                        ? profileQuestions.filter(q => 
+                            (filterRole === 'all' || filterRole === q.talentType) &&
+                            (filterFieldType === 'all' || filterFieldType === q.fieldType) &&
+                            (filterRequired === 'all' || 
+                              (filterRequired === 'required' && q.required) ||
+                              (filterRequired === 'optional' && !q.required)) &&
+                            (filterActive === 'all' || 
+                              (filterActive === 'active' && q.active) ||
+                              (filterActive === 'inactive' && !q.active)) &&
+                            (searchTerm === '' || 
+                              q.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              q.fieldName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              q.fieldType.toLowerCase().includes(searchTerm.toLowerCase()))
+                          ).length
+                        : profileQuestions.filter(q => 
+                            q.talentType === type && 
+                            (filterRole === 'all' || filterRole === q.talentType) &&
+                            (filterFieldType === 'all' || filterFieldType === q.fieldType) &&
+                            (filterRequired === 'all' || 
+                              (filterRequired === 'required' && q.required) ||
+                              (filterRequired === 'optional' && !q.required)) &&
+                            (filterActive === 'all' || 
+                              (filterActive === 'active' && q.active) ||
+                              (filterActive === 'inactive' && !q.active)) &&
+                            (searchTerm === '' || 
+                              q.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              q.fieldName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              q.fieldType.toLowerCase().includes(searchTerm.toLowerCase()))
+                          ).length;
+                      
+                      return (
+                        <div key={type} className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="text-2xl font-bold text-gray-800 dark:text-white">{count}</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                            {type === 'total' ? 'Total' : type === 'voice_artist' ? 'Voice Artist' : type}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
 
                   {/* Questions organized by talent type */}
@@ -2068,7 +2178,17 @@ export default function AdminDashboard() {
                     const typeQuestions = profileQuestions.filter(q => 
                       q.talentType === talentType && 
                       (filterRole === 'all' || filterRole === talentType) &&
-                      (searchTerm === '' || q.question.toLowerCase().includes(searchTerm.toLowerCase()))
+                      (filterFieldType === 'all' || filterFieldType === q.fieldType) &&
+                      (filterRequired === 'all' || 
+                        (filterRequired === 'required' && q.required) ||
+                        (filterRequired === 'optional' && !q.required)) &&
+                      (filterActive === 'all' || 
+                        (filterActive === 'active' && q.active) ||
+                        (filterActive === 'inactive' && !q.active)) &&
+                      (searchTerm === '' || 
+                        q.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        q.fieldName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        q.fieldType.toLowerCase().includes(searchTerm.toLowerCase()))
                     );
                     
                     if (typeQuestions.length === 0) return null;
