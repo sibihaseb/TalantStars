@@ -437,6 +437,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         clients.delete(userId);
       }
     });
+
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
+      if (userId) {
+        clients.delete(userId);
+      }
+    });
+  });
+
+  wss.on('error', (error) => {
+    console.error('WebSocket server error:', error);
   });
 
   function broadcastMessage(message: any) {
