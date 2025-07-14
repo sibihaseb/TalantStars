@@ -332,8 +332,152 @@ export default function Onboarding() {
     );
   };
 
+  const renderCustomField = (field: keyof OnboardingFormData, label: string) => {
+    const currentValues = form.watch(field) as string[] || [];
+    
+    return (
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</Label>
+        <div className="flex space-x-2">
+          <Input
+            value={newSkill}
+            onChange={(e) => setNewSkill(e.target.value)}
+            placeholder={`Add ${label.toLowerCase()}...`}
+            className="flex-1"
+          />
+          <Button type="button" onClick={() => addSkill(field)} variant="outline" size="sm">
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        {currentValues.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {currentValues.map((value) => (
+              <Badge key={value} variant="secondary" className="flex items-center gap-1">
+                {value}
+                <X 
+                  className="h-3 w-3 cursor-pointer hover:text-red-500" 
+                  onClick={() => removeSkill(field, value)}
+                />
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderTalentSpecificQuestions = () => {
+    const questions = getTalentSpecificQuestions(watchedTalentType);
+    
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {questions.map((question) => (
+          <div key={question.field} className="space-y-2">
+            {question.type === 'input' && (
+              <>
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {question.label}
+                </Label>
+                <Input
+                  {...form.register(question.field as keyof OnboardingFormData)}
+                  placeholder={question.placeholder}
+                />
+              </>
+            )}
+            {question.type === 'multiSelect' && (
+              renderMultiSelectField(
+                question.field as keyof OnboardingFormData,
+                question.label,
+                question.options,
+                `Select ${question.label.toLowerCase()}...`
+              )
+            )}
+            {question.type === 'custom' && (
+              renderCustomField(question.field as keyof OnboardingFormData, question.label)
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const getMaxSteps = () => {
     return watchedRole === "talent" ? 6 : 4;
+  };
+
+  // Get talent-specific questions based on talent type
+  const getTalentSpecificQuestions = (talentType: string) => {
+    const baseQuestions = [
+      { field: 'languages', label: 'Languages', type: 'multiSelect', options: LANGUAGE_OPTIONS },
+      { field: 'accents', label: 'Accents', type: 'multiSelect', options: ACCENT_OPTIONS },
+      { field: 'unionStatus', label: 'Union Status', type: 'multiSelect', options: UNION_STATUS_OPTIONS },
+      { field: 'skills', label: 'Special Skills', type: 'custom' },
+      { field: 'experiences', label: 'Experience', type: 'custom' },
+      { field: 'awards', label: 'Awards & Recognition', type: 'custom' },
+    ];
+
+    switch (talentType) {
+      case 'actor':
+        return [
+          ...baseQuestions,
+          { field: 'height', label: 'Height', type: 'input', placeholder: '5\'10"' },
+          { field: 'weight', label: 'Weight', type: 'input', placeholder: '150 lbs' },
+          { field: 'eyeColor', label: 'Eye Color', type: 'multiSelect', options: EYE_COLOR_OPTIONS },
+          { field: 'hairColor', label: 'Hair Color', type: 'multiSelect', options: HAIR_COLOR_OPTIONS },
+          { field: 'shoeSize', label: 'Shoe Size', type: 'input', placeholder: '10' },
+          { field: 'bodyStats', label: 'Body Measurements', type: 'input', placeholder: '36-28-38' },
+          { field: 'tattoos', label: 'Tattoos', type: 'input', placeholder: 'None or describe' },
+          { field: 'piercings', label: 'Piercings', type: 'input', placeholder: 'None or describe' },
+          { field: 'scars', label: 'Scars/Marks', type: 'input', placeholder: 'None or describe' },
+          { field: 'stunts', label: 'Stunt Skills', type: 'multiSelect', options: STUNT_OPTIONS },
+          { field: 'activities', label: 'Physical Activities', type: 'multiSelect', options: ACTIVITY_OPTIONS },
+          { field: 'dancingStyles', label: 'Dancing Styles', type: 'multiSelect', options: DANCING_STYLES },
+          { field: 'sportingActivities', label: 'Sports', type: 'custom' },
+          { field: 'drivingLicenses', label: 'Driving Licenses', type: 'multiSelect', options: DRIVING_LICENSES },
+          { field: 'wardrobe', label: 'Wardrobe Sizes', type: 'multiSelect', options: WARDROBE_OPTIONS },
+          { field: 'walkType', label: 'Walk Type', type: 'input', placeholder: 'Runway, casual, etc.' },
+        ];
+      
+      case 'musician':
+        return [
+          ...baseQuestions,
+          { field: 'instruments', label: 'Instruments', type: 'multiSelect', options: INSTRUMENT_OPTIONS },
+          { field: 'genres', label: 'Music Genres', type: 'multiSelect', options: GENRE_OPTIONS },
+          { field: 'vocalRange', label: 'Vocal Range', type: 'multiSelect', options: VOCAL_RANGE_OPTIONS },
+          { field: 'affiliations', label: 'Music Affiliations', type: 'multiSelect', options: AFFILIATION_OPTIONS },
+        ];
+      
+      case 'voice_artist':
+        return [
+          ...baseQuestions,
+          { field: 'vocalRange', label: 'Vocal Range', type: 'multiSelect', options: VOCAL_RANGE_OPTIONS },
+          { field: 'genres', label: 'Voice Genres', type: 'multiSelect', options: GENRE_OPTIONS },
+        ];
+      
+      case 'model':
+        return [
+          ...baseQuestions,
+          { field: 'height', label: 'Height', type: 'input', placeholder: '5\'10"' },
+          { field: 'weight', label: 'Weight', type: 'input', placeholder: '150 lbs' },
+          { field: 'eyeColor', label: 'Eye Color', type: 'multiSelect', options: EYE_COLOR_OPTIONS },
+          { field: 'hairColor', label: 'Hair Color', type: 'multiSelect', options: HAIR_COLOR_OPTIONS },
+          { field: 'shoeSize', label: 'Shoe Size', type: 'input', placeholder: '10' },
+          { field: 'bodyStats', label: 'Body Measurements', type: 'input', placeholder: '36-28-38' },
+          { field: 'tattoos', label: 'Tattoos', type: 'input', placeholder: 'None or describe' },
+          { field: 'piercings', label: 'Piercings', type: 'input', placeholder: 'None or describe' },
+          { field: 'scars', label: 'Scars/Marks', type: 'input', placeholder: 'None or describe' },
+          { field: 'walkType', label: 'Walk Styles', type: 'input', placeholder: 'Runway, fashion, commercial' },
+          { field: 'wardrobe', label: 'Wardrobe Sizes', type: 'multiSelect', options: WARDROBE_OPTIONS },
+          { field: 'dancingStyles', label: 'Dancing Styles', type: 'multiSelect', options: DANCING_STYLES },
+          { field: 'activities', label: 'Physical Activities', type: 'multiSelect', options: ACTIVITY_OPTIONS },
+          { field: 'sportingActivities', label: 'Sports', type: 'custom' },
+          { field: 'drivingLicenses', label: 'Driving Licenses', type: 'multiSelect', options: DRIVING_LICENSES },
+        ];
+      
+      default:
+        return baseQuestions;
+    }
   };
 
   const getStepInfo = (step: number) => {
@@ -922,62 +1066,57 @@ export default function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 4: Skills & Affiliations */}
+              {/* Step 4: Talent-Specific Details */}
               {currentStep === 4 && watchedRole === "talent" && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">Skills & Affiliations</CardTitle>
+                    <CardTitle className="text-2xl">
+                      {watchedTalentType === 'actor' && 'Acting Details'}
+                      {watchedTalentType === 'musician' && 'Music Details'}
+                      {watchedTalentType === 'voice_artist' && 'Voice Details'}
+                      {watchedTalentType === 'model' && 'Modeling Details'}
+                      {!watchedTalentType && 'Talent Details'}
+                    </CardTitle>
                     <p className="text-gray-600 dark:text-gray-400">
-                      Add your professional skills and affiliations
+                      {watchedTalentType === 'actor' && 'Add your acting experience, physical attributes, and special skills'}
+                      {watchedTalentType === 'musician' && 'Add your musical instruments, genres, and performance experience'}
+                      {watchedTalentType === 'voice_artist' && 'Add your vocal range, experience, and voice skills'}
+                      {watchedTalentType === 'model' && 'Add your physical attributes, modeling experience, and special skills'}
+                      {!watchedTalentType && 'Add your professional skills and experience'}
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                      {renderMultiSelectField("affiliations", "Affiliations", AFFILIATION_OPTIONS, "Select affiliations...")}
-                      {renderMultiSelectField("stunts", "Stunts", STUNT_OPTIONS, "Select stunts...")}
-                      {renderMultiSelectField("activities", "Activities", ACTIVITY_OPTIONS, "Select activities...")}
-                      {renderMultiSelectField("dancingStyles", "Dancing Styles", DANCING_STYLES, "Select dancing styles...")}
-                      {renderMultiSelectField("drivingLicenses", "Driving Licenses", DRIVING_LICENSES, "Select driving licenses...")}
-                    </div>
+                    {renderTalentSpecificQuestions()}
                   </CardContent>
                 </Card>
               )}
 
-              {/* Step 5: Additional Details */}
+              {/* Step 5: Additional Information */}
               {currentStep === 5 && watchedRole === "talent" && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">Additional Details</CardTitle>
+                    <CardTitle className="text-2xl">Additional Information</CardTitle>
                     <p className="text-gray-600 dark:text-gray-400">
-                      Add wardrobe and physical attributes
+                      Add any additional details about your talent profile
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-4">
-                      {renderMultiSelectField("wardrobe", "Wardrobe", WARDROBE_OPTIONS, "Select wardrobe...")}
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="tattoos">Tattoos</Label>
-                          <Input
-                            {...form.register("tattoos")}
-                            placeholder="Description of tattoos"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="piercings">Piercings</Label>
-                          <Input
-                            {...form.register("piercings")}
-                            placeholder="Description of piercings"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="scars">Scars</Label>
-                          <Input
-                            {...form.register("scars")}
-                            placeholder="Description of scars"
-                          />
-                        </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="website">Website/Portfolio</Label>
+                        <Input
+                          {...form.register("website")}
+                          placeholder="https://yourwebsite.com"
+                          type="url"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phoneNumber">Phone Number</Label>
+                        <Input
+                          {...form.register("phoneNumber")}
+                          placeholder="+1 (555) 123-4567"
+                          type="tel"
+                        />
                       </div>
                     </div>
                   </CardContent>
