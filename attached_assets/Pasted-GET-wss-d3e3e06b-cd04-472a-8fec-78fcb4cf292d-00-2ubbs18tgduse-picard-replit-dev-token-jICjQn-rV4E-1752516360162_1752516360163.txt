@@ -1,0 +1,101 @@
+GET
+wss://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/?token=jICjQn-rV4Em
+NS_ERROR_WEBSOCKET_CONNECTION_REFUSED
+
+Firefox can’t establish a connection to the server at wss://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/?token=jICjQn-rV4Em. client:536:19
+Uncaught (in promise) DOMException: An invalid or illegal string was specified
+    setupWebSocket client:536
+    fallback client:509
+    setupWebSocket client:555
+    setupWebSocket client:552
+    <anonymous> client:531
+client:536
+    setupWebSocket client:536
+    fallback client:509
+    setupWebSocket client:555
+    (Async: EventListener.handleEvent)
+    setupWebSocket client:552
+    <anonymous> client:531
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools react-dom.development.js:29895:17
+XHRGET
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/auth/user
+[HTTP/1.1 401 Unauthorized 124ms]
+
+XHRGET
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/auth/user
+[HTTP/1.1 401 Unauthorized 166ms]
+
+XHRGET
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/auth/user
+[HTTP/1.1 401 Unauthorized 165ms]
+
+Uncaught Error: Rendered fewer hooks than expected. This may be caused by an accidental early return statement.
+    React 11
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+    js scheduler.development.js:571
+    js scheduler.development.js:633
+    __require chunk-WOOG5QLI.js:12
+    js index.js:6
+    __require chunk-WOOG5QLI.js:12
+    React 2
+    __require chunk-WOOG5QLI.js:12
+    js React
+    __require chunk-WOOG5QLI.js:12
+    js React
+    __require chunk-WOOG5QLI.js:12
+    <anonymous> react-dom_client.js:38
+react-dom.development.js:15562:11
+Uncaught Error: Rendered fewer hooks than expected. This may be caused by an accidental early return statement.
+    React 12
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+    js scheduler.development.js:571
+    js scheduler.development.js:633
+    __require chunk-WOOG5QLI.js:12
+    js index.js:6
+    __require chunk-WOOG5QLI.js:12
+    React 2
+    __require chunk-WOOG5QLI.js:12
+    js React
+    __require chunk-WOOG5QLI.js:12
+    js React
+    __require chunk-WOOG5QLI.js:12
+    <anonymous> react-dom_client.js:38
+react-dom.development.js:15562:11
+The above error occurred in the <BrowseJobs> component:
+
+BrowseJobs@https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/src/pages/BrowseJobs.tsx:57:48
+Route@https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=b6980a59:323:13
+Switch@https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=b6980a59:379:14
+Router@https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/src/App.tsx?v=rTPMaxdtbHmsnzg3TK4vQ:39:48
+Provider@https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=b6980a59:38:47
+TooltipProvider@https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=b6980a59:67:7
+QueryClientProvider@https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=b6980a59:2804:27
+App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries. react-dom.development.js:18704:15
+Uncaught Error: Rendered fewer hooks than expected. This may be caused by an accidental early return statement.
+    React 9
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+    js scheduler.development.js:571
+    js scheduler.development.js:633
+    __require chunk-WOOG5QLI.js:12
+    js index.js:6
+    __require chunk-WOOG5QLI.js:12
+    React 2
+    __require chunk-WOOG5QLI.js:12
+    js React
+    __require chunk-WOOG5QLI.js:12
+    js React
+    __require chunk-WOOG5QLI.js:12
+    <anonymous> react-dom_client.js:38
+react-dom.development.js:15562:11
+
+​
+

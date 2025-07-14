@@ -102,6 +102,25 @@ export default function BrowseJobs() {
     }
   };
 
+  // Fetch jobs with filters (must be called before any conditional returns)
+  const { data: jobs = [], isLoading: isLoadingJobs, error } = useQuery({
+    queryKey: ["/api/jobs", searchFilters],
+    queryFn: async ({ queryKey }) => {
+      const filters = queryKey[1] as typeof searchFilters;
+      const params = new URLSearchParams();
+      
+      if (filters.talentType && filters.talentType !== "all") params.append("talentType", filters.talentType);
+      if (filters.location) params.append("location", filters.location);
+      if (filters.status && filters.status !== "all") params.append("status", filters.status);
+      
+      const response = await fetch(`/api/jobs?${params.toString()}`);
+      if (!response.ok) throw new Error(`${response.status}: ${response.statusText}`);
+      return response.json();
+    },
+    enabled: isAuthenticated,
+    retry: false,
+  });
+
   // Redirect if not authenticated
   if (!isLoading && !isAuthenticated) {
     return (
@@ -129,25 +148,6 @@ export default function BrowseJobs() {
       </ThemeProvider>
     );
   }
-
-  // Fetch jobs with filters
-  const { data: jobs = [], isLoading: isLoadingJobs, error } = useQuery({
-    queryKey: ["/api/jobs", searchFilters],
-    queryFn: async ({ queryKey }) => {
-      const filters = queryKey[1] as typeof searchFilters;
-      const params = new URLSearchParams();
-      
-      if (filters.talentType && filters.talentType !== "all") params.append("talentType", filters.talentType);
-      if (filters.location) params.append("location", filters.location);
-      if (filters.status && filters.status !== "all") params.append("status", filters.status);
-      
-      const response = await fetch(`/api/jobs?${params.toString()}`);
-      if (!response.ok) throw new Error(`${response.status}: ${response.statusText}`);
-      return response.json();
-    },
-    enabled: isAuthenticated,
-    retry: false,
-  });
 
   const getTalentIcon = (talentType: string) => {
     switch (talentType) {
