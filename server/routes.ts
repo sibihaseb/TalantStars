@@ -535,25 +535,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/admin/jobs', isAuthenticated, async (req: any, res) => {
+    try {
+      console.log("Creating job:", req.body);
+      const job = await storage.createJob(req.body);
+      res.json(job);
+    } catch (error) {
+      console.error("Error creating job:", error);
+      res.status(500).json({ message: "Failed to create job", error: error.message });
+    }
+  });
+
   app.put('/api/admin/jobs/:jobId', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("Updating job:", req.params.jobId, req.body);
       const jobId = parseInt(req.params.jobId);
       const job = await storage.updateJob(jobId, req.body);
       res.json(job);
     } catch (error) {
       console.error("Error updating job:", error);
-      res.status(500).json({ message: "Failed to update job" });
+      res.status(500).json({ message: "Failed to update job", error: error.message });
     }
   });
 
   app.delete('/api/admin/jobs/:jobId', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("Deleting job:", req.params.jobId);
       const jobId = parseInt(req.params.jobId);
       await storage.deleteJob(jobId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting job:", error);
-      res.status(500).json({ message: "Failed to delete job" });
+      res.status(500).json({ message: "Failed to delete job", error: error.message });
     }
   });
 

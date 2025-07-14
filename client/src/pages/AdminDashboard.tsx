@@ -152,9 +152,11 @@ export default function AdminDashboard() {
   const [isEditingTier, setIsEditingTier] = useState(false);
   const [isEditingQuestion, setIsEditingQuestion] = useState(false);
   const [isEditingSetting, setIsEditingSetting] = useState(false);
+  const [isEditingJob, setIsEditingJob] = useState(false);
   const [editingTier, setEditingTier] = useState<PricingTier | null>(null);
   const [editingQuestion, setEditingQuestion] = useState<ProfileQuestion | null>(null);
   const [editingSetting, setEditingSetting] = useState<SystemSetting | null>(null);
+  const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
 
@@ -356,25 +358,64 @@ export default function AdminDashboard() {
     },
   });
 
-  const updateJobMutation = useMutation({
-    mutationFn: async ({ jobId, data }: { jobId: number; data: Partial<Job> }) => {
-      const response = await apiRequest("PUT", `/api/admin/jobs/${jobId}`, data);
+  const createJobMutation = useMutation({
+    mutationFn: async (job: Partial<Job>) => {
+      const response = await apiRequest("POST", "/api/admin/jobs", job);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create job");
+      }
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/jobs"] });
+      setIsEditingJob(false);
+      setEditingJob(null);
+      toast({ title: "Success", description: "Job created successfully" });
+    },
+    onError: (error: Error) => {
+      console.error("Error creating job:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const updateJobMutation = useMutation({
+    mutationFn: async ({ jobId, data }: { jobId: number; data: Partial<Job> }) => {
+      const response = await apiRequest("PUT", `/api/admin/jobs/${jobId}`, data);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update job");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/jobs"] });
+      setIsEditingJob(false);
+      setEditingJob(null);
       toast({ title: "Success", description: "Job updated successfully" });
+    },
+    onError: (error: Error) => {
+      console.error("Error updating job:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
   const deleteJobMutation = useMutation({
     mutationFn: async (jobId: number) => {
       const response = await apiRequest("DELETE", `/api/admin/jobs/${jobId}`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete job");
+      }
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/jobs"] });
       toast({ title: "Success", description: "Job deleted successfully" });
+    },
+    onError: (error: Error) => {
+      console.error("Error deleting job:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
@@ -439,6 +480,28 @@ export default function AdminDashboard() {
     };
     console.log("Saving setting:", settingData);
     saveSystemSettingMutation.mutate(settingData);
+  };
+
+  const handleSaveJob = (formData: FormData) => {
+    const jobData = {
+      ...(editingJob?.id && { id: editingJob.id }),
+      title: formData.get("title") as string,
+      description: formData.get("description") as string,
+      talentType: formData.get("talentType") as string,
+      location: formData.get("location") as string,
+      budget: parseFloat(formData.get("budget") as string),
+      projectDate: formData.get("projectDate") as string,
+      requirements: formData.get("requirements") as string,
+      status: formData.get("status") as string,
+      isPublic: formData.get("isPublic") === "on",
+      userId: user?.id || "admin",
+    };
+    console.log("Saving job:", jobData);
+    if (editingJob?.id) {
+      updateJobMutation.mutate({ jobId: editingJob.id, data: jobData });
+    } else {
+      createJobMutation.mutate(jobData);
+    }
   };
 
   return (
@@ -760,7 +823,10 @@ export default function AdminDashboard() {
                     <Briefcase className="w-5 h-5" />
                     Job Management
                   </span>
-                  <Button>
+                  <Button onClick={() => {
+                    setEditingJob(null);
+                    setIsEditingJob(true);
+                  }}>
                     <Plus className="w-4 h-4 mr-2" />
                     Create Job
                   </Button>
@@ -806,7 +872,14 @@ export default function AdminDashboard() {
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
-                              <Button size="sm" variant="outline">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingJob(job);
+                                  setIsEditingJob(true);
+                                }}
+                              >
                                 <Edit className="w-4 h-4" />
                               </Button>
                               <Button 
@@ -825,6 +898,120 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Job Create/Edit Dialog */}
+            <Dialog open={isEditingJob} onOpenChange={setIsEditingJob}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingJob ? 'Edit Job' : 'Create Job'}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSaveJob(new FormData(e.currentTarget));
+                }}>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="title">Job Title</Label>
+                      <Input
+                        name="title"
+                        defaultValue={editingJob?.title || ""}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        name="description"
+                        defaultValue={editingJob?.description || ""}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="talentType">Talent Type</Label>
+                      <select 
+                        name="talentType" 
+                        defaultValue={editingJob?.talentType || ""}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        required
+                      >
+                        <option value="">Select talent type</option>
+                        <option value="actor">Actor</option>
+                        <option value="musician">Musician</option>
+                        <option value="voice_artist">Voice Artist</option>
+                        <option value="model">Model</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="location">Location</Label>
+                      <Input
+                        name="location"
+                        defaultValue={editingJob?.location || ""}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="budget">Budget</Label>
+                      <Input
+                        type="number"
+                        name="budget"
+                        defaultValue={editingJob?.budget || ""}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="projectDate">Project Date</Label>
+                      <Input
+                        type="date"
+                        name="projectDate"
+                        defaultValue={editingJob?.projectDate || ""}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="requirements">Requirements</Label>
+                      <Textarea
+                        name="requirements"
+                        defaultValue={editingJob?.requirements || ""}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="status">Status</Label>
+                      <select 
+                        name="status" 
+                        defaultValue={editingJob?.status || "open"}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        required
+                      >
+                        <option value="open">Open</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        name="isPublic"
+                        defaultChecked={editingJob?.isPublic}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      <Label htmlFor="isPublic">Public Job</Label>
+                    </div>
+                  </div>
+                  <div className="flex justify-end space-x-2 mt-6">
+                    <Button type="button" variant="outline" onClick={() => setIsEditingJob(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit">
+                      {editingJob ? 'Update Job' : 'Create Job'}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="pricing" className="space-y-6">
