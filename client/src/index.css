@@ -1,0 +1,344 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(210, 40%, 98%);
+  --foreground: hsl(222.2, 84%, 4.9%);
+  --muted: hsl(210, 40%, 96%);
+  --muted-foreground: hsl(215.4, 16.3%, 46.9%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(222.2, 84%, 4.9%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(222.2, 84%, 4.9%);
+  --border: hsl(214.3, 31.8%, 91.4%);
+  --input: hsl(214.3, 31.8%, 91.4%);
+  --primary: hsl(221.2, 83.2%, 53.3%);
+  --primary-foreground: hsl(210, 40%, 98%);
+  --secondary: hsl(210, 40%, 96%);
+  --secondary-foreground: hsl(222.2, 84%, 4.9%);
+  --accent: hsl(210, 40%, 96%);
+  --accent-foreground: hsl(222.2, 84%, 4.9%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(210, 40%, 98%);
+  --ring: hsl(221.2, 83.2%, 53.3%);
+  --radius: 0.75rem;
+  
+  /* Entertainment platform specific colors */
+  --entertainment-blue: hsl(221.2, 83.2%, 53.3%);
+  --entertainment-purple: hsl(262.1, 83.3%, 57.8%);
+  --entertainment-emerald: hsl(142.1, 76.2%, 36.3%);
+  --entertainment-amber: hsl(32.6, 94.6%, 43.7%);
+  --entertainment-yellow: hsl(47.9, 95.8%, 53.1%);
+  
+  /* Glass morphism effect */
+  --glass-bg: hsla(0, 0%, 100%, 0.1);
+  --glass-border: hsla(0, 0%, 100%, 0.2);
+  --glass-backdrop-blur: blur(10px);
+}
+
+.dark {
+  --background: hsl(222.2, 84%, 4.9%);
+  --foreground: hsl(210, 40%, 98%);
+  --muted: hsl(217.2, 32.6%, 17.5%);
+  --muted-foreground: hsl(215, 20.2%, 65.1%);
+  --popover: hsl(222.2, 84%, 4.9%);
+  --popover-foreground: hsl(210, 40%, 98%);
+  --card: hsl(222.2, 84%, 4.9%);
+  --card-foreground: hsl(210, 40%, 98%);
+  --border: hsl(217.2, 32.6%, 17.5%);
+  --input: hsl(217.2, 32.6%, 17.5%);
+  --primary: hsl(217.2, 91.2%, 59.8%);
+  --primary-foreground: hsl(222.2, 84%, 4.9%);
+  --secondary: hsl(217.2, 32.6%, 17.5%);
+  --secondary-foreground: hsl(210, 40%, 98%);
+  --accent: hsl(217.2, 32.6%, 17.5%);
+  --accent-foreground: hsl(210, 40%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(210, 40%, 98%);
+  --ring: hsl(217.2, 91.2%, 59.8%);
+  
+  /* Dark mode glass morphism */
+  --glass-bg: hsla(222.2, 84%, 4.9%, 0.8);
+  --glass-border: hsla(210, 40%, 98%, 0.1);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+}
+
+@layer components {
+  /* Glass morphism utility classes */
+  .glass-morphism {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-backdrop-blur);
+    border: 1px solid var(--glass-border);
+  }
+  
+  .glass-card {
+    @apply glass-morphism rounded-xl shadow-lg;
+  }
+
+  /* Gradient backgrounds */
+  .gradient-bg-primary {
+    background: linear-gradient(135deg, var(--entertainment-blue) 0%, var(--entertainment-purple) 100%);
+  }
+  
+  .gradient-bg-success {
+    background: linear-gradient(135deg, var(--entertainment-emerald) 0%, hsl(142.1, 76.2%, 46.3%) 100%);
+  }
+  
+  .gradient-bg-warning {
+    background: linear-gradient(135deg, var(--entertainment-amber) 0%, var(--entertainment-yellow) 100%);
+  }
+
+  /* Hero gradient for landing */
+  .hero-gradient {
+    background: linear-gradient(135deg, hsl(222.2, 84%, 4.9%) 0%, var(--entertainment-blue) 50%, var(--entertainment-emerald) 100%);
+  }
+
+  /* Sophisticated card hover effects */
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+    transform: translateY(0);
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px hsla(222.2, 84%, 4.9%, 0.1);
+  }
+
+  .dark .card-hover:hover {
+    box-shadow: 0 20px 40px hsla(0, 0%, 0%, 0.3);
+  }
+
+  /* Talent card specific styling */
+  .talent-card {
+    @apply glass-card card-hover;
+  }
+
+  /* Elegant animations */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from { 
+      opacity: 0; 
+      transform: translateY(20px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+  
+  @keyframes slideUp {
+    from { 
+      opacity: 0; 
+      transform: translateY(30px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  /* Profile verification badge */
+  .profile-verified {
+    position: relative;
+  }
+  
+  .profile-verified::after {
+    content: '✓';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: var(--entertainment-emerald);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    border: 2px solid white;
+  }
+
+  /* Floating label animation */
+  .floating-label {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  .floating-label.active {
+    transform: translateY(-24px) scale(0.85);
+    color: var(--entertainment-blue);
+  }
+
+  /* Enhanced button styles */
+  .btn-primary-gradient {
+    @apply bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+  
+  .btn-success-gradient {
+    @apply bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+  
+  .btn-warning-gradient {
+    @apply bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  /* Media player enhancements */
+  .media-container {
+    @apply relative overflow-hidden rounded-xl;
+  }
+  
+  .media-overlay {
+    @apply absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center;
+  }
+
+  /* Enhanced form styling */
+  .form-elegant input:focus,
+  .form-elegant textarea:focus,
+  .form-elegant select:focus {
+    @apply ring-2 ring-blue-500/20 border-blue-500;
+  }
+
+  /* Loading skeleton improvements */
+  .skeleton-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Dashboard grid enhancements */
+  .dashboard-grid {
+    @apply grid gap-6;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  /* Message thread styling */
+  .message-thread {
+    @apply space-y-4 max-h-96 overflow-y-auto;
+    scrollbar-width: thin;
+  }
+
+  /* Search filter enhancements */
+  .search-filters {
+    @apply space-y-4 p-6 glass-card;
+  }
+
+  /* Responsive text utilities */
+  .text-responsive-xl {
+    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl;
+  }
+  
+  .text-responsive-lg {
+    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl;
+  }
+  
+  .text-responsive-base {
+    @apply text-base sm:text-lg md:text-xl;
+  }
+}
+
+@layer utilities {
+  /* Custom utility classes */
+  .text-gradient-primary {
+    background: linear-gradient(135deg, var(--entertainment-blue), var(--entertainment-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .backdrop-blur-elegant {
+    backdrop-filter: blur(20px) saturate(180%);
+  }
+  
+  /* Safe area handling for mobile */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Focus visible improvements */
+  .focus-elegant:focus-visible {
+    @apply outline-none ring-2 ring-blue-500/50 ring-offset-2 ring-offset-background;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    @apply text-black bg-white;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-up,
+  .card-hover {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .glass-morphism {
+    background: var(--background);
+    border: 2px solid var(--border);
+    backdrop-filter: none;
+  }
+}
