@@ -1935,11 +1935,11 @@ export default function AdminDashboard() {
                               required
                             >
                               <option value="">Select talent type</option>
+                              <option value="profile">Profile (General)</option>
                               <option value="actor">Actor</option>
                               <option value="musician">Musician</option>
                               <option value="voice_artist">Voice Artist</option>
                               <option value="model">Model</option>
-                              <option value="all">All Types</option>
                             </select>
                           </div>
                           <div>
@@ -2054,6 +2054,7 @@ export default function AdminDashboard() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="profile">Profile (General)</SelectItem>
                         <SelectItem value="actor">Actor</SelectItem>
                         <SelectItem value="musician">Musician</SelectItem>
                         <SelectItem value="voice_artist">Voice Artist</SelectItem>
@@ -2063,7 +2064,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Questions organized by talent type */}
-                  {['actor', 'musician', 'voice_artist', 'model', 'all'].map(talentType => {
+                  {['profile', 'actor', 'musician', 'voice_artist', 'model'].map(talentType => {
                     const typeQuestions = profileQuestions.filter(q => 
                       q.talentType === talentType && 
                       (filterRole === 'all' || filterRole === talentType) &&
@@ -2075,11 +2076,11 @@ export default function AdminDashboard() {
                     return (
                       <div key={talentType} className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
                         <h3 className="font-semibold mb-4 text-lg flex items-center gap-2">
+                          {talentType === 'profile' && <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">Profile Questions</span>}
                           {talentType === 'actor' && <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Actor Questions</span>}
                           {talentType === 'musician' && <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">Musician Questions</span>}
                           {talentType === 'voice_artist' && <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">Voice Artist Questions</span>}
                           {talentType === 'model' && <span className="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm">Model Questions</span>}
-                          {talentType === 'all' && <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">General Questions</span>}
                           <span className="text-sm text-gray-600">({typeQuestions.length})</span>
                         </h3>
                         
