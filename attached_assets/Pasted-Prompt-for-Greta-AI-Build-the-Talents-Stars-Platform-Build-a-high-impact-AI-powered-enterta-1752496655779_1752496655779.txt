@@ -1,0 +1,134 @@
+Prompt for Greta AI — Build the “Talents & Stars” Platform
+
+Build a high-impact, AI-powered, entertainment industry platform called “Talents & Stars” — a web application designed for Actors, Voice Over Artists, Musicians, Models, and other entertainment professionals, as well as Talent Managers and Producers. The platform should feature dynamic user experiences, robust media management, real-time communication, AI matching, and advanced account controls, powered by secure infrastructure and external integrations (AWS S3/Wasabi, Zoom, OpenAI, Resend.com).
+
+⸻
+
+🧩 CORE USER ROLES & EXPERIENCES
+	1.	TALENT (Actor, Musician, VO Artist, Model, etc.):
+	•	Dynamic onboarding based on talent type.
+	•	Actors: Height, weight, eye/hair color, union status, shoe size, reel links, accents, languages.
+	•	Musicians: Instruments, genres, past gigs, music videos, audio uploads, labels/representation.
+	•	VO Artists: Vocal range, tone examples, demo reels, studio setup.
+	•	Models: Body stats, walk type, editorial/print/runway experience.
+	•	Upload media: Images, audio, video reels (stored via Wasabi/AWS S3).
+	•	Link external videos (YouTube, Vimeo, etc.)
+	•	Availability settings: Toggle (Available / Busy), or use calendar-based availability.
+	•	Rates: Daily / Weekly / Project rates based on talent type.
+	•	Add bio, awards, resumes, affiliations (unions, guilds), and past credits.
+	•	Verified talent badge system (Admin-controlled, blue/green checkmarks).
+	•	AI Profile Enhancer using OpenAI (auto-generate bio, optimize tags, clean up resume).
+	•	Talent can manage their own account even when also represented by a manager.
+	2.	TALENT MANAGER:
+	•	Add, manage, and edit profiles for their talents.
+	•	Group or 1:1 real-time chat with their talents.
+	•	Set availability, update rates, post reels/images/audio for their talents.
+	•	Accept or decline management requests from independent talents.
+	•	Receive all talent inquiry notifications from interested producers or clients.
+	•	View analytics for each talent’s profile views, inquiries, and engagement.
+	3.	PRODUCER / TALENT SEEKER:
+	•	View limited public talent details before account creation.
+	•	Once registered: Full access to talent profiles based on permission.
+	•	Filter and search: By talent type, location, availability, rates, keywords, media type.
+	•	Request meetings (Zoom, Google Meet, Teams, etc. integrations).
+	•	Post gigs, projects, or casting calls (public/private).
+	•	Automatic AI-powered matching engine (finds best matches based on criteria).
+	•	Save favorite talents or create project folders.
+
+⸻
+
+🛠️ TECHNICAL FEATURES & INTEGRATIONS
+	1.	Media Upload & Management:
+	•	Upload videos, images, audio to Wasabi/AWS S3.
+	•	Embedded support for YouTube/Vimeo links.
+	•	Built-in modern media viewers:
+	•	Video player with scrub bar, fullscreen, HD toggle, captions.
+	•	Image gallery slider (fullscreen capable, thumbnail nav).
+	•	Audio player (track preview, waveform option).
+	2.	Real-Time Communication:
+	•	Built-in messaging (1:1, group, broadcast).
+	•	Optional video/audio chat integrations with Zoom, Teams, Google Meet.
+	3.	Monetization & Upgrades:
+	•	Tiered pricing system (Admin-defined):
+	•	Free, Pro, Premium, Enterprise.
+	•	Tiers unlock features like advanced media hosting, analytics, visibility.
+	•	Stripe or Paddle integration for billing.
+	•	Admin can define which features are accessible by plan.
+	4.	Job/Gig Board:
+	•	Producers/companies can post jobs with filters (location, talent type, compensation, project date).
+	•	Talents are notified if they match.
+	•	Talent can apply or respond with media samples.
+	5.	Security & Admin Control:
+	•	End-to-end encrypted chat.
+	•	Account verification workflows.
+	•	Admin dashboard:
+	•	Manage users, media storage, site-wide announcements.
+	•	Control visibility of privacy policy, terms, pricing pages.
+	•	Approve verification badges.
+	•	Set role permissions.
+	•	Moderate job posts, messaging, and profiles.
+	6.	AI & Automation:
+	•	OpenAI integration:
+	•	Smart tags and search optimization for talent profiles.
+	•	AI assistant for writing bios or job descriptions.
+	•	GPT-generated email replies or profile summaries.
+	•	AI Matching Engine for gigs & talent discovery.
+	7.	Email/Notifications:
+	•	Resend.com integration for robust email communications (alerts, confirmations, newsletters).
+	•	SMS/Push (optional via Twilio or similar).
+
+⸻
+
+💡 USER EXPERIENCE ADDITIONS
+	•	Public homepage with:
+	•	Featured talents (blurred until sign-up).
+	•	Testimonials, video highlights, and platform walkthrough.
+	•	Talent categories and quick filters.
+	•	CTA: “Find Talent” / “Join as Talent” / “Post a Gig.”
+	•	Auth System:
+	•	Login, Signup (Google, Apple, Facebook login optional).
+	•	Role selection during signup (Talent, Manager, Producer).
+	•	Multi-factor authentication for security.
+	•	Responsive Design:
+	•	Fully responsive for mobile, tablet, desktop.
+	•	Optimized for high-speed browsing and streaming.
+	•	Analytics Dashboard:
+	•	Talents: Views, gig applications, profile performance.
+	•	Managers: Talent performance summaries.
+	•	Producers: Saved talents, project response stats.
+	•	Referral System (optional):
+	•	Invite friends for bonus features or extended access.
+
+⸻
+
+🎨 DESIGN
+	•	Clean, cinematic UI.
+	•	Dark + Light modes.
+	•	Personalized dashboards per role.
+	•	Elegant landing page:
+	•	Large video hero banner or carousel
+	•	3-column benefit layout (For Talents, Managers, Producers)
+	•	Testimonials or logos of productions using the platform
+	•	Clear buttons for “Sign Up”, “Log In”, “Explore Talent”
+
+⸻
+
+🔗 INTEGRATIONS
+	•	Wasabi or AWS S3 for media hosting
+	•	Resend.com for transactional emails
+	•	Zoom, Google Meet, Teams for meetings
+	•	OpenAI (bio generator, profile optimizer, smart matching)
+	•	Stripe/Paddle for billing
+	•	Future: Twilio, Zapier, Calendly, Notion integration for calendars/tasks
+
+⸻
+
+✅ FINAL INSTRUCTIONS TO AI
+
+Make this project:
+	•	Modular and scalable
+	•	Highly secure and optimized
+	•	AI-enhanced
+	•	Mobile responsive
+	•	Multi-role friendly
+	•	Easy to extend to future talent categories (e.g., Dancers, Comedians, etc.)
