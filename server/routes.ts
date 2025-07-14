@@ -43,7 +43,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User ID is required" });
       }
       
-      const profileData = insertUserProfileSchema.parse({ ...req.body, userId });
+      // Add userId to the request body before validation
+      const dataWithUserId = { ...req.body, userId };
+      console.log("Data with userId:", dataWithUserId);
+      
+      const profileData = insertUserProfileSchema.parse(dataWithUserId);
       console.log("Parsed profile data:", profileData);
       
       const profile = await storage.createUserProfile(profileData);

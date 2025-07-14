@@ -81,7 +81,7 @@ const onboardingSchema = insertUserProfileSchema.extend({
   dancingStyles: z.array(z.string()).optional(),
   sportingActivities: z.array(z.string()).optional(),
   drivingLicenses: z.array(z.string()).optional(),
-});
+}).omit({ userId: true }); // Remove userId from client-side validation since it's added server-side
 
 type OnboardingFormData = z.infer<typeof onboardingSchema>;
 
@@ -1138,46 +1138,33 @@ export default function Onboarding() {
                       console.log("Max steps:", getMaxSteps());
                       console.log("Form values:", form.getValues());
                       
-                      // Get form values and clean them
+                      // Get form values and validate
                       const formValues = form.getValues();
                       console.log("Raw form values:", formValues);
                       
-                      // Test validation directly with schema
-                      try {
-                        const validationResult = onboardingSchema.safeParse(formValues);
-                        console.log("Direct schema validation result:", validationResult);
-                        
-                        if (!validationResult.success) {
-                          console.log("Schema validation errors:", validationResult.error.issues);
-                          
-                          // Show first validation error
-                          const firstError = validationResult.error.issues[0];
-                          const fieldName = firstError.path.join('.');
-                          toast({
-                            title: "Form Validation Error",
-                            description: `${fieldName}: ${firstError.message}`,
-                            variant: "destructive",
-                          });
-                          
-                          // Log all validation errors for debugging
-                          console.log("All validation errors:");
-                          validationResult.error.issues.forEach((issue, index) => {
-                            console.log(`${index + 1}. ${issue.path.join('.')}: ${issue.message}`);
-                          });
-                          return;
-                        }
-                      } catch (error) {
-                        console.error("Schema validation error:", error);
+                      // Validate required fields for final submission
+                      const requiredFields = ['displayName', 'bio', 'location'];
+                      const missingFields = requiredFields.filter(field => {
+                        const value = formValues[field];
+                        return !value || (typeof value === 'string' && value.trim().length === 0);
+                      });
+                      
+                      // Check bio length
+                      if (formValues.bio && formValues.bio.length < 10) {
+                        missingFields.push('bio (minimum 10 characters)');
+                      }
+                      
+                      if (missingFields.length > 0) {
                         toast({
-                          title: "Validation Error",
-                          description: "There was an error validating your form data",
+                          title: "Required Fields Missing",
+                          description: `Please fill out: ${missingFields.join(', ')}`,
                           variant: "destructive",
                         });
                         return;
                       }
                       
-                      // If validation passes, submit the form
-                      form.handleSubmit(onSubmit)();
+                      console.log("Form validation passed, submitting...");
+                      createProfileMutation.mutate(formValues);
                     }}
                   >
                     <span>
