@@ -1014,8 +1014,12 @@ export default function Onboarding() {
                     type="button"
                     disabled={createProfileMutation.isPending}
                     className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
                       console.log("Submit button clicked");
+                      console.log("Current step:", currentStep);
+                      console.log("Max steps:", getMaxSteps());
+                      console.log("Form values:", form.getValues());
                       form.handleSubmit(onSubmit)();
                     }}
                   >
