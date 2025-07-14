@@ -125,25 +125,44 @@ export default function BrowseJobs() {
   if (!isLoading && !isAuthenticated) {
     return (
       <ThemeProvider>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900 flex items-center justify-center">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle className="text-center text-gray-900 dark:text-white">
-                Authentication Required
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Please log in to browse jobs
-              </p>
-              <Button 
-                onClick={() => window.location.href = "/api/login"}
-                className="w-full"
-              >
-                Log In
-              </Button>
-            </CardContent>
-          </Card>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
+          <Header />
+          <div className="flex items-center justify-center min-h-[80vh] px-4">
+            <Card className="w-full max-w-lg shadow-xl border-0">
+              <CardHeader className="text-center pb-2">
+                <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-4">
+                  <Briefcase className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  Browse Job Opportunities
+                </CardTitle>
+                <p className="text-gray-600 dark:text-gray-300 text-sm">
+                  Sign in to access exclusive job listings and apply to opportunities
+                </p>
+              </CardHeader>
+              <CardContent className="text-center pt-4">
+                <div className="space-y-4">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">What you'll get access to:</h4>
+                    <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                      <li>• Browse all available job opportunities</li>
+                      <li>• Apply to positions that match your skills</li>
+                      <li>• Get notifications about new opportunities</li>
+                      <li>• Connect with producers and casting directors</li>
+                    </ul>
+                  </div>
+                  <Button 
+                    onClick={() => window.location.href = "/api/login"}
+                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                  >
+                    <Search className="h-4 w-4 mr-2" />
+                    Sign In to Browse Jobs
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <Footer />
         </div>
       </ThemeProvider>
     );
