@@ -145,6 +145,16 @@ export const availabilityCalendar = pgTable("availability_calendar", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Skill endorsement system
+export const skillEndorsements = pgTable("skill_endorsements", {
+  id: serial("id").primaryKey(),
+  endorserId: varchar("endorser_id").references(() => users.id).notNull(),
+  endorsedUserId: varchar("endorsed_user_id").references(() => users.id).notNull(),
+  skill: varchar("skill").notNull(),
+  message: text("message"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Job postings
 export const jobs = pgTable("jobs", {
   id: serial("id").primaryKey(),
@@ -526,6 +536,11 @@ export const insertAvailabilityCalendarSchema = createInsertSchema(availabilityC
   updatedAt: true,
 });
 
+export const insertSkillEndorsementSchema = createInsertSchema(skillEndorsements).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -561,3 +576,5 @@ export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type AvailabilityCalendar = typeof availabilityCalendar.$inferSelect;
 export type InsertAvailabilityCalendar = z.infer<typeof insertAvailabilityCalendarSchema>;
+export type SkillEndorsement = typeof skillEndorsements.$inferSelect;
+export type InsertSkillEndorsement = z.infer<typeof insertSkillEndorsementSchema>;

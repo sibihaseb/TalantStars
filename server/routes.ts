@@ -12,7 +12,8 @@ import {
   insertMessageSchema,
   insertMeetingSchema,
   insertNotificationSchema,
-  insertUserPermissionSchema
+  insertUserPermissionSchema,
+  insertSkillEndorsementSchema
 } from "@shared/schema";
 import { z } from "zod";
 import { requestPasswordReset, validatePasswordResetToken, resetPassword } from "./passwordUtils";
@@ -928,6 +929,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error enhancing profile:", error);
       res.status(500).json({ message: "Failed to enhance profile" });
+    }
+  });
+
+  // Skill Endorsement routes
+  app.post('/api/skill-endorsements', isAuthenticated, async (req: any, res) => {
+    try {
+      const endorserId = req.user.claims.sub;
+      const { endorsedUserId, skill, message } = req.body;
+      
+      // Validate input
+      const validatedData = insertSkillEndorsementSchema.parse({
+        endorserId,
+        endorsedUserId,
+        skill,
+        message
+      });
+      
+      // Check if user has already endorsed this skill
+      const hasEndorsed = await storage.hasUserEndorsedSkill(endorserId, endorsedUserId, skill);
+      if (hasEndorsed) {
+        return res.status(400).json({ message: "You have already endorsed this skill" });
+      }
+      
+      const endorsement = await storage.createSkillEndorsement(validatedData);
+      res.json(endorsement);
+    } catch (error) {
+      console.error("Error creating skill endorsement:", error);
+      res.status(500).json({ message: "Failed to create skill endorsement" });
+    }
+  });
+  
+  app.get('/api/skill-endorsements/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const endorsements = await storage.getSkillEndorsements(userId);
+      res.json(endorsements);
+    } catch (error) {
+      console.error("Error fetching skill endorsements:", error);
+      res.status(500).json({ message: "Failed to fetch skill endorsements" });
+    }
+  });
+  
+  app.get('/api/skill-endorsements/:userId/:skill', async (req, res) => {
+    try {
+      const { userId, skill } = req.params;
+      const endorsements = await storage.getSkillEndorsementsBySkill(userId, skill);
+      res.json(endorsements);
+    } catch (error) {
+      console.error("Error fetching skill endorsements:", error);
+      res.status(500).json({ message: "Failed to fetch skill endorsements" });
+    }
+  });
+  
+  app.delete('/api/skill-endorsements/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteSkillEndorsement(Number(id));
+      res.json({ message: "Skill endorsement deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting skill endorsement:", error);
+      res.status(500).json({ message: "Failed to delete skill endorsement" });
     }
   });
 

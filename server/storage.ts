@@ -48,7 +48,10 @@ import {
   type InsertNotification,
   type AvailabilityCalendar,
   type InsertAvailabilityCalendar,
+  type SkillEndorsement,
+  type InsertSkillEndorsement,
   availabilityCalendar,
+  skillEndorsements,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc, like, ilike } from "drizzle-orm";
@@ -160,6 +163,13 @@ export interface IStorage {
   
   // AI Profile Enhancement
   enhanceProfileWithAI(userId: string, profile: UserProfile): Promise<UserProfile>;
+  
+  // Skill Endorsement operations
+  createSkillEndorsement(endorsement: InsertSkillEndorsement): Promise<SkillEndorsement>;
+  getSkillEndorsements(userId: string): Promise<SkillEndorsement[]>;
+  getSkillEndorsementsBySkill(userId: string, skill: string): Promise<SkillEndorsement[]>;
+  deleteSkillEndorsement(id: number): Promise<void>;
+  hasUserEndorsedSkill(endorserId: string, endorsedUserId: string, skill: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -724,6 +734,52 @@ export class DatabaseStorage implements IStorage {
     });
     
     return updatedProfile;
+  }
+
+  // Skill Endorsement operations
+  async createSkillEndorsement(endorsement: InsertSkillEndorsement): Promise<SkillEndorsement> {
+    const result = await db.insert(skillEndorsements)
+      .values(endorsement)
+      .returning();
+    return result[0];
+  }
+
+  async getSkillEndorsements(userId: string): Promise<SkillEndorsement[]> {
+    return await db.select()
+      .from(skillEndorsements)
+      .where(eq(skillEndorsements.endorsedUserId, userId))
+      .orderBy(desc(skillEndorsements.createdAt));
+  }
+
+  async getSkillEndorsementsBySkill(userId: string, skill: string): Promise<SkillEndorsement[]> {
+    return await db.select()
+      .from(skillEndorsements)
+      .where(
+        and(
+          eq(skillEndorsements.endorsedUserId, userId),
+          eq(skillEndorsements.skill, skill)
+        )
+      )
+      .orderBy(desc(skillEndorsements.createdAt));
+  }
+
+  async deleteSkillEndorsement(id: number): Promise<void> {
+    await db.delete(skillEndorsements)
+      .where(eq(skillEndorsements.id, id));
+  }
+
+  async hasUserEndorsedSkill(endorserId: string, endorsedUserId: string, skill: string): Promise<boolean> {
+    const result = await db.select()
+      .from(skillEndorsements)
+      .where(
+        and(
+          eq(skillEndorsements.endorserId, endorserId),
+          eq(skillEndorsements.endorsedUserId, endorsedUserId),
+          eq(skillEndorsements.skill, skill)
+        )
+      )
+      .limit(1);
+    return result.length > 0;
   }
 }
 

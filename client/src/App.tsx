@@ -20,6 +20,7 @@ import Admin from "@/pages/Admin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import MeetingManagement from "@/pages/MeetingManagement";
 import TalentProfile from "@/pages/TalentProfile";
+import ProfileViewer from "@/pages/ProfileViewer";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/post-gig" component={PostGig} />
       <Route path="/find-talent" component={FindTalent} />
       <Route path="/talent/:id" component={TalentProfile} />
+      <Route path="/profile/:userId" component={ProfileViewer} />
       <Route path="/admin" component={Admin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/meetings" component={MeetingManagement} />

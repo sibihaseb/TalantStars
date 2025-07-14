@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 import { MediaUpload } from "@/components/talent/MediaUpload";
 import { AvailabilityCalendar } from "@/components/talent/AvailabilityCalendar";
 import { AIProfileEnhancer } from "@/components/talent/AIProfileEnhancer";
+import { SkillEndorsements } from "@/components/talent/SkillEndorsements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -388,10 +389,11 @@ export default function Profile() {
               {/* Profile Form */}
               <div className="lg:col-span-3">
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid w-full grid-cols-5">
+                  <TabsList className="grid w-full grid-cols-6">
                     <TabsTrigger value="profile">Profile</TabsTrigger>
                     <TabsTrigger value="media">Media</TabsTrigger>
                     <TabsTrigger value="availability">Availability</TabsTrigger>
+                    <TabsTrigger value="endorsements">Endorsements</TabsTrigger>
                     <TabsTrigger value="ai-enhance">AI Enhance</TabsTrigger>
                     <TabsTrigger value="settings">Settings</TabsTrigger>
                   </TabsList>
@@ -699,6 +701,12 @@ export default function Profile() {
 
                   <TabsContent value="availability" className="space-y-6">
                     <AvailabilityCalendar />
+                  </TabsContent>
+
+                  <TabsContent value="endorsements" className="space-y-6">
+                    {existingProfile && (
+                      <SkillEndorsements profile={existingProfile} isOwnProfile={true} />
+                    )}
                   </TabsContent>
 
                   <TabsContent value="ai-enhance" className="space-y-6">
