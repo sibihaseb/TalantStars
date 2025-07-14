@@ -24,10 +24,10 @@ export interface SearchFilters {
 export function SearchFilters({ onSearch, onAIMatch }: SearchFiltersProps) {
   const [filters, setFilters] = useState<SearchFilters>({
     query: "",
-    talentType: "",
-    location: "",
-    availability: "",
-    budgetRange: "",
+    talentType: "all",
+    location: "all",
+    availability: "all",
+    budgetRange: "all",
     skills: [],
   });
 
@@ -105,7 +105,7 @@ export function SearchFilters({ onSearch, onAIMatch }: SearchFiltersProps) {
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 <SelectItem value="actor">Actors</SelectItem>
                 <SelectItem value="musician">Musicians</SelectItem>
                 <SelectItem value="model">Models</SelectItem>
@@ -124,7 +124,7 @@ export function SearchFilters({ onSearch, onAIMatch }: SearchFiltersProps) {
                 <SelectValue placeholder="All Locations" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
+                <SelectItem value="all">All Locations</SelectItem>
                 <SelectItem value="Los Angeles, CA">Los Angeles, CA</SelectItem>
                 <SelectItem value="New York, NY">New York, NY</SelectItem>
                 <SelectItem value="Atlanta, GA">Atlanta, GA</SelectItem>
@@ -144,7 +144,7 @@ export function SearchFilters({ onSearch, onAIMatch }: SearchFiltersProps) {
                 <SelectValue placeholder="Any Availability" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Availability</SelectItem>
+                <SelectItem value="all">Any Availability</SelectItem>
                 <SelectItem value="available">Available Now</SelectItem>
                 <SelectItem value="busy">Available Soon</SelectItem>
                 <SelectItem value="unavailable">By Appointment</SelectItem>
@@ -162,7 +162,7 @@ export function SearchFilters({ onSearch, onAIMatch }: SearchFiltersProps) {
                 <SelectValue placeholder="Any Budget" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Budget</SelectItem>
+                <SelectItem value="all">Any Budget</SelectItem>
                 <SelectItem value="0-500">$0 - $500</SelectItem>
                 <SelectItem value="500-2000">$500 - $2000</SelectItem>
                 <SelectItem value="2000-5000">$2000 - $5000</SelectItem>

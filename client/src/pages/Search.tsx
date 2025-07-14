@@ -31,10 +31,10 @@ export default function Search() {
   const [, setLocation] = useLocation();
   const [searchFilters, setSearchFilters] = useState<ISearchFilters>({
     query: "",
-    talentType: "",
-    location: "",
-    availability: "",
-    budgetRange: "",
+    talentType: "all",
+    location: "all",
+    availability: "all",
+    budgetRange: "all",
     skills: [],
   });
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -62,8 +62,8 @@ export default function Search() {
       const params = new URLSearchParams();
       
       if (filters.query) params.append("q", filters.query);
-      if (filters.talentType) params.append("talentType", filters.talentType);
-      if (filters.location) params.append("location", filters.location);
+      if (filters.talentType && filters.talentType !== "all") params.append("talentType", filters.talentType);
+      if (filters.location && filters.location !== "all") params.append("location", filters.location);
       
       const response = await fetch(`/api/search/talents?${params.toString()}`);
       if (!response.ok) throw new Error(`${response.status}: ${response.statusText}`);
@@ -237,10 +237,10 @@ export default function Search() {
                         variant="outline"
                         onClick={() => setSearchFilters({
                           query: "",
-                          talentType: "",
-                          location: "",
-                          availability: "",
-                          budgetRange: "",
+                          talentType: "all",
+                          location: "all",
+                          availability: "all",
+                          budgetRange: "all",
                           skills: [],
                         })}
                       >
