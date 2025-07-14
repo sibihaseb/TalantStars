@@ -38,31 +38,16 @@ function Router() {
         </>
       ) : (
         <>
-          {/* If authenticated but no profile, show onboarding */}
-          {!user?.profile ? (
-            <Route path="/onboarding" component={Onboarding} />
-          ) : (
-            <>
-              {/* Authenticated routes with profile */}
-              <Route path="/" component={Home} />
-              <Route path="/profile" component={Profile} />
-              <Route path="/search" component={Search} />
-              <Route path="/messages" component={Messages} />
-              <Route path="/dashboard" component={Dashboard} />
-              <Route path="/post-gig" component={PostGig} />
-              <Route path="/find-talent" component={FindTalent} />
-            </>
-          )}
-          
-          {/* Redirect to onboarding if no profile exists */}
-          {!user?.profile && (
-            <Route>
-              {() => {
-                window.location.href = "/onboarding";
-                return null;
-              }}
-            </Route>
-          )}
+          {/* Authenticated routes */}
+          <Route path="/" component={user?.profile ? Home : Landing} />
+          <Route path="/onboarding" component={Onboarding} />
+          <Route path="/profile" component={Profile} />
+          <Route path="/search" component={Search} />
+          <Route path="/messages" component={Messages} />
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/post-gig" component={PostGig} />
+          <Route path="/find-talent" component={FindTalent} />
+          <Route path="/how-it-works" component={HowItWorks} />
         </>
       )}
       

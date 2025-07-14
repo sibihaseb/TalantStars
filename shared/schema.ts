@@ -73,6 +73,25 @@ export const userProfiles = pgTable("user_profiles", {
   bodyStats: text("body_stats"),
   walkType: varchar("walk_type"),
   
+  // Extended talent fields
+  affiliations: text("affiliations").array(),
+  stunts: text("stunts").array(),
+  activities: text("activities").array(),
+  awards: text("awards").array(),
+  experiences: text("experiences").array(),
+  skills: text("skills").array(),
+  wardrobe: text("wardrobe").array(),
+  
+  // Additional physical attributes
+  tattoos: varchar("tattoos"),
+  piercings: varchar("piercings"),
+  scars: varchar("scars"),
+  
+  // Performance specific
+  dancingStyles: text("dancing_styles").array(),
+  sportingActivities: text("sporting_activities").array(),
+  drivingLicenses: text("driving_licenses").array(),
+  
   // Rates and availability
   dailyRate: decimal("daily_rate", { precision: 10, scale: 2 }),
   weeklyRate: decimal("weekly_rate", { precision: 10, scale: 2 }),

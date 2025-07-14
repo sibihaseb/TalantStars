@@ -21,6 +21,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserProfileSchema } from "@shared/schema";
 import { z } from "zod";
 import { useLocation } from "wouter";
+import {
+  UNION_STATUS_OPTIONS,
+  LANGUAGE_OPTIONS,
+  ACCENT_OPTIONS,
+  INSTRUMENT_OPTIONS,
+  GENRE_OPTIONS,
+  AFFILIATION_OPTIONS,
+  STUNT_OPTIONS,
+  ACTIVITY_OPTIONS,
+  DANCING_STYLES,
+  DRIVING_LICENSES,
+  EYE_COLOR_OPTIONS,
+  HAIR_COLOR_OPTIONS,
+  VOCAL_RANGE_OPTIONS,
+  WARDROBE_OPTIONS,
+} from "@/lib/constants";
 import { 
   Star, 
   User, 
@@ -43,6 +59,16 @@ const onboardingSchema = insertUserProfileSchema.extend({
   accents: z.array(z.string()).optional(),
   instruments: z.array(z.string()).optional(),
   genres: z.array(z.string()).optional(),
+  affiliations: z.array(z.string()).optional(),
+  stunts: z.array(z.string()).optional(),
+  activities: z.array(z.string()).optional(),
+  awards: z.array(z.string()).optional(),
+  experiences: z.array(z.string()).optional(),
+  skills: z.array(z.string()).optional(),
+  wardrobe: z.array(z.string()).optional(),
+  dancingStyles: z.array(z.string()).optional(),
+  sportingActivities: z.array(z.string()).optional(),
+  drivingLicenses: z.array(z.string()).optional(),
 });
 
 type OnboardingFormData = z.infer<typeof onboardingSchema>;
@@ -54,7 +80,7 @@ export default function Onboarding() {
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(1);
   const [newSkill, setNewSkill] = useState("");
-  const totalSteps = 4;
+  const totalSteps = 6;
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -93,6 +119,16 @@ export default function Onboarding() {
       accents: [],
       instruments: [],
       genres: [],
+      affiliations: [],
+      stunts: [],
+      activities: [],
+      awards: [],
+      experiences: [],
+      skills: [],
+      wardrobe: [],
+      dancingStyles: [],
+      sportingActivities: [],
+      drivingLicenses: [],
       height: "",
       weight: "",
       eyeColor: "",
@@ -102,6 +138,9 @@ export default function Onboarding() {
       vocalRange: "",
       bodyStats: "",
       walkType: "",
+      tattoos: "",
+      piercings: "",
+      scars: "",
       dailyRate: "",
       weeklyRate: "",
       projectRate: "",
@@ -172,23 +211,76 @@ export default function Onboarding() {
     }
   };
 
-  const addSkill = (field: "languages" | "accents" | "instruments" | "genres") => {
+  const addSkill = (field: keyof OnboardingFormData) => {
     if (!newSkill.trim()) return;
     
-    const currentSkills = form.getValues(field) || [];
+    const currentSkills = form.getValues(field) as string[] || [];
     if (!currentSkills.includes(newSkill.trim())) {
       form.setValue(field, [...currentSkills, newSkill.trim()]);
     }
     setNewSkill("");
   };
 
-  const removeSkill = (field: "languages" | "accents" | "instruments" | "genres", skill: string) => {
-    const currentSkills = form.getValues(field) || [];
+  const removeSkill = (field: keyof OnboardingFormData, skill: string) => {
+    const currentSkills = form.getValues(field) as string[] || [];
     form.setValue(field, currentSkills.filter(s => s !== skill));
   };
 
+  const addFromDropdown = (field: keyof OnboardingFormData, value: string) => {
+    const currentSkills = form.getValues(field) as string[] || [];
+    if (!currentSkills.includes(value)) {
+      form.setValue(field, [...currentSkills, value]);
+    }
+  };
+
+  const renderMultiSelectField = (
+    field: keyof OnboardingFormData,
+    label: string,
+    options: Array<{ value: string; label: string }>,
+    placeholder: string = "Select options..."
+  ) => {
+    const currentValues = form.getValues(field) as string[] || [];
+    
+    return (
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</Label>
+        <Select onValueChange={(value) => addFromDropdown(field, value)}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+        {currentValues.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {currentValues.map((value) => (
+              <Badge key={value} variant="secondary" className="flex items-center gap-1">
+                {options.find(opt => opt.value === value)?.label || value}
+                <X 
+                  className="h-3 w-3 cursor-pointer hover:text-red-500" 
+                  onClick={() => removeSkill(field, value)}
+                />
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const getMaxSteps = () => {
+    return watchedRole === "talent" ? 6 : 4;
+  };
+
   const nextStep = () => {
-    if (currentStep < totalSteps) {
+    const maxSteps = getMaxSteps();
+    if (currentStep < maxSteps) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -203,7 +295,7 @@ export default function Onboarding() {
     createProfileMutation.mutate(data);
   };
 
-  const progressPercentage = (currentStep / totalSteps) * 100;
+  const progressPercentage = (currentStep / getMaxSteps()) * 100;
 
   if (isLoading) {
     return (
@@ -230,7 +322,7 @@ export default function Onboarding() {
             <div className="flex justify-center items-center py-4">
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Step {currentStep} of {totalSteps}
+                  Step {currentStep} of {getMaxSteps()}
                 </span>
                 <Progress value={progressPercentage} className="w-32" />
               </div>
@@ -485,17 +577,33 @@ export default function Onboarding() {
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="eyeColor">Eye Color</Label>
-                            <Input
-                              {...form.register("eyeColor")}
-                              placeholder="Brown"
-                            />
+                            <Select onValueChange={(value) => form.setValue("eyeColor", value)}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select eye color" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {EYE_COLOR_OPTIONS.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="hairColor">Hair Color</Label>
-                            <Input
-                              {...form.register("hairColor")}
-                              placeholder="Black"
-                            />
+                            <Select onValueChange={(value) => form.setValue("hairColor", value)}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select hair color" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {HAIR_COLOR_OPTIONS.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
                       </div>
@@ -507,66 +615,8 @@ export default function Onboarding() {
                           Musical Information
                         </h3>
                         <div className="space-y-4">
-                          <div className="space-y-2">
-                            <Label>Instruments</Label>
-                            <div className="flex space-x-2">
-                              <Input
-                                value={newSkill}
-                                onChange={(e) => setNewSkill(e.target.value)}
-                                placeholder="Add instrument"
-                              />
-                              <Button
-                                type="button"
-                                onClick={() => addSkill("instruments")}
-                              >
-                                <Plus className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              {form.watch("instruments")?.map((instrument, index) => (
-                                <Badge key={index} variant="secondary" className="flex items-center space-x-1">
-                                  <span>{instrument}</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => removeSkill("instruments", instrument)}
-                                    className="ml-1 hover:text-red-500"
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </button>
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Genres</Label>
-                            <div className="flex space-x-2">
-                              <Input
-                                value={newSkill}
-                                onChange={(e) => setNewSkill(e.target.value)}
-                                placeholder="Add genre"
-                              />
-                              <Button
-                                type="button"
-                                onClick={() => addSkill("genres")}
-                              >
-                                <Plus className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              {form.watch("genres")?.map((genre, index) => (
-                                <Badge key={index} variant="secondary" className="flex items-center space-x-1">
-                                  <span>{genre}</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => removeSkill("genres", genre)}
-                                    className="ml-1 hover:text-red-500"
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </button>
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
+                          {renderMultiSelectField("instruments", "Instruments", INSTRUMENT_OPTIONS, "Select instruments...")}
+                          {renderMultiSelectField("genres", "Genres", GENRE_OPTIONS, "Select genres...")}
                         </div>
                       </div>
                     )}
@@ -578,10 +628,18 @@ export default function Onboarding() {
                         </h3>
                         <div className="space-y-2">
                           <Label htmlFor="vocalRange">Vocal Range</Label>
-                          <Input
-                            {...form.register("vocalRange")}
-                            placeholder="e.g., Baritone, Soprano, etc."
-                          />
+                          <Select onValueChange={(value) => form.setValue("vocalRange", value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select vocal range" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {VOCAL_RANGE_OPTIONS.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                     )}
@@ -612,34 +670,24 @@ export default function Onboarding() {
 
                     {/* Languages for all talent types */}
                     {watchedRole === "talent" && (
-                      <div className="space-y-2">
-                        <Label>Languages</Label>
-                        <div className="flex space-x-2">
-                          <Input
-                            value={newSkill}
-                            onChange={(e) => setNewSkill(e.target.value)}
-                            placeholder="Add language"
-                          />
-                          <Button
-                            type="button"
-                            onClick={() => addSkill("languages")}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {form.watch("languages")?.map((language, index) => (
-                            <Badge key={index} variant="secondary" className="flex items-center space-x-1">
-                              <span>{language}</span>
-                              <button
-                                type="button"
-                                onClick={() => removeSkill("languages", language)}
-                                className="ml-1 hover:text-red-500"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          ))}
+                      <div className="space-y-4">
+                        {renderMultiSelectField("languages", "Languages", LANGUAGE_OPTIONS, "Select languages...")}
+                        {renderMultiSelectField("accents", "Accents", ACCENT_OPTIONS, "Select accents...")}
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="unionStatus">Union Status</Label>
+                          <Select onValueChange={(value) => form.setValue("unionStatus", value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select union status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {UNION_STATUS_OPTIONS.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                     )}
@@ -647,8 +695,70 @@ export default function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 4: Rates and Availability */}
-              {currentStep === 4 && (
+              {/* Step 4: Skills & Affiliations */}
+              {currentStep === 4 && watchedRole === "talent" && (
+                <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-2xl">Skills & Affiliations</CardTitle>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Add your professional skills and affiliations
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-4">
+                      {renderMultiSelectField("affiliations", "Affiliations", AFFILIATION_OPTIONS, "Select affiliations...")}
+                      {renderMultiSelectField("stunts", "Stunts", STUNT_OPTIONS, "Select stunts...")}
+                      {renderMultiSelectField("activities", "Activities", ACTIVITY_OPTIONS, "Select activities...")}
+                      {renderMultiSelectField("dancingStyles", "Dancing Styles", DANCING_STYLES, "Select dancing styles...")}
+                      {renderMultiSelectField("drivingLicenses", "Driving Licenses", DRIVING_LICENSES, "Select driving licenses...")}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Step 5: Additional Details */}
+              {currentStep === 5 && watchedRole === "talent" && (
+                <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-2xl">Additional Details</CardTitle>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Add wardrobe and physical attributes
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-4">
+                      {renderMultiSelectField("wardrobe", "Wardrobe", WARDROBE_OPTIONS, "Select wardrobe...")}
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="tattoos">Tattoos</Label>
+                          <Input
+                            {...form.register("tattoos")}
+                            placeholder="Description of tattoos"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="piercings">Piercings</Label>
+                          <Input
+                            {...form.register("piercings")}
+                            placeholder="Description of piercings"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="scars">Scars</Label>
+                          <Input
+                            {...form.register("scars")}
+                            placeholder="Description of scars"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Step 6 (or 4 for non-talent): Rates and Availability */}
+              {((currentStep === 6 && watchedRole === "talent") || (currentStep === 4 && watchedRole !== "talent")) && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">Rates & Availability</CardTitle>
@@ -757,7 +867,7 @@ export default function Onboarding() {
                 </Button>
 
                 <div className="flex items-center space-x-2">
-                  {Array.from({ length: totalSteps }).map((_, index) => (
+                  {Array.from({ length: getMaxSteps() }).map((_, index) => (
                     <div
                       key={index}
                       className={`w-3 h-3 rounded-full transition-colors ${
@@ -769,7 +879,7 @@ export default function Onboarding() {
                   ))}
                 </div>
 
-                {currentStep < totalSteps ? (
+                {currentStep < getMaxSteps() ? (
                   <Button
                     type="button"
                     onClick={nextStep}
