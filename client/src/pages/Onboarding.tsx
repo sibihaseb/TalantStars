@@ -1048,10 +1048,17 @@ export default function Onboarding() {
                           
                           // Show first validation error
                           const firstError = validationResult.error.issues[0];
+                          const fieldName = firstError.path.join('.');
                           toast({
                             title: "Form Validation Error",
-                            description: `${firstError.path.join('.')}: ${firstError.message}`,
+                            description: `${fieldName}: ${firstError.message}`,
                             variant: "destructive",
+                          });
+                          
+                          // Log all validation errors for debugging
+                          console.log("All validation errors:");
+                          validationResult.error.issues.forEach((issue, index) => {
+                            console.log(`${index + 1}. ${issue.path.join('.')}: ${issue.message}`);
                           });
                           return;
                         }
