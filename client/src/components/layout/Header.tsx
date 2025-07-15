@@ -6,6 +6,8 @@ import { Star, Search, Briefcase, Plus, Menu, Calendar, MessageCircle, ArrowLeft
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
+import PNG_FILE_6 from "@assets/PNG FILE 6.png";
+
 export function Header() {
   const { isAuthenticated, user } = useAuth();
   const [location] = useLocation();
@@ -47,7 +49,7 @@ export function Header() {
               </Button>
             )}
             <Link href="/" className="flex items-center space-x-2">
-              <img src="/attached_assets/PNG FILE 6_1752621700970.png" alt="Talents & Stars" className="h-8 w-auto" />
+              <img src={PNG_FILE_6} alt="Talents & Stars" className="h-8 w-auto ml-[0px] mr-[0px]" />
             </Link>
             
             <div className="hidden md:flex space-x-6">
