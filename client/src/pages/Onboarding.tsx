@@ -362,6 +362,20 @@ export default function Onboarding() {
     }
   }, [user, setLocation]);
 
+  // Auto-populate role and skip role selection for authenticated users
+  useEffect(() => {
+    if (user?.role) {
+      form.setValue("role", user.role);
+      
+      // Set appropriate starting step based on user role
+      if (user.role === "talent") {
+        setCurrentStep(2); // Start at talent type selection
+      } else {
+        setCurrentStep(3); // Start at basic info for non-talent roles  
+      }
+    }
+  }, [user, form]);
+
   const form = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
     defaultValues: {
@@ -688,7 +702,13 @@ export default function Onboarding() {
   };
 
   const getMaxSteps = () => {
-    return watchedRole === "talent" ? 6 : 4;
+    const isAuthenticated = !!user?.role;
+    // For authenticated users, we skip role selection step
+    if (isAuthenticated) {
+      return watchedRole === "talent" ? 6 : 4;
+    } else {
+      return watchedRole === "talent" ? 7 : 5; // Add 1 for role selection
+    }
   };
 
   // Get talent-specific questions based on talent type
@@ -766,9 +786,12 @@ export default function Onboarding() {
   };
 
   const getStepInfo = (step: number) => {
+    // For authenticated users, we skip role selection step
+    const isAuthenticated = !!user?.role;
+    
     const roleSteps = {
       talent: [
-        { title: "Role Selection", description: "Choose your role", icon: User },
+        { title: "Talent Type", description: "Choose your talent type", icon: Star },
         { title: "Basic Information", description: "Personal details", icon: User },
         { title: "Physical Details", description: "Appearance & stats", icon: Star },
         { title: "Skills & Experience", description: "What you can do", icon: Medal },
@@ -776,33 +799,35 @@ export default function Onboarding() {
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ],
       manager: [
-        { title: "Role Selection", description: "Choose your role", icon: User },
         { title: "Basic Information", description: "Personal details", icon: User },
         { title: "Management Details", description: "Your experience & services", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ],
       agent: [
-        { title: "Role Selection", description: "Choose your role", icon: User },
         { title: "Basic Information", description: "Personal details", icon: User },
         { title: "Agent Details", description: "Your agency & experience", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ],
       producer: [
-        { title: "Role Selection", description: "Choose your role", icon: User },
         { title: "Basic Information", description: "Personal details", icon: User },
         { title: "Production Details", description: "Your projects & experience", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ],
       default: [
-        { title: "Role Selection", description: "Choose your role", icon: User },
         { title: "Basic Information", description: "Personal details", icon: User },
         { title: "Professional Details", description: "Your experience", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ]
     };
 
+    // If not authenticated, show role selection step first
+    if (!isAuthenticated && step === 1) {
+      return { title: "Role Selection", description: "Choose your role", icon: User };
+    }
+
     const steps = roleSteps[watchedRole as keyof typeof roleSteps] || roleSteps.default;
-    return steps[step - 1] || { title: "Step", description: "", icon: User };
+    const adjustedStep = isAuthenticated ? step : step - 1; // Adjust for skipped role selection
+    return steps[adjustedStep - 1] || { title: "Step", description: "", icon: User };
   };
 
   const getProgressPercentage = () => {
@@ -939,8 +964,8 @@ export default function Onboarding() {
               <div className={`transition-all duration-300 ${
                 isStepChanging ? 'opacity-50 transform translate-x-4' : 'opacity-100 transform translate-x-0'
               }`}>
-              {/* Step 1: Role Selection */}
-              {currentStep === 1 && (
+              {/* Step 1: Role Selection (only for non-authenticated users) */}
+              {currentStep === 1 && !user?.role && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">
