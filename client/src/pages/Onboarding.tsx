@@ -768,15 +768,13 @@ export default function Onboarding() {
     if (!watchedRole) return null;
 
     // Filter questions based on role
-    let questionTypes = ['profile'];
+    let questionTypes = [];
     if (watchedRole === 'talent' && watchedTalentType) {
-      questionTypes.push(watchedTalentType);
-    } else if (watchedRole === 'manager') {
-      questionTypes.push('manager');
-    } else if (watchedRole === 'agent') {
-      questionTypes.push('agent');
-    } else if (watchedRole === 'producer') {
-      questionTypes.push('producer');
+      // For talent users, only show questions for their specific talent type
+      questionTypes = [watchedTalentType];
+    } else {
+      // For non-talent users (manager, producer, agent), show 'profile' questions
+      questionTypes = ['profile'];
     }
 
     console.log('Profile questions:', profileQuestions);
@@ -891,6 +889,7 @@ export default function Onboarding() {
         );
       
       case 'yesno':
+      case 'boolean':
         return (
           <Select onValueChange={handleChange} value={typeof currentValue === 'string' ? currentValue : ''}>
             <SelectTrigger>
