@@ -724,8 +724,9 @@ export default function Onboarding() {
 
     const relevantQuestions = profileQuestions
       .filter(q => {
-        console.log('Checking question:', q.question, 'talent_type:', q.talent_type, 'active:', q.active);
-        return questionTypes.includes(q.talent_type) && q.active;
+        console.log('Checking question:', q.question, 'talent_type:', q.talent_type, 'talentType:', q.talentType, 'active:', q.active);
+        const questionType = q.talent_type || q.talentType;
+        return questionTypes.includes(questionType) && q.active;
       })
       .sort((a, b) => a.order - b.order);
 
