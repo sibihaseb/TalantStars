@@ -20,7 +20,7 @@ import Admin from "@/pages/Admin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import PermissionsPage from "@/pages/admin/permissions-page";
 import PricingTiersPage from "@/pages/admin/pricing-tiers";
-import AdminLogin from "@/pages/login";
+import Auth from "@/pages/Auth";
 import MeetingManagement from "@/pages/MeetingManagement";
 import TalentProfile from "@/pages/TalentProfile";
 import ProfileViewer from "@/pages/ProfileViewer";
@@ -28,7 +28,6 @@ import TalentDashboard from "@/pages/TalentDashboard";
 import ProducerDashboard from "@/pages/ProducerDashboard";
 import ManagerDashboard from "@/pages/ManagerDashboard";
 import Availability from "@/pages/Availability";
-import Login from "@/pages/Login";
 import MascotDemo from "@/pages/MascotDemo";
 
 function Router() {
@@ -45,8 +44,8 @@ function Router() {
 
   return (
     <Switch>
-      {/* Login route - admin login */}
-      <Route path="/login" component={AdminLogin} />
+      {/* Auth route - unified login/registration */}
+      <Route path="/auth" component={Auth} />
       
       {/* Public routes */}
       <Route path="/jobs" component={BrowseJobs} />
@@ -55,34 +54,63 @@ function Router() {
       
       {/* Protected admin routes */}
       <Route path="/admin">
-        {isAuthenticated ? <Admin /> : <AdminLogin />}
+        {isAuthenticated && user?.role === 'admin' ? <Admin /> : <Auth />}
       </Route>
       <Route path="/admin/dashboard">
-        {isAuthenticated ? <AdminDashboard /> : <AdminLogin />}
+        {isAuthenticated && user?.role === 'admin' ? <AdminDashboard /> : <Auth />}
       </Route>
       <Route path="/admin/permissions">
-        {isAuthenticated ? <PermissionsPage /> : <AdminLogin />}
+        {isAuthenticated && user?.role === 'admin' ? <PermissionsPage /> : <Auth />}
       </Route>
       <Route path="/admin/pricing-tiers">
-        {isAuthenticated ? <PricingTiersPage /> : <AdminLogin />}
+        {isAuthenticated && user?.role === 'admin' ? <PricingTiersPage /> : <Auth />}
+      </Route>
+      
+      {/* Role-based dashboard routes */}
+      <Route path="/talent-dashboard">
+        {isAuthenticated ? <TalentDashboard /> : <Auth />}
+      </Route>
+      <Route path="/producer-dashboard">
+        {isAuthenticated ? <ProducerDashboard /> : <Auth />}
+      </Route>
+      <Route path="/manager-dashboard">
+        {isAuthenticated ? <ManagerDashboard /> : <Auth />}
       </Route>
       
       {/* Other protected routes */}
-      <Route path="/onboarding" component={Onboarding} />
-      <Route path="/profile" component={Profile} />
-      <Route path="/search" component={Search} />
-      <Route path="/messages" component={Messages} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/post-gig" component={PostGig} />
-      <Route path="/find-talent" component={FindTalent} />
-      <Route path="/talent/:id" component={TalentProfile} />
-      <Route path="/profile/:userId" component={ProfileViewer} />
-      <Route path="/dashboard/talent" component={TalentDashboard} />
-      <Route path="/dashboard/producer" component={ProducerDashboard} />
-      <Route path="/dashboard/manager" component={ManagerDashboard} />
-      <Route path="/dashboard/admin" component={AdminDashboard} />
-      <Route path="/meetings" component={MeetingManagement} />
-      <Route path="/availability" component={Availability} />
+      <Route path="/onboarding">
+        {isAuthenticated ? <Onboarding /> : <Auth />}
+      </Route>
+      <Route path="/profile">
+        {isAuthenticated ? <Profile /> : <Auth />}
+      </Route>
+      <Route path="/search">
+        {isAuthenticated ? <Search /> : <Auth />}
+      </Route>
+      <Route path="/messages">
+        {isAuthenticated ? <Messages /> : <Auth />}
+      </Route>
+      <Route path="/dashboard">
+        {isAuthenticated ? <Dashboard /> : <Auth />}
+      </Route>
+      <Route path="/post-gig">
+        {isAuthenticated ? <PostGig /> : <Auth />}
+      </Route>
+      <Route path="/find-talent">
+        {isAuthenticated ? <FindTalent /> : <Auth />}
+      </Route>
+      <Route path="/talent/:id">
+        {isAuthenticated ? <TalentProfile /> : <Auth />}
+      </Route>
+      <Route path="/profile/:userId">
+        {isAuthenticated ? <ProfileViewer /> : <Auth />}
+      </Route>
+      <Route path="/meetings">
+        {isAuthenticated ? <MeetingManagement /> : <Auth />}
+      </Route>
+      <Route path="/availability">
+        {isAuthenticated ? <Availability /> : <Auth />}
+      </Route>
       
       {/* Conditional home route */}
       {!isAuthenticated ? (

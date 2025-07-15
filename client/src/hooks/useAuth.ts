@@ -1,47 +1,43 @@
-import { useState, useEffect } from "react";
-import type { User, UserProfile } from "@shared/schema";
+import { useQuery } from '@tanstack/react-query';
+import { User } from '@shared/schema';
 
-type UserWithProfile = User & { profile?: UserProfile };
+export interface AuthContextType {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  refetch: () => void;
+}
 
-export function useAuth() {
-  const [user, setUser] = useState<UserWithProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
+export function useAuth(): AuthContextType {
+  const { data: user, isLoading, refetch } = useQuery<User | null>({
+    queryKey: ['/api/user'],
+    queryFn: async () => {
       try {
-        const res = await fetch("/api/user", {
-          credentials: "include",
+        const response = await fetch('/api/user', {
+          credentials: 'include',
         });
         
-        if (res.status === 401) {
-          setUser(null);
-          setIsLoading(false);
-          return;
+        if (response.ok) {
+          return await response.json();
+        } else if (response.status === 401) {
+          // User is not authenticated
+          return null;
+        } else {
+          throw new Error('Failed to fetch user');
         }
-        
-        if (!res.ok) {
-          throw new Error(`${res.status}: ${res.statusText}`);
-        }
-        
-        const userData = await res.json();
-        setUser(userData);
-        setIsLoading(false);
       } catch (error) {
-        // If it's a 401 error, set user to null
-        if (error instanceof Error && error.message.includes("401")) {
-          setUser(null);
-        }
-        setIsLoading(false);
+        console.error('Auth error:', error);
+        return null;
       }
-    };
-
-    checkAuth();
-  }, []);
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: false,
+  });
 
   return {
-    user,
-    isLoading,
+    user: user || null,
     isAuthenticated: !!user,
+    isLoading,
+    refetch,
   };
 }

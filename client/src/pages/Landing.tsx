@@ -119,7 +119,7 @@ export default function Landing() {
               <Button 
                 size="lg"
                 className="bg-white text-blue-900 hover:bg-gray-100 px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all duration-300"
-                onClick={() => window.location.href = "/api/login"}
+                onClick={() => window.location.href = "/auth"}
               >
                 <UserPlus className="h-5 w-5 mr-2" />
                 Join Now
@@ -136,24 +136,14 @@ export default function Landing() {
               <Button 
                 size="lg"
                 className="bg-emerald-600 text-white hover:bg-emerald-700 px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all duration-300"
-                onClick={() => window.location.href = "/api/login"}
+                onClick={() => window.location.href = "/auth"}
               >
                 <Briefcase className="h-5 w-5 mr-2" />
                 Post a Gig
               </Button>
             </div>
             
-            {/* Admin Login Link */}
-            <div className="mt-8 animate-fade-in">
-              <Button 
-                variant="ghost"
-                size="sm"
-                className="text-white/70 hover:text-white hover:bg-white/10 px-4 py-2 text-sm"
-                onClick={() => window.location.href = "/login"}
-              >
-                Admin Login
-              </Button>
-            </div>
+
           </div>
           
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
@@ -319,7 +309,7 @@ export default function Landing() {
               <Button 
                 size="lg"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
-                onClick={() => window.location.href = "/api/login"}
+                onClick={() => window.location.href = "/auth"}
               >
                 View All Talents
               </Button>

@@ -74,7 +74,17 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => window.location.href = "/api/logout"}
+                  onClick={async () => {
+                    try {
+                      await fetch('/api/logout', {
+                        method: 'POST',
+                        credentials: 'include'
+                      });
+                      window.location.href = "/";
+                    } catch (error) {
+                      console.error('Logout failed:', error);
+                    }
+                  }}
                 >
                   Logout
                 </Button>
@@ -84,13 +94,13 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => window.location.href = "/api/login"}
+                  onClick={() => window.location.href = "/auth"}
                 >
                   Login
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => window.location.href = "/api/login"}
+                  onClick={() => window.location.href = "/auth"}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 >
                   Get Started
