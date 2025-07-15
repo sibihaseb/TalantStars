@@ -11,11 +11,30 @@ export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
+  options?: { headers?: Record<string, string> }
 ): Promise<Response> {
+  // Handle FormData differently than regular JSON data
+  let body: string | FormData | undefined;
+  let headers: Record<string, string> = {};
+  
+  if (data instanceof FormData) {
+    // For FormData, let browser set Content-Type with boundary
+    body = data;
+    headers = { ...options?.headers };
+  } else if (data) {
+    // For regular data, use JSON
+    body = JSON.stringify(data);
+    headers = { "Content-Type": "application/json", ...options?.headers };
+  } else {
+    // No data
+    body = undefined;
+    headers = { ...options?.headers };
+  }
+
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
+    headers,
+    body,
     credentials: "include",
   });
 

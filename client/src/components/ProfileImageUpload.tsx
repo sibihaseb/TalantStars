@@ -45,11 +45,7 @@ export default function ProfileImageUpload({
       console.log('Uploading file to server...');
       console.log('FormData entries:', Array.from(formData.entries()));
       
-      const response = await apiRequest('POST', '/api/user/profile-image', formData, {
-        headers: {
-          // Don't set Content-Type for FormData - browser will set it with boundary
-        }
-      });
+      const response = await apiRequest('POST', '/api/user/profile-image', formData);
       
       console.log('Upload response status:', response.status);
       const result = await response.json();
@@ -192,9 +188,27 @@ export default function ProfileImageUpload({
     // Convert canvas to blob
     canvas.toBlob((blob) => {
       if (blob) {
+        console.log('Canvas blob created:', blob);
+        console.log('Blob size:', blob.size);
+        console.log('Blob type:', blob.type);
+        
         const formData = new FormData();
         formData.append('image', blob, 'profile-image.jpg');
+        
+        // Debug FormData contents
+        console.log('FormData contents:');
+        for (let [key, value] of formData.entries()) {
+          console.log(`${key}:`, value);
+        }
+        
         uploadMutation.mutate(formData);
+      } else {
+        console.error('Failed to create blob from canvas');
+        toast({
+          title: "Error",
+          description: "Failed to process cropped image",
+          variant: "destructive",
+        });
       }
     }, 'image/jpeg', 0.9);
   }, [selectedFile, cropData, uploadMutation]);
