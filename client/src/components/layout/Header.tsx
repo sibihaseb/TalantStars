@@ -12,7 +12,6 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navigation = [
-    { name: "Social", href: "/social", icon: MessageCircle },
     { name: "Find Talent", href: "/search", icon: Search },
     { name: "Browse Jobs", href: "/jobs", icon: Briefcase },
     { name: "Post Gig", href: "/post-gig", icon: Plus },

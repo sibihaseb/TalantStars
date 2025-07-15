@@ -15,7 +15,11 @@ import {
   insertMeetingSchema,
   insertNotificationSchema,
   insertUserPermissionSchema,
-  insertSkillEndorsementSchema
+  insertSkillEndorsementSchema,
+  insertSocialPostSchema,
+  insertJobHistorySchema,
+  insertSocialConnectionSchema,
+  insertSocialInteractionSchema
 } from "@shared/schema";
 import { z } from "zod";
 import { requestPasswordReset, validatePasswordResetToken, resetPassword } from "./passwordUtils";
@@ -1774,6 +1778,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Role permission initialization failed:", error);
       res.status(500).json({ message: "Role permission initialization failed", error: error.message });
+    }
+  });
+
+  // Social Media Routes
+  app.post('/api/social/posts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const validatedData = insertSocialPostSchema.parse({ 
+        ...req.body, 
+        userId: parseInt(userId)
+      });
+      
+      const post = await storage.createSocialPost(validatedData);
+      res.json(post);
+    } catch (error) {
+      console.error("Error creating social post:", error);
+      res.status(500).json({ message: "Failed to create social post" });
+    }
+  });
+
+  app.get('/api/social/feed', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.user.id);
+      const filter = req.query.filter || 'all';
+      
+      const posts = await storage.getFeedPosts(userId, 20, 0);
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching social feed:", error);
+      res.status(500).json({ message: "Failed to fetch social feed" });
+    }
+  });
+
+  app.post('/api/social/posts/:postId/like', isAuthenticated, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.postId);
+      const userId = parseInt(req.user.id);
+      
+      await storage.likeSocialPost(postId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error liking post:", error);
+      res.status(500).json({ message: "Failed to like post" });
+    }
+  });
+
+  app.get('/api/social/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.user.id);
+      const userPosts = await storage.getUserSocialPosts(userId);
+      
+      // Mock stats - in production, calculate from database
+      const stats = {
+        posts: userPosts.length,
+        followers: 0,
+        following: 0,
+      };
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching social stats:", error);
+      res.status(500).json({ message: "Failed to fetch social stats" });
+    }
+  });
+
+  app.get('/api/social/trending', isAuthenticated, async (req: any, res) => {
+    try {
+      // Mock trending data - in production, calculate from database
+      const trending = [
+        { tag: "casting", count: 24, trend: "up" },
+        { tag: "audition", count: 18, trend: "up" },
+        { tag: "filming", count: 12, trend: "down" },
+        { tag: "premiere", count: 8, trend: "up" },
+      ];
+      
+      res.json(trending);
+    } catch (error) {
+      console.error("Error fetching trending:", error);
+      res.status(500).json({ message: "Failed to fetch trending" });
+    }
+  });
+
+  // Job History Routes
+  app.post('/api/job-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.user.id);
+      const validatedData = insertJobHistorySchema.parse({ 
+        ...req.body, 
+        userId
+      });
+      
+      const jobHistory = await storage.createJobHistory(validatedData);
+      res.json(jobHistory);
+    } catch (error) {
+      console.error("Error creating job history:", error);
+      res.status(500).json({ message: "Failed to create job history" });
+    }
+  });
+
+  app.get('/api/job-history/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const jobHistory = await storage.getJobHistory(userId);
+      res.json(jobHistory);
+    } catch (error) {
+      console.error("Error fetching job history:", error);
+      res.status(500).json({ message: "Failed to fetch job history" });
+    }
+  });
+
+  app.put('/api/job-history/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertJobHistorySchema.partial().parse(req.body);
+      
+      const jobHistory = await storage.updateJobHistory(id, validatedData);
+      res.json(jobHistory);
+    } catch (error) {
+      console.error("Error updating job history:", error);
+      res.status(500).json({ message: "Failed to update job history" });
+    }
+  });
+
+  app.delete('/api/job-history/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteJobHistory(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting job history:", error);
+      res.status(500).json({ message: "Failed to delete job history" });
     }
   });
 

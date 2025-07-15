@@ -445,7 +445,10 @@ export default function TalentDashboard() {
                     <CardTitle>Social Feed</CardTitle>
                     <CardDescription>Connect with the entertainment community</CardDescription>
                   </div>
-                  <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                  <Button 
+                    onClick={() => window.location.href = '/social'}
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Create Post
                   </Button>
@@ -457,7 +460,11 @@ export default function TalentDashboard() {
                   <p className="text-gray-600 dark:text-gray-400">
                     Access your social feed by visiting the Social page
                   </p>
-                  <Button variant="outline" className="mt-4">
+                  <Button 
+                    variant="outline" 
+                    className="mt-4"
+                    onClick={() => window.location.href = '/social'}
+                  >
                     <Globe className="w-4 h-4 mr-2" />
                     Go to Social
                   </Button>

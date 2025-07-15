@@ -30,7 +30,7 @@ import ManagerDashboard from "@/pages/ManagerDashboard";
 import Availability from "@/pages/Availability";
 import MascotDemo from "@/pages/MascotDemo";
 import Media from "@/pages/Media";
-import Social from "@/pages/Social";
+import Social from "@/pages/SocialModern";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();

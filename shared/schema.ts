@@ -274,6 +274,76 @@ export const systemSettings = pgTable("system_settings", {
   updatedBy: varchar("updated_by").references(() => users.id),
 });
 
+// Job/Gig history for talents and their managers
+export const jobHistoryEnum = pgEnum("job_history_type", [
+  "feature_film", "short_film", "tv_show", "tv_series", "commercial", 
+  "fashion_show", "advertisement", "music_concert", "theater", "voice_over",
+  "modeling", "documentary", "web_series", "music_video", "corporate_video",
+  "live_performance", "radio", "podcast", "audiobook", "gaming", "animation"
+]);
+
+export const jobHistory = pgTable("job_history", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  title: varchar("title").notNull(),
+  company: varchar("company").notNull(),
+  jobType: jobHistoryEnum("job_type").notNull(),
+  role: varchar("role").notNull(), // Actor, Lead Singer, Model, etc.
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  location: varchar("location"),
+  description: text("description"),
+  skills: text("skills").array(), // Skills used/learned
+  credits: text("credits"), // How they want to be credited
+  isPublic: boolean("is_public").default(true),
+  verified: boolean("verified").default(false), // Admin verification
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Feature access control system
+export const featureAccessEnum = pgEnum("feature_access_type", [
+  "social_media", "job_posting", "advanced_search", "media_upload", 
+  "messaging", "analytics", "ai_features", "profile_verification",
+  "team_collaboration", "video_conferencing", "export_data", "api_access",
+  "custom_branding", "priority_support", "advanced_analytics", "reports"
+]);
+
+export const userFeatureAccess = pgTable("user_feature_access", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  featureType: featureAccessEnum("feature_type").notNull(),
+  hasAccess: boolean("has_access").default(false),
+  grantedBy: integer("granted_by").references(() => users.id),
+  grantedAt: timestamp("granted_at"),
+  expiresAt: timestamp("expires_at"),
+  reason: text("reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Social media posts - removed duplicate, using the one below
+
+// Social connections/friendships
+export const socialConnections = pgTable("social_connections", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  friendId: integer("friend_id").references(() => users.id).notNull(),
+  status: varchar("status").default("pending"), // pending, accepted, blocked
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Social post interactions
+export const socialInteractions = pgTable("social_interactions", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").references(() => socialPosts.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  interactionType: varchar("interaction_type").notNull(), // like, comment, share
+  content: text("content"), // For comments
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const adminLogs = pgTable("admin_logs", {
   id: serial("id").primaryKey(),
   adminId: varchar("admin_id").references(() => users.id).notNull(),
@@ -492,15 +562,6 @@ export const userSubscriptions = pgTable("user_subscriptions", {
   status: varchar("status").default("active"), // active, cancelled, expired, pending
   startDate: timestamp("start_date").defaultNow(),
   endDate: timestamp("end_date"),
-  
-  // Usage tracking
-  photosUsed: integer("photos_used").default(0),
-  videosUsed: integer("videos_used").default(0),
-  audioFilesUsed: integer("audio_files_used").default(0),
-  storageUsedMB: integer("storage_used_mb").default(0),
-  projectsUsed: integer("projects_used").default(0),
-  applicationsThisMonth: integer("applications_this_month").default(0),
-  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1013,6 +1074,30 @@ export const insertUserPrivacySettingsSchema = createInsertSchema(userPrivacySet
   updatedAt: true,
 });
 
+// New enhanced features schemas
+export const insertJobHistorySchema = createInsertSchema(jobHistory).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserFeatureAccessSchema = createInsertSchema(userFeatureAccess).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSocialConnectionSchema = createInsertSchema(socialConnections).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSocialInteractionSchema = createInsertSchema(socialInteractions).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -1086,3 +1171,13 @@ export type ProfessionalConnection = typeof professionalConnections.$inferSelect
 export type InsertProfessionalConnection = z.infer<typeof insertProfessionalConnectionSchema>;
 export type UserPrivacySettings = typeof userPrivacySettings.$inferSelect;
 export type InsertUserPrivacySettings = z.infer<typeof insertUserPrivacySettingsSchema>;
+
+// New enhanced features types
+export type JobHistory = typeof jobHistory.$inferSelect;
+export type InsertJobHistory = z.infer<typeof insertJobHistorySchema>;
+export type UserFeatureAccess = typeof userFeatureAccess.$inferSelect;
+export type InsertUserFeatureAccess = z.infer<typeof insertUserFeatureAccessSchema>;
+export type SocialConnection = typeof socialConnections.$inferSelect;
+export type InsertSocialConnection = z.infer<typeof insertSocialConnectionSchema>;
+export type SocialInteraction = typeof socialInteractions.$inferSelect;
+export type InsertSocialInteraction = z.infer<typeof insertSocialInteractionSchema>;

@@ -24,6 +24,13 @@ import {
   jobMatches,
   aiGeneratedContent,
   verificationRequests,
+  socialPosts,
+  socialConnections,
+  socialInteractions,
+  jobHistory,
+  userFeatureAccess,
+  userPrivacySettings,
+  professionalConnections,
   type User,
   type UpsertUser,
   type UserProfile,
@@ -75,22 +82,18 @@ import {
   type InsertVerificationRequest,
   type SocialPost,
   type InsertSocialPost,
-  type PostLike,
-  type InsertPostLike,
-  type PostComment,
-  type InsertPostComment,
-  type Friendship,
-  type InsertFriendship,
-  type ProfessionalConnection,
-  type InsertProfessionalConnection,
+  type SocialConnection,
+  type InsertSocialConnection,
+  type SocialInteraction,
+  type InsertSocialInteraction,
+  type JobHistory,
+  type InsertJobHistory,
+  type UserFeatureAccess,
+  type InsertUserFeatureAccess,
   type UserPrivacySettings,
   type InsertUserPrivacySettings,
-  socialPosts,
-  postLikes,
-  postComments,
-  friendships,
-  professionalConnections,
-  userPrivacySettings,
+  type ProfessionalConnection,
+  type InsertProfessionalConnection,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc, like, ilike, sql, ne } from "drizzle-orm";
@@ -139,6 +142,25 @@ export interface IStorage {
   // Privacy settings
   getUserPrivacySettings(userId: number): Promise<UserPrivacySettings>;
   updateUserPrivacySettings(userId: number, settings: Partial<InsertUserPrivacySettings>): Promise<UserPrivacySettings>;
+  
+  // Job history operations
+  createJobHistory(jobHistory: InsertJobHistory): Promise<JobHistory>;
+  getJobHistory(userId: number): Promise<JobHistory[]>;
+  updateJobHistory(id: number, jobHistory: Partial<InsertJobHistory>): Promise<JobHistory>;
+  deleteJobHistory(id: number): Promise<void>;
+  
+  // Social connections
+  createSocialConnection(connection: InsertSocialConnection): Promise<SocialConnection>;
+  getSocialConnections(userId: number): Promise<SocialConnection[]>;
+  updateSocialConnection(id: number, connection: Partial<InsertSocialConnection>): Promise<SocialConnection>;
+  
+  // Social interactions
+  createSocialInteraction(interaction: InsertSocialInteraction): Promise<SocialInteraction>;
+  getSocialInteractions(postId: number): Promise<SocialInteraction[]>;
+  
+  // Feature access
+  getUserFeatureAccess(userId: number): Promise<UserFeatureAccess[]>;
+  updateUserFeatureAccess(userId: number, featureType: string, hasAccess: boolean): Promise<UserFeatureAccess>;
   
   // Job operations
   createJob(job: InsertJob): Promise<Job>;
@@ -1209,6 +1231,81 @@ export class DatabaseStorage implements IStorage {
   async sendJobMatchNotification(jobId: number, userId: string): Promise<boolean> {
     // Implementation would go here
     return true;
+  }
+
+  // Job history operations
+  async createJobHistory(jobHistoryData: InsertJobHistory): Promise<JobHistory> {
+    const [result] = await db.insert(jobHistory).values(jobHistoryData).returning();
+    return result;
+  }
+
+  async getJobHistory(userId: number): Promise<JobHistory[]> {
+    return await db.select().from(jobHistory).where(eq(jobHistory.userId, userId)).orderBy(desc(jobHistory.startDate));
+  }
+
+  async updateJobHistory(id: number, jobHistoryUpdate: Partial<InsertJobHistory>): Promise<JobHistory> {
+    const [result] = await db.update(jobHistory)
+      .set({ ...jobHistoryUpdate, updatedAt: new Date() })
+      .where(eq(jobHistory.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteJobHistory(id: number): Promise<void> {
+    await db.delete(jobHistory).where(eq(jobHistory.id, id));
+  }
+
+  // Social connections
+  async createSocialConnection(connection: InsertSocialConnection): Promise<SocialConnection> {
+    const [result] = await db.insert(socialConnections).values(connection).returning();
+    return result;
+  }
+
+  async getSocialConnections(userId: number): Promise<SocialConnection[]> {
+    return await db.select().from(socialConnections).where(eq(socialConnections.userId, userId));
+  }
+
+  async updateSocialConnection(id: number, connection: Partial<InsertSocialConnection>): Promise<SocialConnection> {
+    const [result] = await db.update(socialConnections)
+      .set({ ...connection, updatedAt: new Date() })
+      .where(eq(socialConnections.id, id))
+      .returning();
+    return result;
+  }
+
+  // Social interactions
+  async createSocialInteraction(interaction: InsertSocialInteraction): Promise<SocialInteraction> {
+    const [result] = await db.insert(socialInteractions).values(interaction).returning();
+    return result;
+  }
+
+  async getSocialInteractions(postId: number): Promise<SocialInteraction[]> {
+    return await db.select().from(socialInteractions).where(eq(socialInteractions.postId, postId));
+  }
+
+  // Feature access
+  async getUserFeatureAccess(userId: number): Promise<UserFeatureAccess[]> {
+    return await db.select().from(userFeatureAccess).where(eq(userFeatureAccess.userId, userId));
+  }
+
+  async updateUserFeatureAccess(userId: number, featureType: string, hasAccess: boolean): Promise<UserFeatureAccess> {
+    const [existing] = await db.select().from(userFeatureAccess)
+      .where(and(eq(userFeatureAccess.userId, userId), eq(userFeatureAccess.featureType, featureType)));
+    
+    if (existing) {
+      const [result] = await db.update(userFeatureAccess)
+        .set({ hasAccess, updatedAt: new Date() })
+        .where(eq(userFeatureAccess.id, existing.id))
+        .returning();
+      return result;
+    } else {
+      const [result] = await db.insert(userFeatureAccess).values({
+        userId,
+        featureType,
+        hasAccess,
+      }).returning();
+      return result;
+    }
   }
 }
 
