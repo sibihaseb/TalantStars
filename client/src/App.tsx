@@ -89,10 +89,10 @@ function Router() {
       
       {/* Other protected routes */}
       <Route path="/onboarding">
-        {isAuthenticated ? <Onboarding key="onboarding" /> : <Auth />}
+        {isAuthenticated ? <Onboarding /> : <Auth />}
       </Route>
       <Route path="/profile-completion">
-        {isAuthenticated ? <Onboarding key="profile-completion" /> : <Auth />}
+        {isAuthenticated ? <Onboarding /> : <Auth />}
       </Route>
       <Route path="/profile">
         {isAuthenticated ? <Profile /> : <Auth />}

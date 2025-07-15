@@ -477,7 +477,7 @@ const RequiredFieldLabel = ({ children, required = false }: { children: React.Re
   </div>
 );
 
-export default function Onboarding() {
+const Onboarding = React.memo(function Onboarding() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
@@ -509,14 +509,14 @@ export default function Onboarding() {
       }, 500);
       return;
     }
-  }, [isAuthenticated, isLoading, toast]);
+  }, [isAuthenticated, isLoading]); // Remove toast from dependencies
 
   // Redirect if user already has a profile
   useEffect(() => {
     if (user?.profile) {
       setLocation("/");
     }
-  }, [user, setLocation]);
+  }, [user?.profile, setLocation]); // Only depend on profile, not entire user object
 
   const form = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
@@ -574,7 +574,7 @@ export default function Onboarding() {
         setCurrentStep(3); // Start at basic info for non-talent roles  
       }
     }
-  }, [user, form]);
+  }, [user?.role]); // Only depend on user role, not entire user object or form
 
   const createProfileMutation = useMutation({
     mutationFn: async (data: OnboardingFormData) => {
@@ -1957,4 +1957,6 @@ export default function Onboarding() {
       </div>
     </ThemeProvider>
   );
-}
+});
+
+export default Onboarding;
