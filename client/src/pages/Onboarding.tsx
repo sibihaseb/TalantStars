@@ -819,61 +819,47 @@ export default function Onboarding() {
   };
 
   const renderDynamicFormField = (question: any) => {
-    const fieldName = question.field_name as keyof OnboardingFormData;
+    const fieldName = question.field_name;
+    const currentValue = form.getValues(fieldName) || '';
+    
+    const handleChange = (value: any) => {
+      form.setValue(fieldName, value);
+    };
     
     switch (question.field_type) {
       case 'text':
         return (
-          <Controller
-            name={fieldName}
-            control={form.control}
-            defaultValue=""
-            render={({ field }) => (
-              <Input
-                {...field}
-                placeholder={`Enter ${question.question.toLowerCase()}...`}
-              />
-            )}
+          <Input
+            value={currentValue}
+            onChange={(e) => handleChange(e.target.value)}
+            placeholder={`Enter ${question.question.toLowerCase()}...`}
           />
         );
       
       case 'textarea':
         return (
-          <Controller
-            name={fieldName}
-            control={form.control}
-            defaultValue=""
-            render={({ field }) => (
-              <Textarea
-                {...field}
-                placeholder={`Enter ${question.question.toLowerCase()}...`}
-                rows={3}
-              />
-            )}
+          <Textarea
+            value={currentValue}
+            onChange={(e) => handleChange(e.target.value)}
+            placeholder={`Enter ${question.question.toLowerCase()}...`}
+            rows={3}
           />
         );
       
       case 'select':
         return (
-          <Controller
-            name={fieldName}
-            control={form.control}
-            defaultValue=""
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder={`Select ${question.question.toLowerCase()}...`} />
-                </SelectTrigger>
-                <SelectContent>
-                  {question.options?.map((option: string) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
+          <Select onValueChange={handleChange} value={currentValue}>
+            <SelectTrigger>
+              <SelectValue placeholder={`Select ${question.question.toLowerCase()}...`} />
+            </SelectTrigger>
+            <SelectContent>
+              {question.options?.map((option: string) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         );
       
       case 'checkbox':
@@ -894,16 +880,10 @@ export default function Onboarding() {
       
       default:
         return (
-          <Controller
-            name={fieldName}
-            control={form.control}
-            defaultValue=""
-            render={({ field }) => (
-              <Input
-                {...field}
-                placeholder={`Enter ${question.question.toLowerCase()}...`}
-              />
-            )}
+          <Input
+            value={currentValue}
+            onChange={(e) => handleChange(e.target.value)}
+            placeholder={`Enter ${question.question.toLowerCase()}...`}
           />
         );
     }
