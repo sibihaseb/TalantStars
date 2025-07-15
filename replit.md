@@ -10,6 +10,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Onboarding Component Re-render Issue Fixed (July 15, 2025)
+- **Issue**: Duplicate question titles appearing due to excessive component re-renders (8+ renders per page load)
+- **Root Cause**: React.memo wrapper combined with complex form state dependencies causing render cascades
+- **Solution**: 
+  - Removed and re-added all actor questions (21 questions) with proper field names and database structure
+  - Removed React.memo wrapper from Onboarding component to prevent render optimization conflicts
+  - Added useMemo for relevantQuestions computation to prevent unnecessary re-filtering
+  - Optimized form watching to reduce state dependencies
+  - Restarted workflow to clear cached component state
+- **Result**: ✅ Component now renders cleanly without duplicates, questions display properly with correct field names
+- **Test Credentials**: martyTEST / 123456 (talent role with actor questions working correctly)
+
 ### Emotional Progress Mascot System Implementation (July 15, 2025)
 - **Interactive Mascot**: Created comprehensive emotional progress mascot system with 8 distinct emotions (happy, excited, proud, celebrating, motivated, calm, focused, sleepy)
 - **Progress Tracking**: Built dynamic progress calculation system that responds to user profile completion with real-time emotional feedback
