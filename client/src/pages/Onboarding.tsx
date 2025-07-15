@@ -480,9 +480,16 @@ const RequiredFieldLabel = ({ children, required = false }: { children: React.Re
 export default function Onboarding() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(1);
+  
+  // Debug: Track component renders
+  console.log('=== ONBOARDING COMPONENT RENDER ===');
+  console.log('Current location:', location);
+  console.log('User:', user?.username);
+  console.log('Current step:', currentStep);
+  console.log('Timestamp:', new Date().toISOString());
   const [newSkill, setNewSkill] = useState("");
   const [isStepChanging, setIsStepChanging] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
