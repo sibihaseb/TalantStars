@@ -1,0 +1,53 @@
+Continue Building Profile clicked - forcing navigation to onboarding main.tsx:54:22
+Step 1 completed! main.tsx:54:22
+XHRGET
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/admin/profile-questions
+[HTTP/1.1 403 Forbidden 79ms]
+
+Step 2 completed! 2 main.tsx:54:22
+Step 3 completed! 44 main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+Form submitted with data: 
+Object { role: "talent", talentType: "actor", displayName: "Marty TEST", bio: "I love it when things work together", location: "Orlando", website: "", phoneNumber: "", availabilityStatus: "available", height: "", weight: "", … }
+main.tsx:54:22
+Form errors: 
+Object {  }
+main.tsx:54:22
+Form is valid: false main.tsx:54:22
+Calling mutation... main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+Submitting profile data: 
+Object { role: "talent", talentType: "actor", displayName: "Marty TEST", bio: "I love it when things work together", location: "Orlando", website: "", phoneNumber: "", availabilityStatus: "available", height: "", weight: "", … }
+main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+API response status: 200 main.tsx:54:22
+API response data: 
+Object { id: 3, userId: 5, role: "talent", talentType: "actor", displayName: "Marty TEST", bio: "I love it when things work together", location: "Orlando", website: "", phoneNumber: "", isVerified: false, … }
+main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+Step 1 completed! main.tsx:54:22
+XHRGET
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/admin/profile-questions
+[HTTP/1.1 403 Forbidden 96ms]
+
+Step 2 completed! 2 main.tsx:54:22
+Step 3 completed! 25 main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+Form submitted with data: 
+Object { role: "talent", talentType: "actor", displayName: "Marty TEST", bio: "asfadfd fdsasdf", location: "fOrlan", website: "", phoneNumber: "", availabilityStatus: "available", height: "", weight: "", … }
+main.tsx:54:22
+Form errors: 
+Object {  }
+main.tsx:54:22
+Form is valid: false main.tsx:54:22
+Calling mutation... main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+Submitting profile data: 
+Object { role: "talent", talentType: "actor", displayName: "Marty TEST", bio: "asfadfd fdsasdf", location: "fOrlan", website: "", phoneNumber: "", availabilityStatus: "available", height: "", weight: "", … }
+main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+API response status: 200 main.tsx:54:22
+API response data: 
+Object { id: 4, userId: 5, role: "talent", talentType: "actor", displayName: "Marty TEST", bio: "asfadfd fdsasdf", location: "fOrlan", website: "", phoneNumber: "", isVerified: false, … }
+main.tsx:54:22
+Step 4 completed!

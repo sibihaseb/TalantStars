@@ -77,7 +77,10 @@ export default function ProfileImageUpload({
   });
 
   const handleFileSelect = useCallback((file: File) => {
+    console.log('File selected:', file.name, file.type, file.size);
+    
     if (!file.type.startsWith('image/')) {
+      console.log('Invalid file type');
       toast({
         title: "Invalid File",
         description: "Please select an image file",
@@ -87,6 +90,7 @@ export default function ProfileImageUpload({
     }
 
     if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      console.log('File too large');
       toast({
         title: "File Too Large",
         description: "Please select an image smaller than 10MB",
@@ -95,16 +99,22 @@ export default function ProfileImageUpload({
       return;
     }
 
+    console.log('Setting selected file and preview URL');
     setSelectedFile(file);
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
     setShowCropper(true);
+    console.log('Cropper should now be visible');
   }, [toast]);
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('File input changed');
     const file = e.target.files?.[0];
+    console.log('Selected file:', file);
     if (file) {
       handleFileSelect(file);
+    } else {
+      console.log('No file selected');
     }
   };
 
