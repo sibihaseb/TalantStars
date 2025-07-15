@@ -292,13 +292,68 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Enhanced permissions system with granular control
+export const permissionCategoryEnum = pgEnum("permission_category", [
+  "user_management",
+  "profile_management", 
+  "media_management",
+  "job_management",
+  "application_management",
+  "messaging",
+  "analytics",
+  "system_settings",
+  "content_moderation",
+  "billing_payments",
+  "verification",
+  "notifications",
+  "calendar_scheduling",
+  "ai_features",
+  "reports"
+]);
+
+export const permissionActionEnum = pgEnum("permission_action", [
+  "create",
+  "read", 
+  "update",
+  "delete",
+  "approve",
+  "reject",
+  "publish",
+  "unpublish",
+  "verify",
+  "unverify",
+  "export",
+  "import",
+  "moderate",
+  "assign",
+  "unassign"
+]);
+
+// Role-based default permissions
+export const rolePermissions = pgTable("role_permissions", {
+  id: serial("id").primaryKey(),
+  role: userRoleEnum("role").notNull(),
+  category: permissionCategoryEnum("category").notNull(),
+  action: permissionActionEnum("action").notNull(),
+  resource: varchar("resource"), // optional specific resource like "own_profile", "all_profiles"
+  granted: boolean("granted").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Individual user permissions (overrides role permissions)
 export const userPermissions = pgTable("user_permissions", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").references(() => users.id).notNull(),
-  permission: varchar("permission").notNull(), // e.g., "admin.users.create", "admin.jobs.edit"
+  category: permissionCategoryEnum("category").notNull(),
+  action: permissionActionEnum("action").notNull(),
+  resource: varchar("resource"), // optional specific resource like "own_profile", "all_profiles", "user_123"
   granted: boolean("granted").default(true).notNull(),
   grantedBy: varchar("granted_by").references(() => users.id),
+  expiresAt: timestamp("expires_at"), // optional expiration
+  conditions: jsonb("conditions"), // optional conditions like time restrictions, IP restrictions, etc.
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const notifications = pgTable("notifications", {
@@ -720,9 +775,16 @@ export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTo
   createdAt: true,
 });
 
+export const insertRolePermissionSchema = createInsertSchema(rolePermissions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertUserPermissionSchema = createInsertSchema(userPermissions).omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 });
 
 export const insertNotificationSchema = createInsertSchema(notifications).omit({
@@ -820,6 +882,8 @@ export type Meeting = typeof meetings.$inferSelect;
 export type InsertMeeting = z.infer<typeof insertMeetingSchema>;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
+export type RolePermission = typeof rolePermissions.$inferSelect;
+export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
 export type UserPermission = typeof userPermissions.$inferSelect;
 export type InsertUserPermission = z.infer<typeof insertUserPermissionSchema>;
 export type Notification = typeof notifications.$inferSelect;

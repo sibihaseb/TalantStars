@@ -8,6 +8,7 @@ import { storage } from "./simple-storage";
 import { User } from "@shared/simple-schema";
 import connectPg from "connect-pg-simple";
 import createMemoryStore from "memorystore";
+import { pool } from "./db";
 
 declare global {
   namespace Express {
@@ -31,25 +32,32 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  // Temporary memory store for debugging
+  // Use memory store for development to avoid cookie issues
   const MemoryStore = createMemoryStore(session);
   const sessionStore = new MemoryStore({
     checkPeriod: 86400000, // prune expired entries every 24h
   });
 
+  // Force development environment for cookie settings
+  const isDev = process.env.NODE_ENV !== 'production';
+  console.log("Environment:", process.env.NODE_ENV, "isDev:", isDev);
+
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "your-secret-key-here",
     resave: false,
-    saveUninitialized: true, // Force session creation for proper authentication
+    saveUninitialized: false, // Don't save empty sessions
     store: sessionStore,
     name: "connect.sid",
     cookie: {
       httpOnly: true,
-      secure: false, // Force to false for development
+      secure: false, // Force secure to false for all environments
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       sameSite: "lax"
     },
   };
+
+  // Debug: log the cookie configuration
+  console.log("Session cookie configuration:", sessionSettings.cookie);
 
   // Remove trust proxy setting for development
   // app.set("trust proxy", 1);
@@ -57,10 +65,11 @@ export function setupAuth(app: Express) {
   // Test middleware to see if session is working
   app.use(session(sessionSettings));
   
-  // Add debug middleware to check session creation
+  // Ensure cookies are not secure in development
   app.use((req: any, res: any, next: any) => {
-    console.log("Session ID:", req.sessionID);
-    console.log("Session exists:", !!req.session);
+    if (req.session && req.session.cookie) {
+      req.session.cookie.secure = false;
+    }
     next();
   });
   
@@ -81,12 +90,18 @@ export function setupAuth(app: Express) {
     }),
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  passport.serializeUser((user, done) => {
+    console.log("Serializing user:", user);
+    done(null, user.id);
+  });
   passport.deserializeUser(async (id: number, done) => {
     try {
+      console.log("Deserializing user ID:", id);
       const user = await storage.getUser(id);
+      console.log("Deserialized user:", user);
       done(null, user);
     } catch (error) {
+      console.error("Error deserializing user:", error);
       done(error);
     }
   });
@@ -121,9 +136,21 @@ export function setupAuth(app: Express) {
 
   app.post("/api/login", passport.authenticate("local"), (req, res) => {
     const user = req.user as any;
-    console.log("Session after login:", req.session);
-    console.log("User after login:", user);
-    console.log("IsAuthenticated:", req.isAuthenticated());
+    
+    // Force secure to false after login
+    if (req.session && req.session.cookie) {
+      req.session.cookie.secure = false;
+    }
+    
+    res.status(200).json({ ...user, password: undefined });
+  });
+
+  // Add admin login endpoint that matches the scratchpad
+  app.post("/api/admin/login", passport.authenticate("local"), (req, res) => {
+    const user = req.user as any;
+    console.log("Admin Session after login:", req.session);
+    console.log("Admin User after login:", user);
+    console.log("Admin IsAuthenticated:", req.isAuthenticated());
     res.status(200).json({ ...user, password: undefined });
   });
 
@@ -154,8 +181,29 @@ export function setupAuth(app: Express) {
 }
 
 export const isAuthenticated = (req: any, res: any, next: any) => {
+  console.log("Traditional auth middleware - isAuthenticated:", req.isAuthenticated());
+  console.log("Traditional auth middleware - user:", req.user);
+  console.log("Traditional auth middleware - session:", req.session);
+  console.log("Traditional auth middleware - sessionID:", req.sessionID);
+  
   if (req.isAuthenticated()) {
     return next();
   }
   res.status(401).json({ message: "Unauthorized" });
+};
+
+export const isAdmin = (req: any, res: any, next: any) => {
+  console.log("Admin middleware - isAuthenticated:", req.isAuthenticated());
+  console.log("Admin middleware - user:", req.user);
+  console.log("Admin middleware - user role:", req.user?.role);
+  
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  
+  if (req.user?.role !== "admin") {
+    return res.status(403).json({ message: "Forbidden - Not an admin" });
+  }
+  
+  next();
 };

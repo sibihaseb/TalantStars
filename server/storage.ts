@@ -13,6 +13,7 @@ import {
   analytics,
   meetings,
   passwordResetTokens,
+  rolePermissions,
   userPermissions,
   notifications,
   availabilityCalendar,
@@ -50,6 +51,8 @@ import {
   type InsertMeeting,
   type PasswordResetToken,
   type InsertPasswordResetToken,
+  type RolePermission,
+  type InsertRolePermission,
   type UserPermission,
   type InsertUserPermission,
   type Notification,
@@ -76,7 +79,8 @@ import { eq, and, or, desc, asc, like, ilike } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
-  getUser(id: string): Promise<User | undefined>;
+  getUser(id: string | number): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   
   // Profile operations
@@ -190,6 +194,12 @@ export interface IStorage {
   getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
   usePasswordResetToken(token: string): Promise<void>;
   
+  // Role permissions
+  createRolePermission(permission: InsertRolePermission): Promise<RolePermission>;
+  getRolePermissions(role: string): Promise<RolePermission[]>;
+  updateRolePermission(id: number, permission: Partial<InsertRolePermission>): Promise<RolePermission>;
+  deleteRolePermission(id: number): Promise<void>;
+  
   // User permissions
   createUserPermission(permission: InsertUserPermission): Promise<UserPermission>;
   getUserPermissions(userId: string): Promise<UserPermission[]>;
@@ -222,12 +232,22 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   // User operations
-  async getUser(id: string): Promise<User | undefined> {
+  async getUser(id: string | number): Promise<User | undefined> {
     try {
-      const [user] = await db.select().from(users).where(eq(users.id, id));
+      const [user] = await db.select().from(users).where(eq(users.id, Number(id)));
       return user;
     } catch (error) {
       console.error('Error getting user:', error);
+      throw error;
+    }
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.email, email));
+      return user;
+    } catch (error) {
+      console.error('Error getting user by email:', error);
       throw error;
     }
   }
@@ -695,6 +715,29 @@ export class DatabaseStorage implements IStorage {
     await db.update(passwordResetTokens)
       .set({ used: true })
       .where(eq(passwordResetTokens.token, token));
+  }
+
+  // Role permissions
+  async createRolePermission(permission: InsertRolePermission): Promise<RolePermission> {
+    const [result] = await db.insert(rolePermissions).values(permission).returning();
+    return result;
+  }
+
+  async getRolePermissions(role: string): Promise<RolePermission[]> {
+    return await db.select().from(rolePermissions)
+      .where(eq(rolePermissions.role, role));
+  }
+
+  async updateRolePermission(id: number, permission: Partial<InsertRolePermission>): Promise<RolePermission> {
+    const [result] = await db.update(rolePermissions)
+      .set(permission)
+      .where(eq(rolePermissions.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteRolePermission(id: number): Promise<void> {
+    await db.delete(rolePermissions).where(eq(rolePermissions.id, id));
   }
 
   // User permissions

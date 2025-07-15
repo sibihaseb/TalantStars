@@ -4,7 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { storage as simpleStorage } from "./simple-storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { setupAuth as setupTraditionalAuth, isAuthenticated as isTraditionalAuthenticated } from "./auth";
+import { setupAuth as setupTraditionalAuth, isAuthenticated as isTraditionalAuthenticated, isAdmin } from "./auth";
 import { enhanceProfile, generateBio } from "./openai";
 import { 
   insertUserProfileSchema, 
@@ -347,7 +347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes (for user management, pricing, etc.)
-  app.get('/api/admin/users', isTraditionalAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/users', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const users = await simpleStorage.getAllUsers();
       res.setHeader('Content-Type', 'application/json');
@@ -358,7 +358,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/users', isTraditionalAuthenticated, async (req: any, res) => {
+  app.post('/api/admin/users', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Creating user:", req.body);
       
@@ -394,7 +394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/users/:userId', isTraditionalAuthenticated, async (req: any, res) => {
+  app.put('/api/admin/users/:userId', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
       console.log("Updating user:", userId, req.body);
@@ -406,7 +406,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/admin/users/:userId', isTraditionalAuthenticated, async (req: any, res) => {
+  app.delete('/api/admin/users/:userId', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
       console.log("Deleting user:", userId);
@@ -420,7 +420,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Password reset routes
-  app.post('/api/admin/users/:userId/reset-password', isTraditionalAuthenticated, async (req: any, res) => {
+  app.post('/api/admin/users/:userId/reset-password', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
       const user = await storage.getUser(userId);
@@ -853,6 +853,153 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error deleting job:", error);
       res.status(500).json({ message: "Failed to delete job", error: error.message });
     }
+  });
+
+  // Admin - Permissions Management
+  app.get("/api/admin/permissions/roles", isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const roles = ["talent", "manager", "producer", "admin"];
+      const allRolePermissions = {};
+      
+      for (const role of roles) {
+        const permissions = await storage.getRolePermissions(role);
+        allRolePermissions[role] = permissions;
+      }
+      
+      res.json(allRolePermissions);
+    } catch (error) {
+      console.error("Error fetching role permissions:", error);
+      res.status(500).json({ error: "Failed to fetch role permissions" });
+    }
+  });
+
+  app.post("/api/admin/permissions/roles", isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { role, category, action, resource, granted } = req.body;
+      
+      if (!role || !category || !action) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      
+      const permission = await storage.createRolePermission({
+        role,
+        category,
+        action,
+        resource,
+        granted: granted !== false
+      });
+      
+      res.json(permission);
+    } catch (error) {
+      console.error("Error creating role permission:", error);
+      res.status(500).json({ error: "Failed to create role permission" });
+    }
+  });
+
+  app.get("/api/admin/permissions/users/:userId", isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const userPermissions = await storage.getUserPermissions(userId);
+      const rolePermissions = await storage.getRolePermissions(user.role);
+      
+      res.json({
+        user: {
+          id: user.id,
+          username: user.username,
+          role: user.role,
+          email: user.email
+        },
+        userPermissions,
+        rolePermissions
+      });
+    } catch (error) {
+      console.error("Error fetching user permissions:", error);
+      res.status(500).json({ error: "Failed to fetch user permissions" });
+    }
+  });
+
+  app.post("/api/admin/permissions/users/:userId", isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { category, action, resource, granted, expiresAt, conditions } = req.body;
+      
+      if (!category || !action) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      
+      const permission = await storage.createUserPermission({
+        userId,
+        category,
+        action,
+        resource,
+        granted: granted !== false,
+        grantedBy: req.user.id,
+        expiresAt: expiresAt ? new Date(expiresAt) : undefined,
+        conditions
+      });
+      
+      res.json(permission);
+    } catch (error) {
+      console.error("Error creating user permission:", error);
+      res.status(500).json({ error: "Failed to create user permission" });
+    }
+  });
+
+  app.delete("/api/admin/permissions/users/:permissionId", isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { permissionId } = req.params;
+      await storage.deleteUserPermission(parseInt(permissionId));
+      res.sendStatus(204);
+    } catch (error) {
+      console.error("Error deleting user permission:", error);
+      res.status(500).json({ error: "Failed to delete user permission" });
+    }
+  });
+
+  app.get("/api/admin/permissions/categories", isTraditionalAuthenticated, isAdmin, (req: any, res) => {
+    const categories = [
+      "user_management",
+      "profile_management", 
+      "media_management",
+      "job_management",
+      "application_management",
+      "messaging",
+      "analytics",
+      "system_settings",
+      "content_moderation",
+      "billing_payments",
+      "verification",
+      "notifications",
+      "calendar_scheduling",
+      "ai_features",
+      "reports"
+    ];
+    
+    const actions = [
+      "create",
+      "read", 
+      "update",
+      "delete",
+      "approve",
+      "reject",
+      "publish",
+      "unpublish",
+      "verify",
+      "unverify",
+      "export",
+      "import",
+      "moderate",
+      "assign",
+      "unassign"
+    ];
+    
+    res.json({ categories, actions });
   });
 
   // Talent-Manager routes

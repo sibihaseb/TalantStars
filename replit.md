@@ -8,6 +8,17 @@ Talents & Stars is a comprehensive AI-powered entertainment industry platform th
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### Session Authentication Fix (July 15, 2025)
+- **Issue**: Session cookies were being set with `secure: true` flag, preventing session persistence in development environment
+- **Root Cause**: Session middleware was defaulting to secure cookies even in development mode
+- **Solution**: 
+  - Forced `secure: false` in session configuration for all environments
+  - Added middleware to ensure cookie secure flag is always false in development
+  - Confirmed session persistence works correctly across login/logout/user endpoints
+- **Result**: ✅ Authentication system now fully functional with proper session management
+
 ## System Architecture
 
 ### Full-Stack Architecture
