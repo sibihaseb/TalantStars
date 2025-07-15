@@ -819,14 +819,16 @@ export default function Onboarding() {
   };
 
   const renderDynamicFormField = (question: any) => {
-    const fieldName = question.field_name;
+    const fieldName = question.fieldName || question.field_name;
     const currentValue = form.getValues(fieldName) || '';
+    
+    console.log('Rendering field:', fieldName, 'type:', question.fieldType || question.field_type, 'value:', currentValue);
     
     const handleChange = (value: any) => {
       form.setValue(fieldName, value);
     };
     
-    switch (question.field_type) {
+    switch (question.fieldType || question.field_type) {
       case 'text':
         return (
           <Input
