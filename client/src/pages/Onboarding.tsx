@@ -112,10 +112,10 @@ const onboardingSchema = insertUserProfileSchema.extend({
   sportingActivities: z.array(z.string()).optional(),
   drivingLicenses: z.array(z.string()).optional(),
   
-  // Acting-specific fields
-  acting_specialty: z.string().optional(),
+  // Acting-specific fields from database
+  acting_specialty: z.array(z.string()).optional(),
   acting_experience_years: z.string().optional(),
-  acting_method: z.string().optional(),
+  acting_method: z.array(z.string()).optional(),
   improvisation_comfort: z.string().optional(),
   stage_combat: z.string().optional(),
   intimate_scenes: z.string().optional(),
@@ -123,26 +123,20 @@ const onboardingSchema = insertUserProfileSchema.extend({
   motion_capture: z.string().optional(),
   animals_comfort: z.string().optional(),
   crying_on_cue: z.string().optional(),
-  dancing_ability: z.string().optional(),
-  singing_ability: z.string().optional(),
-  comedy_experience: z.string().optional(),
-  drama_experience: z.string().optional(),
-  action_experience: z.string().optional(),
-  horror_experience: z.string().optional(),
-  sci_fi_experience: z.string().optional(),
-  period_experience: z.string().optional(),
-  children_comfort: z.string().optional(),
-  dialects_accents: z.array(z.string()).optional(),
-  // Additional acting fields from database
-  accent_experience: z.string().optional(),
-  children_experience: z.string().optional(),
-  green_screen: z.string().optional(),
-  musical_theater: z.string().optional(),
-  nudity_comfort: z.string().optional(),
   period_pieces: z.string().optional(),
   physical_comedy: z.string().optional(),
-  shakespeare_experience: z.string().optional(),
+  accent_experience: z.string().optional(),
+  green_screen: z.string().optional(),
   stunt_comfort: z.string().optional(),
+  shakespeare_experience: z.string().optional(),
+  musical_theater: z.string().optional(),
+  children_experience: z.string().optional(),
+  horror_experience: z.string().optional(),
+  // Representation fields
+  current_manager: z.string().optional(),
+  current_agent: z.string().optional(),
+  current_publicist: z.string().optional(),
+  representation_status: z.string().optional(),
   
   // Musician-specific fields
   primary_instrument: z.string().optional(),
@@ -1733,21 +1727,46 @@ export default function Onboarding() {
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Representation Information
+                      </h3>
                       <div className="space-y-2">
-                        <Label htmlFor="website">Website/Portfolio</Label>
+                        <Label htmlFor="current_manager">Current Manager (Optional)</Label>
                         <Input
-                          {...form.register("website")}
-                          placeholder="https://yourwebsite.com"
-                          type="url"
+                          {...form.register("current_manager")}
+                          placeholder="Enter your current manager's name"
+                          type="text"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="phoneNumber">Phone Number</Label>
+                        <Label htmlFor="current_agent">Current Agent (Optional)</Label>
                         <Input
-                          {...form.register("phoneNumber")}
-                          placeholder="+1 (555) 123-4567"
-                          type="tel"
+                          {...form.register("current_agent")}
+                          placeholder="Enter your current agent's name"
+                          type="text"
                         />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="current_publicist">Current Publicist (Optional)</Label>
+                        <Input
+                          {...form.register("current_publicist")}
+                          placeholder="Enter your current publicist's name"
+                          type="text"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="representation_status">Representation Status</Label>
+                        <Select onValueChange={(value) => form.setValue("representation_status", value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select representation status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="seeking">Seeking representation</SelectItem>
+                            <SelectItem value="have">Have representation</SelectItem>
+                            <SelectItem value="self">Self-represented</SelectItem>
+                            <SelectItem value="not_seeking">Not currently seeking</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   </CardContent>
