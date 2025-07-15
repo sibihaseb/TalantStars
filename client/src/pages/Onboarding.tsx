@@ -484,12 +484,7 @@ const Onboarding = React.memo(function Onboarding() {
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(1);
   
-  // Debug: Track component renders
-  console.log('=== ONBOARDING COMPONENT RENDER ===');
-  console.log('Current location:', location);
-  console.log('User:', user?.username);
-  console.log('Current step:', currentStep);
-  console.log('Timestamp:', new Date().toISOString());
+  // Remove debug logs
   const [newSkill, setNewSkill] = useState("");
   const [isStepChanging, setIsStepChanging] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -762,11 +757,13 @@ const Onboarding = React.memo(function Onboarding() {
   const { data: profileQuestions = [] } = useQuery({
     queryKey: ["/api/profile-questions"],
     enabled: !!watchedRole,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  // Create a component to prevent re-rendering issues
-  const RoleSpecificQuestions = React.memo(() => {
-    if (!watchedRole) return null;
+  // Memoize the relevant questions to prevent re-computation
+  const relevantQuestions = useMemo(() => {
+    if (!watchedRole) return [];
 
     // Filter questions based on role
     let questionTypes = [];
@@ -778,19 +775,21 @@ const Onboarding = React.memo(function Onboarding() {
       questionTypes = ['profile'];
     }
 
-    const relevantQuestions = profileQuestions
+    return profileQuestions
       .filter(q => {
         const questionType = q.talentType;
         const isRelevant = questionTypes.includes(questionType) && q.active;
         return isRelevant;
       })
       .sort((a, b) => a.order - b.order);
+  }, [watchedRole, watchedTalentType, profileQuestions]);
 
-    if (relevantQuestions.length === 0) {
+  // Render questions directly without inline component
+  const renderRoleSpecificQuestions = () => {
+    if (!watchedRole || relevantQuestions.length === 0) {
       return (
         <div className="text-gray-500 text-center py-8">
           <p>No questions available for this role.</p>
-          <p className="text-sm mt-2">Looking for types: {questionTypes.join(', ')}</p>
         </div>
       );
     }
@@ -808,7 +807,7 @@ const Onboarding = React.memo(function Onboarding() {
         ))}
       </div>
     );
-  });
+  };
 
   const renderDynamicFormField = (question: any) => {
     const fieldName = question.fieldName || question.field_name;
@@ -1694,7 +1693,7 @@ const Onboarding = React.memo(function Onboarding() {
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <RoleSpecificQuestions />
+                    {renderRoleSpecificQuestions()}
                   </CardContent>
                 </Card>
               )}
