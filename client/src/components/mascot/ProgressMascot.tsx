@@ -270,7 +270,15 @@ export function ProgressMascot({
                 onClick={() => {
                   const nextIncomplete = items.find(item => !item.completed);
                   if (nextIncomplete) {
-                    onItemClick?.(nextIncomplete);
+                    if (onItemClick) {
+                      onItemClick(nextIncomplete);
+                    } else {
+                      // Fallback navigation
+                      window.location.href = '/onboarding';
+                    }
+                  } else {
+                    // No incomplete items, navigate to dashboard
+                    window.location.href = '/dashboard';
                   }
                 }}
               >
@@ -282,10 +290,16 @@ export function ProgressMascot({
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => updateMascot({ 
-                emotion: 'motivated', 
-                message: "I believe in you! Let's make it happen!" 
-              })}
+              onClick={() => {
+                try {
+                  updateMascot({ 
+                    emotion: 'motivated', 
+                    message: "I believe in you! Let's make it happen!" 
+                  });
+                } catch (error) {
+                  console.error('Error updating mascot:', error);
+                }
+              }}
             >
               <Heart className="w-4 h-4 mr-2" />
               Get Motivated

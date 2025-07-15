@@ -170,6 +170,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Upload profile image
+  app.post('/api/user/profile-image', isAuthenticated, upload.single('image'), async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const file = req.file;
+      
+      if (!file) {
+        return res.status(400).json({ message: "No image file provided" });
+      }
+
+      // Upload to Wasabi S3
+      const uploadResult = await uploadFileToWasabi(file, `user-${userId}/profile`);
+      
+      // Update user profile image URL in database
+      const updatedUser = await storage.updateUserProfileImage(userId, uploadResult.url);
+      
+      res.json({
+        profileImageUrl: uploadResult.url,
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error("Error uploading profile image:", error);
+      res.status(500).json({ message: "Failed to upload profile image" });
+    }
+  });
+
   // AI enhancement routes
   app.post('/api/profile/enhance', isAuthenticated, async (req: any, res) => {
     try {

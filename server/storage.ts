@@ -109,6 +109,7 @@ export interface IStorage {
   getUser(id: string | number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUserProfileImage(userId: string | number, imageUrl: string): Promise<User>;
   
   // Profile operations
   getUserProfile(userId: string): Promise<UserProfile | undefined>;
@@ -346,6 +347,23 @@ export class DatabaseStorage implements IStorage {
       return user;
     } catch (error) {
       console.error('Error upserting user:', error);
+      throw error;
+    }
+  }
+
+  async updateUserProfileImage(userId: string | number, imageUrl: string): Promise<User> {
+    try {
+      const [user] = await db
+        .update(users)
+        .set({ 
+          profileImageUrl: imageUrl,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId))
+        .returning();
+      return user;
+    } catch (error) {
+      console.error('Error updating user profile image:', error);
       throw error;
     }
   }
