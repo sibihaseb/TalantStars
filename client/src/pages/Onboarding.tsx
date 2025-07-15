@@ -575,15 +575,11 @@ function Onboarding() {
 
   const createProfileMutation = useMutation({
     mutationFn: async (data: OnboardingFormData) => {
-      console.log("Submitting profile data:", data);
       try {
         const response = await apiRequest("POST", "/api/profile", data);
-        console.log("API response status:", response.status);
         const result = await response.json();
-        console.log("API response data:", result);
         return result;
       } catch (error) {
-        console.error("API request failed:", error);
         throw error;
       }
     },
@@ -601,8 +597,6 @@ function Onboarding() {
       }, 1000);
     },
     onError: (error) => {
-      console.error("Profile creation error:", error);
-      
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -815,7 +809,7 @@ function Onboarding() {
     const fieldName = question.fieldName || question.field_name;
     const currentValue = form.getValues(fieldName) || '';
     
-    console.log('Rendering field:', fieldName, 'type:', question.fieldType || question.field_type, 'value:', currentValue);
+
     
     const handleChange = (value: any) => {
       form.setValue(fieldName, value);
@@ -1113,13 +1107,11 @@ function Onboarding() {
   };
 
   const onSubmit = (data: OnboardingFormData) => {
-    console.log("Form submitted with data:", data);
-    console.log("Form errors:", form.formState.errors);
-    console.log("Form is valid:", form.formState.isValid);
+
     
     // Additional validation for required fields
     if (!data.displayName || !data.bio || !data.location) {
-      console.log("Required fields missing");
+
       toast({
         title: "Required Fields Missing",
         description: "Please fill in all required fields",
@@ -1129,7 +1121,7 @@ function Onboarding() {
     }
     
     if (data.bio.length < 10) {
-      console.log("Bio too short");
+
       toast({
         title: "Bio Too Short",
         description: "Please write a bio with at least 10 characters",
@@ -1138,7 +1130,7 @@ function Onboarding() {
       return;
     }
     
-    console.log("Calling mutation...");
+
     createProfileMutation.mutate(data);
   };
 
@@ -1174,7 +1166,7 @@ function Onboarding() {
               showRewards={true}
               onStepComplete={(step) => {
                 // Optional: Add additional celebration logic here
-                console.log(`Step ${step} completed!`);
+
               }}
             />
           </div>
@@ -1634,16 +1626,14 @@ function Onboarding() {
                       <ProfileImageUpload
                         currentImage={form.watch("profileImageUrl")}
                         onImageUpdate={(url) => {
-                          console.log("Image upload completed, setting profileImageUrl:", url);
+
                           form.setValue("profileImageUrl", url);
                           form.trigger("profileImageUrl");
                           
                           // Force form validation to update
                           setTimeout(() => {
                             const formData = form.getValues();
-                            console.log("Form data after image upload:", formData);
-                            console.log("Form errors after image upload:", form.formState.errors);
-                            console.log("Form valid after image upload:", form.formState.isValid);
+
                             
                             // Auto-advance to next step after successful upload
                             nextStep();
@@ -1933,7 +1923,7 @@ function Onboarding() {
                     className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
                     onClick={async (e) => {
                       e.preventDefault();
-                      console.log("Submit button clicked");
+
                       
                       // Use form's handleSubmit to trigger validation
                       form.handleSubmit(onSubmit)();

@@ -1,0 +1,63 @@
+Upload result: 
+Object { profileImageUrl: "https://s3.us-east-1.wasabisys.com/talent/user-5/profile/592c341e-cc67-45cd-8d5b-d9969c9a6764.jpg", user: {…} }
+main.tsx:54:22
+Image upload completed, setting profileImageUrl: https://s3.us-east-1.wasabisys.com/talent/user-5/profile/592c341e-cc67-45cd-8d5b-d9969c9a6764.jpg main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: false, selectedFile: undefined, previewUrl: false, mandatory: true }
+main.tsx:54:22
+Step 4 completed! 2 main.tsx:54:22
+Form data after image upload: 
+Object { role: "talent", talentType: "actor", displayName: "Marty TEST", bio: "adfasdfasdfasdf", location: "adfasdf", profileImageUrl: "https://s3.us-east-1.wasabisys.com/talent/user-5/profile/592c341e-cc67-45cd-8d5b-d9969c9a6764.jpg", website: "", phoneNumber: "", availabilityStatus: "available", languages: [], … }
+main.tsx:54:22
+Form errors after image upload: 
+Object {  }
+main.tsx:54:22
+Form valid after image upload: true main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+Rendering field: primarySpecialty type: checkbox value: <empty string> main.tsx:54:22
+Rendering field: yearsExperience type: number value: <empty string> main.tsx:54:22
+Rendering field: actingMethod type: checkbox value: <empty string> main.tsx:54:22
+Rendering field: improvisationComfort type: select value: <empty string> main.tsx:54:22
+Rendering field: stageCombat type: boolean value: <empty string> main.tsx:54:22
+Rendering field: intimateScenesComfort type: select value: <empty string> main.tsx:54:22
+Rendering field: roleTypes type: checkbox value: <empty string> main.tsx:54:22
+Rendering field: motionCapture type: select value: <empty string> main.tsx:54:22
+Rendering field: animalWork type: select value: <empty string> main.tsx:54:22
+Rendering field: cryingOnCue type: select value: <empty string> main.tsx:54:22
+Rendering field: periodPieces type: select value: <empty string> main.tsx:54:22
+Rendering field: physicalComedy type: select value: <empty string> main.tsx:54:22
+Rendering field: accentExperience type: select value: <empty string> main.tsx:54:22
+Rendering field: greenScreen type: select value: <empty string> main.tsx:54:22
+Rendering field: stuntComfort type: select value: <empty string> main.tsx:54:22
+Rendering field: shakespeareExperience type: select value: <empty string> main.tsx:54:22
+Rendering field: musicalTheater type: select value: <empty string> main.tsx:54:22
+Rendering field: currentAgent type: text value: <empty string> main.tsx:54:22
+Rendering field: horrorThriller type: checkbox value: <empty string> main.tsx:54:22
+Rendering field: currentPublicist type: text value: <empty string> main.tsx:54:22
+Rendering field: representationStatus type: select value: <empty string> main.tsx:54:22
+Step 5 completed! main.tsx:54:22
+Rendering field: primarySpecialty type: checkbox value: <empty string> main.tsx:54:22
+Rendering field: yearsExperience type: number value: <empty string> main.tsx:54:22
+Rendering field: actingMethod type: checkbox value: <empty string> main.tsx:54:22
+Rendering field: improvisationComfort type: select value: <empty string> main.tsx:54:22
+Rendering field: stageCombat type: boolean value: <empty string> main.tsx:54:22
+Rendering field: intimateScenesComfort type: select value: <empty string> main.tsx:54:22
+Rendering field: roleTypes type: checkbox value: <empty string> main.tsx:54:22
+Rendering field: motionCapture type: select value: <empty string> main.tsx:54:22
+Rendering field: animalWork type: select value: <empty string> main.tsx:54:22
+Rendering field: cryingOnCue type: select value: <empty string> main.tsx:54:22
+Rendering field: periodPieces type: select value: <empty string> main.tsx:54:22
+Rendering field: physicalComedy type: select value: <empty string> main.tsx:54:22
+Rendering field: accentExperience type: select value: <empty string> main.tsx:54:22
+Rendering field: greenScreen type: select value: <empty string> main.tsx:54:22
+Rendering field: stuntComfort type: select value: <empty string> main.tsx:54:22
+Rendering field: shakespeareExperience type: select value: <empty string> main.tsx:54:22
+Rendering field: musicalTheater type: select value: <empty string> main.tsx:54:22
+Rendering field: currentAgent type: text value: <empty string> main.tsx:54:22
+Rendering field: horrorThriller type: checkbox value: <empty string> main.tsx:54:22
+Rendering field: currentPublicist type: text value: <empty string> main.tsx:54:22
+Rendering field: representationStatus type: select value: <empty string> main.tsx:54:22
+Step 5 completed! main.tsx:54:22
+
+​
+

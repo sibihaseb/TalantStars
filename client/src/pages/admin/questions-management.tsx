@@ -40,7 +40,10 @@ const TALENT_TYPES = [
   { value: 'musician', label: 'Musician' },
   { value: 'voice_artist', label: 'Voice Artist' },
   { value: 'model', label: 'Model' },
-  { value: 'profile', label: 'Manager/Producer' }
+  { value: 'manager', label: 'Manager' },
+  { value: 'agent', label: 'Agent' },
+  { value: 'producer', label: 'Producer' },
+  { value: 'profile', label: 'Personal Questions' }
 ];
 
 const FIELD_TYPES = [
@@ -210,7 +213,7 @@ export default function QuestionsManagement() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -359,15 +362,42 @@ export default function QuestionsManagement() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="order">Order</Label>
-                  <Input
-                    id="order"
-                    type="number"
-                    value={formData.order}
-                    onChange={(e) => setFormData(prev => ({ ...prev, order: parseInt(e.target.value) }))}
-                    min="1"
-                    required
-                  />
+                  <Label htmlFor="order">Order (Priority)</Label>
+                  <Select 
+                    value={formData.order.toString()} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, order: parseInt(value) }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select order" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 - First (Highest Priority)</SelectItem>
+                      <SelectItem value="2">2 - Second</SelectItem>
+                      <SelectItem value="3">3 - Third</SelectItem>
+                      <SelectItem value="4">4 - Fourth</SelectItem>
+                      <SelectItem value="5">5 - Fifth</SelectItem>
+                      <SelectItem value="6">6 - Sixth</SelectItem>
+                      <SelectItem value="7">7 - Seventh</SelectItem>
+                      <SelectItem value="8">8 - Eighth</SelectItem>
+                      <SelectItem value="9">9 - Ninth</SelectItem>
+                      <SelectItem value="10">10 - Tenth</SelectItem>
+                      <SelectItem value="11">11 - Eleventh</SelectItem>
+                      <SelectItem value="12">12 - Twelfth</SelectItem>
+                      <SelectItem value="13">13 - Thirteenth</SelectItem>
+                      <SelectItem value="14">14 - Fourteenth</SelectItem>
+                      <SelectItem value="15">15 - Fifteenth</SelectItem>
+                      <SelectItem value="16">16 - Sixteenth</SelectItem>
+                      <SelectItem value="17">17 - Seventeenth</SelectItem>
+                      <SelectItem value="18">18 - Eighteenth</SelectItem>
+                      <SelectItem value="19">19 - Nineteenth</SelectItem>
+                      <SelectItem value="20">20 - Twentieth</SelectItem>
+                      <SelectItem value="21">21 - Twenty-first</SelectItem>
+                      <SelectItem value="22">22 - Twenty-second</SelectItem>
+                      <SelectItem value="23">23 - Twenty-third</SelectItem>
+                      <SelectItem value="24">24 - Twenty-fourth</SelectItem>
+                      <SelectItem value="25">25 - Twenty-fifth</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div className="flex items-center space-x-2">
@@ -443,7 +473,7 @@ export default function QuestionsManagement() {
                           )}
                           {question.active ? "Active" : "Inactive"}
                         </Badge>
-                        <Badge variant="outline">Order: {question.order}</Badge>
+                        <Badge variant="outline">Priority: {question.order}</Badge>
                       </div>
                       <h3 className="font-medium text-gray-900 dark:text-white">{question.question}</h3>
                       <p className="text-sm text-gray-500">Field: {question.field_name}</p>

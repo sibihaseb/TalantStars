@@ -72,6 +72,9 @@ function Router() {
       <Route path="/admin/questions">
         {isAuthenticated && user?.role === 'admin' ? <QuestionsManagement /> : <Auth />}
       </Route>
+      <Route path="/admin/questions-management">
+        {isAuthenticated && user?.role === 'admin' ? <QuestionsManagement /> : <Auth />}
+      </Route>
       <Route path="/admin/featured-talent">
         {isAuthenticated && user?.role === 'admin' ? <FeaturedTalentManagement /> : <Auth />}
       </Route>
