@@ -1336,6 +1336,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Initialize default pricing tiers
+  app.post('/api/admin/init-default-tiers', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const defaultTiers = [
+        {
+          name: "Basic",
+          price: 0,
+          duration: 30,
+          features: ["Basic Profile", "Limited Upload", "Basic Search"],
+          active: true,
+          maxPhotos: 5,
+          maxVideos: 1,
+          maxAudio: 2,
+          maxStorageGB: 1,
+          maxProjects: 1,
+          maxApplications: 20,
+          hasAnalytics: false,
+          hasMessaging: true,
+          hasAIFeatures: false,
+          hasPrioritySupport: false,
+          canCreateJobs: false,
+          canViewProfiles: true,
+          canExportData: false,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          name: "Professional",
+          price: 29.99,
+          duration: 30,
+          features: ["Enhanced Profile", "Advanced Upload", "Advanced Search", "Priority Support"],
+          active: true,
+          maxPhotos: 25,
+          maxVideos: 10,
+          maxAudio: 15,
+          maxStorageGB: 5,
+          maxProjects: 5,
+          maxApplications: 100,
+          hasAnalytics: true,
+          hasMessaging: true,
+          hasAIFeatures: true,
+          hasPrioritySupport: true,
+          canCreateJobs: true,
+          canViewProfiles: true,
+          canExportData: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          name: "Enterprise",
+          price: 99.99,
+          duration: 30,
+          features: ["Premium Profile", "Unlimited Upload", "Full Platform Access", "24/7 Support"],
+          active: true,
+          maxPhotos: 0, // Unlimited
+          maxVideos: 0, // Unlimited
+          maxAudio: 0, // Unlimited
+          maxStorageGB: 0, // Unlimited
+          maxProjects: 0, // Unlimited
+          maxApplications: 0, // Unlimited
+          hasAnalytics: true,
+          hasMessaging: true,
+          hasAIFeatures: true,
+          hasPrioritySupport: true,
+          canCreateJobs: true,
+          canViewProfiles: true,
+          canExportData: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      ];
+
+      // Check if tiers already exist
+      const existingTiers = await storage.getPricingTiers();
+      if (existingTiers.length > 0) {
+        return res.json({ 
+          message: "Pricing tiers already exist", 
+          count: existingTiers.length,
+          tiers: existingTiers
+        });
+      }
+
+      // Create the default tiers
+      const createdTiers = [];
+      for (const tierData of defaultTiers) {
+        const tier = await storage.createPricingTier(tierData);
+        createdTiers.push(tier);
+      }
+
+      res.json({
+        message: "Default pricing tiers created successfully",
+        count: createdTiers.length,
+        tiers: createdTiers
+      });
+    } catch (error) {
+      console.error("Error creating default pricing tiers:", error);
+      res.status(500).json({ message: "Failed to create default pricing tiers" });
+    }
+  });
+
   app.put('/api/admin/profile-questions/:questionId', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const questionId = parseInt(req.params.questionId);

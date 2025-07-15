@@ -228,34 +228,21 @@ export const pricingTiers = pgTable("pricing_tiers", {
   // Resource limits
   maxPhotos: integer("max_photos").default(0), // 0 = unlimited
   maxVideos: integer("max_videos").default(0),
-  maxAudioFiles: integer("max_audio_files").default(0),
+  maxAudio: integer("max_audio").default(0),
   maxStorageGB: integer("max_storage_gb").default(1),
   maxProjects: integer("max_projects").default(0),
-  maxApplicationsPerMonth: integer("max_applications_per_month").default(0),
+  maxApplications: integer("max_applications").default(0),
   
   // Feature access
   hasAnalytics: boolean("has_analytics").default(false),
-  hasRealtimeMessaging: boolean("has_realtime_messaging").default(false),
+  hasMessaging: boolean("has_messaging").default(false),
   hasAIFeatures: boolean("has_ai_features").default(false),
-  hasAdvancedSearch: boolean("has_advanced_search").default(false),
   hasPrioritySupport: boolean("has_priority_support").default(false),
-  hasCustomBranding: boolean("has_custom_branding").default(false),
-  hasAPIAccess: boolean("has_api_access").default(false),
-  hasAdvancedAnalytics: boolean("has_advanced_analytics").default(false),
-  hasTeamCollaboration: boolean("has_team_collaboration").default(false),
-  hasVideoConferencing: boolean("has_video_conferencing").default(false),
   
   // Permissions
   canCreateJobs: boolean("can_create_jobs").default(false),
-  canViewTalentProfiles: boolean("can_view_talent_profiles").default(true),
+  canViewProfiles: boolean("can_view_profiles").default(true),
   canExportData: boolean("can_export_data").default(false),
-  canManageTeam: boolean("can_manage_team").default(false),
-  canAccessReports: boolean("can_access_reports").default(false),
-  
-  // Featured talent controls
-  canBeFeatured: boolean("can_be_featured").default(false),
-  featuredTierName: varchar("featured_tier_name"), // Premium, Gold, Platinum, etc.
-  featuredPriority: integer("featured_priority").default(0), // Higher = shows first in featured section
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

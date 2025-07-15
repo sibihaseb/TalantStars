@@ -118,7 +118,7 @@ const requiredFieldsByStep = {
   2: ['talentType'], // Talent Type (for talent role)
   3: ['displayName', 'bio', 'location'], // Basic Info
   4: ['profileImageUrl'], // Profile Image (mandatory)
-  5: [], // Experience & Skills (optional)
+  5: [], // Experience & Skills (role-specific questions - optional)
   6: [], // Media & Portfolio (optional)
   7: [], // Preferences & Availability (optional)
 };
