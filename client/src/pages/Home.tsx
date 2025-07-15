@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { TalentCard } from "@/components/talent/TalentCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -97,6 +98,11 @@ export default function Home() {
         
         <main className="pt-20 pb-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Language Selector */}
+            <div className="flex justify-end mb-4">
+              <LanguageSelector />
+            </div>
+            
             {/* Welcome Section */}
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">

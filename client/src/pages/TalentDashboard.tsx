@@ -216,6 +216,12 @@ export default function TalentDashboard() {
     }
   };
 
+  const handleAddJobHistory = () => {
+    if (jobHistoryForm.title && jobHistoryForm.company && jobHistoryForm.role) {
+      createJobHistoryMutation.mutate(jobHistoryForm);
+    }
+  };
+
   const handleCompleteProfile = () => {
     // Navigate to profile completion page instead of portfolio tab
     window.location.href = '/profile-completion';

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { 
   Star, 
   Play, 
@@ -104,6 +105,11 @@ export default function Landing() {
             <div className="absolute inset-0 flex items-center justify-center opacity-20">
               <Play className="h-32 w-32 text-white" />
             </div>
+          </div>
+          
+          {/* Language Selector */}
+          <div className="absolute top-24 right-8 z-20">
+            <LanguageSelector />
           </div>
           
           <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
