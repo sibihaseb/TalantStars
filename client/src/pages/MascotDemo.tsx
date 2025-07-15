@@ -1,46 +1,81 @@
 import { useState } from 'react';
-import { Header } from '@/components/layout/Header';
-import { ThemeProvider } from '@/components/ui/theme-provider';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Mascot, MascotEmotion, MascotSize } from '@/components/ui/mascot';
-import { EmotionalProgress } from '@/components/ui/emotional-progress';
-import { Sparkles, Heart, Trophy, Zap, Star, Sun } from 'lucide-react';
-
-const emotions: MascotEmotion[] = [
-  'happy', 'excited', 'celebrating', 'thinking', 'sleepy', 
-  'surprised', 'proud', 'encouraging', 'dancing', 'relaxed'
-];
-
-const sizes: MascotSize[] = ['sm', 'md', 'lg', 'xl'];
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MascotEmotions, useMascotState, MascotState } from '@/components/mascot/MascotEmotions';
+import { ProgressMascot, sampleProfileProgress } from '@/components/mascot/ProgressMascot';
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { ThemeProvider } from "@/components/ui/theme-provider";
+import { 
+  Heart, 
+  Star, 
+  Sparkles, 
+  Trophy, 
+  Zap, 
+  Sun, 
+  Moon, 
+  Target,
+  Play,
+  Pause
+} from 'lucide-react';
 
 export default function MascotDemo() {
-  const [selectedEmotion, setSelectedEmotion] = useState<MascotEmotion>('happy');
-  const [selectedSize, setSelectedSize] = useState<MascotSize>('md');
-  const [message, setMessage] = useState("Hello! I'm your friendly mascot! 🎉");
-  const [showMessage, setShowMessage] = useState(true);
-  const [animate, setAnimate] = useState(true);
-  const [progressStep, setProgressStep] = useState(5);
+  const { mascotState, updateMascot, celebrateAchievement, showProgress } = useMascotState();
+  const [isAnimated, setIsAnimated] = useState(true);
+  const [selectedSize, setSelectedSize] = useState<'small' | 'medium' | 'large'>('medium');
+  const [progressItems, setProgressItems] = useState(sampleProfileProgress);
 
-  const triggerMessage = () => {
-    setShowMessage(false);
-    setTimeout(() => setShowMessage(true), 100);
-  };
+  const emotions: MascotState['emotion'][] = [
+    'happy', 'excited', 'proud', 'celebrating', 'motivated', 'calm', 'focused', 'sleepy'
+  ];
 
   const emotionDescriptions = {
-    happy: "Cheerful and welcoming, perfect for positive interactions",
-    excited: "Full of energy and enthusiasm, great for achievements",
-    celebrating: "Party time! For major accomplishments and milestones",
-    thinking: "Contemplative and focused, ideal for complex tasks",
-    sleepy: "Relaxed and calm, good for downtime or rest periods",
-    surprised: "Amazed and impressed, perfect for unexpected moments",
-    proud: "Accomplished and confident, great for completed goals",
-    encouraging: "Supportive and motivating, ideal for difficult tasks",
-    dancing: "Joyful and expressive, perfect for fun celebrations",
-    relaxed: "Peaceful and content, great for calm moments"
+    happy: 'Cheerful and positive, ready to help',
+    excited: 'Energetic and enthusiastic about progress',
+    proud: 'Satisfied with accomplishments',
+    celebrating: 'Congratulating on achievements',
+    motivated: 'Encouraging and inspiring',
+    calm: 'Peaceful and relaxed',
+    focused: 'Concentrated and determined',
+    sleepy: 'Tired or in rest mode'
+  };
+
+  const handleEmotionChange = (emotion: MascotState['emotion']) => {
+    const messages = {
+      happy: "I'm so happy to help you today! ✨",
+      excited: "This is amazing! Let's keep going! 🚀",
+      proud: "Look at what you've accomplished! 🌟",
+      celebrating: "Congratulations! You did it! 🎉",
+      motivated: "You've got this! Let's achieve greatness! 💪",
+      calm: "Take a deep breath. We're doing great. 😌",
+      focused: "Let's concentrate and get this done. 🎯",
+      sleepy: "Maybe it's time for a little break? 😴"
+    };
+
+    updateMascot({
+      emotion,
+      message: messages[emotion]
+    });
+  };
+
+  const handleProgressChange = (progress: number) => {
+    showProgress(progress);
+  };
+
+  const handleItemToggle = (itemId: string) => {
+    setProgressItems(prev => 
+      prev.map(item => 
+        item.id === itemId 
+          ? { ...item, completed: !item.completed }
+          : item
+      )
+    );
+  };
+
+  const triggerAchievement = () => {
+    celebrateAchievement("Demo Master!");
   };
 
   return (
@@ -48,211 +83,319 @@ export default function MascotDemo() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
         <Header />
         
-        <main className="pt-20 pb-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-8 text-center">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                Mascot & Emotional Progress Demo
+        <main className="pt-20 pb-16">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                Emotional Progress Mascot Demo
               </h1>
-              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                Experience our cute mascot system that provides emotional feedback and encouragement throughout the user journey
+              <p className="text-lg text-gray-600 dark:text-gray-300">
+                Meet your friendly progress companion! This mascot adapts to your progress and celebrates your achievements.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Mascot Controls */}
-              <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Sparkles className="w-5 h-5 text-purple-500" />
-                    <span>Mascot Controls</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="emotion">Emotion</Label>
-                    <Select value={selectedEmotion} onValueChange={(value) => setSelectedEmotion(value as MascotEmotion)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an emotion" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {emotions.map((emotion) => (
-                          <SelectItem key={emotion} value={emotion}>
-                            {emotion.charAt(0).toUpperCase() + emotion.slice(1)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {emotionDescriptions[selectedEmotion]}
-                    </p>
-                  </div>
+            <Tabs defaultValue="emotions" className="space-y-8">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="emotions">Emotions Demo</TabsTrigger>
+                <TabsTrigger value="progress">Progress Tracker</TabsTrigger>
+                <TabsTrigger value="integration">Integration Example</TabsTrigger>
+              </TabsList>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="size">Size</Label>
-                    <Select value={selectedSize} onValueChange={(value) => setSelectedSize(value as MascotSize)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a size" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sizes.map((size) => (
-                          <SelectItem key={size} value={size}>
-                            {size.toUpperCase()}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Message</Label>
-                    <Input
-                      id="message"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Enter a message..."
-                    />
-                  </div>
-
-                  <div className="flex items-center space-x-4">
-                    <Button
-                      onClick={triggerMessage}
-                      variant="outline"
-                      size="sm"
-                    >
-                      Show Message
-                    </Button>
-                    <Button
-                      onClick={() => setAnimate(!animate)}
-                      variant="outline"
-                      size="sm"
-                    >
-                      {animate ? 'Stop Animation' : 'Start Animation'}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Mascot Display */}
-              <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Heart className="w-5 h-5 text-pink-500" />
-                    <span>Mascot Preview</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center min-h-64">
-                  <Mascot
-                    emotion={selectedEmotion}
-                    size={selectedSize}
-                    message={message}
-                    showMessage={showMessage}
-                    animate={animate}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Emotional Progress Demo */}
-            <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 mb-8">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Trophy className="w-5 h-5 text-yellow-500" />
-                  <span>Emotional Progress System</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Progress Step (1-10)</Label>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      onClick={() => setProgressStep(Math.max(1, progressStep - 1))}
-                      disabled={progressStep <= 1}
-                      variant="outline"
-                      size="sm"
-                    >
-                      -
-                    </Button>
-                    <Input
-                      type="number"
-                      value={progressStep}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value);
-                        if (val >= 1 && val <= 10) {
-                          setProgressStep(val);
-                        }
-                      }}
-                      min={1}
-                      max={10}
-                      className="w-20 text-center"
-                    />
-                    <Button
-                      onClick={() => setProgressStep(Math.min(10, progressStep + 1))}
-                      disabled={progressStep >= 10}
-                      variant="outline"
-                      size="sm"
-                    >
-                      +
-                    </Button>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Current step: {progressStep} of 10
-                  </p>
-                </div>
-
-                <EmotionalProgress
-                  currentStep={progressStep}
-                  totalSteps={10}
-                  stepTitle="Demo Progress"
-                  completedSteps={
-                    Array.from({ length: progressStep - 1 }, (_, i) => `Step ${i + 1}`)
-                  }
-                  showRewards={true}
-                  onStepComplete={(step) => {
-                    console.log(`Demo step ${step} completed!`);
-                  }}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Emotion Gallery */}
-            <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Star className="w-5 h-5 text-blue-500" />
-                  <span>Emotion Gallery</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-                  {emotions.map((emotion) => (
-                    <div key={emotion} className="text-center space-y-2">
-                      <div className="flex justify-center">
-                        <Mascot
-                          emotion={emotion}
-                          size="md"
-                          animate={true}
-                          showMessage={false}
+              <TabsContent value="emotions" className="space-y-8">
+                <div className="grid lg:grid-cols-2 gap-8">
+                  {/* Mascot Display */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Sparkles className="w-5 h-5 text-purple-500" />
+                        <span>Interactive Mascot</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col items-center space-y-6">
+                      <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-8">
+                        <MascotEmotions 
+                          state={mascotState}
+                          size={selectedSize}
+                          showMessage={true}
+                          animated={isAnimated}
                         />
                       </div>
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">
-                        {emotion}
-                      </p>
-                      <Button
-                        onClick={() => setSelectedEmotion(emotion)}
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                      >
-                        Select
-                      </Button>
-                    </div>
-                  ))}
+                      
+                      <div className="text-center space-y-4">
+                        <div className="flex items-center justify-center space-x-4">
+                          <span className="text-sm font-medium">Size:</span>
+                          {(['small', 'medium', 'large'] as const).map(size => (
+                            <Button
+                              key={size}
+                              variant={selectedSize === size ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSelectedSize(size)}
+                            >
+                              {size}
+                            </Button>
+                          ))}
+                        </div>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsAnimated(!isAnimated)}
+                        >
+                          {isAnimated ? <Pause className="w-4 h-4 mr-2" /> : <Play className="w-4 h-4 mr-2" />}
+                          {isAnimated ? 'Pause' : 'Play'} Animation
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Controls */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Target className="w-5 h-5 text-green-500" />
+                        <span>Emotion Controls</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div>
+                        <h4 className="font-semibold mb-3">Choose Emotion:</h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          {emotions.map(emotion => (
+                            <Button
+                              key={emotion}
+                              variant={mascotState.emotion === emotion ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handleEmotionChange(emotion)}
+                              className="justify-start"
+                            >
+                              {emotion}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold mb-3">Progress Simulation:</h4>
+                        <div className="space-y-3">
+                          {[0, 25, 50, 75, 100].map(progress => (
+                            <Button
+                              key={progress}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleProgressChange(progress)}
+                              className="w-full justify-start"
+                            >
+                              {progress}% Complete
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold mb-3">Special Actions:</h4>
+                        <div className="space-y-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={triggerAchievement}
+                            className="w-full justify-start"
+                          >
+                            <Trophy className="w-4 h-4 mr-2" />
+                            Trigger Achievement
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => updateMascot({
+                              emotion: 'motivated',
+                              message: "You're doing amazing! Keep it up! 💪"
+                            })}
+                            className="w-full justify-start"
+                          >
+                            <Zap className="w-4 h-4 mr-2" />
+                            Motivate User
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-              </CardContent>
-            </Card>
+
+                {/* Emotion Reference */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Emotion Reference</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {emotions.map(emotion => (
+                        <div key={emotion} className="p-4 border rounded-lg">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Badge variant="secondary">{emotion}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {emotionDescriptions[emotion]}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="progress" className="space-y-8">
+                <div className="grid lg:grid-cols-2 gap-8">
+                  <ProgressMascot
+                    title="Profile Completion"
+                    items={progressItems}
+                    onItemClick={(item) => handleItemToggle(item.id)}
+                    showActions={true}
+                  />
+                  
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Interactive Progress Demo</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Click on any progress item to toggle its completion status and watch the mascot react!
+                      </p>
+                      
+                      <div className="space-y-2">
+                        <h4 className="font-semibold">Quick Actions:</h4>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setProgressItems(prev => 
+                              prev.map(item => ({ ...item, completed: true }))
+                            )}
+                          >
+                            Complete All
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setProgressItems(prev => 
+                              prev.map(item => ({ ...item, completed: false }))
+                            )}
+                          >
+                            Reset All
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setProgressItems(prev => 
+                              prev.map(item => ({ 
+                                ...item, 
+                                completed: Math.random() > 0.5 
+                              }))
+                            )}
+                          >
+                            Random Progress
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <h4 className="font-semibold">Features:</h4>
+                        <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                          <li>• Dynamic emotional responses to progress</li>
+                          <li>• Point-based achievement system</li>
+                          <li>• Categorized progress items</li>
+                          <li>• Motivational tips and messages</li>
+                          <li>• Celebration animations</li>
+                          <li>• Progress persistence</li>
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="integration">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Integration in Real Application</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="font-semibold mb-3">Usage Examples:</h4>
+                        <div className="space-y-3 text-sm">
+                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <strong>Onboarding:</strong> Guide users through profile completion with encouraging feedback
+                          </div>
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <strong>Dashboard:</strong> Show overall progress and motivate continued engagement
+                          </div>
+                          <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                            <strong>Tasks:</strong> Provide emotional feedback for completed objectives
+                          </div>
+                          <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                            <strong>Achievements:</strong> Celebrate milestones and accomplishments
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold mb-3">Implementation Code:</h4>
+                        <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-sm font-mono overflow-x-auto">
+                          <pre>{`// Basic Usage
+import { ProgressMascot } from '@/components/mascot/ProgressMascot';
+
+<ProgressMascot 
+  title="Profile Setup"
+  items={progressItems}
+  onItemClick={handleItemClick}
+  showActions={true}
+/>
+
+// Custom Mascot State
+import { MascotEmotions, useMascotState } from '@/components/mascot/MascotEmotions';
+
+const { mascotState, updateMascot, celebrateAchievement } = useMascotState();
+
+// Celebrate achievements
+celebrateAchievement("First Login!");
+
+// Update progress
+showProgress(75);`}</pre>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-lg">
+                      <h4 className="font-semibold mb-3">Key Features:</h4>
+                      <div className="grid md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <h5 className="font-medium mb-2">Emotional Intelligence:</h5>
+                          <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+                            <li>• Adapts to user progress</li>
+                            <li>• Contextual emotional responses</li>
+                            <li>• Personalized messaging</li>
+                            <li>• Achievement celebrations</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <h5 className="font-medium mb-2">Technical Features:</h5>
+                          <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+                            <li>• Smooth animations with Framer Motion</li>
+                            <li>• Responsive design</li>
+                            <li>• Theme-aware styling</li>
+                            <li>• Extensible emotion system</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         </main>
+
+        <Footer />
       </div>
     </ThemeProvider>
   );

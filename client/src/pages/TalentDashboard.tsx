@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { ProgressMascot } from "@/components/mascot/ProgressMascot";
 import { 
   Calendar, 
   Briefcase, 
@@ -68,6 +69,104 @@ export default function TalentDashboard() {
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  // Calculate dynamic progress based on user profile
+  const calculateProfileProgress = () => {
+    if (!profile) return [];
+    
+    const progressItems = [
+      {
+        id: 'basic-info',
+        title: 'Complete Basic Information',
+        description: 'Add your name, email, and contact details',
+        completed: !!(profile.firstName && profile.lastName && profile.email),
+        points: 20,
+        category: 'profile' as const
+      },
+      {
+        id: 'profile-image',
+        title: 'Upload Profile Image',
+        description: 'Add a professional headshot',
+        completed: !!profile.profileImageUrl,
+        points: 25,
+        category: 'profile' as const
+      },
+      {
+        id: 'bio',
+        title: 'Write Your Bio',
+        description: 'Tell your story in 300 words',
+        completed: !!(profile.bio && profile.bio.length > 100),
+        points: 30,
+        category: 'profile' as const
+      },
+      {
+        id: 'skills',
+        title: 'Add Skills & Talents',
+        description: 'List your key abilities and expertise',
+        completed: !!(profile.skills && profile.skills.length > 0),
+        points: 25,
+        category: 'profile' as const
+      },
+      {
+        id: 'experience',
+        title: 'Add Work Experience',
+        description: 'Include past jobs and projects',
+        completed: !!(jobHistory && jobHistory.length > 0),
+        points: 30,
+        category: 'experience' as const
+      },
+      {
+        id: 'availability',
+        title: 'Set Availability',
+        description: 'Update your availability status',
+        completed: !!(profile.availabilityStatus && profile.availabilityStatus !== 'not_set'),
+        points: 15,
+        category: 'profile' as const
+      },
+      {
+        id: 'verification',
+        title: 'Get Verified',
+        description: 'Complete identity verification',
+        completed: !!profile.verified,
+        points: 40,
+        category: 'achievement' as const
+      }
+    ];
+
+    return progressItems;
+  };
+
+  const profileProgress = calculateProfileProgress();
+
+  const handleProgressItemClick = (item: any) => {
+    // Navigate to appropriate section based on item
+    switch (item.id) {
+      case 'basic-info':
+        setActiveTab('overview');
+        break;
+      case 'profile-image':
+        setActiveTab('overview');
+        break;
+      case 'bio':
+        setActiveTab('overview');
+        break;
+      case 'skills':
+        setActiveTab('overview');
+        break;
+      case 'experience':
+        setIsJobHistoryDialogOpen(true);
+        break;
+      case 'availability':
+        setActiveTab('overview');
+        break;
+      case 'verification':
+        toast({
+          title: "Verification",
+          description: "Contact support to complete verification process",
+        });
+        break;
+    }
+  };
 
   // Fetch user profile and stats
   const { data: profile } = useQuery({
@@ -352,52 +451,21 @@ export default function TalentDashboard() {
 
           <TabsContent value="overview">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Profile Completion */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <TrendingUp className="w-5 h-5" />
-                    <span>Profile Completion</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Complete your profile to get better opportunities
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Progress</span>
-                      <span className="text-sm text-gray-600">{profileCompletion}%</span>
-                    </div>
-                    <Progress value={profileCompletion} className="h-2" />
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2 text-sm">
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                        <span>Basic Information</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-sm">
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                        <span>Profile Photo</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-sm">
-                        <AlertCircle className="w-4 h-4 text-yellow-500" />
-                        <span>Portfolio Media</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-sm">
-                        <XCircle className="w-4 h-4 text-red-500" />
-                        <span>Demo Reel</span>
-                      </div>
-                    </div>
-                    <Button className="w-full" size="sm" onClick={handleCompleteProfile}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Complete Profile
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Interactive Mascot Progress */}
+              <div className="lg:col-span-1">
+                <ProgressMascot
+                  title="Profile Journey"
+                  items={profileProgress}
+                  onItemClick={handleProgressItemClick}
+                  showActions={true}
+                  className="h-fit"
+                />
+              </div>
 
-              {/* Recent Applications */}
-              <Card>
+              {/* Dashboard Cards */}
+              <div className="lg:col-span-2 space-y-8">
+                {/* Recent Applications */}
+                <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Briefcase className="w-5 h-5" />
@@ -580,7 +648,8 @@ export default function TalentDashboard() {
                     </Dialog>
                   </div>
                 </CardContent>
-              </Card>
+                </Card>
+              </div>
             </div>
           </TabsContent>
 
