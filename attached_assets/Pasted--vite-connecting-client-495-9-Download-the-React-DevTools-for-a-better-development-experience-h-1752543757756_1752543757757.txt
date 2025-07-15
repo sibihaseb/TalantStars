@@ -1,0 +1,58 @@
+[vite] connecting... client:495:9
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools react-dom.development.js:29895:17
+XHRGET
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/admin/pricing-tiers
+[HTTP/1.1 500 Internal Server Error 160ms]
+
+Source map error: No sources are declared in this source map.
+Resource URL: https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WOOG5QLI.js?v=313ecdf2
+Source Map URL: chunk-WOOG5QLI.js.map
+
+Source map error: No sources are declared in this source map.
+Resource URL: https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/clsx.js?v=313ecdf2
+Source Map URL: clsx.js.map
+
+Source map error: No sources are declared in this source map.
+Resource URL: https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react.js?v=313ecdf2
+Source Map URL: react.js.map
+
+Source map error: No sources are declared in this source map.
+Resource URL: https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-slot.js?v=313ecdf2
+Source Map URL: @radix-ui_react-slot.js.map
+
+Source map error: No sources are declared in this source map.
+Resource URL: https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-hook-form.js?v=313ecdf2
+Source Map URL: react-hook-form.js.map
+
+Source map error: No sources are declared in this source map.
+Resource URL: https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/drizzle-orm.js?v=313ecdf2
+Source Map URL: drizzle-orm.js.map
+
+Source map error: No sources are declared in this source map.
+Resource URL: https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/zod.js?v=313ecdf2
+Source Map URL: zod.js.map
+
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. main.tsx:40:23
+Saving tier: 
+Object { name: "test", price: 5.99, duration: 777, features: (1) […], active: true }
+main.tsx:54:22
+XHRPOST
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/admin/pricing-tiers
+[HTTP/1.1 500 Internal Server Error 481ms]
+
+Error saving pricing tier: Error: 500: {"message":"Failed to create pricing tier","error":"column \"max_photos\" of relation \"pricing_tiers\" does not exist"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    mutationFn AdminDashboard.tsx:353
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+    execute mutation.ts:208
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    handleSaveTier AdminDashboard.tsx:566
+    onSubmit AdminDashboard.tsx:1793
+    React 25
+main.tsx:27:24
+
+​

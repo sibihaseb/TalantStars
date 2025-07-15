@@ -42,6 +42,7 @@ import {
   X,
   Save
 } from "lucide-react";
+import { EmotionalProgress } from "@/components/ui/emotional-progress";
 
 const profileSchema = insertUserProfileSchema.extend({
   languages: z.array(z.string()).optional(),
@@ -315,41 +316,26 @@ export default function Profile() {
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Profile Completeness
-                      </span>
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        {completeness}%
-                      </span>
-                    </div>
-                    <Progress value={completeness} className="h-2" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Basic info completed
-                      </span>
-                    </div>
-                    {mediaFiles.length > 0 ? (
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          Media portfolio added
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center space-x-2">
-                        <AlertCircle className="h-4 w-4 text-yellow-500" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          Add media samples
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                  <EmotionalProgress
+                    currentStep={Math.floor(completeness / 10)}
+                    totalSteps={10}
+                    stepTitle="Profile Completeness"
+                    completedSteps={[
+                      ...(form.watch('displayName') ? ["Display Name"] : []),
+                      ...(form.watch('bio') ? ["Bio"] : []),
+                      ...(form.watch('location') ? ["Location"] : []),
+                      ...(form.watch('talentType') ? ["Talent Type"] : []),
+                      ...(form.watch('languages')?.length > 0 ? ["Languages"] : []),
+                      ...(form.watch('dailyRate') ? ["Daily Rate"] : []),
+                      ...(form.watch('weeklyRate') ? ["Weekly Rate"] : []),
+                      ...(form.watch('projectRate') ? ["Project Rate"] : []),
+                      ...(mediaFiles.length > 0 ? ["Media Portfolio"] : []),
+                    ]}
+                    showRewards={true}
+                    onStepComplete={(step) => {
+                      console.log(`Profile completion step ${step} completed!`);
+                    }}
+                  />
 
                   <div className="space-y-2">
                     <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">

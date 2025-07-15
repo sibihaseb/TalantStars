@@ -26,6 +26,7 @@ import {
   AlertCircle,
   Plus
 } from "lucide-react";
+import { EmotionalProgress } from "@/components/ui/emotional-progress";
 
 export default function TalentDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -123,33 +124,43 @@ export default function TalentDashboard() {
             </div>
 
             {/* Profile Completion Alert */}
-            {profileCompletion < 80 && (
-              <Card className="mb-6 border-orange-200 bg-orange-50 dark:bg-orange-900/20">
+            {profileCompletion < 100 && (
+              <Card className="mb-6 border-2 border-gradient-to-r from-blue-200 to-purple-200 bg-gradient-to-br from-white to-blue-50/50 dark:from-gray-800 dark:to-blue-900/20">
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <AlertCircle className="h-5 w-5 text-orange-600" />
-                      <div>
-                        <h3 className="font-medium text-orange-900 dark:text-orange-100">
-                          Complete Your Profile
-                        </h3>
-                        <p className="text-sm text-orange-700 dark:text-orange-200">
-                          {profileCompletion}% complete - Add more details to attract opportunities
-                        </p>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm" onClick={() => {
-                      // Check if user has a profile, if not go to onboarding
-                      if (!profile?.profile?.displayName) {
-                        window.location.href = "/onboarding";
-                      } else {
-                        window.location.href = "/profile";
-                      }
-                    }}>
+                  <EmotionalProgress
+                    currentStep={Math.floor(profileCompletion / 10)}
+                    totalSteps={10}
+                    stepTitle="Complete Your Profile"
+                    completedSteps={[
+                      ...(profile?.profile?.displayName ? ["Display Name"] : []),
+                      ...(profile?.profile?.bio ? ["Bio"] : []),
+                      ...(profile?.profile?.location ? ["Location"] : []),
+                      ...(profile?.profile?.skills?.length > 0 ? ["Skills"] : []),
+                      ...(media.length > 0 ? ["Media Portfolio"] : []),
+                      ...(profile?.profile?.resume ? ["Resume"] : [])
+                    ]}
+                    showRewards={true}
+                    onStepComplete={(step) => {
+                      console.log(`Profile step ${step} completed!`);
+                    }}
+                  />
+                  <div className="mt-4 flex justify-center">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        // Check if user has a profile, if not go to onboarding
+                        if (!profile?.profile?.displayName) {
+                          window.location.href = "/onboarding";
+                        } else {
+                          window.location.href = "/profile";
+                        }
+                      }}
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0"
+                    >
                       Complete Profile
                     </Button>
                   </div>
-                  <Progress value={profileCompletion} className="mt-3" />
                 </CardContent>
               </Card>
             )}

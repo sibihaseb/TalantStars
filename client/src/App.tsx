@@ -29,6 +29,7 @@ import ProducerDashboard from "@/pages/ProducerDashboard";
 import ManagerDashboard from "@/pages/ManagerDashboard";
 import Availability from "@/pages/Availability";
 import Login from "@/pages/Login";
+import MascotDemo from "@/pages/MascotDemo";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -50,6 +51,7 @@ function Router() {
       {/* Public routes */}
       <Route path="/jobs" component={BrowseJobs} />
       <Route path="/how-it-works" component={HowItWorks} />
+      <Route path="/mascot-demo" component={MascotDemo} />
       
       {/* Protected admin routes */}
       <Route path="/admin">

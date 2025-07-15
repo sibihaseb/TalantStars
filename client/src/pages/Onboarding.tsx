@@ -64,6 +64,7 @@ import {
   Lightbulb,
   Zap as ZapIcon
 } from "lucide-react";
+import { EmotionalProgress } from "@/components/ui/emotional-progress";
 
 const onboardingSchema = insertUserProfileSchema.extend({
   // Required fields with enhanced validation
@@ -336,6 +337,7 @@ export default function Onboarding() {
   const [newSkill, setNewSkill] = useState("");
   const [isStepChanging, setIsStepChanging] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const totalSteps = 6;
 
   // Redirect if not authenticated
@@ -843,6 +845,10 @@ export default function Onboarding() {
         return;
       }
       
+      // Mark current step as completed
+      const stepInfo = getStepInfo(currentStep);
+      setCompletedSteps(prev => [...prev, stepInfo.title]);
+      
       setIsStepChanging(true);
       setShowCelebration(true);
       
@@ -900,78 +906,20 @@ export default function Onboarding() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
         <Header />
         
-        {/* Enhanced Progress Header */}
+        {/* Emotional Progress Header */}
         <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 mt-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-                  showCelebration 
-                    ? 'bg-gradient-to-r from-yellow-400 to-orange-500 animate-pulse' 
-                    : 'bg-gradient-to-r from-blue-500 to-purple-600'
-                }`}>
-                  {showCelebration ? (
-                    <PartyPopper className="h-6 w-6 text-white animate-bounce" />
-                  ) : (
-                    React.createElement(getStepInfo(currentStep).icon, { className: "h-6 w-6 text-white" })
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {getStepInfo(currentStep).title}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {getStepInfo(currentStep).description}
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                  {getProgressPercentage()}%
-                </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  Step {currentStep} of {getMaxSteps()}
-                </div>
-              </div>
-            </div>
-            
-            <div className="relative mb-4">
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${getProgressPercentage()}%` }}
-                />
-              </div>
-            </div>
-            
-            {/* Step indicators */}
-            <div className="flex justify-between">
-              {Array.from({ length: getMaxSteps() }).map((_, index) => (
-                <div
-                  key={index}
-                  className={`flex flex-col items-center transition-all duration-300 ${
-                    index + 1 <= currentStep ? 'opacity-100' : 'opacity-50'
-                  }`}
-                >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
-                    index + 1 < currentStep
-                      ? 'bg-green-500 text-white'
-                      : index + 1 === currentStep
-                      ? 'bg-blue-600 text-white animate-pulse'
-                      : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400'
-                  }`}>
-                    {index + 1 < currentStep ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      index + 1
-                    )}
-                  </div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-16 text-center">
-                    {getStepInfo(index + 1).title.split(' ')[0]}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <EmotionalProgress
+              currentStep={currentStep}
+              totalSteps={getMaxSteps()}
+              stepTitle={getStepInfo(currentStep).title}
+              completedSteps={completedSteps}
+              showRewards={true}
+              onStepComplete={(step) => {
+                // Optional: Add additional celebration logic here
+                console.log(`Step ${step} completed!`);
+              }}
+            />
           </div>
         </div>
 
