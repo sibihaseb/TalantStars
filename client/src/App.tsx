@@ -83,6 +83,9 @@ function Router() {
       <Route path="/onboarding">
         {isAuthenticated ? <Onboarding /> : <Auth />}
       </Route>
+      <Route path="/profile-completion">
+        {isAuthenticated ? <Onboarding /> : <Auth />}
+      </Route>
       <Route path="/profile">
         {isAuthenticated ? <Profile /> : <Auth />}
       </Route>

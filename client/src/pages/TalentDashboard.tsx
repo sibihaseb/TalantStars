@@ -223,8 +223,8 @@ export default function TalentDashboard() {
   };
 
   const handleCompleteProfile = () => {
-    // Navigate to profile completion page instead of portfolio tab
-    window.location.href = '/profile-completion';
+    // Navigate to onboarding page for profile completion
+    window.location.href = '/onboarding';
   };
 
   const handleViewApplications = () => {
