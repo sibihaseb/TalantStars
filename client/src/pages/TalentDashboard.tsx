@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +51,7 @@ import {
 
 export default function TalentDashboard() {
   const { user } = useAuth();
+  const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
   const [isJobHistoryDialogOpen, setIsJobHistoryDialogOpen] = useState(false);
@@ -153,28 +155,28 @@ export default function TalentDashboard() {
     switch (item.id) {
       case 'basic-info':
         if (!item.completed) {
-          window.location.href = '/onboarding';
+          setLocation('/onboarding');
         } else {
           setActiveTab('overview');
         }
         break;
       case 'profile-image':
         if (!item.completed) {
-          window.location.href = '/onboarding';
+          setLocation('/onboarding');
         } else {
           setActiveTab('overview');
         }
         break;
       case 'bio':
         if (!item.completed) {
-          window.location.href = '/onboarding';
+          setLocation('/onboarding');
         } else {
           setActiveTab('overview');
         }
         break;
       case 'skills':
         if (!item.completed) {
-          window.location.href = '/onboarding';
+          setLocation('/onboarding');
         } else {
           setActiveTab('overview');
         }
@@ -188,7 +190,7 @@ export default function TalentDashboard() {
         break;
       case 'availability':
         if (!item.completed) {
-          window.location.href = '/onboarding';
+          setLocation('/onboarding');
         } else {
           setActiveTab('overview');
         }
@@ -202,7 +204,7 @@ export default function TalentDashboard() {
       default:
         // For any other incomplete items, navigate to onboarding
         if (!item.completed) {
-          window.location.href = '/onboarding';
+          setLocation('/onboarding');
         }
         break;
     }
@@ -815,7 +817,7 @@ export default function TalentDashboard() {
                     <CardDescription>Connect with the entertainment community</CardDescription>
                   </div>
                   <Button 
-                    onClick={() => window.location.href = '/social'}
+                    onClick={() => setLocation('/social')}
                     className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                   >
                     <Plus className="w-4 h-4 mr-2" />
@@ -832,7 +834,7 @@ export default function TalentDashboard() {
                   <Button 
                     variant="outline" 
                     className="mt-4"
-                    onClick={() => window.location.href = '/social'}
+                    onClick={() => setLocation('/social')}
                   >
                     <Globe className="w-4 h-4 mr-2" />
                     Go to Social

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useLocation } from 'wouter';
 import { MascotEmotions, useMascotState } from './MascotEmotions';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -41,6 +42,7 @@ export function ProgressMascot({
   className = ""
 }: ProgressMascotProps) {
   const { mascotState, updateMascot, celebrateAchievement, showProgress } = useMascotState();
+  const [location, setLocation] = useLocation();
   const [previousProgress, setPreviousProgress] = useState(0);
   const [justCompleted, setJustCompleted] = useState<string | null>(null);
 
@@ -273,12 +275,12 @@ export function ProgressMascot({
                     if (onItemClick) {
                       onItemClick(nextIncomplete);
                     } else {
-                      // Fallback navigation
-                      window.location.href = '/onboarding';
+                      // Fallback navigation using router
+                      setLocation('/onboarding');
                     }
                   } else {
                     // No incomplete items, navigate to dashboard
-                    window.location.href = '/dashboard';
+                    setLocation('/dashboard');
                   }
                 }}
               >
@@ -291,14 +293,10 @@ export function ProgressMascot({
               variant="ghost" 
               size="sm"
               onClick={() => {
-                try {
-                  updateMascot({ 
-                    emotion: 'motivated', 
-                    message: "I believe in you! Let's make it happen!" 
-                  });
-                } catch (error) {
-                  console.error('Error updating mascot:', error);
-                }
+                updateMascot({ 
+                  emotion: 'motivated', 
+                  message: "I believe in you! Let's make it happen!" 
+                });
               }}
             >
               <Heart className="w-4 h-4 mr-2" />
