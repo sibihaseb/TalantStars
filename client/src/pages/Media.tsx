@@ -838,16 +838,7 @@ export default function Media() {
                           </Button>
                         )}
                         
-                        {currentMedia.url && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(currentMedia.url, '_blank')}
-                          >
-                            <Download className="h-4 w-4 mr-1" />
-                            Download
-                          </Button>
-                        )}
+
                       </div>
                     </div>
                   </div>

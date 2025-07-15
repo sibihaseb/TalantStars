@@ -324,6 +324,89 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Social media features
+export const friendshipStatusEnum = pgEnum("friendship_status", ["pending", "accepted", "blocked"]);
+export const postPrivacyEnum = pgEnum("post_privacy", ["public", "friends", "private"]);
+
+// User friendships and connections
+export const friendships = pgTable("friendships", {
+  id: serial("id").primaryKey(),
+  requesterId: integer("requester_id").references(() => users.id).notNull(),
+  addresseeId: integer("addressee_id").references(() => users.id).notNull(),
+  status: friendshipStatusEnum("status").default("pending").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Social posts
+export const socialPosts = pgTable("social_posts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  mediaIds: integer("media_ids").array(), // references to mediaFiles
+  privacy: postPrivacyEnum("privacy").default("public").notNull(),
+  taggedUsers: integer("tagged_users").array(), // references to users
+  likes: integer("likes").default(0),
+  comments: integer("comments").default(0),
+  shares: integer("shares").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Post likes
+export const postLikes = pgTable("post_likes", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").references(() => socialPosts.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Post comments
+export const postComments = pgTable("post_comments", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").references(() => socialPosts.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  likes: integer("likes").default(0),
+  parentCommentId: integer("parent_comment_id").references(() => postComments.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Professional connections (managers, agents, PR, etc.)
+export const professionalConnectionTypeEnum = pgEnum("professional_connection_type", [
+  "manager", "agent", "pr", "publicist", "attorney", "accountant", "coach", "mentor"
+]);
+
+export const professionalConnections = pgTable("professional_connections", {
+  id: serial("id").primaryKey(),
+  talentId: integer("talent_id").references(() => users.id).notNull(),
+  professionalId: integer("professional_id").references(() => users.id).notNull(),
+  connectionType: professionalConnectionTypeEnum("connection_type").notNull(),
+  status: varchar("status").default("active"), // active, inactive, pending
+  contractStartDate: timestamp("contract_start_date"),
+  contractEndDate: timestamp("contract_end_date"),
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User privacy settings
+export const userPrivacySettings = pgTable("user_privacy_settings", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  profileVisibility: varchar("profile_visibility").default("public"), // public, friends, private
+  searchable: boolean("searchable").default(true),
+  allowFriendRequests: boolean("allow_friend_requests").default(true),
+  allowMessages: boolean("allow_messages").default(true),
+  allowTagging: boolean("allow_tagging").default(true),
+  showOnlineStatus: boolean("show_online_status").default(true),
+  showActivity: boolean("show_activity").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Enhanced permissions system with granular control
 export const permissionCategoryEnum = pgEnum("permission_category", [
   "user_management",
@@ -894,6 +977,42 @@ export const insertVerificationRequestSchema = createInsertSchema(verificationRe
   submittedAt: true,
 });
 
+// Insert schemas for social media features
+export const insertFriendshipSchema = createInsertSchema(friendships).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSocialPostSchema = createInsertSchema(socialPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPostLikeSchema = createInsertSchema(postLikes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPostCommentSchema = createInsertSchema(postComments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProfessionalConnectionSchema = createInsertSchema(professionalConnections).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserPrivacySettingsSchema = createInsertSchema(userPrivacySettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -953,3 +1072,17 @@ export type MediaProcessingQueue = typeof mediaProcessingQueue.$inferSelect;
 export type InsertMediaProcessingQueue = z.infer<typeof insertMediaProcessingQueueSchema>;
 export type VerificationRequest = typeof verificationRequests.$inferSelect;
 export type InsertVerificationRequest = z.infer<typeof insertVerificationRequestSchema>;
+
+// Social media types
+export type Friendship = typeof friendships.$inferSelect;
+export type InsertFriendship = z.infer<typeof insertFriendshipSchema>;
+export type SocialPost = typeof socialPosts.$inferSelect;
+export type InsertSocialPost = z.infer<typeof insertSocialPostSchema>;
+export type PostLike = typeof postLikes.$inferSelect;
+export type InsertPostLike = z.infer<typeof insertPostLikeSchema>;
+export type PostComment = typeof postComments.$inferSelect;
+export type InsertPostComment = z.infer<typeof insertPostCommentSchema>;
+export type ProfessionalConnection = typeof professionalConnections.$inferSelect;
+export type InsertProfessionalConnection = z.infer<typeof insertProfessionalConnectionSchema>;
+export type UserPrivacySettings = typeof userPrivacySettings.$inferSelect;
+export type InsertUserPrivacySettings = z.infer<typeof insertUserPrivacySettingsSchema>;

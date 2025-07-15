@@ -73,9 +73,27 @@ import {
   type InsertAiGeneratedContent,
   type VerificationRequest,
   type InsertVerificationRequest,
+  type SocialPost,
+  type InsertSocialPost,
+  type PostLike,
+  type InsertPostLike,
+  type PostComment,
+  type InsertPostComment,
+  type Friendship,
+  type InsertFriendship,
+  type ProfessionalConnection,
+  type InsertProfessionalConnection,
+  type UserPrivacySettings,
+  type InsertUserPrivacySettings,
+  socialPosts,
+  postLikes,
+  postComments,
+  friendships,
+  professionalConnections,
+  userPrivacySettings,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, or, desc, asc, like, ilike } from "drizzle-orm";
+import { eq, and, or, desc, asc, like, ilike, sql, ne } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -94,6 +112,33 @@ export interface IStorage {
   getMediaFile(id: number): Promise<MediaFile | undefined>;
   updateMediaFile(id: number, media: Partial<InsertMediaFile>): Promise<MediaFile>;
   deleteMediaFile(id: number): Promise<void>;
+
+  // Social media operations
+  createSocialPost(post: InsertSocialPost): Promise<SocialPost>;
+  getSocialPosts(userId: number, limit?: number, offset?: number): Promise<SocialPost[]>;
+  getFeedPosts(userId: number, limit?: number, offset?: number): Promise<SocialPost[]>;
+  getUserSocialPosts(userId: number): Promise<SocialPost[]>;
+  likeSocialPost(postId: number, userId: number): Promise<void>;
+  unlikeSocialPost(postId: number, userId: number): Promise<void>;
+  commentOnPost(comment: InsertPostComment): Promise<PostComment>;
+  getPostComments(postId: number): Promise<PostComment[]>;
+  
+  // Friend operations
+  sendFriendRequest(requesterId: number, addresseeId: number): Promise<Friendship>;
+  acceptFriendRequest(friendshipId: number): Promise<Friendship>;
+  rejectFriendRequest(friendshipId: number): Promise<void>;
+  getFriendRequests(userId: number): Promise<Friendship[]>;
+  getFriends(userId: number): Promise<User[]>;
+  searchUsers(query: string, currentUserId: number): Promise<User[]>;
+  
+  // Professional connections
+  createProfessionalConnection(connection: InsertProfessionalConnection): Promise<ProfessionalConnection>;
+  getProfessionalConnections(talentId: number): Promise<ProfessionalConnection[]>;
+  updateProfessionalConnection(id: number, connection: Partial<InsertProfessionalConnection>): Promise<ProfessionalConnection>;
+  
+  // Privacy settings
+  getUserPrivacySettings(userId: number): Promise<UserPrivacySettings>;
+  updateUserPrivacySettings(userId: number, settings: Partial<InsertUserPrivacySettings>): Promise<UserPrivacySettings>;
   
   // Job operations
   createJob(job: InsertJob): Promise<Job>;
@@ -335,6 +380,228 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMediaFile(id: number): Promise<void> {
     await db.delete(mediaFiles).where(eq(mediaFiles.id, id));
+  }
+
+  // Social media operations
+  async createSocialPost(post: InsertSocialPost): Promise<SocialPost> {
+    const [newPost] = await db.insert(socialPosts).values(post).returning();
+    return newPost;
+  }
+
+  async getSocialPosts(userId: number, limit: number = 20, offset: number = 0): Promise<SocialPost[]> {
+    return await db
+      .select()
+      .from(socialPosts)
+      .where(eq(socialPosts.userId, userId))
+      .orderBy(desc(socialPosts.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getFeedPosts(userId: number, limit: number = 20, offset: number = 0): Promise<SocialPost[]> {
+    // Get posts from friends and user's own posts
+    const friendIds = await db
+      .select({ id: users.id })
+      .from(friendships)
+      .innerJoin(users, or(
+        and(eq(friendships.requesterId, userId), eq(friendships.addresseeId, users.id)),
+        and(eq(friendships.addresseeId, userId), eq(friendships.requesterId, users.id))
+      ))
+      .where(eq(friendships.status, "accepted"));
+
+    const friendUserIds = friendIds.map(f => f.id);
+    friendUserIds.push(userId); // Include user's own posts
+
+    return await db
+      .select()
+      .from(socialPosts)
+      .where(or(
+        ...friendUserIds.map(id => eq(socialPosts.userId, id)),
+        eq(socialPosts.privacy, "public")
+      ))
+      .orderBy(desc(socialPosts.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getUserSocialPosts(userId: number): Promise<SocialPost[]> {
+    return await db
+      .select()
+      .from(socialPosts)
+      .where(eq(socialPosts.userId, userId))
+      .orderBy(desc(socialPosts.createdAt));
+  }
+
+  async likeSocialPost(postId: number, userId: number): Promise<void> {
+    await db.insert(postLikes).values({ postId, userId });
+    await db
+      .update(socialPosts)
+      .set({ 
+        likes: sql`${socialPosts.likes} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(socialPosts.id, postId));
+  }
+
+  async unlikeSocialPost(postId: number, userId: number): Promise<void> {
+    await db.delete(postLikes).where(and(
+      eq(postLikes.postId, postId),
+      eq(postLikes.userId, userId)
+    ));
+    await db
+      .update(socialPosts)
+      .set({ 
+        likes: sql`${socialPosts.likes} - 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(socialPosts.id, postId));
+  }
+
+  async commentOnPost(comment: InsertPostComment): Promise<PostComment> {
+    const [newComment] = await db.insert(postComments).values(comment).returning();
+    await db
+      .update(socialPosts)
+      .set({ 
+        comments: sql`${socialPosts.comments} + 1`,
+        updatedAt: new Date()
+      })
+      .where(eq(socialPosts.id, comment.postId));
+    return newComment;
+  }
+
+  async getPostComments(postId: number): Promise<PostComment[]> {
+    return await db
+      .select()
+      .from(postComments)
+      .where(eq(postComments.postId, postId))
+      .orderBy(asc(postComments.createdAt));
+  }
+
+  // Friend operations
+  async sendFriendRequest(requesterId: number, addresseeId: number): Promise<Friendship> {
+    const [friendship] = await db
+      .insert(friendships)
+      .values({ requesterId, addresseeId, status: "pending" })
+      .returning();
+    return friendship;
+  }
+
+  async acceptFriendRequest(friendshipId: number): Promise<Friendship> {
+    const [friendship] = await db
+      .update(friendships)
+      .set({ status: "accepted", updatedAt: new Date() })
+      .where(eq(friendships.id, friendshipId))
+      .returning();
+    return friendship;
+  }
+
+  async rejectFriendRequest(friendshipId: number): Promise<void> {
+    await db.delete(friendships).where(eq(friendships.id, friendshipId));
+  }
+
+  async getFriendRequests(userId: number): Promise<Friendship[]> {
+    return await db
+      .select()
+      .from(friendships)
+      .where(and(
+        eq(friendships.addresseeId, userId),
+        eq(friendships.status, "pending")
+      ))
+      .orderBy(desc(friendships.createdAt));
+  }
+
+  async getFriends(userId: number): Promise<User[]> {
+    const friendships = await db
+      .select()
+      .from(friendships)
+      .where(and(
+        or(
+          eq(friendships.requesterId, userId),
+          eq(friendships.addresseeId, userId)
+        ),
+        eq(friendships.status, "accepted")
+      ));
+
+    const friendIds = friendships.map(f => 
+      f.requesterId === userId ? f.addresseeId : f.requesterId
+    );
+
+    if (friendIds.length === 0) return [];
+
+    return await db
+      .select()
+      .from(users)
+      .where(or(...friendIds.map(id => eq(users.id, id))));
+  }
+
+  async searchUsers(query: string, currentUserId: number): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(and(
+        or(
+          ilike(users.username, `%${query}%`),
+          ilike(users.firstName, `%${query}%`),
+          ilike(users.lastName, `%${query}%`)
+        ),
+        // Exclude current user from search results
+        ne(users.id, currentUserId)
+      ))
+      .limit(20);
+  }
+
+  // Professional connections
+  async createProfessionalConnection(connection: InsertProfessionalConnection): Promise<ProfessionalConnection> {
+    const [newConnection] = await db
+      .insert(professionalConnections)
+      .values(connection)
+      .returning();
+    return newConnection;
+  }
+
+  async getProfessionalConnections(talentId: number): Promise<ProfessionalConnection[]> {
+    return await db
+      .select()
+      .from(professionalConnections)
+      .where(eq(professionalConnections.talentId, talentId))
+      .orderBy(desc(professionalConnections.createdAt));
+  }
+
+  async updateProfessionalConnection(id: number, connection: Partial<InsertProfessionalConnection>): Promise<ProfessionalConnection> {
+    const [updatedConnection] = await db
+      .update(professionalConnections)
+      .set({ ...connection, updatedAt: new Date() })
+      .where(eq(professionalConnections.id, id))
+      .returning();
+    return updatedConnection;
+  }
+
+  // Privacy settings
+  async getUserPrivacySettings(userId: number): Promise<UserPrivacySettings> {
+    const [settings] = await db
+      .select()
+      .from(userPrivacySettings)
+      .where(eq(userPrivacySettings.userId, userId));
+    
+    if (!settings) {
+      // Create default privacy settings if none exist
+      const [newSettings] = await db
+        .insert(userPrivacySettings)
+        .values({ userId })
+        .returning();
+      return newSettings;
+    }
+    
+    return settings;
+  }
+
+  async updateUserPrivacySettings(userId: number, settings: Partial<InsertUserPrivacySettings>): Promise<UserPrivacySettings> {
+    const [updatedSettings] = await db
+      .update(userPrivacySettings)
+      .set({ ...settings, updatedAt: new Date() })
+      .where(eq(userPrivacySettings.userId, userId))
+      .returning();
+    return updatedSettings;
   }
 
   // Job operations

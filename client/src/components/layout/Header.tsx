@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { useAuth } from "@/hooks/useAuth";
-import { Star, Search, Briefcase, Plus, Menu, Calendar } from "lucide-react";
+import { Star, Search, Briefcase, Plus, Menu, Calendar, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -12,6 +12,7 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navigation = [
+    { name: "Social", href: "/social", icon: MessageCircle },
     { name: "Find Talent", href: "/search", icon: Search },
     { name: "Browse Jobs", href: "/jobs", icon: Briefcase },
     { name: "Post Gig", href: "/post-gig", icon: Plus },

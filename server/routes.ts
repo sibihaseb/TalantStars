@@ -378,6 +378,227 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Social Media Routes
+  
+  // Get social feed
+  app.get("/api/social/feed", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const offset = parseInt(req.query.offset as string) || 0;
+      
+      const posts = await storage.getFeedPosts(userId, limit, offset);
+      res.json(posts);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error fetching feed: " + error.message });
+    }
+  });
+
+  // Get user's posts
+  app.get("/api/social/posts/:userId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const posts = await storage.getUserSocialPosts(userId);
+      res.json(posts);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error fetching posts: " + error.message });
+    }
+  });
+
+  // Create post
+  app.post("/api/social/posts", isAuthenticated, async (req: any, res) => {
+    try {
+      const postData = {
+        userId: req.user.id,
+        content: req.body.content,
+        mediaIds: req.body.mediaIds || [],
+        privacy: req.body.privacy || 'public',
+        taggedUsers: req.body.taggedUsers || [],
+      };
+      
+      const post = await storage.createSocialPost(postData);
+      res.json(post);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error creating post: " + error.message });
+    }
+  });
+
+  // Like post
+  app.post("/api/social/posts/:postId/like", isAuthenticated, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.postId);
+      const userId = req.user.id;
+      
+      await storage.likeSocialPost(postId, userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: "Error liking post: " + error.message });
+    }
+  });
+
+  // Unlike post
+  app.delete("/api/social/posts/:postId/like", isAuthenticated, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.postId);
+      const userId = req.user.id;
+      
+      await storage.unlikeSocialPost(postId, userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: "Error unliking post: " + error.message });
+    }
+  });
+
+  // Comment on post
+  app.post("/api/social/posts/:postId/comments", isAuthenticated, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.postId);
+      const commentData = {
+        postId,
+        userId: req.user.id,
+        content: req.body.content,
+      };
+      
+      const comment = await storage.commentOnPost(commentData);
+      res.json(comment);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error creating comment: " + error.message });
+    }
+  });
+
+  // Get post comments
+  app.get("/api/social/posts/:postId/comments", isAuthenticated, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.postId);
+      const comments = await storage.getPostComments(postId);
+      res.json(comments);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error fetching comments: " + error.message });
+    }
+  });
+
+  // Friend Operations
+  
+  // Get friends
+  app.get("/api/social/friends", isAuthenticated, async (req: any, res) => {
+    try {
+      const friends = await storage.getFriends(req.user.id);
+      res.json(friends);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error fetching friends: " + error.message });
+    }
+  });
+
+  // Get friend requests
+  app.get("/api/social/friend-requests", isAuthenticated, async (req: any, res) => {
+    try {
+      const requests = await storage.getFriendRequests(req.user.id);
+      res.json(requests);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error fetching friend requests: " + error.message });
+    }
+  });
+
+  // Send friend request
+  app.post("/api/social/friend-request/:userId", isAuthenticated, async (req: any, res) => {
+    try {
+      const addresseeId = parseInt(req.params.userId);
+      const friendship = await storage.sendFriendRequest(req.user.id, addresseeId);
+      res.json(friendship);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error sending friend request: " + error.message });
+    }
+  });
+
+  // Accept friend request
+  app.post("/api/social/friend-request/:friendshipId/accept", isAuthenticated, async (req: any, res) => {
+    try {
+      const friendshipId = parseInt(req.params.friendshipId);
+      const friendship = await storage.acceptFriendRequest(friendshipId);
+      res.json(friendship);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error accepting friend request: " + error.message });
+    }
+  });
+
+  // Reject friend request
+  app.delete("/api/social/friend-request/:friendshipId", isAuthenticated, async (req: any, res) => {
+    try {
+      const friendshipId = parseInt(req.params.friendshipId);
+      await storage.rejectFriendRequest(friendshipId);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: "Error rejecting friend request: " + error.message });
+    }
+  });
+
+  // Search users
+  app.get("/api/social/search", isAuthenticated, async (req: any, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query || query.length < 2) {
+        return res.json([]);
+      }
+      
+      const users = await storage.searchUsers(query, req.user.id);
+      res.json(users);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error searching users: " + error.message });
+    }
+  });
+
+  // Professional Connections
+  
+  // Get professional connections
+  app.get("/api/social/professional-connections", isAuthenticated, async (req: any, res) => {
+    try {
+      const connections = await storage.getProfessionalConnections(req.user.id);
+      res.json(connections);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error fetching professional connections: " + error.message });
+    }
+  });
+
+  // Create professional connection
+  app.post("/api/social/professional-connections", isAuthenticated, async (req: any, res) => {
+    try {
+      const connectionData = {
+        talentId: req.user.id,
+        professionalId: req.body.professionalId,
+        connectionType: req.body.connectionType,
+        status: req.body.status || 'pending',
+        notes: req.body.notes,
+      };
+      
+      const connection = await storage.createProfessionalConnection(connectionData);
+      res.json(connection);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error creating professional connection: " + error.message });
+    }
+  });
+
+  // Privacy Settings
+  
+  // Get privacy settings
+  app.get("/api/social/privacy", isAuthenticated, async (req: any, res) => {
+    try {
+      const settings = await storage.getUserPrivacySettings(req.user.id);
+      res.json(settings);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error fetching privacy settings: " + error.message });
+    }
+  });
+
+  // Update privacy settings
+  app.put("/api/social/privacy", isAuthenticated, async (req: any, res) => {
+    try {
+      const settings = await storage.updateUserPrivacySettings(req.user.id, req.body);
+      res.json(settings);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error updating privacy settings: " + error.message });
+    }
+  });
+
   // Job routes
   app.post('/api/jobs', isAuthenticated, async (req: any, res) => {
     try {
