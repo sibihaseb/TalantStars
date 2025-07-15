@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+// Force cache refresh - v2.0.1
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeProvider } from "@/components/ui/theme-provider";
@@ -477,7 +478,8 @@ const RequiredFieldLabel = ({ children, required = false }: { children: React.Re
   </div>
 );
 
-const Onboarding = React.memo(function Onboarding() {
+// Cache-busting comment to force component refresh - v2.0
+function Onboarding() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
@@ -1955,6 +1957,6 @@ const Onboarding = React.memo(function Onboarding() {
       </div>
     </ThemeProvider>
   );
-});
+}
 
 export default Onboarding;
