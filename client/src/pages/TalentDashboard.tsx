@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,8 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Calendar, 
   Briefcase, 
@@ -44,6 +50,24 @@ import {
 export default function TalentDashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+  const [isJobHistoryDialogOpen, setIsJobHistoryDialogOpen] = useState(false);
+  const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
+  const [postContent, setPostContent] = useState("");
+  const [jobHistoryForm, setJobHistoryForm] = useState({
+    title: "",
+    company: "",
+    jobType: "",
+    role: "",
+    startDate: "",
+    endDate: "",
+    location: "",
+    description: "",
+    verified: false
+  });
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // Fetch user profile and stats
   const { data: profile } = useQuery({
@@ -72,6 +96,133 @@ export default function TalentDashboard() {
     },
     enabled: !!user,
   });
+
+  const { data: jobHistory } = useQuery({
+    queryKey: ['/api/job-history', user?.id],
+    queryFn: async () => {
+      const response = await apiRequest('GET', `/api/job-history/${user?.id}`);
+      return response.json();
+    },
+    enabled: !!user,
+  });
+
+  // Create post mutation
+  const createPostMutation = useMutation({
+    mutationFn: async (content: string) => {
+      const response = await apiRequest('POST', '/api/social/posts', {
+        content,
+        privacy: 'public',
+        mediaUrls: [],
+        taggedUsers: []
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/social/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/social/stats'] });
+      setPostContent("");
+      setIsPostDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Post created successfully!",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to create post. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create job history mutation
+  const createJobHistoryMutation = useMutation({
+    mutationFn: async (jobData: any) => {
+      const response = await apiRequest('POST', '/api/job-history', jobData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/job-history'] });
+      setJobHistoryForm({
+        title: "",
+        company: "",
+        jobType: "",
+        role: "",
+        startDate: "",
+        endDate: "",
+        location: "",
+        description: "",
+        verified: false
+      });
+      setIsJobHistoryDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Job history added successfully!",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to add job history. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Media upload mutation
+  const uploadMediaMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('fileType', 'portfolio');
+      const response = await apiRequest('POST', '/api/upload', formData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/media'] });
+      setMediaFile(null);
+      setIsMediaDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Media uploaded successfully!",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to upload media. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Action handlers
+  const handleCreatePost = () => {
+    if (postContent.trim()) {
+      createPostMutation.mutate(postContent);
+    }
+  };
+
+  const handleAddJobHistory = () => {
+    if (jobHistoryForm.title && jobHistoryForm.company) {
+      createJobHistoryMutation.mutate(jobHistoryForm);
+    }
+  };
+
+  const handleMediaUpload = () => {
+    if (mediaFile) {
+      uploadMediaMutation.mutate(mediaFile);
+    }
+  };
+
+  const handleCompleteProfile = () => {
+    setActiveTab("portfolio");
+  };
+
+  const handleViewApplications = () => {
+    setActiveTab("applications");
+  };
 
   const { data: socialStats } = useQuery({
     queryKey: ['/api/social/stats'],
@@ -230,7 +381,7 @@ export default function TalentDashboard() {
                         <span>Demo Reel</span>
                       </div>
                     </div>
-                    <Button className="w-full" size="sm">
+                    <Button className="w-full" size="sm" onClick={handleCompleteProfile}>
                       <Plus className="w-4 h-4 mr-2" />
                       Complete Profile
                     </Button>
@@ -262,7 +413,7 @@ export default function TalentDashboard() {
                         </Badge>
                       </div>
                     ))}
-                    <Button variant="outline" className="w-full" size="sm">
+                    <Button variant="outline" className="w-full" size="sm" onClick={handleViewApplications}>
                       <Eye className="w-4 h-4 mr-2" />
                       View All Applications
                     </Button>
@@ -304,10 +455,42 @@ export default function TalentDashboard() {
                       </div>
                       <span className="text-sm font-medium">{socialStats?.shares || 0}</span>
                     </div>
-                    <Button variant="outline" className="w-full" size="sm">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Post
-                    </Button>
+                    <Dialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full" size="sm">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create Post
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Create New Post</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="post-content">What's on your mind?</Label>
+                            <Textarea
+                              id="post-content"
+                              placeholder="Share your thoughts, updates, or achievements..."
+                              value={postContent}
+                              onChange={(e) => setPostContent(e.target.value)}
+                              className="min-h-24"
+                            />
+                          </div>
+                          <div className="flex justify-end space-x-2">
+                            <Button variant="outline" onClick={() => setIsPostDialogOpen(false)}>
+                              Cancel
+                            </Button>
+                            <Button 
+                              onClick={handleCreatePost}
+                              disabled={!postContent.trim() || createPostMutation.isPending}
+                            >
+                              {createPostMutation.isPending ? "Posting..." : "Post"}
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </CardContent>
               </Card>
@@ -481,10 +664,41 @@ export default function TalentDashboard() {
                     <CardTitle>Portfolio</CardTitle>
                     <CardDescription>Showcase your work and talent</CardDescription>
                   </div>
-                  <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Add Media
-                  </Button>
+                  <Dialog open={isMediaDialogOpen} onOpenChange={setIsMediaDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Add Media
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Upload Media</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="media-file">Select File</Label>
+                          <Input
+                            id="media-file"
+                            type="file"
+                            accept="image/*,video/*,audio/*"
+                            onChange={(e) => setMediaFile(e.target.files?.[0] || null)}
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="outline" onClick={() => setIsMediaDialogOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button 
+                            onClick={handleMediaUpload}
+                            disabled={!mediaFile || uploadMediaMutation.isPending}
+                          >
+                            {uploadMediaMutation.isPending ? "Uploading..." : "Upload"}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardHeader>
               <CardContent>
@@ -493,7 +707,7 @@ export default function TalentDashboard() {
                     <CardContent className="flex flex-col items-center justify-center p-8 text-center">
                       <Camera className="w-12 h-12 text-gray-400 mb-4" />
                       <p className="text-sm text-gray-600 mb-2">Add Photos</p>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => setIsMediaDialogOpen(true)}>
                         <Plus className="w-4 h-4 mr-2" />
                         Upload
                       </Button>
@@ -504,7 +718,7 @@ export default function TalentDashboard() {
                     <CardContent className="flex flex-col items-center justify-center p-8 text-center">
                       <PlayCircle className="w-12 h-12 text-gray-400 mb-4" />
                       <p className="text-sm text-gray-600 mb-2">Add Videos</p>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => setIsMediaDialogOpen(true)}>
                         <Plus className="w-4 h-4 mr-2" />
                         Upload
                       </Button>
@@ -515,10 +729,98 @@ export default function TalentDashboard() {
                     <CardContent className="flex flex-col items-center justify-center p-8 text-center">
                       <Award className="w-12 h-12 text-gray-400 mb-4" />
                       <p className="text-sm text-gray-600 mb-2">Add Achievements</p>
-                      <Button variant="outline" size="sm">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add
-                      </Button>
+                      <Dialog open={isJobHistoryDialogOpen} onOpenChange={setIsJobHistoryDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Add Job History</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor="job-title">Job Title</Label>
+                              <Input
+                                id="job-title"
+                                value={jobHistoryForm.title}
+                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, title: e.target.value})}
+                                placeholder="Lead Actor, Background Vocalist, etc."
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="company">Company/Production</Label>
+                              <Input
+                                id="company"
+                                value={jobHistoryForm.company}
+                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, company: e.target.value})}
+                                placeholder="Netflix, Warner Bros, etc."
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="job-type">Job Type</Label>
+                              <Select value={jobHistoryForm.jobType} onValueChange={(value) => setJobHistoryForm({...jobHistoryForm, jobType: value})}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select job type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="feature_film">Feature Film</SelectItem>
+                                  <SelectItem value="short_film">Short Film</SelectItem>
+                                  <SelectItem value="tv_series">TV Series</SelectItem>
+                                  <SelectItem value="commercial">Commercial</SelectItem>
+                                  <SelectItem value="music_video">Music Video</SelectItem>
+                                  <SelectItem value="theater">Theater</SelectItem>
+                                  <SelectItem value="fashion_show">Fashion Show</SelectItem>
+                                  <SelectItem value="concert">Concert</SelectItem>
+                                  <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor="start-date">Start Date</Label>
+                                <Input
+                                  id="start-date"
+                                  type="date"
+                                  value={jobHistoryForm.startDate}
+                                  onChange={(e) => setJobHistoryForm({...jobHistoryForm, startDate: e.target.value})}
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="end-date">End Date</Label>
+                                <Input
+                                  id="end-date"
+                                  type="date"
+                                  value={jobHistoryForm.endDate}
+                                  onChange={(e) => setJobHistoryForm({...jobHistoryForm, endDate: e.target.value})}
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label htmlFor="description">Description</Label>
+                              <Textarea
+                                id="description"
+                                value={jobHistoryForm.description}
+                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, description: e.target.value})}
+                                placeholder="Describe your role and achievements..."
+                              />
+                            </div>
+                            <div className="flex justify-end space-x-2">
+                              <Button variant="outline" onClick={() => setIsJobHistoryDialogOpen(false)}>
+                                Cancel
+                              </Button>
+                              <Button 
+                                onClick={handleAddJobHistory}
+                                disabled={!jobHistoryForm.title || !jobHistoryForm.company || createJobHistoryMutation.isPending}
+                              >
+                                {createJobHistoryMutation.isPending ? "Adding..." : "Add"}
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </CardContent>
                   </Card>
                 </div>
@@ -534,7 +836,10 @@ export default function TalentDashboard() {
                     <CardTitle>Availability Calendar</CardTitle>
                     <CardDescription>Manage your schedule and availability</CardDescription>
                   </div>
-                  <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                  <Button 
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                    onClick={() => toast({ title: "Coming Soon", description: "Calendar functionality will be available soon!" })}
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Event
                   </Button>
