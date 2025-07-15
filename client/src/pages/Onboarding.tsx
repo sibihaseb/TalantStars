@@ -111,6 +111,94 @@ const onboardingSchema = insertUserProfileSchema.extend({
   dancingStyles: z.array(z.string()).optional(),
   sportingActivities: z.array(z.string()).optional(),
   drivingLicenses: z.array(z.string()).optional(),
+  
+  // Acting-specific fields
+  acting_specialty: z.string().optional(),
+  acting_experience_years: z.string().optional(),
+  acting_method: z.string().optional(),
+  improvisation_comfort: z.string().optional(),
+  stage_combat: z.string().optional(),
+  intimate_scenes: z.string().optional(),
+  preferred_roles: z.array(z.string()).optional(),
+  motion_capture: z.string().optional(),
+  animals_comfort: z.string().optional(),
+  crying_on_cue: z.string().optional(),
+  dancing_ability: z.string().optional(),
+  singing_ability: z.string().optional(),
+  comedy_experience: z.string().optional(),
+  drama_experience: z.string().optional(),
+  action_experience: z.string().optional(),
+  horror_experience: z.string().optional(),
+  sci_fi_experience: z.string().optional(),
+  period_experience: z.string().optional(),
+  children_comfort: z.string().optional(),
+  dialects_accents: z.array(z.string()).optional(),
+  
+  // Musician-specific fields
+  primary_instrument: z.string().optional(),
+  additional_instruments: z.array(z.string()).optional(),
+  music_experience_years: z.string().optional(),
+  music_genres: z.array(z.string()).optional(),
+  performance_types: z.array(z.string()).optional(),
+  music_theory_knowledge: z.string().optional(),
+  sight_reading: z.string().optional(),
+  improvisation_music: z.string().optional(),
+  composition_skills: z.string().optional(),
+  recording_experience: z.string().optional(),
+  live_performance_experience: z.string().optional(),
+  band_experience: z.string().optional(),
+  solo_performance: z.string().optional(),
+  music_production: z.string().optional(),
+  audio_software: z.array(z.string()).optional(),
+  music_education: z.string().optional(),
+  performance_venues: z.array(z.string()).optional(),
+  music_collaborations: z.string().optional(),
+  music_awards: z.string().optional(),
+  touring_experience: z.string().optional(),
+  
+  // Voice Artist-specific fields
+  voice_type: z.string().optional(),
+  voice_experience_years: z.string().optional(),
+  voice_genres: z.array(z.string()).optional(),
+  recording_setup: z.string().optional(),
+  voice_training: z.string().optional(),
+  character_voices: z.string().optional(),
+  narration_experience: z.string().optional(),
+  commercial_experience: z.string().optional(),
+  audiobook_experience: z.string().optional(),
+  animation_experience: z.string().optional(),
+  video_game_experience: z.string().optional(),
+  podcast_experience: z.string().optional(),
+  voice_coaching: z.string().optional(),
+  breath_control: z.string().optional(),
+  voice_stamina: z.string().optional(),
+  microphone_technique: z.string().optional(),
+  voice_editing: z.string().optional(),
+  multiple_characters: z.string().optional(),
+  voice_impressions: z.string().optional(),
+  voice_pitch_range: z.string().optional(),
+  
+  // Model-specific fields
+  modeling_type: z.string().optional(),
+  modeling_experience_years: z.string().optional(),
+  shoot_types: z.array(z.string()).optional(),
+  wardrobe_sizes: z.string().optional(),
+  portfolio_pieces: z.string().optional(),
+  runway_experience: z.string().optional(),
+  print_experience: z.string().optional(),
+  commercial_modeling: z.string().optional(),
+  fashion_modeling: z.string().optional(),
+  fitness_modeling: z.string().optional(),
+  lifestyle_modeling: z.string().optional(),
+  product_modeling: z.string().optional(),
+  swimwear_comfort: z.string().optional(),
+  lingerie_comfort: z.string().optional(),
+  nude_artistic: z.string().optional(),
+  travel_availability: z.string().optional(),
+  modeling_awards: z.string().optional(),
+  agency_representation: z.string().optional(),
+  modeling_education: z.string().optional(),
+  photo_editing: z.string().optional(),
 }).omit({ userId: true }); // Remove userId from client-side validation since it's added server-side
 
 type OnboardingFormData = z.infer<typeof onboardingSchema>;
@@ -610,7 +698,7 @@ export default function Onboarding() {
 
   // Fetch role-specific questions from database
   const { data: profileQuestions = [] } = useQuery({
-    queryKey: ["/api/admin/profile-questions"],
+    queryKey: ["/api/profile-questions"],
     enabled: !!watchedRole,
   });
 
@@ -630,7 +718,7 @@ export default function Onboarding() {
     }
 
     const relevantQuestions = profileQuestions
-      .filter(q => questionTypes.includes(q.talentType) && q.active)
+      .filter(q => questionTypes.includes(q.talent_type) && q.active)
       .sort((a, b) => a.order - b.order);
 
     if (relevantQuestions.length === 0) {
@@ -653,9 +741,9 @@ export default function Onboarding() {
   };
 
   const renderDynamicFormField = (question: any) => {
-    const fieldName = question.fieldName as keyof OnboardingFormData;
+    const fieldName = question.field_name as keyof OnboardingFormData;
     
-    switch (question.fieldType) {
+    switch (question.field_type) {
       case 'text':
         return (
           <Input

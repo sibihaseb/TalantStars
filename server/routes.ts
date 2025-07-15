@@ -1252,6 +1252,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Keep the old endpoints for backward compatibility
+  // Public endpoint for profile questions (used in onboarding)
+  app.get('/api/profile-questions', isAuthenticated, async (req: any, res) => {
+    try {
+      const questions = await storage.getProfileQuestions();
+      res.json(questions);
+    } catch (error) {
+      console.error("Error fetching profile questions:", error);
+      res.status(500).json({ message: "Failed to fetch profile questions" });
+    }
+  });
+
+  // Admin endpoint for profile questions management
   app.get('/api/admin/profile-questions', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const questions = await storage.getProfileQuestions();
