@@ -84,6 +84,9 @@ const onboardingSchema = insertUserProfileSchema.extend({
     .min(2, "Location must be at least 2 characters")
     .max(100, "Location must be less than 100 characters"),
   
+  // Profile image URL - required for onboarding
+  profileImageUrl: z.string().min(1, "Profile image is required"),
+  
   // Optional fields with validation
   website: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   phoneNumber: z.string().regex(/^[\+]?[1-9][\d]{0,15}$/, "Invalid phone number format").optional().or(z.literal("")),
@@ -372,6 +375,7 @@ export default function Onboarding() {
       displayName: user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "",
       bio: "",
       location: "",
+      profileImageUrl: "",
       website: "",
       phoneNumber: "",
       availabilityStatus: "available",
@@ -1429,10 +1433,18 @@ export default function Onboarding() {
                       <ProfileImageUpload
                         currentImage={form.watch("profileImageUrl")}
                         onImageUpdate={(url) => {
+                          console.log("Image upload completed, setting profileImageUrl:", url);
                           form.setValue("profileImageUrl", url);
                           form.trigger("profileImageUrl");
-                          // Auto-advance to next step after successful upload
+                          
+                          // Force form validation to update
                           setTimeout(() => {
+                            const formData = form.getValues();
+                            console.log("Form data after image upload:", formData);
+                            console.log("Form errors after image upload:", form.formState.errors);
+                            console.log("Form valid after image upload:", form.formState.isValid);
+                            
+                            // Auto-advance to next step after successful upload
                             nextStep();
                           }, 500);
                         }}

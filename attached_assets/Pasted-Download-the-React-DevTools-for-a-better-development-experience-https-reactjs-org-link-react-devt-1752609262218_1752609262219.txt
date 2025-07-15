@@ -1,0 +1,82 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools react-dom.development.js:29895:17
+Continue Building Profile clicked - forcing navigation to onboarding main.tsx:54:22
+Step 1 completed! main.tsx:54:22
+XHRGET
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/admin/profile-questions
+[HTTP/1.1 403 Forbidden 100ms]
+
+Step 2 completed! 2 main.tsx:54:22
+Step 3 completed! 20 main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: false, selectedFile: undefined, previewUrl: false, mandatory: true }
+main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+Choose Image button clicked main.tsx:54:22
+File input ref: 
+<input class="hidden" data-replit-metadata="client/src/components/Pr…eImageUpload.tsx:393:14" data-component-name="input" type="file" accept="image/*" data-testid="file-input">
+main.tsx:54:22
+File input ref value: <empty string> main.tsx:54:22
+File input changed - event fired main.tsx:54:22
+Event target: 
+<input class="hidden" data-replit-metadata="client/src/components/Pr…eImageUpload.tsx:393:14" data-component-name="input" type="file" accept="image/*" data-testid="file-input">
+main.tsx:54:22
+Files length: 1 main.tsx:54:22
+File list: 
+FileList [ File ]
+main.tsx:54:22
+Selected file: 
+File { name: "u9344792314_create_a_16x9_image_of_The_Evolution_of_Santa_Cla_f49ae375-73e7-4d15-a8b8-183c9e6ef2c5_1.png", lastModified: 1751987804583, webkitRelativePath: "", size: 1693464, type: "image/png" }
+main.tsx:54:22
+File details: 
+Object { name: "u9344792314_create_a_16x9_image_of_The_Evolution_of_Santa_Cla_f49ae375-73e7-4d15-a8b8-183c9e6ef2c5_1.png", size: 1693464, type: "image/png" }
+main.tsx:54:22
+File selected: u9344792314_create_a_16x9_image_of_The_Evolution_of_Santa_Cla_f49ae375-73e7-4d15-a8b8-183c9e6ef2c5_1.png image/png 1693464 main.tsx:54:22
+Setting selected file and preview URL main.tsx:54:22
+Cropper should now be visible main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "u9344792314_create_a_16x9_image_of_The_Evolution_of_Santa_Cla_f49ae375-73e7-4d15-a8b8-183c9e6ef2c5_1.png", previewUrl: true, mandatory: true }
+main.tsx:54:22
+Form submitted with data: 
+Object { role: "talent", talentType: "actor", displayName: "Marty TEST", bio: "asdfadsf fdsas", location: "asdf", website: "", phoneNumber: "", availabilityStatus: "available", height: "", weight: "", … }
+main.tsx:54:22
+Form errors: 
+Object {  }
+main.tsx:54:22
+Form is valid: false main.tsx:54:22
+Calling mutation... main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+Submitting profile data: 
+Object { role: "talent", talentType: "actor", displayName: "Marty TEST", bio: "asdfadsf fdsas", location: "asdf", website: "", phoneNumber: "", availabilityStatus: "available", height: "", weight: "", … }
+main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+Canvas blob created: 
+Blob { size: 490828, type: "image/jpeg" }
+main.tsx:54:22
+Blob size: 490828 main.tsx:54:22
+Blob type: image/jpeg main.tsx:54:22
+FormData contents: main.tsx:54:22
+image: 
+File { name: "profile-image.jpg", lastModified: 1752609217663, webkitRelativePath: "", size: 490828, type: "image/jpeg" }
+main.tsx:54:22
+Uploading file to server... main.tsx:54:22
+FormData entries: 
+Array [ (2) […] ]
+main.tsx:54:22
+API response status: 200 main.tsx:54:22
+API response data: 
+Object { id: 12, userId: 5, role: "talent", talentType: "actor", displayName: "Marty TEST", bio: "asdfadsf fdsas", location: "asdf", website: "", phoneNumber: "", isVerified: false, … }
+main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+Upload response status: 200 main.tsx:54:22
+Upload result: 
+Object { profileImageUrl: "https://s3.us-east-1.wasabisys.com/talent/user-5/profile/f990ffdf-a961-44d3-8ffb-ba4d2630f482.jpg", user: {…} }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: false, selectedFile: undefined, previewUrl: false, mandatory: true }
+main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+Step 2 completed! main.tsx:54:22
+
+​
+
