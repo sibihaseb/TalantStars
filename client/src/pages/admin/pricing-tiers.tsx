@@ -66,6 +66,9 @@ export default function PricingTiersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priceFilter, setPriceFilter] = useState<string>("all");
+  const [durationFilter, setDurationFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("name");
+  const [sortOrder, setSortOrder] = useState<string>("asc");
   
   const [formData, setFormData] = useState({
     name: "",
@@ -240,16 +243,39 @@ export default function PricingTiersPage() {
     }));
   };
 
-  // Filter tiers based on search and filters
-  const filteredTiers = pricingTiers.filter(tier => {
-    const matchesSearch = tier.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || (statusFilter === "active" ? tier.active : !tier.active);
-    const matchesPrice = priceFilter === "all" || 
-      (priceFilter === "free" && parseFloat(tier.price) === 0) ||
-      (priceFilter === "paid" && parseFloat(tier.price) > 0);
-    
-    return matchesSearch && matchesStatus && matchesPrice;
-  });
+  // Filter and sort tiers
+  const filteredTiers = pricingTiers
+    .filter(tier => {
+      const matchesSearch = tier.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === "all" || (statusFilter === "active" ? tier.active : !tier.active);
+      const matchesPrice = priceFilter === "all" || 
+        (priceFilter === "free" && parseFloat(tier.price) === 0) ||
+        (priceFilter === "paid" && parseFloat(tier.price) > 0) ||
+        (priceFilter === "low" && parseFloat(tier.price) > 0 && parseFloat(tier.price) <= 25) ||
+        (priceFilter === "medium" && parseFloat(tier.price) > 25 && parseFloat(tier.price) <= 100) ||
+        (priceFilter === "high" && parseFloat(tier.price) > 100);
+      const matchesDuration = durationFilter === "all" ||
+        (durationFilter === "monthly" && tier.duration === 30) ||
+        (durationFilter === "quarterly" && tier.duration === 90) ||
+        (durationFilter === "yearly" && tier.duration === 365);
+      
+      return matchesSearch && matchesStatus && matchesPrice && matchesDuration;
+    })
+    .sort((a, b) => {
+      let aValue: any = a[sortBy as keyof PricingTier];
+      let bValue: any = b[sortBy as keyof PricingTier];
+      
+      if (sortBy === "price") {
+        aValue = parseFloat(a.price);
+        bValue = parseFloat(b.price);
+      }
+      
+      if (sortBy === "name") {
+        return sortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      }
+      
+      return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
+    });
 
   const formatPrice = (price: string) => {
     return parseFloat(price) === 0 ? 'Free' : `$${parseFloat(price).toFixed(2)}/month`;
@@ -312,11 +338,11 @@ export default function PricingTiersPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Filter className="w-5 h-5 mr-2" />
-              Filters & Search
+              Advanced Filters & Search
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
               <div>
                 <Label htmlFor="search">Search Tiers</Label>
                 <div className="relative">
@@ -344,15 +370,45 @@ export default function PricingTiersPage() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="price">Price</Label>
+                <Label htmlFor="price">Price Range</Label>
                 <Select value={priceFilter} onValueChange={setPriceFilter}>
                   <SelectTrigger>
                     <SelectValue placeholder="Filter by price" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Prices</SelectItem>
-                    <SelectItem value="free">Free Tiers</SelectItem>
-                    <SelectItem value="paid">Paid Tiers</SelectItem>
+                    <SelectItem value="free">Free ($0)</SelectItem>
+                    <SelectItem value="low">Low ($1-$25)</SelectItem>
+                    <SelectItem value="medium">Medium ($26-$100)</SelectItem>
+                    <SelectItem value="high">High ($100+)</SelectItem>
+                    <SelectItem value="paid">All Paid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="duration">Duration</Label>
+                <Select value={durationFilter} onValueChange={setDurationFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Durations</SelectItem>
+                    <SelectItem value="monthly">Monthly (30 days)</SelectItem>
+                    <SelectItem value="quarterly">Quarterly (90 days)</SelectItem>
+                    <SelectItem value="yearly">Yearly (365 days)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="sort">Sort By</Label>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Name</SelectItem>
+                    <SelectItem value="price">Price</SelectItem>
+                    <SelectItem value="duration">Duration</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -363,16 +419,67 @@ export default function PricingTiersPage() {
                     setSearchTerm("");
                     setStatusFilter("all");
                     setPriceFilter("all");
+                    setDurationFilter("all");
+                    setSortBy("name");
+                    setSortOrder("asc");
                   }}
                   className="w-full"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Reset Filters
+                  Reset All
                 </Button>
               </div>
             </div>
+            
+            {/* Sort Order Toggle */}
+            <div className="mt-4 flex items-center space-x-2">
+              <Label>Sort Order:</Label>
+              <Button
+                variant={sortOrder === "asc" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSortOrder("asc")}
+              >
+                Ascending
+              </Button>
+              <Button
+                variant={sortOrder === "desc" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSortOrder("desc")}
+              >
+                Descending
+              </Button>
+            </div>
           </CardContent>
         </Card>
+
+        {/* Results Summary */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg border-0 shadow-sm">
+            <div className="flex items-center space-x-4">
+              <Badge variant="outline" className="text-sm">
+                {filteredTiers.length} of {pricingTiers.length} tiers shown
+              </Badge>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Sorted by {sortBy} ({sortOrder === 'asc' ? 'ascending' : 'descending'})
+              </span>
+            </div>
+            {(searchTerm || statusFilter !== "all" || priceFilter !== "all" || durationFilter !== "all") && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm("");
+                  setStatusFilter("all");
+                  setPriceFilter("all");
+                  setDurationFilter("all");
+                }}
+                className="text-blue-600 hover:text-blue-700"
+              >
+                Clear all filters
+              </Button>
+            )}
+          </div>
+        </div>
 
         {/* Tiers Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -416,23 +523,31 @@ export default function PricingTiersPage() {
               <CardContent className="space-y-4">
                 {/* Features */}
                 <div>
-                  <h4 className="font-semibold text-sm mb-2">Features</h4>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span>Analytics</span>
+                  <h4 className="font-semibold text-sm mb-2">Features & Permissions</h4>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                      <span>📊 Analytics Dashboard</span>
                       {tier.hasAnalytics ? <CheckCircle className="w-3 h-3 text-green-500" /> : <XCircle className="w-3 h-3 text-red-500" />}
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span>Messaging</span>
+                    <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                      <span>💬 Messaging System</span>
                       {tier.hasMessaging ? <CheckCircle className="w-3 h-3 text-green-500" /> : <XCircle className="w-3 h-3 text-red-500" />}
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span>AI Features</span>
+                    <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                      <span>🤖 AI-Powered Features</span>
                       {tier.hasAIFeatures ? <CheckCircle className="w-3 h-3 text-green-500" /> : <XCircle className="w-3 h-3 text-red-500" />}
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span>Priority Support</span>
+                    <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                      <span>⚡ Priority Support</span>
                       {tier.hasPrioritySupport ? <CheckCircle className="w-3 h-3 text-green-500" /> : <XCircle className="w-3 h-3 text-red-500" />}
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                      <span>🔍 View Profiles</span>
+                      {tier.canViewProfiles ? <CheckCircle className="w-3 h-3 text-green-500" /> : <XCircle className="w-3 h-3 text-red-500" />}
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                      <span>📝 Create Jobs</span>
+                      {tier.canCreateJobs ? <CheckCircle className="w-3 h-3 text-green-500" /> : <XCircle className="w-3 h-3 text-red-500" />}
                     </div>
                   </div>
                 </div>
@@ -612,30 +727,130 @@ export default function PricingTiersPage() {
                 </div>
               </div>
 
-              {/* Features */}
+              {/* Features & Permissions */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Features</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {[
-                    { key: 'hasAnalytics', label: 'Analytics' },
-                    { key: 'hasMessaging', label: 'Messaging' },
-                    { key: 'hasAIFeatures', label: 'AI Features' },
-                    { key: 'hasPrioritySupport', label: 'Priority Support' },
-                    { key: 'canCreateJobs', label: 'Create Jobs' },
-                    { key: 'canViewProfiles', label: 'View Profiles' },
-                    { key: 'canExportData', label: 'Export Data' },
-                  ].map((feature) => (
-                    <div key={feature.key} className="flex items-center space-x-2">
-                      <Switch
-                        id={feature.key}
-                        checked={formData[feature.key as keyof typeof formData] as boolean}
-                        onCheckedChange={(checked) => 
-                          setFormData(prev => ({ ...prev, [feature.key]: checked }))
-                        }
-                      />
-                      <Label htmlFor={feature.key}>{feature.label}</Label>
+                <h3 className="text-lg font-semibold mb-4">Features & Permissions</h3>
+                <div className="space-y-6">
+                  
+                  {/* Analytics & Reporting */}
+                  <div>
+                    <h4 className="font-medium text-sm mb-3 text-blue-600">📊 Analytics & Reporting</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <Label htmlFor="hasAnalytics" className="font-medium">Analytics Dashboard</Label>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">View performance metrics and insights</p>
+                        </div>
+                        <Switch
+                          id="hasAnalytics"
+                          checked={formData.hasAnalytics}
+                          onCheckedChange={(checked) => 
+                            setFormData(prev => ({ ...prev, hasAnalytics: checked }))
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <Label htmlFor="canExportData" className="font-medium">Export Data</Label>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Download reports and data exports</p>
+                        </div>
+                        <Switch
+                          id="canExportData"
+                          checked={formData.canExportData}
+                          onCheckedChange={(checked) => 
+                            setFormData(prev => ({ ...prev, canExportData: checked }))
+                          }
+                        />
+                      </div>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Communication */}
+                  <div>
+                    <h4 className="font-medium text-sm mb-3 text-green-600">💬 Communication</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <Label htmlFor="hasMessaging" className="font-medium">Messaging System</Label>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Send and receive messages with other users</p>
+                        </div>
+                        <Switch
+                          id="hasMessaging"
+                          checked={formData.hasMessaging}
+                          onCheckedChange={(checked) => 
+                            setFormData(prev => ({ ...prev, hasMessaging: checked }))
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <Label htmlFor="hasPrioritySupport" className="font-medium">Priority Support</Label>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Get priority customer support</p>
+                        </div>
+                        <Switch
+                          id="hasPrioritySupport"
+                          checked={formData.hasPrioritySupport}
+                          onCheckedChange={(checked) => 
+                            setFormData(prev => ({ ...prev, hasPrioritySupport: checked }))
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* AI & Smart Features */}
+                  <div>
+                    <h4 className="font-medium text-sm mb-3 text-purple-600">🤖 AI & Smart Features</h4>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <Label htmlFor="hasAIFeatures" className="font-medium">AI-Powered Features</Label>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Profile optimization, smart matching, and AI suggestions</p>
+                        </div>
+                        <Switch
+                          id="hasAIFeatures"
+                          checked={formData.hasAIFeatures}
+                          onCheckedChange={(checked) => 
+                            setFormData(prev => ({ ...prev, hasAIFeatures: checked }))
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Platform Access */}
+                  <div>
+                    <h4 className="font-medium text-sm mb-3 text-orange-600">🔍 Platform Access</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <Label htmlFor="canViewProfiles" className="font-medium">View Talent Profiles</Label>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Browse and view detailed talent profiles</p>
+                        </div>
+                        <Switch
+                          id="canViewProfiles"
+                          checked={formData.canViewProfiles}
+                          onCheckedChange={(checked) => 
+                            setFormData(prev => ({ ...prev, canViewProfiles: checked }))
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <Label htmlFor="canCreateJobs" className="font-medium">Create Job Posts</Label>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Post jobs and casting calls</p>
+                        </div>
+                        <Switch
+                          id="canCreateJobs"
+                          checked={formData.canCreateJobs}
+                          onCheckedChange={(checked) => 
+                            setFormData(prev => ({ ...prev, canCreateJobs: checked }))
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
 
