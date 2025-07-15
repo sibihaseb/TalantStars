@@ -152,28 +152,58 @@ export default function TalentDashboard() {
     // Navigate to appropriate section based on item
     switch (item.id) {
       case 'basic-info':
-        setActiveTab('overview');
+        if (!item.completed) {
+          window.location.href = '/onboarding';
+        } else {
+          setActiveTab('overview');
+        }
         break;
       case 'profile-image':
-        setActiveTab('overview');
+        if (!item.completed) {
+          window.location.href = '/onboarding';
+        } else {
+          setActiveTab('overview');
+        }
         break;
       case 'bio':
-        setActiveTab('overview');
+        if (!item.completed) {
+          window.location.href = '/onboarding';
+        } else {
+          setActiveTab('overview');
+        }
         break;
       case 'skills':
-        setActiveTab('overview');
+        if (!item.completed) {
+          window.location.href = '/onboarding';
+        } else {
+          setActiveTab('overview');
+        }
         break;
       case 'experience':
-        setIsJobHistoryDialogOpen(true);
+        if (!item.completed) {
+          setIsJobHistoryDialogOpen(true);
+        } else {
+          setActiveTab('overview');
+        }
         break;
       case 'availability':
-        setActiveTab('overview');
+        if (!item.completed) {
+          window.location.href = '/onboarding';
+        } else {
+          setActiveTab('overview');
+        }
         break;
       case 'verification':
         toast({
           title: "Verification",
           description: "Contact support to complete verification process",
         });
+        break;
+      default:
+        // For any other incomplete items, navigate to onboarding
+        if (!item.completed) {
+          window.location.href = '/onboarding';
+        }
         break;
     }
   };

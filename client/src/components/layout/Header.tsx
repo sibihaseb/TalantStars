@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { useAuth } from "@/hooks/useAuth";
-import { Star, Search, Briefcase, Plus, Menu, Calendar, MessageCircle } from "lucide-react";
+import { Star, Search, Briefcase, Plus, Menu, Calendar, MessageCircle, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -20,11 +20,32 @@ export function Header() {
 
   const isActive = (href: string) => location === href;
 
+  const handleBackClick = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = '/dashboard';
+    }
+  };
+
+  const showBackButton = location !== '/' && location !== '/dashboard' && isAuthenticated;
+
   return (
     <header className="fixed w-full top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
+            {showBackButton && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBackClick}
+                className="flex items-center space-x-1"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Back</span>
+              </Button>
+            )}
             <Link href="/" className="flex items-center space-x-2">
               <Star className="h-8 w-8 text-yellow-500 fill-current" />
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">
