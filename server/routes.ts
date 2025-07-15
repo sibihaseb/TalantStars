@@ -205,29 +205,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const file = req.file;
+      const { title, description, category, externalUrl } = req.body;
       
-      if (!file) {
-        return res.status(400).json({ message: "No file uploaded" });
+      if (!file && !externalUrl) {
+        return res.status(400).json({ message: "Either file or external URL is required" });
       }
 
-      // Upload file to Wasabi
-      const uploadResult = await uploadFileToWasabi(file, `user-${userId}/media`);
-      
-      // Create media record in database
-      const mediaData = {
-        userId,
-        filename: uploadResult.key,
-        originalName: uploadResult.originalName,
-        mimeType: uploadResult.type,
-        size: uploadResult.size,
-        url: uploadResult.url,
-        thumbnailUrl: null,
-        mediaType: getFileTypeFromMimeType(uploadResult.type),
-        tags: [],
-        description: req.body.description || '',
-        isPublic: true,
-        category: req.body.category || 'portfolio'
-      };
+      let mediaData;
+
+      if (file) {
+        // Upload file to Wasabi
+        const uploadResult = await uploadFileToWasabi(file, `user-${userId}/media`);
+        
+        // Create media record in database
+        mediaData = {
+          userId,
+          filename: uploadResult.key,
+          originalName: uploadResult.originalName,
+          mimeType: uploadResult.type,
+          size: uploadResult.size,
+          url: uploadResult.url,
+          thumbnailUrl: null,
+          mediaType: getFileTypeFromMimeType(uploadResult.type),
+          tags: [],
+          title: title || '',
+          description: description || '',
+          isPublic: true,
+          category: category || 'portfolio'
+        };
+      } else if (externalUrl) {
+        // Handle external URL
+        let mediaType = 'video';
+        if (externalUrl.includes('youtube.com') || externalUrl.includes('youtu.be')) {
+          mediaType = 'video';
+        } else if (externalUrl.includes('vimeo.com')) {
+          mediaType = 'video';
+        } else if (externalUrl.includes('soundcloud.com') || externalUrl.includes('spotify.com')) {
+          mediaType = 'audio';
+        }
+        
+        mediaData = {
+          userId,
+          filename: `external_${Date.now()}`,
+          originalName: title || 'External Media',
+          mimeType: `${mediaType}/external`,
+          size: 0,
+          url: null,
+          thumbnailUrl: null,
+          mediaType,
+          tags: [],
+          title: title || '',
+          description: description || '',
+          isPublic: true,
+          category: category || 'portfolio',
+          externalUrl: externalUrl,
+          isExternal: true
+        };
+      }
       
       const media = await storage.createMediaFile(mediaData);
       res.json(media);
@@ -240,7 +274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/media/external', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const { url, description, category } = req.body;
+      const { url, title, description, category } = req.body;
       
       // Determine media type from URL
       let mediaType = 'video';
@@ -255,13 +289,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const mediaData = {
         userId,
         filename: `external_${Date.now()}`,
-        originalName: description || 'External Media',
+        originalName: title || 'External Media',
         mimeType: `${mediaType}/external`,
         size: 0,
         url: null,
         thumbnailUrl: null,
         mediaType,
         tags: [],
+        title: title || '',
         description: description || '',
         isPublic: true,
         category: category || 'portfolio',
