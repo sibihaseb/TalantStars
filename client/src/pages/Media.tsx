@@ -122,8 +122,10 @@ export default function Media() {
 
   const handleFileUpload = (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
     formData.append('category', category);
+    formData.append('description', description);
     uploadMutation.mutate(formData);
   };
 
@@ -209,8 +211,11 @@ export default function Media() {
                               type="file"
                               accept="image/*,video/*,audio/*"
                               required
-                              className="mt-1"
+                              className="mt-1 cursor-pointer"
                             />
+                            <p className="text-sm text-gray-500 mt-1">
+                              Supported formats: Images (JPG, PNG, GIF), Videos (MP4, MOV, AVI), Audio (MP3, WAV)
+                            </p>
                           </div>
 
                           <div>
@@ -331,21 +336,21 @@ export default function Media() {
                         {mediaFiles.map((media: any) => (
                           <Card key={media.id} className="overflow-hidden">
                             <CardContent className="p-0">
-                              {media.type === 'image' && media.url && (
+                              {media.mediaType === 'image' && media.url && (
                                 <img 
                                   src={media.url} 
                                   alt={media.description || 'Media file'} 
                                   className="w-full h-48 object-cover"
                                 />
                               )}
-                              {media.type === 'video' && media.url && (
+                              {media.mediaType === 'video' && media.url && (
                                 <video 
                                   src={media.url} 
                                   className="w-full h-48 object-cover"
                                   controls
                                 />
                               )}
-                              {media.type === 'audio' && media.url && (
+                              {media.mediaType === 'audio' && media.url && (
                                 <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
                                   <Music className="h-12 w-12 text-gray-400" />
                                 </div>
@@ -358,9 +363,9 @@ export default function Media() {
                               
                               <div className="p-4">
                                 <div className="flex items-center justify-between mb-2">
-                                  <Badge className={getMediaTypeColor(media.type)}>
-                                    {getMediaIcon(media.type)}
-                                    <span className="ml-1 capitalize">{media.type}</span>
+                                  <Badge className={getMediaTypeColor(media.mediaType)}>
+                                    {getMediaIcon(media.mediaType)}
+                                    <span className="ml-1 capitalize">{media.mediaType}</span>
                                   </Badge>
                                   <Badge variant="outline">{media.category}</Badge>
                                 </div>

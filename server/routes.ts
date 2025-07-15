@@ -22,6 +22,8 @@ import { requestPasswordReset, validatePasswordResetToken, resetPassword } from 
 import { sendMeetingInvitation, sendWelcomeEmail, sendEmail } from "./email";
 import { scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
+import { uploadFileToWasabi, deleteFileFromWasabi, getFileTypeFromMimeType } from "./wasabi-config";
+import multer from "multer";
 
 const scryptAsync = promisify(scrypt);
 
@@ -34,6 +36,24 @@ async function hashPassword(password: string) {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup traditional authentication for all routes
   setupAuth(app);
+
+  // Configure multer for file uploads
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 50 * 1024 * 1024, // 50MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      // Accept images, videos, and audio files
+      if (file.mimetype.startsWith('image/') || 
+          file.mimetype.startsWith('video/') || 
+          file.mimetype.startsWith('audio/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image, video, and audio files are allowed'));
+      }
+    }
+  });
 
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
@@ -181,10 +201,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Media routes
-  app.post('/api/media', isAuthenticated, async (req: any, res) => {
+  app.post('/api/media', isAuthenticated, upload.single('file'), async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const mediaData = insertMediaFileSchema.parse({ ...req.body, userId });
+      const file = req.file;
+      
+      if (!file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Upload file to Wasabi
+      const uploadResult = await uploadFileToWasabi(file, `user-${userId}/media`);
+      
+      // Create media record in database
+      const mediaData = {
+        userId,
+        filename: uploadResult.key,
+        originalName: uploadResult.originalName,
+        mimeType: uploadResult.type,
+        size: uploadResult.size,
+        url: uploadResult.url,
+        thumbnailUrl: null,
+        mediaType: getFileTypeFromMimeType(uploadResult.type),
+        tags: [],
+        description: req.body.description || '',
+        isPublic: true,
+        category: req.body.category || 'portfolio'
+      };
+      
       const media = await storage.createMediaFile(mediaData);
       res.json(media);
     } catch (error) {
@@ -196,24 +240,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/media/external', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const mediaData = await storage.createMediaFile({
+      const { url, description, category } = req.body;
+      
+      // Determine media type from URL
+      let mediaType = 'video';
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        mediaType = 'video';
+      } else if (url.includes('vimeo.com')) {
+        mediaType = 'video';
+      } else if (url.includes('soundcloud.com') || url.includes('spotify.com')) {
+        mediaType = 'audio';
+      }
+      
+      const mediaData = {
         userId,
         filename: `external_${Date.now()}`,
-        originalName: req.body.title || 'External Video',
-        mimeType: 'video/external',
+        originalName: description || 'External Media',
+        mimeType: `${mediaType}/external`,
         size: 0,
-        url: req.body.external_url,
+        url: null,
         thumbnailUrl: null,
-        mediaType: 'video',
+        mediaType,
         tags: [],
-        description: req.body.description || '',
+        description: description || '',
         isPublic: true,
-        external_url: req.body.external_url,
-        external_platform: req.body.external_platform,
-        external_id: req.body.external_id,
-        is_external: true,
-      });
-      res.json(mediaData);
+        category: category || 'portfolio',
+        externalUrl: url,
+        isExternal: true
+      };
+      
+      const media = await storage.createMediaFile(mediaData);
+      res.json(media);
     } catch (error) {
       console.error("Error creating external media file:", error);
       res.status(500).json({ message: "Failed to create external media file" });
@@ -234,6 +291,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/media/:id', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // Get media file info before deletion
+      const mediaFiles = await storage.getUserMediaFiles(req.user.id);
+      const mediaFile = mediaFiles.find(m => m.id === id);
+      
+      if (mediaFile && mediaFile.filename && !mediaFile.isExternal) {
+        // Delete from Wasabi if it's not an external link
+        try {
+          await deleteFileFromWasabi(mediaFile.filename);
+        } catch (error) {
+          console.error("Error deleting file from Wasabi:", error);
+          // Continue with database deletion even if cloud deletion fails
+        }
+      }
+      
       await storage.deleteMediaFile(id);
       res.json({ success: true });
     } catch (error) {
