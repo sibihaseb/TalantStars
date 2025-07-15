@@ -627,8 +627,9 @@ const Onboarding = React.memo(function Onboarding() {
     },
   });
 
-  const watchedRole = form.watch("role");
-  const watchedTalentType = form.watch("talentType");
+  // Optimize form watching to prevent excessive re-renders
+  const watchedValues = form.watch(["role", "talentType", "displayName", "location", "bio", "website", "phoneNumber"]);
+  const [watchedRole, watchedTalentType, watchedDisplayName, watchedLocation, watchedBio, watchedWebsite, watchedPhoneNumber] = watchedValues;
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -671,7 +672,6 @@ const Onboarding = React.memo(function Onboarding() {
   const removeSkill = (field: keyof OnboardingFormData, skill: string) => {
     const currentSkills = form.getValues(field) as string[] || [];
     form.setValue(field, currentSkills.filter(s => s !== skill));
-    form.trigger(field); // Trigger validation/re-render
   };
 
   const addFromDropdown = (field: keyof OnboardingFormData, value: string) => {
@@ -679,7 +679,6 @@ const Onboarding = React.memo(function Onboarding() {
     if (!currentSkills.includes(value)) {
       const newValues = [...currentSkills, value];
       form.setValue(field, newValues);
-      form.trigger(field); // Trigger validation/re-render
     }
   };
 
@@ -689,7 +688,7 @@ const Onboarding = React.memo(function Onboarding() {
     options: Array<{ value: string; label: string }>,
     placeholder: string = "Select options..."
   ) => {
-    const currentValues = form.watch(field) as string[] || [];
+    const currentValues = form.getValues(field) as string[] || [];
     
     return (
       <div className="space-y-2">
@@ -725,7 +724,7 @@ const Onboarding = React.memo(function Onboarding() {
   };
 
   const renderCustomField = (field: keyof OnboardingFormData, label: string) => {
-    const currentValues = form.watch(field) as string[] || [];
+    const currentValues = form.getValues(field) as string[] || [];
     
     return (
       <div className="space-y-2">
@@ -1411,7 +1410,7 @@ const Onboarding = React.memo(function Onboarding() {
                         )}
                         <ValidationFeedback 
                           fieldName="displayName" 
-                          value={form.watch("displayName") || ""} 
+                          value={watchedDisplayName || ""} 
                           talentType={watchedTalentType}
                         />
                       </div>
@@ -1429,7 +1428,7 @@ const Onboarding = React.memo(function Onboarding() {
                         )}
                         <ValidationFeedback 
                           fieldName="location" 
-                          value={form.watch("location") || ""} 
+                          value={watchedLocation || ""} 
                           talentType={watchedTalentType}
                         />
                       </div>
@@ -1450,11 +1449,11 @@ const Onboarding = React.memo(function Onboarding() {
                       )}
                       <ValidationFeedback 
                         fieldName="bio" 
-                        value={form.watch("bio") || ""} 
+                        value={watchedBio || ""} 
                         talentType={watchedTalentType}
                       />
                       <div className="text-xs text-gray-500 mt-1">
-                        {form.watch("bio")?.length || 0}/500 characters
+                        {watchedBio?.length || 0}/500 characters
                       </div>
                     </div>
 
@@ -1471,7 +1470,7 @@ const Onboarding = React.memo(function Onboarding() {
                         )}
                         <ValidationFeedback 
                           fieldName="website" 
-                          value={form.watch("website") || ""} 
+                          value={watchedWebsite || ""} 
                           talentType={watchedTalentType}
                         />
                       </div>
@@ -1487,7 +1486,7 @@ const Onboarding = React.memo(function Onboarding() {
                         )}
                         <ValidationFeedback 
                           fieldName="phoneNumber" 
-                          value={form.watch("phoneNumber") || ""} 
+                          value={watchedPhoneNumber || ""} 
                           talentType={watchedTalentType}
                         />
                       </div>

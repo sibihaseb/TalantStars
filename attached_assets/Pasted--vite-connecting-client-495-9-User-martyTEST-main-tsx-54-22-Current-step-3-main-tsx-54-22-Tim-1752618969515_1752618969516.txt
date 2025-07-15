@@ -1,0 +1,58 @@
+
+[vite] connecting... client:495:9
+User: martyTEST main.tsx:54:22
+Current step: 3 main.tsx:54:22
+Timestamp: 2025-07-15T22:31:38.871Z main.tsx:54:22
+Step 3 completed! main.tsx:54:22
+=== ONBOARDING COMPONENT RENDER === main.tsx:54:22
+Current location: /onboarding main.tsx:54:22
+User: martyTEST main.tsx:54:22
+Current step: 3 main.tsx:54:22
+Timestamp: 2025-07-15T22:31:38.938Z main.tsx:54:22
+Step 3 completed! main.tsx:54:22
+=== ONBOARDING COMPONENT RENDER === main.tsx:54:22
+Current location: /onboarding main.tsx:54:22
+User: martyTEST main.tsx:54:22
+Current step: 3 main.tsx:54:22
+Timestamp: 2025-07-15T22:31:38.972Z main.tsx:54:22
+Step 3 completed! main.tsx:54:22
+=== ONBOARDING COMPONENT RENDER === main.tsx:54:22
+Current location: /onboarding main.tsx:54:22
+User: martyTEST main.tsx:54:22
+Current step: 3 main.tsx:54:22
+Timestamp: 2025-07-15T22:31:39.107Z main.tsx:54:22
+Step 3 completed! main.tsx:54:22
+=== ONBOARDING COMPONENT RENDER === main.tsx:54:22
+Current location: /onboarding main.tsx:54:22
+User: martyTEST main.tsx:54:22
+Current step: 3 main.tsx:54:22
+Timestamp: 2025-07-15T22:31:39.220Z main.tsx:54:22
+Step 3 completed! main.tsx:54:22
+=== ONBOARDING COMPONENT RENDER === main.tsx:54:22
+Current location: /onboarding main.tsx:54:22
+User: martyTEST main.tsx:54:22
+Current step: 3 main.tsx:54:22
+Timestamp: 2025-07-15T22:31:39.270Z main.tsx:54:22
+Step 3 completed! main.tsx:54:22
+=== ONBOARDING COMPONENT RENDER === main.tsx:54:22
+Current location: /onboarding main.tsx:54:22
+User: martyTEST main.tsx:54:22
+Current step: 3 main.tsx:54:22
+Timestamp: 2025-07-15T22:31:39.313Z main.tsx:54:22
+Step 3 completed! main.tsx:54:22
+=== ONBOARDING COMPONENT RENDER === main.tsx:54:22
+Current location: /onboarding main.tsx:54:22
+User: martyTEST main.tsx:54:22
+Current step: 3 main.tsx:54:22
+Timestamp: 2025-07-15T22:31:39.420Z main.tsx:54:22
+Step 3 completed! main.tsx:54:22
+=== ONBOARDING COMPONENT RENDER === main.tsx:54:22
+Current location: /onboarding main.tsx:54:22
+User: martyTEST main.tsx:54:22
+Current step: 3 main.tsx:54:22
+Timestamp: 2025-07-15T22:31:43.014Z main.tsx:54:22
+Step 3 completed! main.tsx:54:22
+Step 5 completed! main.tsx:54:22
+
+​
+
