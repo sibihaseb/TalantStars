@@ -92,6 +92,7 @@ export interface IStorage {
   createMediaFile(media: InsertMediaFile): Promise<MediaFile>;
   getUserMediaFiles(userId: string): Promise<MediaFile[]>;
   getMediaFile(id: number): Promise<MediaFile | undefined>;
+  updateMediaFile(id: number, media: Partial<InsertMediaFile>): Promise<MediaFile>;
   deleteMediaFile(id: number): Promise<void>;
   
   // Job operations
@@ -321,6 +322,15 @@ export class DatabaseStorage implements IStorage {
       .from(mediaFiles)
       .where(eq(mediaFiles.id, id));
     return media;
+  }
+
+  async updateMediaFile(id: number, media: Partial<InsertMediaFile>): Promise<MediaFile> {
+    const [updatedMedia] = await db
+      .update(mediaFiles)
+      .set({ ...media, updatedAt: new Date() })
+      .where(eq(mediaFiles.id, id))
+      .returning();
+    return updatedMedia;
   }
 
   async deleteMediaFile(id: number): Promise<void> {

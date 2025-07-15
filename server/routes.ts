@@ -323,6 +323,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update media endpoint
+  app.put('/api/media/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { title, description, category } = req.body;
+      const userId = req.user.id;
+      
+      // Get media file to verify ownership
+      const mediaFiles = await storage.getUserMediaFiles(userId);
+      const mediaFile = mediaFiles.find(m => m.id === id);
+      
+      if (!mediaFile) {
+        return res.status(404).json({ message: "Media file not found" });
+      }
+      
+      // Update media file
+      const updatedMedia = await storage.updateMediaFile(id, {
+        title,
+        description,
+        category,
+      });
+      
+      res.json(updatedMedia);
+    } catch (error) {
+      console.error("Error updating media:", error);
+      res.status(500).json({ message: "Failed to update media" });
+    }
+  });
+
   app.delete('/api/media/:id', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
