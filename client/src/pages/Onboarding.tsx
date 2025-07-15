@@ -788,7 +788,9 @@ export default function Onboarding() {
       .filter(q => {
         console.log('Checking question:', q.question, 'talent_type:', q.talent_type, 'talentType:', q.talentType, 'active:', q.active);
         const questionType = q.talent_type || q.talentType;
-        return questionTypes.includes(questionType) && q.active;
+        const isRelevant = questionTypes.includes(questionType) && q.active;
+        console.log('Question type:', questionType, 'Is relevant:', isRelevant);
+        return isRelevant;
       })
       .sort((a, b) => a.order - b.order);
 
@@ -830,7 +832,7 @@ export default function Onboarding() {
       case 'text':
         return (
           <Input
-            value={currentValue}
+            value={typeof currentValue === 'string' ? currentValue : ''}
             onChange={(e) => handleChange(e.target.value)}
             placeholder={`Enter ${question.question.toLowerCase()}...`}
           />
@@ -839,7 +841,7 @@ export default function Onboarding() {
       case 'textarea':
         return (
           <Textarea
-            value={currentValue}
+            value={typeof currentValue === 'string' ? currentValue : ''}
             onChange={(e) => handleChange(e.target.value)}
             placeholder={`Enter ${question.question.toLowerCase()}...`}
             rows={3}
@@ -848,7 +850,7 @@ export default function Onboarding() {
       
       case 'select':
         return (
-          <Select onValueChange={handleChange} value={currentValue}>
+          <Select onValueChange={handleChange} value={typeof currentValue === 'string' ? currentValue : ''}>
             <SelectTrigger>
               <SelectValue placeholder={`Select ${question.question.toLowerCase()}...`} />
             </SelectTrigger>
@@ -881,7 +883,7 @@ export default function Onboarding() {
       default:
         return (
           <Input
-            value={currentValue}
+            value={typeof currentValue === 'string' ? currentValue : ''}
             onChange={(e) => handleChange(e.target.value)}
             placeholder={`Enter ${question.question.toLowerCase()}...`}
           />
