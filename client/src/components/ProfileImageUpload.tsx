@@ -184,7 +184,7 @@ export default function ProfileImageUpload({
     canvas.toBlob((blob) => {
       if (blob) {
         const formData = new FormData();
-        formData.append('profileImage', blob, 'profile-image.jpg');
+        formData.append('image', blob, 'profile-image.jpg');
         uploadMutation.mutate(formData);
       }
     }, 'image/jpeg', 0.9);

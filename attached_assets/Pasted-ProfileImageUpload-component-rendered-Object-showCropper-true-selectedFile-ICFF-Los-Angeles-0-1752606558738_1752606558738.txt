@@ -1,0 +1,146 @@
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+Form submitted with data: 
+Object { role: "talent", talentType: "actor", displayName: "Marty TEST", bio: "ljlkmkljkljlk", location: "kjk", website: "", phoneNumber: "", availabilityStatus: "available", height: "", weight: "", … }
+main.tsx:54:22
+Form errors: 
+Object {  }
+main.tsx:54:22
+Form is valid: false main.tsx:54:22
+Calling mutation... main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+Submitting profile data: 
+Object { role: "talent", talentType: "actor", displayName: "Marty TEST", bio: "ljlkmkljkljlk", location: "kjk", website: "", phoneNumber: "", availabilityStatus: "available", height: "", weight: "", … }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+XHRPOST
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/user/profile-image
+[HTTP/1.1 400 Bad Request 109ms]
+
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+API response status: 200 main.tsx:54:22
+API response data: 
+Object { id: 7, userId: 5, role: "talent", talentType: "actor", displayName: "Marty TEST", bio: "ljlkmkljkljlk", location: "kjk", website: "", phoneNumber: "", isVerified: false, … }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "ICFF Los Angeles 01.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+
+​
+
