@@ -125,6 +125,7 @@ export const mediaFiles = pgTable("media_files", {
   mediaType: varchar("media_type").notNull(), // 'image', 'video', 'audio', 'external'
   tags: text("tags").array(),
   description: text("description"),
+  category: varchar("category").default("portfolio"), // portfolio, demo, headshot, resume, other
   isPublic: boolean("is_public").default(true),
   // External video links
   externalUrl: varchar("external_url"), // For YouTube, Vimeo, etc.
