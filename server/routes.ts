@@ -1273,6 +1273,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Featured talent management endpoints
+  app.get('/api/admin/featured-talent', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const featuredTalents = await storage.getFeaturedTalents();
+      res.json(featuredTalents);
+    } catch (error) {
+      console.error("Error fetching featured talents:", error);
+      res.status(500).json({ message: "Failed to fetch featured talents" });
+    }
+  });
+
+  app.get('/api/admin/all-talent-profiles', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const allTalents = await storage.getAllTalentProfiles();
+      res.json(allTalents);
+    } catch (error) {
+      console.error("Error fetching talent profiles:", error);
+      res.status(500).json({ message: "Failed to fetch talent profiles" });
+    }
+  });
+
+  app.post('/api/admin/toggle-featured', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId, isFeatured, featuredTier } = req.body;
+      
+      const updatedProfile = await storage.toggleFeaturedStatus(userId, isFeatured, featuredTier);
+      
+      res.json({
+        success: true,
+        profile: updatedProfile
+      });
+    } catch (error) {
+      console.error("Error toggling featured status:", error);
+      res.status(500).json({ message: "Failed to toggle featured status" });
+    }
+  });
+
+  // Get user's media limits based on pricing tier
+  app.get('/api/user/media-limits', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const limits = await storage.getUserMediaLimits(userId);
+      res.json(limits);
+    } catch (error) {
+      console.error("Error fetching media limits:", error);
+      res.status(500).json({ message: "Failed to fetch media limits" });
+    }
+  });
+
+  // Check if user can upload media
+  app.post('/api/user/check-media-upload', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { mediaType } = req.body; // 'image', 'video', 'audio'
+      
+      const canUpload = await storage.checkMediaUploadPermission(userId, mediaType);
+      res.json({ canUpload });
+    } catch (error) {
+      console.error("Error checking media upload permission:", error);
+      res.status(500).json({ message: "Failed to check upload permission" });
+    }
+  });
+
   app.put('/api/admin/profile-questions/:questionId', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const questionId = parseInt(req.params.questionId);

@@ -112,6 +112,11 @@ export const userProfiles = pgTable("user_profiles", {
   // Analytics
   profileViews: integer("profile_views").default(0),
   
+  // Featured talent system
+  isFeatured: boolean("is_featured").default(false),
+  featuredAt: timestamp("featured_at"),
+  featuredTier: varchar("featured_tier"), // premium, gold, platinum, etc.
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -246,6 +251,11 @@ export const pricingTiers = pgTable("pricing_tiers", {
   canExportData: boolean("can_export_data").default(false),
   canManageTeam: boolean("can_manage_team").default(false),
   canAccessReports: boolean("can_access_reports").default(false),
+  
+  // Featured talent controls
+  canBeFeatured: boolean("can_be_featured").default(false),
+  featuredTierName: varchar("featured_tier_name"), // Premium, Gold, Platinum, etc.
+  featuredPriority: integer("featured_priority").default(0), // Higher = shows first in featured section
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

@@ -1040,6 +1040,106 @@ export class DatabaseStorage implements IStorage {
     await db.delete(meetings).where(eq(meetings.id, id));
   }
 
+  // Featured talent management
+  async getFeaturedTalents(): Promise<any[]> {
+    const result = await db.select({
+      id: userProfiles.id,
+      userId: userProfiles.userId,
+      displayName: userProfiles.displayName,
+      talentType: userProfiles.talentType,
+      profileImageUrl: users.profileImageUrl,
+      isFeatured: userProfiles.isFeatured,
+      featuredAt: userProfiles.featuredAt,
+      featuredTier: userProfiles.featuredTier,
+      profileViews: userProfiles.profileViews,
+      user: {
+        username: users.username,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+      }
+    })
+    .from(userProfiles)
+    .innerJoin(users, eq(userProfiles.userId, users.id))
+    .where(eq(userProfiles.isFeatured, true))
+    .orderBy(desc(userProfiles.featuredAt));
+    
+    return result;
+  }
+
+  async getAllTalentProfiles(): Promise<any[]> {
+    const result = await db.select({
+      id: userProfiles.id,
+      userId: userProfiles.userId,
+      displayName: userProfiles.displayName,
+      talentType: userProfiles.talentType,
+      profileImageUrl: users.profileImageUrl,
+      isFeatured: userProfiles.isFeatured,
+      featuredAt: userProfiles.featuredAt,
+      featuredTier: userProfiles.featuredTier,
+      profileViews: userProfiles.profileViews,
+      user: {
+        username: users.username,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+      }
+    })
+    .from(userProfiles)
+    .innerJoin(users, eq(userProfiles.userId, users.id))
+    .where(eq(userProfiles.role, 'talent'))
+    .orderBy(desc(userProfiles.createdAt));
+    
+    return result;
+  }
+
+  async toggleFeaturedStatus(userId: number, isFeatured: boolean, featuredTier?: string): Promise<any> {
+    const updateData: any = {
+      isFeatured,
+      featuredAt: isFeatured ? new Date() : null,
+      featuredTier: isFeatured ? featuredTier : null,
+    };
+
+    const [updatedProfile] = await db.update(userProfiles)
+      .set(updateData)
+      .where(eq(userProfiles.userId, userId))
+      .returning();
+    
+    return updatedProfile;
+  }
+
+  // Media limits and permissions
+  async getUserMediaLimits(userId: number): Promise<any> {
+    // Get user's current pricing tier (would need to be implemented)
+    // For now, return default limits
+    return {
+      maxPhotos: 10,
+      maxVideos: 5,
+      maxAudioFiles: 3,
+      maxStorageGB: 1,
+      currentPhotos: 0,
+      currentVideos: 0,
+      currentAudioFiles: 0,
+      currentStorageGB: 0,
+    };
+  }
+
+  async checkMediaUploadPermission(userId: number, mediaType: string): Promise<boolean> {
+    // Get user's current media count and limits
+    const limits = await this.getUserMediaLimits(userId);
+    
+    switch (mediaType) {
+      case 'image':
+        return limits.currentPhotos < limits.maxPhotos || limits.maxPhotos === 0;
+      case 'video':
+        return limits.currentVideos < limits.maxVideos || limits.maxVideos === 0;
+      case 'audio':
+        return limits.currentAudioFiles < limits.maxAudioFiles || limits.maxAudioFiles === 0;
+      default:
+        return false;
+    }
+  }
+
   // Password reset operations
   async createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken> {
     const [result] = await db.insert(passwordResetTokens).values(token).returning();

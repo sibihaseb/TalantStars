@@ -63,6 +63,12 @@ export default function ProfileImageUpload({
         onImageUpdate(data.profileImageUrl);
       }
       
+      // Force form validation to update
+      setTimeout(() => {
+        const event = new Event('imageUploaded');
+        window.dispatchEvent(event);
+      }, 100);
+      
       // Invalidate queries to refresh user data
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
       queryClient.invalidateQueries({ queryKey: ['/api/user/profile'] });

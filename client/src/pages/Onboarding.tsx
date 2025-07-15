@@ -1431,6 +1431,10 @@ export default function Onboarding() {
                         onImageUpdate={(url) => {
                           form.setValue("profileImageUrl", url);
                           form.trigger("profileImageUrl");
+                          // Auto-advance to next step after successful upload
+                          setTimeout(() => {
+                            nextStep();
+                          }, 500);
                         }}
                         mandatory={true}
                       />

@@ -21,6 +21,7 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import PermissionsPage from "@/pages/admin/permissions-page";
 import PricingTiersPage from "@/pages/admin/pricing-tiers";
 import QuestionsManagement from "@/pages/admin/questions-management";
+import FeaturedTalentManagement from "@/pages/admin/featured-talent";
 import Auth from "@/pages/Auth";
 import MeetingManagement from "@/pages/MeetingManagement";
 import TalentProfile from "@/pages/TalentProfile";
@@ -70,6 +71,9 @@ function Router() {
       </Route>
       <Route path="/admin/questions">
         {isAuthenticated && user?.role === 'admin' ? <QuestionsManagement /> : <Auth />}
+      </Route>
+      <Route path="/admin/featured-talent">
+        {isAuthenticated && user?.role === 'admin' ? <FeaturedTalentManagement /> : <Auth />}
       </Route>
       
       {/* Role-based dashboard routes */}
