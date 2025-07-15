@@ -53,6 +53,8 @@ import {
   type AdminLog,
   type InsertAdminLog,
   type Analytics,
+  type AvailabilityCalendar,
+  type InsertAvailabilityCalendar,
   type InsertAnalytics,
   type Meeting,
   type InsertMeeting,
@@ -286,6 +288,10 @@ export interface IStorage {
   getAvailabilityEntry(id: number): Promise<AvailabilityCalendar | undefined>;
   updateAvailabilityEntry(id: number, entry: Partial<InsertAvailabilityCalendar>): Promise<AvailabilityCalendar>;
   deleteAvailabilityEntry(id: number): Promise<void>;
+  getUserAvailabilityEvents(userId: number): Promise<AvailabilityCalendar[]>;
+  createAvailabilityEvent(eventData: InsertAvailabilityCalendar): Promise<AvailabilityCalendar>;
+  updateAvailabilityEvent(eventId: number, userId: number, eventData: Partial<InsertAvailabilityCalendar>): Promise<AvailabilityCalendar | undefined>;
+  deleteAvailabilityEvent(eventId: number, userId: number): Promise<void>;
   
   // AI Profile Enhancement
   enhanceProfileWithAI(userId: string, profile: UserProfile): Promise<UserProfile>;
@@ -915,6 +921,36 @@ export class DatabaseStorage implements IStorage {
 
   async getAdminLogs(limit = 100): Promise<AdminLog[]> {
     return await db.select().from(adminLogs).orderBy(desc(adminLogs.createdAt)).limit(limit);
+  }
+
+  // Calendar/Availability Event methods
+  async getUserAvailabilityEvents(userId: number): Promise<AvailabilityCalendar[]> {
+    const events = await db
+      .select()
+      .from(availabilityCalendar)
+      .where(eq(availabilityCalendar.userId, userId))
+      .orderBy(desc(availabilityCalendar.startDateTime));
+    return events;
+  }
+
+  async createAvailabilityEvent(eventData: InsertAvailabilityCalendar): Promise<AvailabilityCalendar> {
+    const [event] = await db.insert(availabilityCalendar).values(eventData).returning();
+    return event;
+  }
+
+  async updateAvailabilityEvent(eventId: number, userId: number, eventData: Partial<InsertAvailabilityCalendar>): Promise<AvailabilityCalendar | undefined> {
+    const [event] = await db
+      .update(availabilityCalendar)
+      .set(eventData)
+      .where(and(eq(availabilityCalendar.id, eventId), eq(availabilityCalendar.userId, userId)))
+      .returning();
+    return event;
+  }
+
+  async deleteAvailabilityEvent(eventId: number, userId: number): Promise<void> {
+    await db
+      .delete(availabilityCalendar)
+      .where(and(eq(availabilityCalendar.id, eventId), eq(availabilityCalendar.userId, userId)));
   }
 
   // Admin - Analytics

@@ -15,6 +15,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { Header } from '@/components/layout/Header';
 import { 
   Heart, 
   MessageCircle, 
@@ -379,9 +380,11 @@ export default function SocialModern() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-purple-900">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <>
+      <Header />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-purple-900 pt-16">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
           {/* Left Sidebar - Profile & Stats */}
           <div className="lg:col-span-1">
@@ -957,6 +960,7 @@ export default function SocialModern() {
             </div>
           </div>
 
+          </div>
         </div>
       </div>
 
@@ -1084,6 +1088,6 @@ export default function SocialModern() {
         </DialogContent>
       </Dialog>
 
-    </div>
+    </>
   );
 }

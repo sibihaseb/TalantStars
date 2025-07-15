@@ -204,6 +204,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Calendar routes
+  app.get('/api/calendar/events', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const events = await storage.getUserAvailabilityEvents(userId);
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching calendar events:", error);
+      res.status(500).json({ message: "Failed to fetch calendar events" });
+    }
+  });
+
+  app.post('/api/calendar/events', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const eventData = {
+        userId,
+        startDate: new Date(req.body.startDate),
+        endDate: new Date(req.body.endDate),
+        status: req.body.status || 'available',
+        notes: req.body.notes || null,
+        allDay: req.body.allDay !== undefined ? req.body.allDay : true,
+      };
+      const event = await storage.createAvailabilityEvent(eventData);
+      res.json(event);
+    } catch (error) {
+      console.error("Error creating calendar event:", error);
+      res.status(500).json({ message: "Failed to create calendar event" });
+    }
+  });
+
+  app.put('/api/calendar/events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const eventId = parseInt(req.params.id);
+      const eventData = {
+        ...req.body,
+        startDateTime: new Date(`${req.body.startDate} ${req.body.startTime}`),
+        endDateTime: req.body.endDate && req.body.endTime ? new Date(`${req.body.endDate} ${req.body.endTime}`) : null,
+      };
+      const event = await storage.updateAvailabilityEvent(eventId, userId, eventData);
+      res.json(event);
+    } catch (error) {
+      console.error("Error updating calendar event:", error);
+      res.status(500).json({ message: "Failed to update calendar event" });
+    }
+  });
+
+  app.delete('/api/calendar/events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const eventId = parseInt(req.params.id);
+      await storage.deleteAvailabilityEvent(eventId, userId);
+      res.json({ message: "Event deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting calendar event:", error);
+      res.status(500).json({ message: "Failed to delete calendar event" });
+    }
+  });
+
   // Media routes
   app.post('/api/media', isAuthenticated, upload.single('file'), async (req: any, res) => {
     try {

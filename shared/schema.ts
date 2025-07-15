@@ -10,6 +10,8 @@ import {
   boolean,
   decimal,
   pgEnum,
+  date,
+  time,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
@@ -293,7 +295,7 @@ export const jobHistory = pgTable("job_history", {
   endDate: timestamp("end_date"),
   location: varchar("location"),
   description: text("description"),
-  skills: text("skills").array(), // Skills used/learned
+
   credits: text("credits"), // How they want to be credited
   isPublic: boolean("is_public").default(true),
   verified: boolean("verified").default(false), // Admin verification
@@ -421,6 +423,51 @@ export const socialPosts = pgTable("social_posts", {
   shares: integer("shares").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Media Uploads
+export const mediaUploads = pgTable("media_uploads", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  filename: varchar("filename", { length: 255 }).notNull(),
+  originalFilename: varchar("original_filename", { length: 255 }),
+  title: varchar("title", { length: 255 }),
+  description: text("description"),
+  category: varchar("category", { length: 100 }),
+  fileType: varchar("file_type", { length: 50 }),
+  fileSize: integer("file_size"),
+  mediaUrl: varchar("media_url", { length: 500 }),
+  thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User Availability
+export const userAvailability = pgTable("user_availability", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  date: date("date").notNull(),
+  status: varchar("status", { length: 20 }).default("available"),
+  eventTitle: varchar("event_title", { length: 255 }),
+  eventDescription: text("event_description"),
+  startTime: time("start_time"),
+  endTime: time("end_time"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Verification Documents
+export const verificationDocuments = pgTable("verification_documents", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  documentType: varchar("document_type", { length: 100 }).notNull(),
+  documentUrl: varchar("document_url", { length: 500 }).notNull(),
+  documentName: varchar("document_name", { length: 255 }),
+  status: varchar("status", { length: 20 }).default("pending"),
+  adminNotes: text("admin_notes"),
+  submittedAt: timestamp("submitted_at").defaultNow(),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewedBy: integer("reviewed_by"),
 });
 
 // Post likes
@@ -982,6 +1029,71 @@ export const insertAvailabilityCalendarSchema = createInsertSchema(availabilityC
   createdAt: true,
   updatedAt: true,
 });
+
+export const insertMediaUploadSchema = createInsertSchema(mediaUploads).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserAvailabilitySchema = createInsertSchema(userAvailability).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertVerificationDocumentSchema = createInsertSchema(verificationDocuments).omit({
+  id: true,
+  submittedAt: true,
+});
+
+// Types
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UserProfile = typeof userProfiles.$inferSelect;
+export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
+export type MediaFile = typeof mediaFiles.$inferSelect;
+export type InsertMediaFile = z.infer<typeof insertMediaFileSchema>;
+export type Job = typeof jobs.$inferSelect;
+export type InsertJob = z.infer<typeof insertJobSchema>;
+export type JobApplication = typeof jobApplications.$inferSelect;
+export type InsertJobApplication = z.infer<typeof insertJobApplicationSchema>;
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type PricingTier = typeof pricingTiers.$inferSelect;
+export type InsertPricingTier = z.infer<typeof insertPricingTierSchema>;
+export type ProfileQuestion = typeof profileQuestions.$inferSelect;
+export type InsertProfileQuestion = z.infer<typeof insertProfileQuestionSchema>;
+export type SystemSetting = typeof systemSettings.$inferSelect;
+export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
+export type AdminLog = typeof adminLogs.$inferSelect;
+export type InsertAdminLog = z.infer<typeof insertAdminLogSchema>;
+export type Analytics = typeof analytics.$inferSelect;
+export type InsertAnalytics = z.infer<typeof insertAnalyticsSchema>;
+export type Meeting = typeof meetings.$inferSelect;
+export type InsertMeeting = z.infer<typeof insertMeetingSchema>;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
+export type RolePermission = typeof rolePermissions.$inferSelect;
+export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
+export type UserPermission = typeof userPermissions.$inferSelect;
+export type InsertUserPermission = z.infer<typeof insertUserPermissionSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type AvailabilityCalendar = typeof availabilityCalendar.$inferSelect;
+export type InsertAvailabilityCalendar = z.infer<typeof insertAvailabilityCalendarSchema>;
+export type MediaUpload = typeof mediaUploads.$inferSelect;
+export type InsertMediaUpload = z.infer<typeof insertMediaUploadSchema>;
+export type UserAvailability = typeof userAvailability.$inferSelect;
+export type InsertUserAvailability = z.infer<typeof insertUserAvailabilitySchema>;
+export type VerificationDocument = typeof verificationDocuments.$inferSelect;
+export type InsertVerificationDocument = z.infer<typeof insertVerificationDocumentSchema>;
+export type JobHistory = typeof jobHistory.$inferSelect;
+export type InsertJobHistory = z.infer<typeof insertJobHistorySchema>;
+export type SocialPost = typeof socialPosts.$inferSelect;
+export type InsertSocialPost = z.infer<typeof insertSocialPostSchema>;
+export type SocialConnection = typeof socialConnections.$inferSelect;
+export type InsertSocialConnection = z.infer<typeof insertSocialConnectionSchema>;
 
 export const insertSkillEndorsementSchema = createInsertSchema(skillEndorsements).omit({
   id: true,
