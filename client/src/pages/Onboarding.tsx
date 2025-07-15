@@ -758,12 +758,8 @@ export default function Onboarding() {
     enabled: !!watchedRole,
   });
 
-  const renderRoleSpecificQuestions = useMemo(() => {
-    console.log('=== MEMOIZING QUESTIONS ===');
-    console.log('Current step:', currentStep);
-    console.log('Profile questions length:', profileQuestions.length);
-    
-    return () => {
+  // Create a component to prevent re-rendering issues
+  const RoleSpecificQuestions = React.memo(() => {
     if (!watchedRole) return null;
 
     // Filter questions based on role
@@ -776,12 +772,6 @@ export default function Onboarding() {
       questionTypes = ['profile'];
     }
 
-    console.log('=== RENDER ROLE SPECIFIC QUESTIONS ===');
-    console.log('Profile questions total:', profileQuestions.length);
-    console.log('Question types to filter:', questionTypes);
-    console.log('Watched role:', watchedRole);
-    console.log('Watched talent type:', watchedTalentType);
-
     const relevantQuestions = profileQuestions
       .filter(q => {
         const questionType = q.talentType;
@@ -789,22 +779,6 @@ export default function Onboarding() {
         return isRelevant;
       })
       .sort((a, b) => a.order - b.order);
-
-    console.log('Relevant questions found:', relevantQuestions.length);
-    console.log('Questions:', relevantQuestions.map(q => ({ id: q.id, question: q.question, field_name: q.field_name })));
-
-    // Check for duplicates
-    const questionIds = relevantQuestions.map(q => q.id);
-    const duplicateIds = questionIds.filter((id, index) => questionIds.indexOf(id) !== index);
-    if (duplicateIds.length > 0) {
-      console.error('DUPLICATE QUESTION IDs FOUND:', duplicateIds);
-    }
-
-    const questionTexts = relevantQuestions.map(q => q.question);
-    const duplicateTexts = questionTexts.filter((text, index) => questionTexts.indexOf(text) !== index);
-    if (duplicateTexts.length > 0) {
-      console.error('DUPLICATE QUESTION TEXTS FOUND:', duplicateTexts);
-    }
 
     if (relevantQuestions.length === 0) {
       return (
@@ -815,30 +789,20 @@ export default function Onboarding() {
       );
     }
 
-    // Create a unique render key to prevent duplicate renders
-    const renderKey = `questions-${currentStep}-${watchedRole}-${watchedTalentType}-${relevantQuestions.length}`;
-    console.log('Creating render with key:', renderKey);
-    
     return (
-      <div key={renderKey} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {relevantQuestions.map((question, index) => {
-          const questionKey = `question-${question.id}-${question.field_name}-${index}`;
-          console.log('Rendering question:', question.question, 'with key:', questionKey);
-          
-          return (
-            <div key={questionKey} className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {question.question}
-                {question.required && <span className="text-red-500 ml-1">*</span>}
-              </Label>
-              {renderDynamicFormField(question)}
-            </div>
-          );
-        })}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {relevantQuestions.map((question) => (
+          <div key={`q-${question.id}`} className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {question.question}
+              {question.required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+            {renderDynamicFormField(question)}
+          </div>
+        ))}
       </div>
     );
-    };
-  }, [watchedRole, watchedTalentType, profileQuestions, currentStep]);
+  });
 
   const renderDynamicFormField = (question: any) => {
     const fieldName = question.fieldName || question.field_name;
@@ -1724,7 +1688,7 @@ export default function Onboarding() {
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {renderRoleSpecificQuestions()}
+                    <RoleSpecificQuestions />
                   </CardContent>
                 </Card>
               )}
