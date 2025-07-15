@@ -793,6 +793,19 @@ export default function Onboarding() {
     console.log('Relevant questions found:', relevantQuestions.length);
     console.log('Questions:', relevantQuestions.map(q => ({ id: q.id, question: q.question, field_name: q.field_name })));
 
+    // Check for duplicates
+    const questionIds = relevantQuestions.map(q => q.id);
+    const duplicateIds = questionIds.filter((id, index) => questionIds.indexOf(id) !== index);
+    if (duplicateIds.length > 0) {
+      console.error('DUPLICATE QUESTION IDs FOUND:', duplicateIds);
+    }
+
+    const questionTexts = relevantQuestions.map(q => q.question);
+    const duplicateTexts = questionTexts.filter((text, index) => questionTexts.indexOf(text) !== index);
+    if (duplicateTexts.length > 0) {
+      console.error('DUPLICATE QUESTION TEXTS FOUND:', duplicateTexts);
+    }
+
     if (relevantQuestions.length === 0) {
       return (
         <div className="text-gray-500 text-center py-8">
@@ -802,17 +815,26 @@ export default function Onboarding() {
       );
     }
 
+    // Create a unique render key to prevent duplicate renders
+    const renderKey = `questions-${currentStep}-${watchedRole}-${watchedTalentType}-${relevantQuestions.length}`;
+    console.log('Creating render with key:', renderKey);
+    
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {relevantQuestions.map((question) => (
-          <div key={`question-${question.id}-${question.field_name}`} className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {question.question}
-              {question.required && <span className="text-red-500 ml-1">*</span>}
-            </Label>
-            {renderDynamicFormField(question)}
-          </div>
-        ))}
+      <div key={renderKey} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {relevantQuestions.map((question, index) => {
+          const questionKey = `question-${question.id}-${question.field_name}-${index}`;
+          console.log('Rendering question:', question.question, 'with key:', questionKey);
+          
+          return (
+            <div key={questionKey} className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {question.question}
+                {question.required && <span className="text-red-500 ml-1">*</span>}
+              </Label>
+              {renderDynamicFormField(question)}
+            </div>
+          );
+        })}
       </div>
     );
     };
