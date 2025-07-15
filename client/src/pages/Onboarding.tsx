@@ -876,7 +876,7 @@ export default function Onboarding() {
       
       case 'checkbox':
         return renderMultiSelectField(
-          fieldName,
+          fieldName as keyof OnboardingFormData,
           question.question,
           (question.options || []).map((opt: string) => ({ value: opt, label: opt })),
           `Select ${question.question.toLowerCase()}...`
@@ -884,7 +884,7 @@ export default function Onboarding() {
       
       case 'multiselect':
         return renderMultiSelectField(
-          fieldName,
+          fieldName as keyof OnboardingFormData,
           question.question,
           (question.options || []).map((opt: string) => ({ value: opt, label: opt })),
           `Select ${question.question.toLowerCase()}...`
