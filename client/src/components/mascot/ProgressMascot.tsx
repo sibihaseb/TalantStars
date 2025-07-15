@@ -270,23 +270,9 @@ export function ProgressMascot({
                 variant="outline" 
                 className="w-full"
                 onClick={() => {
-                  console.log('Continue Building Profile clicked');
-                  const nextIncomplete = items.find(item => !item.completed);
-                  console.log('Next incomplete item:', nextIncomplete);
-                  if (nextIncomplete) {
-                    if (onItemClick) {
-                      console.log('Calling onItemClick with:', nextIncomplete);
-                      onItemClick(nextIncomplete);
-                    } else {
-                      // Fallback navigation using router
-                      console.log('Fallback navigation to /onboarding');
-                      setLocation('/onboarding');
-                    }
-                  } else {
-                    // No incomplete items, navigate to dashboard
-                    console.log('No incomplete items, navigating to dashboard');
-                    setLocation('/dashboard');
-                  }
+                  console.log('Continue Building Profile clicked - forcing navigation to onboarding');
+                  // Always navigate to onboarding for profile completion
+                  setLocation('/onboarding');
                 }}
               >
                 <Target className="w-4 h-4 mr-2" />
@@ -298,11 +284,15 @@ export function ProgressMascot({
               variant="ghost" 
               size="sm"
               onClick={() => {
-                console.log('Get Motivated clicked');
+                console.log('Get Motivated clicked - updating mascot and navigating to onboarding');
                 updateMascot({ 
                   emotion: 'motivated', 
                   message: "I believe in you! Let's make it happen!" 
                 });
+                // Navigate to onboarding after a short delay to show the motivation message
+                setTimeout(() => {
+                  setLocation('/onboarding');
+                }, 1000);
               }}
             >
               <Heart className="w-4 h-4 mr-2" />
