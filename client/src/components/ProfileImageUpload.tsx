@@ -258,6 +258,14 @@ export default function ProfileImageUpload({
     setIsCropDragging(false);
   };
 
+  // Debug: Log component mount
+  console.log('ProfileImageUpload component rendered', { 
+    showCropper, 
+    selectedFile: selectedFile?.name,
+    previewUrl: !!previewUrl,
+    mandatory 
+  });
+
   return (
     <div className="space-y-4">
       <Card>
@@ -313,7 +321,11 @@ export default function ProfileImageUpload({
                   </p>
                 </div>
                 <Button
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => {
+                    console.log('Choose Image button clicked');
+                    console.log('File input ref:', fileInputRef.current);
+                    fileInputRef.current?.click();
+                  }}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
                   <Upload className="h-4 w-4 mr-2" />
@@ -326,6 +338,7 @@ export default function ProfileImageUpload({
                 accept="image/*"
                 onChange={handleFileInputChange}
                 className="hidden"
+                data-testid="file-input"
               />
             </div>
           )}
