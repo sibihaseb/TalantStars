@@ -47,10 +47,7 @@ export function Header() {
               </Button>
             )}
             <Link href="/" className="flex items-center space-x-2">
-              <Star className="h-8 w-8 text-yellow-500 fill-current" />
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                Talents & Stars
-              </h1>
+              <img src="/attached_assets/PNG FILE 6_1752621700970.png" alt="Talents & Stars" className="h-8 w-auto" />
             </Link>
             
             <div className="hidden md:flex space-x-6">
