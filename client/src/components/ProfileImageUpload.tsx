@@ -27,6 +27,8 @@ export default function ProfileImageUpload({
   } | null>(null);
   const [showCropper, setShowCropper] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isCropDragging, setIsCropDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -205,6 +207,47 @@ export default function ProfileImageUpload({
     }
   };
 
+  // Mouse event handlers for crop area dragging
+  const handleCropMouseDown = (e: React.MouseEvent) => {
+    if (!cropData || !imageRef.current) return;
+    
+    e.preventDefault();
+    setIsCropDragging(true);
+    
+    const rect = imageRef.current.getBoundingClientRect();
+    setDragStart({
+      x: e.clientX - rect.left - cropData.x,
+      y: e.clientY - rect.top - cropData.y
+    });
+  };
+
+  const handleCropMouseMove = (e: React.MouseEvent) => {
+    if (!isCropDragging || !cropData || !imageRef.current) return;
+    
+    e.preventDefault();
+    const rect = imageRef.current.getBoundingClientRect();
+    
+    const newX = e.clientX - rect.left - dragStart.x;
+    const newY = e.clientY - rect.top - dragStart.y;
+    
+    // Constrain to image boundaries
+    const maxX = rect.width - cropData.width;
+    const maxY = rect.height - cropData.height;
+    
+    const constrainedX = Math.max(0, Math.min(newX, maxX));
+    const constrainedY = Math.max(0, Math.min(newY, maxY));
+    
+    setCropData({
+      ...cropData,
+      x: constrainedX,
+      y: constrainedY
+    });
+  };
+
+  const handleCropMouseUp = () => {
+    setIsCropDragging(false);
+  };
+
   return (
     <div className="space-y-4">
       <Card>
@@ -294,6 +337,9 @@ export default function ProfileImageUpload({
                   ref={cropperRef}
                   className="relative inline-block"
                   style={{ maxWidth: '100%' }}
+                  onMouseMove={handleCropMouseMove}
+                  onMouseUp={handleCropMouseUp}
+                  onMouseLeave={handleCropMouseUp}
                 >
                   <img
                     ref={imageRef}
@@ -312,8 +358,9 @@ export default function ProfileImageUpload({
                         top: cropData.y,
                         width: cropData.width,
                         height: cropData.height,
-                        cursor: 'move'
+                        cursor: isCropDragging ? 'grabbing' : 'grab'
                       }}
+                      onMouseDown={handleCropMouseDown}
                     >
                       <div className="absolute inset-0 flex items-center justify-center">
                         <Crop className="h-8 w-8 text-blue-600" />

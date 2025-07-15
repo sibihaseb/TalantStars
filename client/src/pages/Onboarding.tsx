@@ -912,9 +912,24 @@ export default function Onboarding() {
     console.log("Form errors:", form.formState.errors);
     console.log("Form is valid:", form.formState.isValid);
     
-    // Check if form is valid
-    if (!form.formState.isValid) {
-      console.log("Form validation failed, not submitting");
+    // Additional validation for required fields
+    if (!data.displayName || !data.bio || !data.location) {
+      console.log("Required fields missing");
+      toast({
+        title: "Required Fields Missing",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (data.bio.length < 10) {
+      console.log("Bio too short");
+      toast({
+        title: "Bio Too Short",
+        description: "Please write a bio with at least 10 characters",
+        variant: "destructive",
+      });
       return;
     }
     
@@ -1693,44 +1708,8 @@ export default function Onboarding() {
                       e.preventDefault();
                       console.log("Submit button clicked");
                       
-                      // Get form values
-                      const formValues = form.getValues();
-                      console.log("Form values:", formValues);
-                      
-                      // Simple validation for required fields
-                      const displayName = formValues.displayName?.trim();
-                      const bio = formValues.bio?.trim();
-                      const location = formValues.location?.trim();
-                      
-                      if (!displayName) {
-                        toast({
-                          title: "Required Field Missing",
-                          description: "Please enter your display name",
-                          variant: "destructive",
-                        });
-                        return;
-                      }
-                      
-                      if (!bio || bio.length < 10) {
-                        toast({
-                          title: "Required Field Missing",
-                          description: "Please enter a bio with at least 10 characters",
-                          variant: "destructive",
-                        });
-                        return;
-                      }
-                      
-                      if (!location) {
-                        toast({
-                          title: "Required Field Missing",
-                          description: "Please enter your location",
-                          variant: "destructive",
-                        });
-                        return;
-                      }
-                      
-                      console.log("Submitting profile...");
-                      createProfileMutation.mutate(formValues);
+                      // Use form's handleSubmit to trigger validation
+                      form.handleSubmit(onSubmit)();
                     }}
                   >
                     <span>
