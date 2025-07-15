@@ -795,6 +795,7 @@ export default function Onboarding() {
       talent: [
         { title: "Talent Type", description: "Choose your talent type", icon: Star },
         { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Profile Image", description: "Upload your photo", icon: Camera },
         { title: "Physical Details", description: "Appearance & stats", icon: Star },
         { title: "Skills & Experience", description: "What you can do", icon: Medal },
         { title: "Location & Contact", description: "Where you work", icon: Crown },
@@ -802,21 +803,25 @@ export default function Onboarding() {
       ],
       manager: [
         { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Profile Image", description: "Upload your photo", icon: Camera },
         { title: "Management Details", description: "Your experience & services", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ],
       agent: [
         { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Profile Image", description: "Upload your photo", icon: Camera },
         { title: "Agent Details", description: "Your agency & experience", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ],
       producer: [
         { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Profile Image", description: "Upload your photo", icon: Camera },
         { title: "Production Details", description: "Your projects & experience", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ],
       default: [
         { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Profile Image", description: "Upload your photo", icon: Camera },
         { title: "Professional Details", description: "Your experience", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ]
@@ -845,7 +850,12 @@ export default function Onboarding() {
       const value = form.getValues(field as keyof OnboardingFormData);
       
       if (!value || (typeof value === 'string' && value.trim() === '')) {
-        errors.push(`${field.charAt(0).toUpperCase() + field.slice(1)} is required`);
+        // Special error messages for specific fields
+        if (field === 'profileImageUrl') {
+          errors.push('Profile image is required');
+        } else {
+          errors.push(`${field.charAt(0).toUpperCase() + field.slice(1)} is required`);
+        }
       }
       
       // Special validation for bio minimum length
