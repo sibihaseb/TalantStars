@@ -441,7 +441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mass email functionality
-  app.post('/api/admin/mass-email', isAuthenticated, async (req: any, res) => {
+  app.post('/api/admin/mass-email', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { subject, content, recipients } = req.body;
       
@@ -541,7 +541,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User permissions routes
-  app.get('/api/admin/users/:userId/permissions', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/users/:userId/permissions', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
       const permissions = await storage.getUserPermissions(userId);
@@ -552,15 +552,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/users/:userId/permissions', isAuthenticated, async (req: any, res) => {
+  app.post('/api/admin/users/:userId/permissions', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
-      const grantedBy = req.user.claims.sub;
+      const grantedBy = req.user.id; // Use traditional auth user ID
       const permission = await storage.createUserPermission({
         userId,
-        permission: req.body.permission,
+        category: req.body.category,
+        action: req.body.action,
+        resource: req.body.resource,
         granted: req.body.granted,
-        grantedBy,
+        grantedBy: grantedBy.toString(),
       });
       res.json(permission);
     } catch (error) {
@@ -592,7 +594,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/users/:userId/role', isAuthenticated, async (req: any, res) => {
+  app.put('/api/admin/users/:userId/role', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
       const { role } = req.body;
@@ -604,7 +606,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/users/:userId/verify', isAuthenticated, async (req: any, res) => {
+  app.put('/api/admin/users/:userId/verify', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
       const { verified } = req.body;
@@ -617,7 +619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Pricing tiers management
-  app.get('/api/admin/pricing-tiers', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/pricing-tiers', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const tiers = await storage.getPricingTiers();
       res.json(tiers);
@@ -627,7 +629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/pricing-tiers', isAuthenticated, async (req: any, res) => {
+  app.post('/api/admin/pricing-tiers', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Creating pricing tier:", req.body);
       const tier = await storage.createPricingTier(req.body);
@@ -638,7 +640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/pricing-tiers/:tierId', isAuthenticated, async (req: any, res) => {
+  app.put('/api/admin/pricing-tiers/:tierId', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const tierId = parseInt(req.params.tierId);
       const tier = await storage.updatePricingTier(tierId, req.body);
@@ -649,7 +651,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/admin/pricing-tiers/:tierId', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/admin/pricing-tiers/:tierId', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const tierId = parseInt(req.params.tierId);
       await storage.deletePricingTier(tierId);
@@ -661,7 +663,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Profile questions management
-  app.get('/api/admin/profile-questions', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/profile-questions', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const questions = await storage.getProfileQuestions();
       res.json(questions);
@@ -671,7 +673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/profile-questions', isAuthenticated, async (req: any, res) => {
+  app.post('/api/admin/profile-questions', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Creating profile question:", req.body);
       const question = await storage.createProfileQuestion(req.body);
@@ -682,7 +684,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/profile-questions/:questionId', isAuthenticated, async (req: any, res) => {
+  app.put('/api/admin/profile-questions/:questionId', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const questionId = parseInt(req.params.questionId);
       const question = await storage.updateProfileQuestion(questionId, req.body);
@@ -693,7 +695,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/admin/profile-questions/:questionId', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/admin/profile-questions/:questionId', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const questionId = parseInt(req.params.questionId);
       await storage.deleteProfileQuestion(questionId);
@@ -705,7 +707,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // System Settings management
-  app.get('/api/admin/settings', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/settings', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const settings = await storage.getSystemSettings();
       res.json(settings);
@@ -715,7 +717,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/settings', isAuthenticated, async (req: any, res) => {
+  app.post('/api/admin/settings', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Creating system setting:", req.body);
       const setting = await storage.createSystemSetting(req.body);
@@ -726,7 +728,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/settings/:key', isAuthenticated, async (req: any, res) => {
+  app.put('/api/admin/settings/:key', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const key = req.params.key;
       const { value } = req.body;
@@ -739,7 +741,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/admin/settings/:key', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/admin/settings/:key', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const key = req.params.key;
       await storage.deleteSystemSetting(key);
@@ -751,7 +753,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin Logs
-  app.get('/api/admin/logs', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/logs', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 100;
       const logs = await storage.getAdminLogs(limit);
@@ -762,7 +764,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/logs', isAuthenticated, async (req: any, res) => {
+  app.post('/api/admin/logs', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const adminId = req.user.claims.sub;
       const logData = { ...req.body, adminId, ipAddress: req.ip, userAgent: req.get('User-Agent') };
@@ -775,7 +777,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Analytics
-  app.get('/api/admin/analytics', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/analytics', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { startDate, endDate } = req.query;
       const analytics = await storage.getAnalytics(
@@ -789,7 +791,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/analytics/summary', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/analytics/summary', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const summary = await storage.getAnalyticsSummary();
       res.json(summary);
@@ -799,7 +801,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/analytics', isAuthenticated, async (req: any, res) => {
+  app.post('/api/admin/analytics', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const analytics = await storage.createAnalytics(req.body);
       res.json(analytics);
@@ -810,7 +812,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin Job Management
-  app.get('/api/admin/jobs', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/jobs', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const jobs = await storage.getJobs();
       res.json(jobs);
@@ -820,7 +822,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/jobs', isAuthenticated, async (req: any, res) => {
+  app.post('/api/admin/jobs', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Creating job:", req.body);
       const job = await storage.createJob(req.body);
@@ -831,7 +833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/jobs/:jobId', isAuthenticated, async (req: any, res) => {
+  app.put('/api/admin/jobs/:jobId', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Updating job:", req.params.jobId, req.body);
       const jobId = parseInt(req.params.jobId);
@@ -843,7 +845,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/admin/jobs/:jobId', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/admin/jobs/:jobId', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Deleting job:", req.params.jobId);
       const jobId = parseInt(req.params.jobId);

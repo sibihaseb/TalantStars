@@ -83,6 +83,18 @@ export function setupAuth(app: Express) {
     next();
   });
   
+  // Force session cookie to be sent without secure flag
+  app.use((req: any, res: any, next: any) => {
+    const originalSend = res.send;
+    res.send = function(body: any) {
+      if (req.session && req.session.cookie) {
+        req.session.cookie.secure = false;
+      }
+      return originalSend.call(this, body);
+    };
+    next();
+  });
+  
   app.use(passport.initialize());
   app.use(passport.session());
 
@@ -161,7 +173,21 @@ export function setupAuth(app: Express) {
     console.log("Admin Session after login:", req.session);
     console.log("Admin User after login:", user);
     console.log("Admin IsAuthenticated:", req.isAuthenticated());
-    res.status(200).json({ ...user, password: undefined });
+    
+    // Force session to be saved and ensure cookie is sent
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error:", err);
+        return res.status(500).json({ message: "Session save failed" });
+      }
+      
+      // Force cookie to be non-secure
+      if (req.session && req.session.cookie) {
+        req.session.cookie.secure = false;
+      }
+      
+      res.status(200).json({ ...user, password: undefined });
+    });
   });
 
   app.post("/api/logout", (req, res, next) => {
