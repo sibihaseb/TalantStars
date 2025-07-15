@@ -786,8 +786,8 @@ export default function Onboarding() {
 
     const relevantQuestions = profileQuestions
       .filter(q => {
-        console.log('Checking question:', q.question, 'talent_type:', q.talent_type, 'talentType:', q.talentType, 'active:', q.active);
-        const questionType = q.talent_type || q.talentType;
+        console.log('Checking question:', q.question, 'talentType:', q.talentType, 'active:', q.active);
+        const questionType = q.talentType;
         const isRelevant = questionTypes.includes(questionType) && q.active;
         console.log('Question type:', questionType, 'Is relevant:', isRelevant);
         return isRelevant;
@@ -838,6 +838,16 @@ export default function Onboarding() {
           />
         );
       
+      case 'number':
+        return (
+          <Input
+            type="number"
+            value={typeof currentValue === 'string' || typeof currentValue === 'number' ? currentValue : ''}
+            onChange={(e) => handleChange(e.target.value)}
+            placeholder={`Enter ${question.question.toLowerCase()}...`}
+          />
+        );
+      
       case 'textarea':
         return (
           <Textarea
@@ -878,6 +888,19 @@ export default function Onboarding() {
           question.question,
           (question.options || []).map((opt: string) => ({ value: opt, label: opt })),
           `Select ${question.question.toLowerCase()}...`
+        );
+      
+      case 'yesno':
+        return (
+          <Select onValueChange={handleChange} value={typeof currentValue === 'string' ? currentValue : ''}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select yes or no..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="yes">Yes</SelectItem>
+              <SelectItem value="no">No</SelectItem>
+            </SelectContent>
+          </Select>
         );
       
       default:
