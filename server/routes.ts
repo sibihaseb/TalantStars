@@ -51,6 +51,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+
   // Profile routes
   app.post('/api/profile', isAuthenticated, async (req: any, res) => {
     try {

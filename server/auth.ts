@@ -7,6 +7,7 @@ import { promisify } from "util";
 import { storage } from "./simple-storage";
 import { User } from "@shared/simple-schema";
 import connectPg from "connect-pg-simple";
+import createMemoryStore from "memorystore";
 
 declare global {
   namespace Express {
@@ -30,28 +31,39 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: true,
-    ttl: 7 * 24 * 60 * 60, // 7 days
-    tableName: "sessions",
+  // Temporary memory store for debugging
+  const MemoryStore = createMemoryStore(session);
+  const sessionStore = new MemoryStore({
+    checkPeriod: 86400000, // prune expired entries every 24h
   });
 
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "your-secret-key-here",
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // Force session creation for proper authentication
     store: sessionStore,
+    name: "connect.sid",
     cookie: {
       httpOnly: true,
-      secure: false, // Set to true in production with HTTPS
+      secure: false, // Force to false for development
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: "lax"
     },
   };
 
-  app.set("trust proxy", 1);
+  // Remove trust proxy setting for development
+  // app.set("trust proxy", 1);
+  
+  // Test middleware to see if session is working
   app.use(session(sessionSettings));
+  
+  // Add debug middleware to check session creation
+  app.use((req: any, res: any, next: any) => {
+    console.log("Session ID:", req.sessionID);
+    console.log("Session exists:", !!req.session);
+    next();
+  });
+  
   app.use(passport.initialize());
   app.use(passport.session());
 
@@ -109,6 +121,9 @@ export function setupAuth(app: Express) {
 
   app.post("/api/login", passport.authenticate("local"), (req, res) => {
     const user = req.user as any;
+    console.log("Session after login:", req.session);
+    console.log("User after login:", user);
+    console.log("IsAuthenticated:", req.isAuthenticated());
     res.status(200).json({ ...user, password: undefined });
   });
 
@@ -123,6 +138,18 @@ export function setupAuth(app: Express) {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     const user = req.user as any;
     res.json({ ...user, password: undefined });
+  });
+
+  // Test route to check session middleware
+  app.get("/api/test-session", (req, res) => {
+    console.log("Test session route called");
+    console.log("Session ID:", req.sessionID);
+    console.log("Session exists:", !!req.session);
+    res.json({ 
+      sessionID: req.sessionID,
+      hasSession: !!req.session,
+      sessionData: req.session
+    });
   });
 }
 
