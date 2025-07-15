@@ -319,7 +319,70 @@ export default function TalentDashboard() {
                           <Calendar className="h-4 w-4 mr-2" />
                           Manage Availability
                         </Button>
+                        <Button 
+                          className="w-full justify-start" 
+                          variant="outline"
+                          onClick={() => window.location.href = "/media"}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Upload Media
+                        </Button>
                       </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                {/* Recent Opportunities */}
+                <div className="mt-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Star className="h-5 w-5" />
+                        <span>Recent Opportunities</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {jobs.length === 0 ? (
+                        <div className="text-center py-8">
+                          <Star className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                          <p className="text-gray-500">No opportunities available at the moment</p>
+                          <p className="text-sm text-gray-400 mt-2">Check back later for new opportunities</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {jobs.slice(0, 3).map((job: any) => (
+                            <div key={job.id} className="flex items-center justify-between p-4 border rounded-lg">
+                              <div className="flex-1">
+                                <h3 className="font-medium">{job.title}</h3>
+                                <p className="text-sm text-gray-500">{job.location}</p>
+                                <p className="text-sm text-gray-500">Budget: ${job.budget}</p>
+                              </div>
+                              <div className="flex space-x-2">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => window.location.href = `/jobs/${job.id}`}
+                                >
+                                  View Details
+                                </Button>
+                                <Button 
+                                  size="sm"
+                                  onClick={() => window.location.href = `/jobs/${job.id}/apply`}
+                                >
+                                  Apply
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                          <Button 
+                            className="w-full mt-4" 
+                            variant="outline"
+                            onClick={() => window.location.href = "/jobs"}
+                          >
+                            View All Opportunities
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
@@ -374,12 +437,26 @@ export default function TalentDashboard() {
                       <div className="space-y-4">
                         {jobs.slice(0, 5).map((job: any) => (
                           <div key={job.id} className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
+                            <div className="flex-1">
                               <h3 className="font-medium">{job.title}</h3>
                               <p className="text-sm text-gray-500">{job.location}</p>
                               <p className="text-sm text-gray-500">Budget: ${job.budget}</p>
                             </div>
-                            <Button size="sm">Apply Now</Button>
+                            <div className="flex space-x-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => window.location.href = `/jobs/${job.id}`}
+                              >
+                                View Details
+                              </Button>
+                              <Button 
+                                size="sm"
+                                onClick={() => window.location.href = `/jobs/${job.id}/apply`}
+                              >
+                                Apply
+                              </Button>
+                            </div>
                           </div>
                         ))}
                         <Button 

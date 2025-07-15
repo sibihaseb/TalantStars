@@ -166,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/profile/generate-bio', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const profile = await storage.getUserProfile(userId);
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
@@ -183,7 +183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Media routes
   app.post('/api/media', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const mediaData = insertMediaFileSchema.parse({ ...req.body, userId });
       const media = await storage.createMediaFile(mediaData);
       res.json(media);
@@ -195,7 +195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/media/external', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const mediaData = await storage.createMediaFile({
         userId,
         filename: `external_${Date.now()}`,
@@ -222,7 +222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/media', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const media = await storage.getUserMediaFiles(userId);
       res.json(media);
     } catch (error) {
@@ -245,7 +245,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Job routes
   app.post('/api/jobs', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const jobData = insertJobSchema.parse({ ...req.body, userId });
       const job = await storage.createJob(jobData);
       res.json(job);
@@ -287,7 +287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Job application routes
   app.post('/api/jobs/:id/apply', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const jobId = parseInt(req.params.id);
       const applicationData = insertJobApplicationSchema.parse({
         ...req.body,
@@ -316,7 +316,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Message routes
   app.post('/api/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const senderId = req.user.claims.sub;
+      const senderId = req.user.id;
       const messageData = insertMessageSchema.parse({ ...req.body, senderId });
       const message = await storage.createMessage(messageData);
       
@@ -332,7 +332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/messages/:userId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const otherUserId = req.params.userId;
       const messages = await storage.getMessages(userId, otherUserId);
       res.json(messages);
@@ -344,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/conversations', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const conversations = await storage.getUserConversations(userId);
       res.json(conversations);
     } catch (error) {
@@ -534,7 +534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Meeting routes
   app.post('/api/meetings', isAuthenticated, async (req: any, res) => {
     try {
-      const organizerId = req.user.claims.sub;
+      const organizerId = req.user.id;
       const meetingData = { ...req.body, organizerId };
       
       const meeting = await storage.createMeeting(meetingData);
@@ -562,7 +562,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/meetings', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const meetings = await storage.getMeetings(userId);
       res.json(meetings);
     } catch (error) {
@@ -627,7 +627,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Notifications routes
   app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const notifications = await storage.getUserNotifications(userId);
       res.json(notifications);
     } catch (error) {
@@ -785,7 +785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const key = req.params.key;
       const { value } = req.body;
-      const updatedBy = req.user.claims.sub;
+      const updatedBy = req.user.id;
       const setting = await storage.updateSystemSetting(key, value, updatedBy);
       res.json(setting);
     } catch (error) {
@@ -819,7 +819,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/logs', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const adminId = req.user.claims.sub;
+      const adminId = req.user.id;
       const logData = { ...req.body, adminId, ipAddress: req.ip, userAgent: req.get('User-Agent') };
       const log = await storage.createAdminLog(logData);
       res.json(log);
