@@ -44,8 +44,8 @@ export function setupAuth(app: Express) {
 
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "your-secret-key-here",
-    resave: false,
-    saveUninitialized: false, // Don't save empty sessions
+    resave: true, // Force save session on every request
+    saveUninitialized: true, // Save empty sessions for debugging
     store: sessionStore,
     name: "connect.sid",
     cookie: {
@@ -56,19 +56,29 @@ export function setupAuth(app: Express) {
     },
   };
 
+  // Force cookie to be non-secure in development
+  if (process.env.NODE_ENV === 'development') {
+    sessionSettings.cookie!.secure = false;
+  }
+
   // Debug: log the cookie configuration
   console.log("Session cookie configuration:", sessionSettings.cookie);
 
   // Remove trust proxy setting for development
   // app.set("trust proxy", 1);
   
+  // Completely disable trust proxy for development
+  app.set("trust proxy", false);
+  
   // Test middleware to see if session is working
   app.use(session(sessionSettings));
   
-  // Ensure cookies are not secure in development
+  // Ensure cookies are not secure in development - more aggressive override
   app.use((req: any, res: any, next: any) => {
     if (req.session && req.session.cookie) {
       req.session.cookie.secure = false;
+      req.session.cookie.httpOnly = true;
+      req.session.cookie.sameSite = 'lax';
     }
     next();
   });
