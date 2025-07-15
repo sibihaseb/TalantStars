@@ -1,0 +1,97 @@
+vite] connecting... client:495:9
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools react-dom.development.js:29895:17
+Source map error: No sources are declared in this source map.
+Resource URL: https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-slot.js?v=313ecdf2
+Source Map URL: @radix-ui_react-slot.js.map
+
+Source map error: No sources are declared in this source map.
+Resource URL: https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WOOG5QLI.js?v=313ecdf2
+Source Map URL: chunk-WOOG5QLI.js.map
+
+Source map error: No sources are declared in this source map.
+Resource URL: https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react.js?v=313ecdf2
+Source Map URL: react.js.map
+
+Source map error: No sources are declared in this source map.
+Resource URL: https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/clsx.js?v=313ecdf2
+Source Map URL: clsx.js.map
+
+Source map error: No sources are declared in this source map.
+Resource URL: https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-hook-form.js?v=313ecdf2
+Source Map URL: react-hook-form.js.map
+
+Source map error: No sources are declared in this source map.
+Resource URL: https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/drizzle-orm.js?v=313ecdf2
+Source Map URL: drizzle-orm.js.map
+
+Source map error: No sources are declared in this source map.
+Resource URL: https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/zod.js?v=313ecdf2
+Source Map URL: zod.js.map
+
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. 2 main.tsx:40:23
+Saving user: 
+Object { id: 3, email: "marty@24flix.com", firstName: "Marty", lastName: "Jean-Louis", role: "admin" }
+main.tsx:54:22
+XHRPUT
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/admin/users/3
+[HTTP/1.1 500 Internal Server Error 462ms]
+
+Error updating user: Error: 500: {"message":"Failed to update user","error":"null value in column \"username\" of relation \"users\" violates not-null constraint"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    mutationFn AdminDashboard.tsx:233
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+    execute mutation.ts:208
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    handleSaveUser AdminDashboard.tsx:631
+    onSubmit AdminDashboard.tsx:1079
+    React 25
+main.tsx:27:24
+Saving user: 
+Object { id: 3, email: "marty@24flix.com", firstName: "Marty", lastName: "Jean-Louis", role: "admin" }
+main.tsx:54:22
+XHRPUT
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/admin/users/3
+[HTTP/1.1 500 Internal Server Error 281ms]
+
+Error updating user: Error: 500: {"message":"Failed to update user","error":"null value in column \"username\" of relation \"users\" violates not-null constraint"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    mutationFn AdminDashboard.tsx:233
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+    execute mutation.ts:208
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    handleSaveUser AdminDashboard.tsx:631
+    onSubmit AdminDashboard.tsx:1079
+    React 25
+main.tsx:27:24
+Saving user: 
+Object { id: 3, email: "marty@24flix.com", firstName: "Marty", lastName: "Jean-Louis", role: "admin" }
+main.tsx:54:22
+XHRPUT
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/admin/users/3
+[HTTP/1.1 500 Internal Server Error 434ms]
+
+Error updating user: Error: 500: {"message":"Failed to update user","error":"null value in column \"username\" of relation \"users\" violates not-null constraint"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    mutationFn AdminDashboard.tsx:233
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+    execute mutation.ts:208
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    handleSaveUser AdminDashboard.tsx:631
+    onSubmit AdminDashboard.tsx:1079
+    React 25
+main.tsx:27:24
+
+​
+

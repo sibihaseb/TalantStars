@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Shield, UserCircle } from "lucide-react";
 
 export default function Login() {
   const [, navigate] = useLocation();

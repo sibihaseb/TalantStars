@@ -399,7 +399,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       console.log("Updating user:", userId, req.body);
-      const user = await storage.upsertUser({ ...req.body, id: userId });
+      
+      // Get existing user to preserve required fields
+      const existingUser = await storage.getUser(userId);
+      if (!existingUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Merge request body with existing user data, ensuring username exists
+      const userData = {
+        ...existingUser,
+        ...req.body,
+        id: userId,
+        username: req.body.username || existingUser.username || req.body.email || existingUser.email
+      };
+      
+      console.log("Merged user data:", userData);
+      const user = await storage.upsertUser(userData);
       res.json(user);
     } catch (error) {
       console.error("Error updating user:", error);
