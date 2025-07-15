@@ -29,6 +29,7 @@ import ProducerDashboard from "@/pages/ProducerDashboard";
 import ManagerDashboard from "@/pages/ManagerDashboard";
 import Availability from "@/pages/Availability";
 import MascotDemo from "@/pages/MascotDemo";
+import Media from "@/pages/Media";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -110,6 +111,9 @@ function Router() {
       </Route>
       <Route path="/availability">
         {isAuthenticated ? <Availability /> : <Auth />}
+      </Route>
+      <Route path="/media">
+        {isAuthenticated ? <Media /> : <Auth />}
       </Route>
       
       {/* Conditional home route */}
