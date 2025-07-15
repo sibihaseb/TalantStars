@@ -217,7 +217,8 @@ export default function TalentDashboard() {
   };
 
   const handleCompleteProfile = () => {
-    setActiveTab("portfolio");
+    // Navigate to profile completion page instead of portfolio tab
+    window.location.href = '/profile-completion';
   };
 
   const handleViewApplications = () => {
@@ -421,71 +422,151 @@ export default function TalentDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Social Activity */}
+              {/* Work Experience */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <MessageSquare className="w-5 h-5" />
-                    <span>Social Activity</span>
+                    <Award className="w-5 h-5" />
+                    <span>Work Experience</span>
                   </CardTitle>
                   <CardDescription>
-                    Your recent social engagement
+                    Your professional experience and achievements
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Heart className="w-4 h-4 text-red-500" />
-                        <span className="text-sm">Post Likes</span>
+                    {jobHistory?.slice(0, 3).map((job: any, index: number) => (
+                      <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                          <Briefcase className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            <p className="font-medium text-sm">{job.title}</p>
+                            {job.verified && <CheckCircle className="w-4 h-4 text-green-500" />}
+                          </div>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{job.company}</p>
+                          <p className="text-xs text-gray-500">
+                            {new Date(job.startDate).getFullYear()} - {job.endDate ? new Date(job.endDate).getFullYear() : 'Present'}
+                          </p>
+                        </div>
                       </div>
-                      <span className="text-sm font-medium">{socialStats?.likes || 0}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <MessageSquare className="w-4 h-4 text-blue-500" />
-                        <span className="text-sm">Comments</span>
+                    ))}
+                    {(!jobHistory || jobHistory.length === 0) && (
+                      <div className="text-center py-6 text-gray-500">
+                        <Award className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                        <p className="text-sm">No work experience added yet</p>
                       </div>
-                      <span className="text-sm font-medium">{socialStats?.comments || 0}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Share2 className="w-4 h-4 text-green-500" />
-                        <span className="text-sm">Shares</span>
-                      </div>
-                      <span className="text-sm font-medium">{socialStats?.shares || 0}</span>
-                    </div>
-                    <Dialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen}>
+                    )}
+                    <Dialog open={isJobHistoryDialogOpen} onOpenChange={setIsJobHistoryDialogOpen}>
                       <DialogTrigger asChild>
                         <Button variant="outline" className="w-full" size="sm">
                           <Plus className="w-4 h-4 mr-2" />
-                          Create Post
+                          Add Experience
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="max-w-2xl">
                         <DialogHeader>
-                          <DialogTitle>Create New Post</DialogTitle>
+                          <DialogTitle>Add Work Experience</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="job-title">Job Title</Label>
+                              <Input
+                                id="job-title"
+                                value={jobHistoryForm.title}
+                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, title: e.target.value})}
+                                placeholder="e.g., Lead Actor"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="company">Company/Production</Label>
+                              <Input
+                                id="company"
+                                value={jobHistoryForm.company}
+                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, company: e.target.value})}
+                                placeholder="e.g., Netflix"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="job-type">Job Type</Label>
+                              <Select value={jobHistoryForm.jobType} onValueChange={(value) => setJobHistoryForm({...jobHistoryForm, jobType: value})}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select job type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="film">Film</SelectItem>
+                                  <SelectItem value="tv">Television</SelectItem>
+                                  <SelectItem value="theater">Theater</SelectItem>
+                                  <SelectItem value="commercial">Commercial</SelectItem>
+                                  <SelectItem value="music">Music</SelectItem>
+                                  <SelectItem value="modeling">Modeling</SelectItem>
+                                  <SelectItem value="voice">Voice Acting</SelectItem>
+                                  <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor="role">Role</Label>
+                              <Input
+                                id="role"
+                                value={jobHistoryForm.role}
+                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, role: e.target.value})}
+                                placeholder="e.g., Supporting Actor"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="start-date">Start Date</Label>
+                              <Input
+                                id="start-date"
+                                type="date"
+                                value={jobHistoryForm.startDate}
+                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, startDate: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="end-date">End Date</Label>
+                              <Input
+                                id="end-date"
+                                type="date"
+                                value={jobHistoryForm.endDate}
+                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, endDate: e.target.value})}
+                              />
+                            </div>
+                          </div>
                           <div>
-                            <Label htmlFor="post-content">What's on your mind?</Label>
+                            <Label htmlFor="location">Location</Label>
+                            <Input
+                              id="location"
+                              value={jobHistoryForm.location}
+                              onChange={(e) => setJobHistoryForm({...jobHistoryForm, location: e.target.value})}
+                              placeholder="e.g., Los Angeles, CA"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="description">Description</Label>
                             <Textarea
-                              id="post-content"
-                              placeholder="Share your thoughts, updates, or achievements..."
-                              value={postContent}
-                              onChange={(e) => setPostContent(e.target.value)}
+                              id="description"
+                              value={jobHistoryForm.description}
+                              onChange={(e) => setJobHistoryForm({...jobHistoryForm, description: e.target.value})}
+                              placeholder="Describe your role and achievements..."
                               className="min-h-24"
                             />
                           </div>
                           <div className="flex justify-end space-x-2">
-                            <Button variant="outline" onClick={() => setIsPostDialogOpen(false)}>
+                            <Button variant="outline" onClick={() => setIsJobHistoryDialogOpen(false)}>
                               Cancel
                             </Button>
                             <Button 
-                              onClick={handleCreatePost}
-                              disabled={!postContent.trim() || createPostMutation.isPending}
+                              onClick={handleCreateJobHistory}
+                              disabled={createJobHistoryMutation.isPending}
                             >
-                              {createPostMutation.isPending ? "Posting..." : "Post"}
+                              {createJobHistoryMutation.isPending ? "Adding..." : "Add Experience"}
                             </Button>
                           </div>
                         </div>

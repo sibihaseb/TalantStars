@@ -1352,6 +1352,141 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin - Settings Management
+  app.get('/api/admin/settings', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const settings = await storage.getAdminSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error('Get admin settings error:', error);
+      res.status(500).json({ error: 'Failed to get admin settings' });
+    }
+  });
+
+  app.post('/api/admin/settings', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { key, value, description, encrypted } = req.body;
+      
+      if (!key || value === undefined) {
+        return res.status(400).json({ error: 'Key and value are required' });
+      }
+
+      const setting = await storage.updateAdminSetting(key, value, req.user?.username || 'admin');
+      res.json(setting);
+    } catch (error) {
+      console.error('Update admin setting error:', error);
+      res.status(500).json({ error: 'Failed to update admin setting' });
+    }
+  });
+
+  app.delete('/api/admin/settings/:key', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { key } = req.params;
+      await storage.deleteAdminSetting(key);
+      res.json({ message: 'Setting deleted successfully' });
+    } catch (error) {
+      console.error('Delete admin setting error:', error);
+      res.status(500).json({ error: 'Failed to delete admin setting' });
+    }
+  });
+
+  // Calendar Events
+  app.get('/api/calendar/events', isAuthenticated, async (req: any, res) => {
+    try {
+      const events = await storage.getAvailabilityCalendar(req.user?.id);
+      res.json(events);
+    } catch (error) {
+      console.error('Get calendar events error:', error);
+      res.status(500).json({ error: 'Failed to get calendar events' });
+    }
+  });
+
+  app.post('/api/calendar/events', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventData = {
+        ...req.body,
+        userId: req.user?.id,
+      };
+      
+      const event = await storage.createAvailabilityCalendar(eventData);
+      res.json(event);
+    } catch (error) {
+      console.error('Create calendar event error:', error);
+      res.status(500).json({ error: 'Failed to create calendar event' });
+    }
+  });
+
+  app.put('/api/calendar/events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const event = await storage.updateAvailabilityCalendar(eventId, req.body);
+      res.json(event);
+    } catch (error) {
+      console.error('Update calendar event error:', error);
+      res.status(500).json({ error: 'Failed to update calendar event' });
+    }
+  });
+
+  app.delete('/api/calendar/events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      await storage.deleteAvailabilityCalendar(eventId);
+      res.json({ message: 'Calendar event deleted successfully' });
+    } catch (error) {
+      console.error('Delete calendar event error:', error);
+      res.status(500).json({ error: 'Failed to delete calendar event' });
+    }
+  });
+
+  // Meeting Requests
+  app.get('/api/meetings', isAuthenticated, async (req: any, res) => {
+    try {
+      const meetings = await storage.getMeetingRequests(req.user?.id);
+      res.json(meetings);
+    } catch (error) {
+      console.error('Get meetings error:', error);
+      res.status(500).json({ error: 'Failed to get meetings' });
+    }
+  });
+
+  app.post('/api/meetings', isAuthenticated, async (req: any, res) => {
+    try {
+      const meetingData = {
+        ...req.body,
+        fromUserId: req.user?.id,
+        status: 'pending',
+      };
+      
+      const meeting = await storage.createMeetingRequest(meetingData);
+      res.json(meeting);
+    } catch (error) {
+      console.error('Create meeting error:', error);
+      res.status(500).json({ error: 'Failed to create meeting request' });
+    }
+  });
+
+  app.put('/api/meetings/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const meetingId = parseInt(req.params.id);
+      const meeting = await storage.updateMeetingRequest(meetingId, req.body);
+      res.json(meeting);
+    } catch (error) {
+      console.error('Update meeting error:', error);
+      res.status(500).json({ error: 'Failed to update meeting request' });
+    }
+  });
+
+  app.delete('/api/meetings/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const meetingId = parseInt(req.params.id);
+      await storage.deleteMeetingRequest(meetingId);
+      res.json({ message: 'Meeting request deleted successfully' });
+    } catch (error) {
+      console.error('Delete meeting error:', error);
+      res.status(500).json({ error: 'Failed to delete meeting request' });
+    }
+  });
+
   // Admin - Permissions Management
   app.get("/api/admin/permissions/roles", isAuthenticated, isAdmin, async (req: any, res) => {
     try {

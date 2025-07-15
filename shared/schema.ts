@@ -44,7 +44,9 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  mainImageUrl: varchar("main_image_url"), // 1:1 cropped main profile image
   role: userRoleEnum("role").default("talent"),
+  language: varchar("language").default("en"), // User's preferred language
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -717,6 +719,37 @@ export const verificationRequests = pgTable("verification_requests", {
   reviewedAt: timestamp("reviewed_at"),
 });
 
+// Meeting requests system
+export const meetingRequests = pgTable("meeting_requests", {
+  id: serial("id").primaryKey(),
+  fromUserId: varchar("from_user_id").references(() => users.id).notNull(),
+  toUserId: varchar("to_user_id").references(() => users.id).notNull(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  requestedDate: timestamp("requested_date").notNull(),
+  requestedTime: time("requested_time"),
+  duration: integer("duration").default(60), // in minutes
+  meetingType: varchar("meeting_type").default("video"), // video, phone, in_person
+  location: varchar("location"), // for in-person meetings
+  status: varchar("status").default("pending"), // pending, accepted, declined, cancelled
+  responseMessage: text("response_message"),
+  respondedAt: timestamp("responded_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Admin settings for OpenAI keys and other configurations
+export const adminSettings = pgTable("admin_settings", {
+  id: serial("id").primaryKey(),
+  key: varchar("key").unique().notNull(),
+  value: text("value"),
+  description: text("description"),
+  encrypted: boolean("encrypted").default(false),
+  updatedBy: varchar("updated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(userProfiles, {
@@ -941,6 +974,26 @@ export const verificationRequestsRelations = relations(verificationRequests, ({ 
   }),
 }));
 
+export const meetingRequestsRelations = relations(meetingRequests, ({ one }) => ({
+  fromUser: one(users, {
+    fields: [meetingRequests.fromUserId],
+    references: [users.id],
+    relationName: "sentMeetingRequests",
+  }),
+  toUser: one(users, {
+    fields: [meetingRequests.toUserId],
+    references: [users.id],
+    relationName: "receivedMeetingRequests",
+  }),
+}));
+
+export const adminSettingsRelations = relations(adminSettings, ({ one }) => ({
+  updatedBy: one(users, {
+    fields: [adminSettings.updatedBy],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
   id: true,
@@ -1148,7 +1201,44 @@ export const insertMediaProcessingQueueSchema = createInsertSchema(mediaProcessi
 export const insertVerificationRequestSchema = createInsertSchema(verificationRequests).omit({
   id: true,
   submittedAt: true,
+  reviewedAt: true,
 });
+
+export const insertMeetingRequestSchema = createInsertSchema(meetingRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAdminSettingSchema = createInsertSchema(adminSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Additional type definitions for new tables
+export type MeetingRequest = typeof meetingRequests.$inferSelect;
+export type InsertMeetingRequest = z.infer<typeof insertMeetingRequestSchema>;
+export type AdminSetting = typeof adminSettings.$inferSelect;
+export type InsertAdminSetting = z.infer<typeof insertAdminSettingSchema>;
+export type UserSubscription = typeof userSubscriptions.$inferSelect;
+export type InsertUserSubscription = z.infer<typeof insertUserSubscriptionSchema>;
+export type ChatRoom = typeof chatRooms.$inferSelect;
+export type InsertChatRoom = z.infer<typeof insertChatRoomSchema>;
+export type ChatRoomParticipant = typeof chatRoomParticipants.$inferSelect;
+export type InsertChatRoomParticipant = z.infer<typeof insertChatRoomParticipantSchema>;
+export type ChatMessage = typeof chatMessages.$inferSelect;
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+export type JobMatch = typeof jobMatches.$inferSelect;
+export type InsertJobMatch = z.infer<typeof insertJobMatchSchema>;
+export type EmailTemplate = typeof emailTemplates.$inferSelect;
+export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
+export type AiGeneratedContent = typeof aiGeneratedContent.$inferSelect;
+export type InsertAiGeneratedContent = z.infer<typeof insertAiGeneratedContentSchema>;
+export type MediaProcessingQueue = typeof mediaProcessingQueue.$inferSelect;
+export type InsertMediaProcessingQueue = z.infer<typeof insertMediaProcessingQueueSchema>;
+export type VerificationRequest = typeof verificationRequests.$inferSelect;
+export type InsertVerificationRequest = z.infer<typeof insertVerificationRequestSchema>;
 
 // Insert schemas for social media features
 export const insertFriendshipSchema = createInsertSchema(friendships).omit({

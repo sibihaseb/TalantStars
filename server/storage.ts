@@ -96,6 +96,10 @@ import {
   type InsertUserPrivacySettings,
   type ProfessionalConnection,
   type InsertProfessionalConnection,
+  type AdminSetting,
+  type InsertAdminSetting,
+  type MeetingRequest,
+  type InsertMeetingRequest,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc, like, ilike, sql, ne } from "drizzle-orm";
@@ -1342,6 +1346,121 @@ export class DatabaseStorage implements IStorage {
       }).returning();
       return result;
     }
+  }
+
+  // Admin settings operations
+  async createAdminSetting(setting: InsertAdminSetting): Promise<AdminSetting> {
+    const [result] = await db.insert(adminSettings).values(setting).returning();
+    return result;
+  }
+
+  async getAdminSettings(): Promise<AdminSetting[]> {
+    return await db.select().from(adminSettings).orderBy(asc(adminSettings.key));
+  }
+
+  async getAdminSetting(key: string): Promise<AdminSetting | undefined> {
+    const [setting] = await db.select().from(adminSettings).where(eq(adminSettings.key, key));
+    return setting;
+  }
+
+  async updateAdminSetting(key: string, value: string, updatedBy: string): Promise<AdminSetting> {
+    const [existing] = await db.select().from(adminSettings).where(eq(adminSettings.key, key));
+    
+    if (existing) {
+      const [result] = await db.update(adminSettings)
+        .set({ value, updatedBy, updatedAt: new Date() })
+        .where(eq(adminSettings.key, key))
+        .returning();
+      return result;
+    } else {
+      const [result] = await db.insert(adminSettings).values({
+        key,
+        value,
+        updatedBy,
+      }).returning();
+      return result;
+    }
+  }
+
+  async deleteAdminSetting(key: string): Promise<void> {
+    await db.delete(adminSettings).where(eq(adminSettings.key, key));
+  }
+
+  // Meeting request operations
+  async createMeetingRequest(request: InsertMeetingRequest): Promise<MeetingRequest> {
+    const [result] = await db.insert(meetingRequests).values(request).returning();
+    return result;
+  }
+
+  async getMeetingRequests(userId: string): Promise<MeetingRequest[]> {
+    return await db.select().from(meetingRequests)
+      .where(or(eq(meetingRequests.fromUserId, userId), eq(meetingRequests.toUserId, userId)))
+      .orderBy(desc(meetingRequests.createdAt));
+  }
+
+  async getMeetingRequest(id: number): Promise<MeetingRequest | undefined> {
+    const [request] = await db.select().from(meetingRequests).where(eq(meetingRequests.id, id));
+    return request;
+  }
+
+  async updateMeetingRequest(id: number, request: Partial<InsertMeetingRequest>): Promise<MeetingRequest> {
+    const [result] = await db.update(meetingRequests)
+      .set({ ...request, updatedAt: new Date() })
+      .where(eq(meetingRequests.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteMeetingRequest(id: number): Promise<void> {
+    await db.delete(meetingRequests).where(eq(meetingRequests.id, id));
+  }
+
+  // Calendar operations
+  async createAvailabilityCalendar(calendar: InsertAvailabilityCalendar): Promise<AvailabilityCalendar> {
+    const [result] = await db.insert(availabilityCalendar).values(calendar).returning();
+    return result;
+  }
+
+  async getAvailabilityCalendar(userId: string): Promise<AvailabilityCalendar[]> {
+    return await db.select().from(availabilityCalendar)
+      .where(eq(availabilityCalendar.userId, userId))
+      .orderBy(asc(availabilityCalendar.startDate));
+  }
+
+  async updateAvailabilityCalendar(id: number, calendar: Partial<InsertAvailabilityCalendar>): Promise<AvailabilityCalendar> {
+    const [result] = await db.update(availabilityCalendar)
+      .set({ ...calendar, updatedAt: new Date() })
+      .where(eq(availabilityCalendar.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteAvailabilityCalendar(id: number): Promise<void> {
+    await db.delete(availabilityCalendar).where(eq(availabilityCalendar.id, id));
+  }
+
+  // Calendar operations
+  async createAvailabilityCalendar(calendar: InsertAvailabilityCalendar): Promise<AvailabilityCalendar> {
+    const [result] = await db.insert(availabilityCalendar).values(calendar).returning();
+    return result;
+  }
+
+  async getAvailabilityCalendar(userId: string): Promise<AvailabilityCalendar[]> {
+    return await db.select().from(availabilityCalendar)
+      .where(eq(availabilityCalendar.userId, userId))
+      .orderBy(asc(availabilityCalendar.startDate));
+  }
+
+  async updateAvailabilityCalendar(id: number, calendar: Partial<InsertAvailabilityCalendar>): Promise<AvailabilityCalendar> {
+    const [result] = await db.update(availabilityCalendar)
+      .set({ ...calendar, updatedAt: new Date() })
+      .where(eq(availabilityCalendar.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteAvailabilityCalendar(id: number): Promise<void> {
+    await db.delete(availabilityCalendar).where(eq(availabilityCalendar.id, id));
   }
 }
 
