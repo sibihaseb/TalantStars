@@ -108,10 +108,20 @@ export default function ProfileImageUpload({
   }, [toast]);
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('File input changed');
+    console.log('File input changed - event fired');
+    console.log('Event target:', e.target);
+    console.log('Files length:', e.target.files?.length);
+    console.log('File list:', e.target.files);
+    
     const file = e.target.files?.[0];
     console.log('Selected file:', file);
+    
     if (file) {
+      console.log('File details:', {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      });
       handleFileSelect(file);
     } else {
       console.log('No file selected');
@@ -321,12 +331,24 @@ export default function ProfileImageUpload({
                   </p>
                 </div>
                 <Button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     console.log('Choose Image button clicked');
                     console.log('File input ref:', fileInputRef.current);
-                    fileInputRef.current?.click();
+                    console.log('File input ref value:', fileInputRef.current?.value);
+                    
+                    // Reset the file input to ensure change event fires
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = '';
+                    }
+                    
+                    setTimeout(() => {
+                      fileInputRef.current?.click();
+                    }, 0);
                   }}
                   className="bg-blue-600 hover:bg-blue-700"
+                  type="button"
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   Choose Image
