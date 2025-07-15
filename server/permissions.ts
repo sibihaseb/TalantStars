@@ -6,6 +6,18 @@ import {
   InsertUserPermission 
 } from "@shared/schema";
 
+// Permission audit log interface
+interface PermissionAuditLog {
+  userId: string;
+  userRole: string;
+  permission: PermissionCheck;
+  granted: boolean;
+  timestamp: Date;
+  ipAddress?: string;
+  userAgent?: string;
+  reason?: string;
+}
+
 /**
  * Enhanced permissions management system
  * Provides granular permission checking and management
@@ -114,6 +126,40 @@ export async function hasAllPermissions(
 ): Promise<boolean> {
   const results = await hasPermissions(context, permissions);
   return results.every(result => result);
+}
+
+/**
+ * Log permission access attempts for auditing
+ */
+async function logPermissionAttempt(
+  context: PermissionContext,
+  permission: PermissionCheck,
+  granted: boolean
+): Promise<void> {
+  try {
+    const auditLog: PermissionAuditLog = {
+      userId: context.userId,
+      userRole: context.userRole,
+      permission,
+      granted,
+      timestamp: context.timestamp,
+      ipAddress: context.ipAddress,
+      userAgent: context.userAgent,
+      reason: granted ? "Access granted" : "Access denied"
+    };
+
+    // Log to admin logs for now (could be separate audit table)
+    await storage.createAdminLog({
+      action: "permission_check",
+      details: JSON.stringify(auditLog),
+      adminId: context.userId,
+      ipAddress: context.ipAddress,
+      userAgent: context.userAgent,
+      timestamp: context.timestamp
+    });
+  } catch (error) {
+    console.error("Failed to log permission attempt:", error);
+  }
 }
 
 /**
@@ -419,12 +465,16 @@ export function requirePermission(permission: PermissionCheck) {
 
     const hasAccess = await hasPermission(context, permission);
     if (!hasAccess) {
+      // Log permission denial for auditing
+      await logPermissionAttempt(context, permission, false);
       return res.status(403).json({ 
         error: "Permission denied",
         required: permission
       });
     }
 
+    // Log successful permission check
+    await logPermissionAttempt(context, permission, true);
     next();
   };
 }

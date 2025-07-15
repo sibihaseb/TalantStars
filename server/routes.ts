@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { storage as simpleStorage } from "./simple-storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupAuth as setupTraditionalAuth, isAuthenticated as isTraditionalAuthenticated, isAdmin } from "./auth";
+import { requirePermission, requireAnyPermission, PermissionChecks } from "./permissions";
 import { enhanceProfile, generateBio } from "./openai";
 import { 
   insertUserProfileSchema, 
@@ -1234,6 +1235,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }));
     }
   }
+
+  // Permission Management Test & Initialization Endpoints
+  app.post('/api/admin/test-permissions', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      // Test user permission creation
+      const testUserId = "1";
+      const testPermission = {
+        userId: testUserId,
+        category: "CONTENT",
+        action: "CREATE",
+        resource: "blog_posts",
+        granted: true,
+        grantedBy: req.user.id.toString(),
+        conditions: { maxDailyPosts: 5 }
+      };
+      
+      const permission = await storage.createUserPermission(testPermission);
+      
+      // Test permission check using the permissions module
+      const context = {
+        userId: testUserId,
+        userRole: "talent",
+        timestamp: new Date()
+      };
+      
+      const hasPermissionResult = await storage.hasUserPermission(context.userId, {
+        category: "CONTENT",
+        action: "CREATE",
+        resource: "blog_posts"
+      });
+      
+      res.json({ 
+        success: true, 
+        permission, 
+        hasPermission: hasPermissionResult,
+        message: "Permission test completed successfully"
+      });
+    } catch (error) {
+      console.error("Permission test failed:", error);
+      res.status(500).json({ message: "Permission test failed", error: error.message });
+    }
+  });
+
+  app.post('/api/admin/initialize-role-permissions', isTraditionalAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      // Initialize default role permissions
+      const defaultRolePermissions = [
+        // Admin permissions
+        { role: "admin", category: "USER", action: "CREATE", resource: "all", granted: true },
+        { role: "admin", category: "USER", action: "READ", resource: "all", granted: true },
+        { role: "admin", category: "USER", action: "UPDATE", resource: "all", granted: true },
+        { role: "admin", category: "USER", action: "DELETE", resource: "all", granted: true },
+        { role: "admin", category: "ADMIN", action: "ALL", resource: "all", granted: true },
+        { role: "admin", category: "CONTENT", action: "ALL", resource: "all", granted: true },
+        { role: "admin", category: "JOBS", action: "ALL", resource: "all", granted: true },
+        { role: "admin", category: "MEDIA", action: "ALL", resource: "all", granted: true },
+        { role: "admin", category: "BILLING", action: "ALL", resource: "all", granted: true },
+        { role: "admin", category: "SYSTEM", action: "ALL", resource: "all", granted: true },
+        { role: "admin", category: "AI", action: "ALL", resource: "all", granted: true },
+        
+        // Producer permissions
+        { role: "producer", category: "USER", action: "READ", resource: "talents", granted: true },
+        { role: "producer", category: "JOBS", action: "CREATE", resource: "all", granted: true },
+        { role: "producer", category: "JOBS", action: "UPDATE", resource: "own", granted: true },
+        { role: "producer", category: "JOBS", action: "DELETE", resource: "own", granted: true },
+        { role: "producer", category: "CONTENT", action: "CREATE", resource: "job_posts", granted: true },
+        { role: "producer", category: "MEDIA", action: "UPLOAD", resource: "job_media", granted: true },
+        { role: "producer", category: "AI", action: "USE", resource: "job_matching", granted: true },
+        
+        // Manager permissions
+        { role: "manager", category: "USER", action: "READ", resource: "talents", granted: true },
+        { role: "manager", category: "USER", action: "UPDATE", resource: "managed_talents", granted: true },
+        { role: "manager", category: "JOBS", action: "READ", resource: "all", granted: true },
+        { role: "manager", category: "JOBS", action: "APPLY", resource: "for_talents", granted: true },
+        { role: "manager", category: "CONTENT", action: "CREATE", resource: "talent_profiles", granted: true },
+        { role: "manager", category: "MEDIA", action: "UPLOAD", resource: "talent_media", granted: true },
+        { role: "manager", category: "AI", action: "USE", resource: "profile_optimization", granted: true },
+        
+        // Talent permissions
+        { role: "talent", category: "USER", action: "READ", resource: "own", granted: true },
+        { role: "talent", category: "USER", action: "UPDATE", resource: "own", granted: true },
+        { role: "talent", category: "JOBS", action: "READ", resource: "all", granted: true },
+        { role: "talent", category: "JOBS", action: "APPLY", resource: "all", granted: true },
+        { role: "talent", category: "CONTENT", action: "CREATE", resource: "own_profile", granted: true },
+        { role: "talent", category: "CONTENT", action: "UPDATE", resource: "own_profile", granted: true },
+        { role: "talent", category: "MEDIA", action: "UPLOAD", resource: "own_media", granted: true },
+        { role: "talent", category: "AI", action: "USE", resource: "basic_features", granted: true },
+      ];
+      
+      // Create role permissions
+      const createdPermissions = [];
+      for (const permission of defaultRolePermissions) {
+        try {
+          const created = await storage.createRolePermission(permission);
+          createdPermissions.push(created);
+        } catch (error) {
+          console.log(`Permission ${permission.role}-${permission.category}-${permission.action} may already exist`);
+        }
+      }
+      
+      res.json({ 
+        success: true, 
+        created: createdPermissions.length,
+        total: defaultRolePermissions.length,
+        message: `Initialized ${createdPermissions.length} role permissions` 
+      });
+    } catch (error) {
+      console.error("Role permission initialization failed:", error);
+      res.status(500).json({ message: "Role permission initialization failed", error: error.message });
+    }
+  });
 
   return httpServer;
 }

@@ -18,6 +18,7 @@ import FindTalent from "@/pages/FindTalent";
 import BrowseJobs from "@/pages/BrowseJobs";
 import Admin from "@/pages/Admin";
 import AdminDashboard from "@/pages/AdminDashboard";
+import PermissionsPage from "@/pages/admin/permissions-page";
 import MeetingManagement from "@/pages/MeetingManagement";
 import TalentProfile from "@/pages/TalentProfile";
 import ProfileViewer from "@/pages/ProfileViewer";
@@ -54,6 +55,9 @@ function Router() {
       </Route>
       <Route path="/admin/dashboard">
         {isAuthenticated ? <AdminDashboard /> : <Login />}
+      </Route>
+      <Route path="/admin/permissions">
+        {isAuthenticated ? <PermissionsPage /> : <Login />}
       </Route>
       
       {/* Other protected routes */}
