@@ -1,0 +1,131 @@
+Continue Building Profile clicked - forcing navigation to onboarding main.tsx:54:22
+Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render. main.tsx:27:24
+Step 1 completed! main.tsx:54:22
+XHRGET
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/admin/profile-questions
+[HTTP/1.1 403 Forbidden 95ms]
+
+Step 2 completed! 2 main.tsx:54:22
+Step 3 completed! 23 main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: false, selectedFile: undefined, previewUrl: false, mandatory: true }
+main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+Choose Image button clicked main.tsx:54:22
+File input ref: 
+<input class="hidden" data-replit-metadata="client/src/components/Pr…eImageUpload.tsx:357:14" data-component-name="input" type="file" accept="image/*" data-testid="file-input">
+main.tsx:54:22
+File input ref value: <empty string> main.tsx:54:22
+File input changed - event fired main.tsx:54:22
+Event target: 
+<input class="hidden" data-replit-metadata="client/src/components/Pr…eImageUpload.tsx:357:14" data-component-name="input" type="file" accept="image/*" data-testid="file-input">
+main.tsx:54:22
+Files length: 1 main.tsx:54:22
+File list: 
+FileList [ File ]
+main.tsx:54:22
+Selected file: 
+File { name: "son_savior.jpg", lastModified: 1751989014771, webkitRelativePath: "", size: 407579, type: "image/jpeg" }
+main.tsx:54:22
+File details: 
+Object { name: "son_savior.jpg", size: 407579, type: "image/jpeg" }
+main.tsx:54:22
+File selected: son_savior.jpg image/jpeg 407579 main.tsx:54:22
+Setting selected file and preview URL main.tsx:54:22
+Cropper should now be visible main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+Form submitted with data: 
+Object { role: "talent", talentType: "actor", displayName: "Marty TEST", bio: "asdfasdfafdssdf", location: "adfs", website: "", phoneNumber: "", availabilityStatus: "available", height: "", weight: "", … }
+main.tsx:54:22
+Form errors: 
+Object {  }
+main.tsx:54:22
+Form is valid: false main.tsx:54:22
+Calling mutation... main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "son_savior.jpg", previewUrl: true, mandatory: true }
+main.tsx:54:22
+Step 4 completed! main.tsx:54:22
+
+​
+

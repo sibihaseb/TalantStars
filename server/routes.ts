@@ -176,7 +176,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const file = req.file;
       
+      console.log('Profile image upload request received');
+      console.log('User ID:', userId);
+      console.log('File:', file);
+      console.log('Request body:', req.body);
+      console.log('Request files:', req.files);
+      
       if (!file) {
+        console.log('No file received by server');
         return res.status(400).json({ message: "No image file provided" });
       }
 

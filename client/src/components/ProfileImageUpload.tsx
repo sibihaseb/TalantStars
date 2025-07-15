@@ -34,6 +34,7 @@ export default function ProfileImageUpload({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const cropperRef = useRef<HTMLDivElement>(null);
+  const lastLogKey = useRef<string>('');
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -41,12 +42,20 @@ export default function ProfileImageUpload({
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async (formData: FormData) => {
+      console.log('Uploading file to server...');
+      console.log('FormData entries:', Array.from(formData.entries()));
+      
       const response = await apiRequest('POST', '/api/user/profile-image', formData, {
         headers: {
           // Don't set Content-Type for FormData - browser will set it with boundary
         }
       });
-      return response.json();
+      
+      console.log('Upload response status:', response.status);
+      const result = await response.json();
+      console.log('Upload result:', result);
+      
+      return result;
     },
     onSuccess: (data) => {
       setShowCropper(false);
@@ -268,13 +277,20 @@ export default function ProfileImageUpload({
     setIsCropDragging(false);
   };
 
-  // Debug: Log component mount
-  console.log('ProfileImageUpload component rendered', { 
-    showCropper, 
-    selectedFile: selectedFile?.name,
-    previewUrl: !!previewUrl,
-    mandatory 
-  });
+  // Debug: Log component mount (only when needed to avoid infinite logs)
+  if (process.env.NODE_ENV === 'development') {
+    // Only log on significant state changes
+    const logKey = `${showCropper}-${selectedFile?.name}-${!!previewUrl}`;
+    if (logKey !== lastLogKey.current) {
+      console.log('ProfileImageUpload component rendered', { 
+        showCropper, 
+        selectedFile: selectedFile?.name,
+        previewUrl: !!previewUrl,
+        mandatory 
+      });
+      lastLogKey.current = logKey;
+    }
+  }
 
   return (
     <div className="space-y-4">
