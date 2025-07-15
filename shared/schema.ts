@@ -213,9 +213,39 @@ export const pricingTiers = pgTable("pricing_tiers", {
   duration: integer("duration").notNull(), // in days
   features: text("features").array().notNull(),
   active: boolean("active").default(true),
+  
+  // Resource limits
+  maxPhotos: integer("max_photos").default(0), // 0 = unlimited
+  maxVideos: integer("max_videos").default(0),
+  maxAudioFiles: integer("max_audio_files").default(0),
+  maxStorageGB: integer("max_storage_gb").default(1),
+  maxProjects: integer("max_projects").default(0),
+  maxApplicationsPerMonth: integer("max_applications_per_month").default(0),
+  
+  // Feature access
+  hasAnalytics: boolean("has_analytics").default(false),
+  hasRealtimeMessaging: boolean("has_realtime_messaging").default(false),
+  hasAIFeatures: boolean("has_ai_features").default(false),
+  hasAdvancedSearch: boolean("has_advanced_search").default(false),
+  hasPrioritySupport: boolean("has_priority_support").default(false),
+  hasCustomBranding: boolean("has_custom_branding").default(false),
+  hasAPIAccess: boolean("has_api_access").default(false),
+  hasAdvancedAnalytics: boolean("has_advanced_analytics").default(false),
+  hasTeamCollaboration: boolean("has_team_collaboration").default(false),
+  hasVideoConferencing: boolean("has_video_conferencing").default(false),
+  
+  // Permissions
+  canCreateJobs: boolean("can_create_jobs").default(false),
+  canViewTalentProfiles: boolean("can_view_talent_profiles").default(true),
+  canExportData: boolean("can_export_data").default(false),
+  canManageTeam: boolean("can_manage_team").default(false),
+  canAccessReports: boolean("can_access_reports").default(false),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+
 
 export const profileQuestions = pgTable("profile_questions", {
   id: serial("id").primaryKey(),
@@ -377,6 +407,15 @@ export const userSubscriptions = pgTable("user_subscriptions", {
   status: varchar("status").default("active"), // active, cancelled, expired, pending
   startDate: timestamp("start_date").defaultNow(),
   endDate: timestamp("end_date"),
+  
+  // Usage tracking
+  photosUsed: integer("photos_used").default(0),
+  videosUsed: integer("videos_used").default(0),
+  audioFilesUsed: integer("audio_files_used").default(0),
+  storageUsedMB: integer("storage_used_mb").default(0),
+  projectsUsed: integer("projects_used").default(0),
+  applicationsThisMonth: integer("applications_this_month").default(0),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

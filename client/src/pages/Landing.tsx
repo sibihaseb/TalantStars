@@ -149,7 +149,7 @@ export default function Landing() {
                 variant="ghost"
                 size="sm"
                 className="text-white/70 hover:text-white hover:bg-white/10 px-4 py-2 text-sm"
-                onClick={() => window.location.href = "/admin"}
+                onClick={() => window.location.href = "/login"}
               >
                 Admin Login
               </Button>

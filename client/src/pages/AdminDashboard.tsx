@@ -655,6 +655,13 @@ export default function AdminDashboard() {
               {users.length} Total Users
             </Badge>
             <Button 
+              onClick={() => window.location.href = '/admin/pricing-tiers'}
+              className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white shadow-lg"
+            >
+              <DollarSign className="w-4 h-4 mr-2" />
+              Pricing Tiers
+            </Button>
+            <Button 
               onClick={() => setIsMassEmailDialogOpen(true)}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
             >

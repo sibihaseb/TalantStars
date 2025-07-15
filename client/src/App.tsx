@@ -19,6 +19,8 @@ import BrowseJobs from "@/pages/BrowseJobs";
 import Admin from "@/pages/Admin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import PermissionsPage from "@/pages/admin/permissions-page";
+import PricingTiersPage from "@/pages/admin/pricing-tiers";
+import AdminLogin from "@/pages/login";
 import MeetingManagement from "@/pages/MeetingManagement";
 import TalentProfile from "@/pages/TalentProfile";
 import ProfileViewer from "@/pages/ProfileViewer";
@@ -42,8 +44,8 @@ function Router() {
 
   return (
     <Switch>
-      {/* Login route - always accessible */}
-      <Route path="/login" component={Login} />
+      {/* Login route - admin login */}
+      <Route path="/login" component={AdminLogin} />
       
       {/* Public routes */}
       <Route path="/jobs" component={BrowseJobs} />
@@ -51,13 +53,16 @@ function Router() {
       
       {/* Protected admin routes */}
       <Route path="/admin">
-        {isAuthenticated ? <Admin /> : <Login />}
+        {isAuthenticated ? <Admin /> : <AdminLogin />}
       </Route>
       <Route path="/admin/dashboard">
-        {isAuthenticated ? <AdminDashboard /> : <Login />}
+        {isAuthenticated ? <AdminDashboard /> : <AdminLogin />}
       </Route>
       <Route path="/admin/permissions">
-        {isAuthenticated ? <PermissionsPage /> : <Login />}
+        {isAuthenticated ? <PermissionsPage /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/pricing-tiers">
+        {isAuthenticated ? <PricingTiersPage /> : <AdminLogin />}
       </Route>
       
       {/* Other protected routes */}
