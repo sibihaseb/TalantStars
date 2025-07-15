@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeProvider } from "@/components/ui/theme-provider";
@@ -758,7 +758,12 @@ export default function Onboarding() {
     enabled: !!watchedRole,
   });
 
-  const renderRoleSpecificQuestions = () => {
+  const renderRoleSpecificQuestions = useMemo(() => {
+    console.log('=== MEMOIZING QUESTIONS ===');
+    console.log('Current step:', currentStep);
+    console.log('Profile questions length:', profileQuestions.length);
+    
+    return () => {
     if (!watchedRole) return null;
 
     // Filter questions based on role
@@ -771,22 +776,22 @@ export default function Onboarding() {
       questionTypes = ['profile'];
     }
 
-    console.log('Profile questions:', profileQuestions);
+    console.log('=== RENDER ROLE SPECIFIC QUESTIONS ===');
+    console.log('Profile questions total:', profileQuestions.length);
     console.log('Question types to filter:', questionTypes);
     console.log('Watched role:', watchedRole);
     console.log('Watched talent type:', watchedTalentType);
 
     const relevantQuestions = profileQuestions
       .filter(q => {
-        console.log('Checking question:', q.question, 'talentType:', q.talentType, 'active:', q.active);
         const questionType = q.talentType;
         const isRelevant = questionTypes.includes(questionType) && q.active;
-        console.log('Question type:', questionType, 'Is relevant:', isRelevant);
         return isRelevant;
       })
       .sort((a, b) => a.order - b.order);
 
     console.log('Relevant questions found:', relevantQuestions.length);
+    console.log('Questions:', relevantQuestions.map(q => ({ id: q.id, question: q.question, field_name: q.field_name })));
 
     if (relevantQuestions.length === 0) {
       return (
@@ -800,7 +805,7 @@ export default function Onboarding() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {relevantQuestions.map((question) => (
-          <div key={question.id} className="space-y-2">
+          <div key={`question-${question.id}-${question.field_name}`} className="space-y-2">
             <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {question.question}
               {question.required && <span className="text-red-500 ml-1">*</span>}
@@ -810,7 +815,8 @@ export default function Onboarding() {
         ))}
       </div>
     );
-  };
+    };
+  }, [watchedRole, watchedTalentType, profileQuestions, currentStep]);
 
   const renderDynamicFormField = (question: any) => {
     const fieldName = question.fieldName || question.field_name;
