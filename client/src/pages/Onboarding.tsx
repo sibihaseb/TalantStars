@@ -1669,45 +1669,30 @@ export default function Onboarding() {
               )}
 
               {/* Step 5: Role-Specific Details */}
-              {currentStep === 5 && watchedRole !== "talent" && (
+              {currentStep === 5 && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">
                       {watchedRole === 'manager' && 'Management Details'}
                       {watchedRole === 'agent' && 'Agent Details'}
                       {watchedRole === 'producer' && 'Production Details'}
+                      {watchedRole === 'talent' && watchedTalentType === 'actor' && 'Acting Details'}
+                      {watchedRole === 'talent' && watchedTalentType === 'musician' && 'Music Details'}
+                      {watchedRole === 'talent' && watchedTalentType === 'voice_artist' && 'Voice Details'}
+                      {watchedRole === 'talent' && watchedTalentType === 'model' && 'Modeling Details'}
+                      {watchedRole === 'talent' && !watchedTalentType && 'Talent Details'}
                       {!watchedRole && 'Professional Details'}
                     </CardTitle>
                     <p className="text-gray-600 dark:text-gray-400">
                       {watchedRole === 'manager' && 'Tell us about your management experience and services'}
                       {watchedRole === 'agent' && 'Tell us about your agency experience and specializations'}
                       {watchedRole === 'producer' && 'Tell us about your production experience and projects'}
+                      {watchedRole === 'talent' && watchedTalentType === 'actor' && 'Add your acting experience, physical attributes, and special skills'}
+                      {watchedRole === 'talent' && watchedTalentType === 'musician' && 'Add your musical instruments, genres, and performance experience'}
+                      {watchedRole === 'talent' && watchedTalentType === 'voice_artist' && 'Add your vocal range, experience, and voice skills'}
+                      {watchedRole === 'talent' && watchedTalentType === 'model' && 'Add your physical attributes, modeling experience, and special skills'}
+                      {watchedRole === 'talent' && !watchedTalentType && 'Add your professional skills and experience'}
                       {!watchedRole && 'Tell us about your professional background'}
-                    </p>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {renderRoleSpecificQuestions()}
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Step 5: Talent-Specific Details */}
-              {currentStep === 5 && watchedRole === "talent" && (
-                <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
-                  <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">
-                      {watchedTalentType === 'actor' && 'Acting Details'}
-                      {watchedTalentType === 'musician' && 'Music Details'}
-                      {watchedTalentType === 'voice_artist' && 'Voice Details'}
-                      {watchedTalentType === 'model' && 'Modeling Details'}
-                      {!watchedTalentType && 'Talent Details'}
-                    </CardTitle>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      {watchedTalentType === 'actor' && 'Add your acting experience, physical attributes, and special skills'}
-                      {watchedTalentType === 'musician' && 'Add your musical instruments, genres, and performance experience'}
-                      {watchedTalentType === 'voice_artist' && 'Add your vocal range, experience, and voice skills'}
-                      {watchedTalentType === 'model' && 'Add your physical attributes, modeling experience, and special skills'}
-                      {!watchedTalentType && 'Add your professional skills and experience'}
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-6">
