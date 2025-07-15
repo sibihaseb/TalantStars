@@ -362,20 +362,6 @@ export default function Onboarding() {
     }
   }, [user, setLocation]);
 
-  // Auto-populate role and skip role selection for authenticated users
-  useEffect(() => {
-    if (user?.role) {
-      form.setValue("role", user.role);
-      
-      // Set appropriate starting step based on user role
-      if (user.role === "talent") {
-        setCurrentStep(2); // Start at talent type selection
-      } else {
-        setCurrentStep(3); // Start at basic info for non-talent roles  
-      }
-    }
-  }, [user, form]);
-
   const form = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
     defaultValues: {
@@ -418,6 +404,20 @@ export default function Onboarding() {
       projectRate: "",
     },
   });
+
+  // Auto-populate role and skip role selection for authenticated users
+  useEffect(() => {
+    if (user?.role) {
+      form.setValue("role", user.role);
+      
+      // Set appropriate starting step based on user role
+      if (user.role === "talent") {
+        setCurrentStep(2); // Start at talent type selection
+      } else {
+        setCurrentStep(3); // Start at basic info for non-talent roles  
+      }
+    }
+  }, [user, form]);
 
   const createProfileMutation = useMutation({
     mutationFn: async (data: OnboardingFormData) => {
