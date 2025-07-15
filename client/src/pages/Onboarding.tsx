@@ -717,12 +717,27 @@ export default function Onboarding() {
       questionTypes.push('producer');
     }
 
+    console.log('Profile questions:', profileQuestions);
+    console.log('Question types to filter:', questionTypes);
+    console.log('Watched role:', watchedRole);
+    console.log('Watched talent type:', watchedTalentType);
+
     const relevantQuestions = profileQuestions
-      .filter(q => questionTypes.includes(q.talent_type) && q.active)
+      .filter(q => {
+        console.log('Checking question:', q.question, 'talent_type:', q.talent_type, 'active:', q.active);
+        return questionTypes.includes(q.talent_type) && q.active;
+      })
       .sort((a, b) => a.order - b.order);
 
+    console.log('Relevant questions found:', relevantQuestions.length);
+
     if (relevantQuestions.length === 0) {
-      return <div className="text-gray-500 text-center py-8">No questions available for this role.</div>;
+      return (
+        <div className="text-gray-500 text-center py-8">
+          <p>No questions available for this role.</p>
+          <p className="text-sm mt-2">Looking for types: {questionTypes.join(', ')}</p>
+        </div>
+      );
     }
 
     return (
@@ -777,11 +792,19 @@ export default function Onboarding() {
           </Select>
         );
       
+      case 'checkbox':
+        return renderMultiSelectField(
+          fieldName,
+          question.question,
+          (question.options || []).map((opt: string) => ({ value: opt, label: opt })),
+          `Select ${question.question.toLowerCase()}...`
+        );
+      
       case 'multiselect':
         return renderMultiSelectField(
           fieldName,
           question.question,
-          question.options || [],
+          (question.options || []).map((opt: string) => ({ value: opt, label: opt })),
           `Select ${question.question.toLowerCase()}...`
         );
       

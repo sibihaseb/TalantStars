@@ -1274,6 +1274,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User Representation routes
+  app.get('/api/user/representations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const representations = await storage.getUserRepresentations(userId);
+      res.json(representations);
+    } catch (error) {
+      console.error("Error fetching user representations:", error);
+      res.status(500).json({ message: "Failed to fetch user representations" });
+    }
+  });
+
+  app.post('/api/user/representations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const representationData = {
+        userId,
+        representationType: req.body.representationType,
+        name: req.body.name,
+        company: req.body.company,
+        email: req.body.email,
+        phone: req.body.phone,
+        website: req.body.website,
+        notes: req.body.notes,
+        isPrimary: req.body.isPrimary || false,
+      };
+      
+      const representation = await storage.createUserRepresentation(representationData);
+      res.json(representation);
+    } catch (error) {
+      console.error("Error creating user representation:", error);
+      res.status(500).json({ message: "Failed to create user representation" });
+    }
+  });
+
+  app.put('/api/user/representations/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const representationId = parseInt(req.params.id);
+      const representationData = req.body;
+      
+      const representation = await storage.updateUserRepresentation(representationId, representationData);
+      res.json(representation);
+    } catch (error) {
+      console.error("Error updating user representation:", error);
+      res.status(500).json({ message: "Failed to update user representation" });
+    }
+  });
+
+  app.delete('/api/user/representations/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const representationId = parseInt(req.params.id);
+      await storage.deleteUserRepresentation(representationId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting user representation:", error);
+      res.status(500).json({ message: "Failed to delete user representation" });
+    }
+  });
+
+  // Role-based pricing tier routes
+  app.get('/api/pricing-tiers', async (req, res) => {
+    try {
+      const role = req.query.role as string;
+      let tiers;
+      
+      if (role) {
+        tiers = await storage.getPricingTiersByRole(role);
+      } else {
+        tiers = await storage.getPricingTiers();
+      }
+      
+      res.json(tiers);
+    } catch (error) {
+      console.error("Error fetching pricing tiers:", error);
+      res.status(500).json({ message: "Failed to fetch pricing tiers" });
+    }
+  });
+
+  app.get('/api/pricing-tiers/:id', async (req, res) => {
+    try {
+      const tierId = parseInt(req.params.id);
+      const tier = await storage.getPricingTier(tierId);
+      
+      if (!tier) {
+        return res.status(404).json({ message: "Pricing tier not found" });
+      }
+      
+      res.json(tier);
+    } catch (error) {
+      console.error("Error fetching pricing tier:", error);
+      res.status(500).json({ message: "Failed to fetch pricing tier" });
+    }
+  });
+
   app.post('/api/admin/profile-questions', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Creating profile question:", req.body);

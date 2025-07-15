@@ -31,6 +31,7 @@ import {
   userFeatureAccess,
   userPrivacySettings,
   professionalConnections,
+  userRepresentation,
   type User,
   type UpsertUser,
   type UserProfile,
@@ -72,6 +73,8 @@ import {
   type InsertSkillEndorsement,
   type UserSubscription,
   type InsertUserSubscription,
+  type UserRepresentation,
+  type InsertUserRepresentation,
   type ChatRoom,
   type InsertChatRoom,
   type ChatMessage,
@@ -307,6 +310,18 @@ export interface IStorage {
   getSkillEndorsementsBySkill(userId: string, skill: string): Promise<SkillEndorsement[]>;
   deleteSkillEndorsement(id: number): Promise<void>;
   hasUserEndorsedSkill(endorserId: string, endorsedUserId: string, skill: string): Promise<boolean>;
+  
+  // User Representation operations
+  createUserRepresentation(representation: InsertUserRepresentation): Promise<UserRepresentation>;
+  getUserRepresentations(userId: string): Promise<UserRepresentation[]>;
+  getUserRepresentation(id: number): Promise<UserRepresentation | undefined>;
+  updateUserRepresentation(id: number, representation: Partial<InsertUserRepresentation>): Promise<UserRepresentation>;
+  deleteUserRepresentation(id: number): Promise<void>;
+  
+  // Pricing Tier operations
+  getPricingTiers(): Promise<PricingTier[]>;
+  getPricingTiersByRole(role: string): Promise<PricingTier[]>;
+  getPricingTier(id: number): Promise<PricingTier | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1568,6 +1583,57 @@ export class DatabaseStorage implements IStorage {
     // For now, return empty array since job history isn't in our schema
     // In a real implementation, we'd query the job history table
     return [];
+  }
+
+  // User Representation operations
+  async createUserRepresentation(representation: InsertUserRepresentation): Promise<UserRepresentation> {
+    const [result] = await db.insert(userRepresentation)
+      .values(representation)
+      .returning();
+    return result;
+  }
+
+  async getUserRepresentations(userId: string): Promise<UserRepresentation[]> {
+    return await db.select().from(userRepresentation)
+      .where(eq(userRepresentation.userId, Number(userId)))
+      .orderBy(asc(userRepresentation.representationType));
+  }
+
+  async getUserRepresentation(id: number): Promise<UserRepresentation | undefined> {
+    const [result] = await db.select().from(userRepresentation)
+      .where(eq(userRepresentation.id, id));
+    return result;
+  }
+
+  async updateUserRepresentation(id: number, representation: Partial<InsertUserRepresentation>): Promise<UserRepresentation> {
+    const [result] = await db.update(userRepresentation)
+      .set({ ...representation, updatedAt: new Date() })
+      .where(eq(userRepresentation.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteUserRepresentation(id: number): Promise<void> {
+    await db.delete(userRepresentation).where(eq(userRepresentation.id, id));
+  }
+
+  // Pricing Tier operations
+  async getPricingTiers(): Promise<PricingTier[]> {
+    return await db.select().from(pricingTiers)
+      .where(eq(pricingTiers.active, true))
+      .orderBy(asc(pricingTiers.price));
+  }
+
+  async getPricingTiersByRole(role: string): Promise<PricingTier[]> {
+    return await db.select().from(pricingTiers)
+      .where(and(eq(pricingTiers.active, true), eq(pricingTiers.targetRole, role)))
+      .orderBy(asc(pricingTiers.price));
+  }
+
+  async getPricingTier(id: number): Promise<PricingTier | undefined> {
+    const [result] = await db.select().from(pricingTiers)
+      .where(eq(pricingTiers.id, id));
+    return result;
   }
 }
 

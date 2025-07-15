@@ -469,6 +469,26 @@ export const verificationDocuments = pgTable("verification_documents", {
   reviewedBy: integer("reviewed_by"),
 });
 
+// User representation (managers, agents, etc.)
+export const representationTypeEnum = pgEnum("representation_type", [
+  "manager", "agent", "publicist", "attorney", "brand_manager", "booking_agent", "assistant"
+]);
+
+export const userRepresentation = pgTable("user_representation", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  representationType: representationTypeEnum("representation_type").notNull(),
+  name: varchar("name").notNull(),
+  company: varchar("company"),
+  email: varchar("email"),
+  phone: varchar("phone"),
+  website: varchar("website"),
+  notes: text("notes"),
+  isPrimary: boolean("is_primary").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Post likes
 export const postLikes = pgTable("post_likes", {
   id: serial("id").primaryKey(),
@@ -903,6 +923,29 @@ export const userSubscriptionsRelations = relations(userSubscriptions, ({ one })
     references: [pricingTiers.id],
   }),
 }));
+
+export const userRepresentationRelations = relations(userRepresentation, ({ one }) => ({
+  user: one(users, {
+    fields: [userRepresentation.userId],
+    references: [users.id],
+  }),
+}));
+
+// Schema types
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
+export type UserProfile = typeof userProfiles.$inferSelect;
+export type InsertUserProfile = typeof userProfiles.$inferInsert;
+export type UserRepresentation = typeof userRepresentation.$inferSelect;
+export type InsertUserRepresentation = typeof userRepresentation.$inferInsert;
+export type PricingTier = typeof pricingTiers.$inferSelect;
+export type InsertPricingTier = typeof pricingTiers.$inferInsert;
+export type ProfileQuestion = typeof profileQuestions.$inferSelect;
+export type InsertProfileQuestion = typeof profileQuestions.$inferInsert;
+
+// Zod schemas for validation
+export const insertUserSchema = createInsertSchema(users);
+export const insertUserRepresentationSchema = createInsertSchema(userRepresentation);
 
 export const chatRoomsRelations = relations(chatRooms, ({ one, many }) => ({
   creator: one(users, {
