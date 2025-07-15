@@ -86,6 +86,9 @@ export default function TalentDashboard() {
   const calculateProfileProgress = () => {
     if (!profile) return [];
     
+    console.log('Profile data:', profile);
+    console.log('Job history:', jobHistory);
+    
     const progressItems = [
       {
         id: 'basic-info',
@@ -144,6 +147,9 @@ export default function TalentDashboard() {
         category: 'achievement' as const
       }
     ];
+
+    console.log('Progress items:', progressItems);
+    console.log('Incomplete items:', progressItems.filter(item => !item.completed));
 
     return progressItems;
   };
