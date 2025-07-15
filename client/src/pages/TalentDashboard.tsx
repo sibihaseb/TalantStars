@@ -151,10 +151,12 @@ export default function TalentDashboard() {
   const profileProgress = calculateProfileProgress();
 
   const handleProgressItemClick = (item: any) => {
+    console.log('handleProgressItemClick called with:', item);
     // Navigate to appropriate section based on item
     switch (item.id) {
       case 'basic-info':
         if (!item.completed) {
+          console.log('Navigating to onboarding for basic-info');
           setLocation('/onboarding');
         } else {
           setActiveTab('overview');

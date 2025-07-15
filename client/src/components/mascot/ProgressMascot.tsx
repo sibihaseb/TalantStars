@@ -270,16 +270,21 @@ export function ProgressMascot({
                 variant="outline" 
                 className="w-full"
                 onClick={() => {
+                  console.log('Continue Building Profile clicked');
                   const nextIncomplete = items.find(item => !item.completed);
+                  console.log('Next incomplete item:', nextIncomplete);
                   if (nextIncomplete) {
                     if (onItemClick) {
+                      console.log('Calling onItemClick with:', nextIncomplete);
                       onItemClick(nextIncomplete);
                     } else {
                       // Fallback navigation using router
+                      console.log('Fallback navigation to /onboarding');
                       setLocation('/onboarding');
                     }
                   } else {
                     // No incomplete items, navigate to dashboard
+                    console.log('No incomplete items, navigating to dashboard');
                     setLocation('/dashboard');
                   }
                 }}
@@ -293,6 +298,7 @@ export function ProgressMascot({
               variant="ghost" 
               size="sm"
               onClick={() => {
+                console.log('Get Motivated clicked');
                 updateMascot({ 
                   emotion: 'motivated', 
                   message: "I believe in you! Let's make it happen!" 
