@@ -1487,6 +1487,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Job History routes
+  app.post('/api/job-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const jobHistoryData = {
+        ...req.body,
+        userId: req.user?.id,
+      };
+      
+      const jobHistory = await storage.createJobHistory(jobHistoryData);
+      res.json(jobHistory);
+    } catch (error) {
+      console.error('Create job history error:', error);
+      res.status(500).json({ error: 'Failed to create job history' });
+    }
+  });
+
+  app.get('/api/job-history/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const jobHistory = await storage.getJobHistory(userId);
+      res.json(jobHistory);
+    } catch (error) {
+      console.error('Get job history error:', error);
+      res.status(500).json({ error: 'Failed to get job history' });
+    }
+  });
+
   // Admin - Permissions Management
   app.get("/api/admin/permissions/roles", isAuthenticated, isAdmin, async (req: any, res) => {
     try {

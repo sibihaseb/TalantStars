@@ -204,15 +204,15 @@ export default function TalentDashboard() {
     }
   };
 
-  const handleAddJobHistory = () => {
-    if (jobHistoryForm.title && jobHistoryForm.company) {
-      createJobHistoryMutation.mutate(jobHistoryForm);
-    }
-  };
-
   const handleMediaUpload = () => {
     if (mediaFile) {
       uploadMediaMutation.mutate(mediaFile);
+    }
+  };
+
+  const handleCreateJobHistory = () => {
+    if (jobHistoryForm.title && jobHistoryForm.company && jobHistoryForm.role) {
+      createJobHistoryMutation.mutate(jobHistoryForm);
     }
   };
 

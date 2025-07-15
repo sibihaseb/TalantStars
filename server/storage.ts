@@ -1439,28 +1439,17 @@ export class DatabaseStorage implements IStorage {
     await db.delete(availabilityCalendar).where(eq(availabilityCalendar.id, id));
   }
 
-  // Calendar operations
-  async createAvailabilityCalendar(calendar: InsertAvailabilityCalendar): Promise<AvailabilityCalendar> {
-    const [result] = await db.insert(availabilityCalendar).values(calendar).returning();
-    return result;
+  // Job History operations
+  async createJobHistory(jobHistoryData: any): Promise<any> {
+    // For now, we'll just return the data as job history isn't in our schema
+    // In a real implementation, we'd add job history to the schema
+    return { id: Date.now(), ...jobHistoryData, createdAt: new Date() };
   }
 
-  async getAvailabilityCalendar(userId: string): Promise<AvailabilityCalendar[]> {
-    return await db.select().from(availabilityCalendar)
-      .where(eq(availabilityCalendar.userId, userId))
-      .orderBy(asc(availabilityCalendar.startDate));
-  }
-
-  async updateAvailabilityCalendar(id: number, calendar: Partial<InsertAvailabilityCalendar>): Promise<AvailabilityCalendar> {
-    const [result] = await db.update(availabilityCalendar)
-      .set({ ...calendar, updatedAt: new Date() })
-      .where(eq(availabilityCalendar.id, id))
-      .returning();
-    return result;
-  }
-
-  async deleteAvailabilityCalendar(id: number): Promise<void> {
-    await db.delete(availabilityCalendar).where(eq(availabilityCalendar.id, id));
+  async getJobHistory(userId: string): Promise<any[]> {
+    // For now, return empty array since job history isn't in our schema
+    // In a real implementation, we'd query the job history table
+    return [];
   }
 }
 
