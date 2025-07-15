@@ -1,294 +1,356 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { useState, useRef, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { Upload, Crop, Save, X, Camera, ImageIcon } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { useLanguage } from "@/lib/i18n";
-import { User, Camera, Upload, X, Crop, Check } from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
 
 interface ProfileImageUploadProps {
-  currentImageUrl?: string;
-  userId: string;
-  onImageUpdate: (imageUrl: string) => void;
+  currentImage?: string;
+  onImageUpdate?: (url: string) => void;
   mandatory?: boolean;
 }
 
-const REQUIRED_ASPECT_RATIO = 1; // 1:1 square aspect ratio
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_FORMATS = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-
-export function ProfileImageUpload({ 
-  currentImageUrl, 
-  userId, 
-  onImageUpdate,
-  mandatory = false
+export default function ProfileImageUpload({ 
+  currentImage, 
+  onImageUpdate, 
+  mandatory = false 
 }: ProfileImageUploadProps) {
-  const { t } = useLanguage();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [cropping, setCropping] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [cropData, setCropData] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  const cropperRef = useRef<HTMLDivElement>(null);
+  
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
+  // Upload mutation
   const uploadMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('type', 'profile');
-      formData.append('userId', userId);
-
-      const response = await apiRequest('POST', '/api/media/upload', formData, {
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setUploadProgress(percentCompleted);
+    mutationFn: async (formData: FormData) => {
+      const response = await apiRequest('POST', '/api/user/profile-image', formData, {
+        headers: {
+          // Don't set Content-Type for FormData - browser will set it with boundary
         }
       });
       return response.json();
     },
     onSuccess: (data) => {
-      onImageUpdate(data.url);
-      queryClient.invalidateQueries({ queryKey: ['/api/user/profile'] });
-      toast({
-        title: t('profileImageUpdated'),
-        description: mandatory ? "Your profile image has been set!" : "Profile image updated successfully",
-      });
+      setShowCropper(false);
       setSelectedFile(null);
-      setPreview(null);
-      setUploadProgress(0);
-    },
-    onError: (error) => {
+      setPreviewUrl(null);
+      setCropData(null);
+      
+      if (onImageUpdate) {
+        onImageUpdate(data.profileImageUrl);
+      }
+      
+      // Invalidate queries to refresh user data
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user/profile'] });
+      
       toast({
-        title: t('uploadError'),
-        description: error.message,
+        title: "Success",
+        description: "Profile image updated successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload profile image",
         variant: "destructive",
       });
-      setUploadProgress(0);
-    },
+    }
   });
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
+  const handleFileSelect = useCallback((file: File) => {
+    if (!file.type.startsWith('image/')) {
       toast({
-        title: t('fileTooLarge'),
-        description: "File size must be less than 5MB",
+        title: "Invalid File",
+        description: "Please select an image file",
         variant: "destructive",
       });
       return;
     }
 
-    // Validate file type
-    if (!ACCEPTED_FORMATS.includes(file.type)) {
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
       toast({
-        title: t('invalidFileType'),
-        description: "Please upload a JPG, PNG, or WebP image",
+        title: "File Too Large",
+        description: "Please select an image smaller than 10MB",
         variant: "destructive",
       });
       return;
     }
 
     setSelectedFile(file);
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    setShowCropper(true);
+  }, [toast]);
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
     
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreview(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-  }, [toast, t]);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png'],
-      'image/webp': ['.webp']
-    },
-    maxFiles: 1,
-    disabled: uploadMutation.isPending
-  });
-
-  const cropImage = useCallback(() => {
-    if (!imageRef.current || !canvasRef.current) return;
+  const handleCrop = useCallback(() => {
+    if (!selectedFile || !cropData || !canvasRef.current || !imageRef.current) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    const image = imageRef.current;
-    
+    const img = imageRef.current;
+
     if (!ctx) return;
 
-    // Calculate crop dimensions for 1:1 aspect ratio
-    const minDimension = Math.min(image.naturalWidth, image.naturalHeight);
-    const cropX = (image.naturalWidth - minDimension) / 2;
-    const cropY = (image.naturalHeight - minDimension) / 2;
-    
-    // Set canvas dimensions
-    canvas.width = 400; // Standard profile image size
-    canvas.height = 400;
-    
-    // Draw cropped image
+    // Set canvas size to 16:9 aspect ratio (e.g., 1920x1080)
+    const outputWidth = 1920;
+    const outputHeight = 1080;
+    canvas.width = outputWidth;
+    canvas.height = outputHeight;
+
+    // Calculate scale factors
+    const scaleX = img.naturalWidth / img.width;
+    const scaleY = img.naturalHeight / img.height;
+
+    // Draw the cropped image
     ctx.drawImage(
-      image,
-      cropX, cropY, minDimension, minDimension,
-      0, 0, 400, 400
+      img,
+      cropData.x * scaleX,
+      cropData.y * scaleY,
+      cropData.width * scaleX,
+      cropData.height * scaleY,
+      0,
+      0,
+      outputWidth,
+      outputHeight
     );
-    
-    // Convert to blob
+
+    // Convert canvas to blob
     canvas.toBlob((blob) => {
       if (blob) {
-        const croppedFile = new File([blob], selectedFile?.name || 'profile.jpg', {
-          type: 'image/jpeg',
-          lastModified: Date.now()
-        });
-        uploadMutation.mutate(croppedFile);
+        const formData = new FormData();
+        formData.append('profileImage', blob, 'profile-image.jpg');
+        uploadMutation.mutate(formData);
       }
     }, 'image/jpeg', 0.9);
-  }, [selectedFile, uploadMutation]);
+  }, [selectedFile, cropData, uploadMutation]);
 
-  const handleCancel = () => {
-    setSelectedFile(null);
-    setPreview(null);
-    setCropping(false);
-    setUploadProgress(0);
+  const handleImageLoad = () => {
+    if (imageRef.current) {
+      const img = imageRef.current;
+      const rect = img.getBoundingClientRect();
+      
+      // Calculate 16:9 crop area centered on the image
+      const aspectRatio = 16 / 9;
+      let cropWidth = rect.width;
+      let cropHeight = rect.width / aspectRatio;
+      
+      if (cropHeight > rect.height) {
+        cropHeight = rect.height;
+        cropWidth = rect.height * aspectRatio;
+      }
+      
+      const x = (rect.width - cropWidth) / 2;
+      const y = (rect.height - cropHeight) / 2;
+      
+      setCropData({
+        x,
+        y,
+        width: cropWidth,
+        height: cropHeight
+      });
+    }
   };
 
-  const hasValidImage = currentImageUrl && !currentImageUrl.includes('placeholder');
+  const cancelCrop = () => {
+    setShowCropper(false);
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    setCropData(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   return (
-    <Card className={`w-full max-w-md mx-auto ${mandatory && !hasValidImage ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''}`}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Camera className="h-5 w-5" />
-          {t('profileImage')}
-          {mandatory && <Badge variant="destructive" className="text-xs">Required</Badge>}
-        </CardTitle>
-        {mandatory && !hasValidImage && (
-          <p className="text-sm text-red-600 dark:text-red-400">
-            A 1:1 profile image is required to complete your profile
-          </p>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Current Image Display */}
-        <div className="flex justify-center">
-          <div className="relative">
-            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
-              {currentImageUrl ? (
-                <img 
-                  src={currentImageUrl} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = '/api/placeholder/128/128';
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <User className="h-12 w-12 text-gray-400" />
-                </div>
-              )}
-            </div>
-            {hasValidImage && (
-              <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-1">
-                <Check className="h-4 w-4" />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Upload Interface */}
-        {!preview && (
-          <div
-            {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-              isDragActive 
-                ? 'border-primary bg-primary/5' 
-                : 'border-gray-300 hover:border-primary'
-            } ${uploadMutation.isPending ? 'opacity-50 pointer-events-none' : ''}`}
-          >
-            <input {...getInputProps()} />
-            <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Camera className="h-5 w-5" />
+            Profile Image {mandatory && <span className="text-red-500">*</span>}
+          </CardTitle>
+          {mandatory && (
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {isDragActive ? 'Drop the image here' : 'Drag & drop an image or click to select'}
+              A profile image is required. Images will be automatically cropped to 16:9 aspect ratio.
             </p>
-            <p className="text-xs text-gray-500 mt-1">
-              JPG, PNG, or WebP • Max 5MB • Will be cropped to 1:1 square
-            </p>
-          </div>
-        )}
-
-        {/* Preview and Crop */}
-        {preview && (
-          <div className="space-y-4">
-            <div className="relative">
-              <img 
-                ref={imageRef}
-                src={preview} 
-                alt="Preview" 
-                className="w-full max-h-64 object-contain rounded-lg"
-                onLoad={() => setCropping(true)}
+          )}
+        </CardHeader>
+        <CardContent>
+          {/* Current Image Display */}
+          {currentImage && !showCropper && (
+            <div className="mb-4">
+              <img
+                src={currentImage}
+                alt="Current profile"
+                className="w-full max-w-md h-auto rounded-lg shadow-md"
+                style={{ aspectRatio: '16/9', objectFit: 'cover' }}
               />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-32 h-32 border-2 border-white shadow-lg rounded-full pointer-events-none">
-                  <div className="w-full h-full border-2 border-primary rounded-full"></div>
+            </div>
+          )}
+
+          {/* File Upload Area */}
+          {!showCropper && (
+            <div
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                isDragging
+                  ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                  : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <div className="space-y-4">
+                <div className="mx-auto w-16 h-16 text-gray-400">
+                  <ImageIcon className="w-full h-full" />
+                </div>
+                <div>
+                  <p className="text-lg font-medium text-gray-900 dark:text-white">
+                    Drop your image here, or browse
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Supports JPG, PNG, GIF up to 10MB
+                  </p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
+                    Images will be automatically cropped to 16:9 aspect ratio
+                  </p>
+                </div>
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Choose Image
+                </Button>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
+            </div>
+          )}
+
+          {/* Crop Interface */}
+          {showCropper && previewUrl && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  Crop your image to 16:9 ratio
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Drag the crop area to adjust the selection
+                </p>
+              </div>
+              
+              <div className="relative max-w-2xl mx-auto">
+                <div
+                  ref={cropperRef}
+                  className="relative inline-block"
+                  style={{ maxWidth: '100%' }}
+                >
+                  <img
+                    ref={imageRef}
+                    src={previewUrl}
+                    alt="Preview"
+                    className="max-w-full h-auto"
+                    onLoad={handleImageLoad}
+                  />
+                  
+                  {/* Crop Overlay */}
+                  {cropData && (
+                    <div
+                      className="absolute border-2 border-blue-500 bg-blue-500/20"
+                      style={{
+                        left: cropData.x,
+                        top: cropData.y,
+                        width: cropData.width,
+                        height: cropData.height,
+                        cursor: 'move'
+                      }}
+                    >
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Crop className="h-8 w-8 text-blue-600" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-            
-            <div className="flex gap-2 justify-center">
-              <Button
-                onClick={cropImage}
-                disabled={uploadMutation.isPending}
-                className="flex items-center gap-2"
-              >
-                <Crop className="h-4 w-4" />
-                {uploadMutation.isPending ? 'Uploading...' : 'Crop & Upload'}
-              </Button>
-              <Button
-                onClick={handleCancel}
-                variant="outline"
-                disabled={uploadMutation.isPending}
-              >
-                <X className="h-4 w-4" />
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
 
-        {/* Upload Progress */}
-        {uploadMutation.isPending && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Uploading...</span>
-              <span>{uploadProgress}%</span>
+              <div className="flex justify-center gap-4">
+                <Button
+                  onClick={handleCrop}
+                  disabled={uploadMutation.isPending}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {uploadMutation.isPending ? 'Saving...' : 'Save & Crop'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={cancelCrop}
+                  disabled={uploadMutation.isPending}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+              </div>
             </div>
-            <Progress value={uploadProgress} className="w-full" />
-          </div>
-        )}
+          )}
+        </CardContent>
+      </Card>
 
-        {/* Hidden canvas for cropping */}
-        <canvas ref={canvasRef} style={{ display: 'none' }} />
-
-        {/* Requirements */}
-        <div className="text-xs text-gray-500 space-y-1">
-          <p>• Image will be automatically cropped to 1:1 square format</p>
-          <p>• Recommended minimum size: 400x400 pixels</p>
-          <p>• Supported formats: JPG, PNG, WebP</p>
-        </div>
-      </CardContent>
-    </Card>
+      {/* Hidden canvas for cropping */}
+      <canvas
+        ref={canvasRef}
+        style={{ display: 'none' }}
+      />
+    </div>
   );
 }

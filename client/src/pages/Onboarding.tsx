@@ -65,6 +65,7 @@ import {
   Zap as ZapIcon
 } from "lucide-react";
 import { EmotionalProgress } from "@/components/ui/emotional-progress";
+import ProfileImageUpload from "@/components/ProfileImageUpload";
 
 const onboardingSchema = insertUserProfileSchema.extend({
   // Required fields with enhanced validation
@@ -116,9 +117,10 @@ const requiredFieldsByStep = {
   1: ['role'], // Role selection
   2: ['talentType'], // Talent Type (for talent role)
   3: ['displayName', 'bio', 'location'], // Basic Info
-  4: [], // Experience & Skills (optional)
-  5: [], // Media & Portfolio (optional)
-  6: [], // Preferences & Availability (optional)
+  4: ['profileImageUrl'], // Profile Image (mandatory)
+  5: [], // Experience & Skills (optional)
+  6: [], // Media & Portfolio (optional)
+  7: [], // Preferences & Availability (optional)
 };
 
 // Helper function to check if field is required
@@ -338,7 +340,7 @@ export default function Onboarding() {
   const [isStepChanging, setIsStepChanging] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
-  const totalSteps = 6;
+  const totalSteps = 7;
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -705,9 +707,9 @@ export default function Onboarding() {
     const isAuthenticated = !!user?.role;
     // For authenticated users, we skip role selection step
     if (isAuthenticated) {
-      return watchedRole === "talent" ? 6 : 4;
+      return watchedRole === "talent" ? 7 : 5; // Added 1 for profile image step
     } else {
-      return watchedRole === "talent" ? 7 : 5; // Add 1 for role selection
+      return watchedRole === "talent" ? 8 : 6; // Add 1 for role selection + 1 for profile image
     }
   };
 
@@ -1384,8 +1386,47 @@ export default function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 3: Role-Specific Details */}
-              {currentStep === 3 && watchedRole !== "talent" && (
+              {/* Step 4: Profile Image Upload (mandatory for all roles) */}
+              {currentStep === 4 && (
+                <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-2xl">
+                      <RequiredFieldLabel required={true}>
+                        Profile Image
+                      </RequiredFieldLabel>
+                    </CardTitle>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Upload a professional profile photo. This is required for all users.
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="max-w-md mx-auto">
+                      <ProfileImageUpload
+                        currentImage={form.watch("profileImageUrl")}
+                        onImageUpdate={(url) => {
+                          form.setValue("profileImageUrl", url);
+                          form.trigger("profileImageUrl");
+                        }}
+                        mandatory={true}
+                      />
+                    </div>
+                    <div className="text-center text-sm text-gray-500">
+                      <p>
+                        <strong>Image Guidelines:</strong>
+                      </p>
+                      <ul className="mt-2 space-y-1">
+                        <li>• Professional headshot or portrait recommended</li>
+                        <li>• Clear, well-lit photo showing your face</li>
+                        <li>• Image will be cropped to 16:9 aspect ratio</li>
+                        <li>• Supported formats: JPG, PNG, WebP</li>
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Step 5: Role-Specific Details */}
+              {currentStep === 5 && watchedRole !== "talent" && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">
@@ -1407,8 +1448,8 @@ export default function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 4: Talent-Specific Details */}
-              {currentStep === 4 && watchedRole === "talent" && (
+              {/* Step 5: Talent-Specific Details */}
+              {currentStep === 5 && watchedRole === "talent" && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">
@@ -1432,8 +1473,8 @@ export default function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 5: Additional Information */}
-              {currentStep === 5 && watchedRole === "talent" && (
+              {/* Step 6: Additional Information */}
+              {currentStep === 6 && watchedRole === "talent" && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">Additional Information</CardTitle>
@@ -1464,8 +1505,8 @@ export default function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 6 (or 4 for non-talent): Rates and Availability */}
-              {((currentStep === 6 && watchedRole === "talent") || (currentStep === 4 && watchedRole !== "talent")) && (
+              {/* Step 7 (or 6 for non-talent): Rates and Availability */}
+              {((currentStep === 7 && watchedRole === "talent") || (currentStep === 6 && watchedRole !== "talent")) && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">Rates & Availability</CardTitle>

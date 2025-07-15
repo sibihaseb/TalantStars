@@ -20,6 +20,7 @@ import Admin from "@/pages/Admin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import PermissionsPage from "@/pages/admin/permissions-page";
 import PricingTiersPage from "@/pages/admin/pricing-tiers";
+import QuestionsManagement from "@/pages/admin/questions-management";
 import Auth from "@/pages/Auth";
 import MeetingManagement from "@/pages/MeetingManagement";
 import TalentProfile from "@/pages/TalentProfile";
@@ -66,6 +67,9 @@ function Router() {
       </Route>
       <Route path="/admin/pricing-tiers">
         {isAuthenticated && user?.role === 'admin' ? <PricingTiersPage /> : <Auth />}
+      </Route>
+      <Route path="/admin/questions">
+        {isAuthenticated && user?.role === 'admin' ? <QuestionsManagement /> : <Auth />}
       </Route>
       
       {/* Role-based dashboard routes */}

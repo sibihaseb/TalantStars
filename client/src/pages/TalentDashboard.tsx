@@ -70,6 +70,16 @@ export default function TalentDashboard() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  // Fetch user profile and stats
+  const { data: profile } = useQuery({
+    queryKey: ['/api/user/profile'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/user/profile');
+      return response.json();
+    },
+    enabled: !!user,
+  });
+
   // Calculate dynamic progress based on user profile
   const calculateProfileProgress = () => {
     if (!profile) return [];
@@ -167,16 +177,6 @@ export default function TalentDashboard() {
         break;
     }
   };
-
-  // Fetch user profile and stats
-  const { data: profile } = useQuery({
-    queryKey: ['/api/user/profile'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/user/profile');
-      return response.json();
-    },
-    enabled: !!user,
-  });
 
   const { data: applications } = useQuery({
     queryKey: ['/api/applications'],

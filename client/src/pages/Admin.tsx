@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
-import { Users, Settings, DollarSign, FileText, Shield, ArrowRight, BarChart3, Activity, Archive, Briefcase } from "lucide-react";
+import { Users, Settings, DollarSign, FileText, Shield, ArrowRight, BarChart3, Activity, Archive, Briefcase, FileQuestion } from "lucide-react";
 import { Link } from "wouter";
 
 interface User {
@@ -188,7 +188,7 @@ export default function Admin() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5" />
+                <FileQuestion className="w-5 h-5" />
                 Profile Questions
               </CardTitle>
             </CardHeader>
@@ -196,7 +196,7 @@ export default function Admin() {
               <p className="text-sm text-gray-600 mb-4">
                 Manage dynamic profile questions for different talent types
               </p>
-              <Link href="/admin/dashboard">
+              <Link href="/admin/questions">
                 <Button variant="outline" className="w-full">
                   Manage Questions
                 </Button>

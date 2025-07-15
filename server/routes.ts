@@ -1158,6 +1158,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Profile questions management
+  app.get('/api/admin/questions', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const talentType = req.query.talent_type as string;
+      let query = db.select().from(profileQuestions);
+      
+      if (talentType) {
+        query = query.where(eq(profileQuestions.talentType, talentType));
+      }
+      
+      const questions = await query.orderBy(asc(profileQuestions.order));
+      res.json(questions);
+    } catch (error) {
+      console.error("Error fetching admin questions:", error);
+      res.status(500).json({ error: "Failed to fetch questions" });
+    }
+  });
+
+  app.post('/api/admin/questions', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      console.log("Creating profile question:", req.body);
+      const questionData = req.body;
+      const [question] = await db.insert(profileQuestions).values(questionData).returning();
+      res.json(question);
+    } catch (error) {
+      console.error("Error creating question:", error);
+      res.status(500).json({ error: "Failed to create question" });
+    }
+  });
+
+  app.put('/api/admin/questions/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const questionId = parseInt(req.params.id);
+      const questionData = req.body;
+      
+      const [updatedQuestion] = await db
+        .update(profileQuestions)
+        .set(questionData)
+        .where(eq(profileQuestions.id, questionId))
+        .returning();
+      
+      res.json(updatedQuestion);
+    } catch (error) {
+      console.error("Error updating question:", error);
+      res.status(500).json({ error: "Failed to update question" });
+    }
+  });
+
+  app.delete('/api/admin/questions/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const questionId = parseInt(req.params.id);
+      
+      await db.delete(profileQuestions).where(eq(profileQuestions.id, questionId));
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting question:", error);
+      res.status(500).json({ error: "Failed to delete question" });
+    }
+  });
+
+  // Keep the old endpoints for backward compatibility
   app.get('/api/admin/profile-questions', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const questions = await storage.getProfileQuestions();
