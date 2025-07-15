@@ -1,529 +1,554 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { ThemeProvider } from "@/components/ui/theme-provider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { useQuery } from "@tanstack/react-query";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
 import { 
-  User, 
   Calendar, 
-  MessageCircle, 
   Briefcase, 
-  TrendingUp, 
+  Users, 
+  MessageSquare, 
+  Camera, 
   Star, 
-  DollarSign,
+  TrendingUp,
+  Bell,
+  Settings,
+  Plus,
+  Search,
+  Filter,
   Eye,
-  Users,
-  Award,
+  Heart,
+  Share2,
+  Edit3,
+  Upload,
   Clock,
   CheckCircle,
+  XCircle,
   AlertCircle,
-  Plus
-} from "lucide-react";
-import { EmotionalProgress } from "@/components/ui/emotional-progress";
+  Globe,
+  MapPin,
+  Mail,
+  Phone,
+  Award,
+  Target,
+  BarChart3,
+  PlayCircle
+} from 'lucide-react';
 
 export default function TalentDashboard() {
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const { toast } = useToast();
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("overview");
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to access your talent dashboard.",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 1000);
-    }
-  }, [isAuthenticated, isLoading, toast]);
-
-  // Fetch user profile and dashboard data
+  // Fetch user profile and stats
   const { data: profile } = useQuery({
-    queryKey: ['/api/auth/user'],
-    enabled: isAuthenticated,
+    queryKey: ['/api/user/profile'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/user/profile');
+      return response.json();
+    },
+    enabled: !!user,
   });
 
-  const { data: jobs = [] } = useQuery({
-    queryKey: ['/api/jobs'],
-    enabled: isAuthenticated,
+  const { data: applications } = useQuery({
+    queryKey: ['/api/applications'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/applications');
+      return response.json();
+    },
+    enabled: !!user,
   });
 
-  const { data: applications = [] } = useQuery({
-    queryKey: ['/api/job-applications'],
-    enabled: isAuthenticated,
+  const { data: opportunities } = useQuery({
+    queryKey: ['/api/opportunities'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/opportunities');
+      return response.json();
+    },
+    enabled: !!user,
   });
 
-  const { data: messages = [] } = useQuery({
-    queryKey: ['/api/messages'],
-    enabled: isAuthenticated,
+  const { data: socialStats } = useQuery({
+    queryKey: ['/api/social/stats'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/social/stats');
+      return response.json();
+    },
+    enabled: !!user,
   });
 
-  const { data: media = [] } = useQuery({
-    queryKey: ['/api/media'],
-    enabled: isAuthenticated,
-  });
-
-  if (isLoading) {
-    return (
-      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
-          <Header />
-          <main className="container mx-auto px-4 py-8">
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-            </div>
-          </main>
-          <Footer />
-        </div>
-      </ThemeProvider>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  // Calculate profile completion
-  const profileCompletion = profile?.profile ? Math.min(100, (
-    (profile.profile.displayName ? 10 : 0) +
-    (profile.profile.bio ? 15 : 0) +
-    (profile.profile.location ? 10 : 0) +
-    (profile.profile.skills?.length > 0 ? 20 : 0) +
-    (media.length > 0 ? 25 : 0) +
-    (profile.profile.resume ? 20 : 0)
-  )) : 0;
-
-  const unreadMessages = messages.filter((msg: any) => !msg.read).length;
-  const activeApplications = applications.filter((app: any) => app.status === 'pending').length;
-  const availableJobs = jobs.filter((job: any) => job.status === 'open').length;
+  const profileCompletion = 75; // Calculate based on profile data
+  const recentApplications = applications?.slice(0, 3) || [];
+  const recentOpportunities = opportunities?.slice(0, 4) || [];
 
   return (
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
-        <Header />
-        
-        <main className="container mx-auto px-4 py-8">
-          <div className="max-w-7xl mx-auto">
-            {/* Welcome Section */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Welcome back, {profile?.profile?.displayName || profile?.displayName || "Talent"}! 
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300">
-                Manage your talent profile, applications, and opportunities
-              </p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Avatar className="h-16 w-16 border-4 border-white shadow-lg">
+                <AvatarImage src={profile?.profileImageUrl} />
+                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xl font-bold">
+                  {user?.firstName?.[0]}{user?.lastName?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  Welcome back, {user?.firstName}!
+                </h1>
+                <p className="text-gray-600 dark:text-gray-300 flex items-center space-x-2">
+                  <span className="capitalize">{user?.role}</span>
+                  <span>•</span>
+                  <span className="capitalize">{profile?.talentType}</span>
+                  <span>•</span>
+                  <MapPin className="w-4 h-4" />
+                  <span>{profile?.location}</span>
+                </p>
+              </div>
             </div>
+            <div className="flex items-center space-x-3">
+              <Button variant="outline" size="sm">
+                <Bell className="w-4 h-4 mr-2" />
+                Notifications
+              </Button>
+              <Button variant="outline" size="sm">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+              <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                <Edit3 className="w-4 h-4 mr-2" />
+                Edit Profile
+              </Button>
+            </div>
+          </div>
+        </div>
 
-            {/* Profile Completion Alert */}
-            {profileCompletion < 100 && (
-              <Card className="mb-6 border-2 border-gradient-to-r from-blue-200 to-purple-200 bg-gradient-to-br from-white to-blue-50/50 dark:from-gray-800 dark:to-blue-900/20">
-                <CardContent className="p-4">
-                  <EmotionalProgress
-                    currentStep={Math.floor(profileCompletion / 10)}
-                    totalSteps={10}
-                    stepTitle="Complete Your Profile"
-                    completedSteps={[
-                      ...(profile?.profile?.displayName ? ["Display Name"] : []),
-                      ...(profile?.profile?.bio ? ["Bio"] : []),
-                      ...(profile?.profile?.location ? ["Location"] : []),
-                      ...(profile?.profile?.skills?.length > 0 ? ["Skills"] : []),
-                      ...(media.length > 0 ? ["Media Portfolio"] : []),
-                      ...(profile?.profile?.resume ? ["Resume"] : [])
-                    ]}
-                    showRewards={true}
-                    onStepComplete={(step) => {
-                      console.log(`Profile step ${step} completed!`);
-                    }}
-                  />
-                  <div className="mt-4 flex justify-center">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => {
-                        // Check if user has a profile, if not go to onboarding
-                        if (!profile?.profile?.displayName) {
-                          window.location.href = "/onboarding";
-                        } else {
-                          window.location.href = "/profile";
-                        }
-                      }}
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0"
-                    >
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-sm font-medium">Profile Views</p>
+                  <p className="text-2xl font-bold">{socialStats?.profileViews || 0}</p>
+                </div>
+                <Eye className="w-8 h-8 text-blue-200" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100 text-sm font-medium">Active Applications</p>
+                  <p className="text-2xl font-bold">{applications?.length || 0}</p>
+                </div>
+                <Briefcase className="w-8 h-8 text-purple-200" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-100 text-sm font-medium">Network</p>
+                  <p className="text-2xl font-bold">{socialStats?.connections || 0}</p>
+                </div>
+                <Users className="w-8 h-8 text-green-200" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-orange-100 text-sm font-medium">Opportunities</p>
+                  <p className="text-2xl font-bold">{opportunities?.length || 0}</p>
+                </div>
+                <Target className="w-8 h-8 text-orange-200" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-6 mb-8">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="applications">Applications</TabsTrigger>
+            <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
+            <TabsTrigger value="social">Social</TabsTrigger>
+            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Profile Completion */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <TrendingUp className="w-5 h-5" />
+                    <span>Profile Completion</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Complete your profile to get better opportunities
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Progress</span>
+                      <span className="text-sm text-gray-600">{profileCompletion}%</span>
+                    </div>
+                    <Progress value={profileCompletion} className="h-2" />
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 text-sm">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span>Basic Information</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-sm">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span>Profile Photo</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-sm">
+                        <AlertCircle className="w-4 h-4 text-yellow-500" />
+                        <span>Portfolio Media</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-sm">
+                        <XCircle className="w-4 h-4 text-red-500" />
+                        <span>Demo Reel</span>
+                      </div>
+                    </div>
+                    <Button className="w-full" size="sm">
+                      <Plus className="w-4 h-4 mr-2" />
                       Complete Profile
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-            )}
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {/* Recent Applications */}
               <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Profile Views</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {profile?.profile?.profileViews || 0}
-                      </p>
-                    </div>
-                    <Eye className="h-8 w-8 text-blue-600" />
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Briefcase className="w-5 h-5" />
+                    <span>Recent Applications</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Track your latest job applications
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {recentApplications.map((app: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{app.title}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{app.company}</p>
+                        </div>
+                        <Badge variant={app.status === 'pending' ? 'secondary' : app.status === 'approved' ? 'default' : 'destructive'}>
+                          {app.status}
+                        </Badge>
+                      </div>
+                    ))}
+                    <Button variant="outline" className="w-full" size="sm">
+                      <Eye className="w-4 h-4 mr-2" />
+                      View All Applications
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Social Activity */}
               <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Applications</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {activeApplications}
-                      </p>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <MessageSquare className="w-5 h-5" />
+                    <span>Social Activity</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Your recent social engagement
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Heart className="w-4 h-4 text-red-500" />
+                        <span className="text-sm">Post Likes</span>
+                      </div>
+                      <span className="text-sm font-medium">{socialStats?.likes || 0}</span>
                     </div>
-                    <Briefcase className="h-8 w-8 text-green-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">New Messages</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {unreadMessages}
-                      </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <MessageSquare className="w-4 h-4 text-blue-500" />
+                        <span className="text-sm">Comments</span>
+                      </div>
+                      <span className="text-sm font-medium">{socialStats?.comments || 0}</span>
                     </div>
-                    <MessageCircle className="h-8 w-8 text-purple-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Available Jobs</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {availableJobs}
-                      </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Share2 className="w-4 h-4 text-green-500" />
+                        <span className="text-sm">Shares</span>
+                      </div>
+                      <span className="text-sm font-medium">{socialStats?.shares || 0}</span>
                     </div>
-                    <Star className="h-8 w-8 text-yellow-600" />
+                    <Button variant="outline" className="w-full" size="sm">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Post
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
 
-            {/* Dashboard Content */}
-            <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="applications">Applications</TabsTrigger>
-                <TabsTrigger value="jobs">Find Jobs</TabsTrigger>
-                <TabsTrigger value="profile">Profile</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="overview">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Recent Activity */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2">
-                        <TrendingUp className="h-5 w-5" />
-                        <span>Recent Activity</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="flex items-center space-x-3">
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                          <div>
-                            <p className="font-medium">Profile updated</p>
-                            <p className="text-sm text-gray-500">2 hours ago</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <Briefcase className="h-5 w-5 text-blue-500" />
-                          <div>
-                            <p className="font-medium">Applied to new casting</p>
-                            <p className="text-sm text-gray-500">1 day ago</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <Star className="h-5 w-5 text-yellow-500" />
-                          <div>
-                            <p className="font-medium">Received skill endorsement</p>
-                            <p className="text-sm text-gray-500">2 days ago</p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Quick Actions */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2">
-                        <Plus className="h-5 w-5" />
-                        <span>Quick Actions</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <Button 
-                          className="w-full justify-start" 
-                          variant="outline"
-                          onClick={() => {
-                            // Check if user has a profile, if not go to onboarding
-                            if (!profile?.profile?.displayName) {
-                              window.location.href = "/onboarding";
-                            } else {
-                              window.location.href = "/profile";
-                            }
-                          }}
-                        >
-                          <User className="h-4 w-4 mr-2" />
-                          {!profile?.profile?.displayName ? "Complete Profile" : "Edit Profile"}
-                        </Button>
-                        <Button 
-                          className="w-full justify-start" 
-                          variant="outline"
-                          onClick={() => window.location.href = "/jobs"}
-                        >
-                          <Briefcase className="h-4 w-4 mr-2" />
-                          Browse Jobs
-                        </Button>
-                        <Button 
-                          className="w-full justify-start" 
-                          variant="outline"
-                          onClick={() => window.location.href = "/messages"}
-                        >
-                          <MessageCircle className="h-4 w-4 mr-2" />
-                          Messages
-                        </Button>
-                        <Button 
-                          className="w-full justify-start" 
-                          variant="outline"
-                          onClick={() => window.location.href = "/availability"}
-                        >
-                          <Calendar className="h-4 w-4 mr-2" />
-                          Manage Availability
-                        </Button>
-                        <Button 
-                          className="w-full justify-start" 
-                          variant="outline"
-                          onClick={() => window.location.href = "/media"}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Upload Media
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+          <TabsContent value="applications">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Job Applications</CardTitle>
+                    <CardDescription>Track and manage your job applications</CardDescription>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm">
+                      <Filter className="w-4 h-4 mr-2" />
+                      Filter
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Search className="w-4 h-4 mr-2" />
+                      Search
+                    </Button>
+                  </div>
                 </div>
-                
-                {/* Recent Opportunities */}
-                <div className="mt-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2">
-                        <Star className="h-5 w-5" />
-                        <span>Recent Opportunities</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {jobs.length === 0 ? (
-                        <div className="text-center py-8">
-                          <Star className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                          <p className="text-gray-500">No opportunities available at the moment</p>
-                          <p className="text-sm text-gray-400 mt-2">Check back later for new opportunities</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          {jobs.slice(0, 3).map((job: any) => (
-                            <div key={job.id} className="flex items-center justify-between p-4 border rounded-lg">
-                              <div className="flex-1">
-                                <h3 className="font-medium">{job.title}</h3>
-                                <p className="text-sm text-gray-500">{job.location}</p>
-                                <p className="text-sm text-gray-500">Budget: ${job.budget}</p>
-                              </div>
-                              <div className="flex space-x-2">
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => window.location.href = `/jobs/${job.id}`}
-                                >
-                                  View Details
-                                </Button>
-                                <Button 
-                                  size="sm"
-                                  onClick={() => window.location.href = `/jobs/${job.id}/apply`}
-                                >
-                                  Apply
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                          <Button 
-                            className="w-full mt-4" 
-                            variant="outline"
-                            onClick={() => window.location.href = "/jobs"}
-                          >
-                            View All Opportunities
-                          </Button>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="applications">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>My Applications</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {applications.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Briefcase className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                        <p className="text-gray-500">No applications yet</p>
-                        <Button className="mt-4" onClick={() => window.location.href = "/jobs"}>
-                          Browse Available Jobs
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {applications.map((app: any) => (
-                          <div key={app.id} className="flex items-center justify-between p-4 border rounded-lg">
-                            <div>
-                              <h3 className="font-medium">{app.jobTitle}</h3>
-                              <p className="text-sm text-gray-500">Applied {new Date(app.appliedAt).toLocaleDateString()}</p>
-                            </div>
-                            <Badge variant={app.status === 'pending' ? 'secondary' : 'default'}>
-                              {app.status}
-                            </Badge>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {applications?.map((app: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold">
+                            {app.company?.[0] || 'C'}
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="jobs">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Available Opportunities</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {jobs.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Star className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                        <p className="text-gray-500">No jobs available at the moment</p>
-                        <p className="text-sm text-gray-400 mt-2">Check back later for new opportunities</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {jobs.slice(0, 5).map((job: any) => (
-                          <div key={job.id} className="flex items-center justify-between p-4 border rounded-lg">
-                            <div className="flex-1">
-                              <h3 className="font-medium">{job.title}</h3>
-                              <p className="text-sm text-gray-500">{job.location}</p>
-                              <p className="text-sm text-gray-500">Budget: ${job.budget}</p>
-                            </div>
-                            <div className="flex space-x-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => window.location.href = `/jobs/${job.id}`}
-                              >
-                                View Details
-                              </Button>
-                              <Button 
-                                size="sm"
-                                onClick={() => window.location.href = `/jobs/${job.id}/apply`}
-                              >
-                                Apply
-                              </Button>
+                          <div>
+                            <h3 className="font-semibold">{app.title}</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{app.company}</p>
+                            <div className="flex items-center space-x-2 text-xs text-gray-500 mt-1">
+                              <Clock className="w-3 h-3" />
+                              <span>Applied {app.appliedDate}</span>
                             </div>
                           </div>
-                        ))}
-                        <Button 
-                          className="w-full mt-4" 
-                          variant="outline"
-                          onClick={() => window.location.href = "/jobs"}
-                        >
-                          View All Jobs
-                        </Button>
+                        </div>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="profile">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Profile Management</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span>Profile Completion</span>
-                        <span className="font-medium">{profileCompletion}%</span>
-                      </div>
-                      <Progress value={profileCompletion} />
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                        <Button 
-                          className="w-full" 
-                          onClick={() => {
-                            // Check if user has a profile, if not go to onboarding
-                            if (!profile?.profile?.displayName) {
-                              window.location.href = "/onboarding";
-                            } else {
-                              window.location.href = "/profile";
-                            }
-                          }}
-                        >
-                          {!profile?.profile?.displayName ? "Complete Profile" : "Edit Profile"}
-                        </Button>
-                        <Button 
-                          className="w-full" 
-                          variant="outline"
-                          onClick={() => {
-                            // Check if user has a profile, if not go to onboarding
-                            if (!profile?.profile?.displayName) {
-                              window.location.href = "/onboarding";
-                            } else {
-                              window.location.href = "/profile";
-                            }
-                          }}
-                        >
-                          {!profile?.profile?.displayName ? "Setup Profile" : "Upload Media"}
+                      <div className="flex items-center space-x-3">
+                        <Badge variant={app.status === 'pending' ? 'secondary' : app.status === 'approved' ? 'default' : 'destructive'}>
+                          {app.status}
+                        </Badge>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </main>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <Footer />
+          <TabsContent value="opportunities">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Recommended Opportunities</CardTitle>
+                    <CardDescription>Discover jobs that match your skills and interests</CardDescription>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm">
+                      <Filter className="w-4 h-4 mr-2" />
+                      Filter
+                    </Button>
+                    <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Browse More
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {recentOpportunities.map((opp: any, index: number) => (
+                    <Card key={index} className="hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+                              {opp.company?.[0] || 'C'}
+                            </div>
+                            <div>
+                              <CardTitle className="text-lg">{opp.title}</CardTitle>
+                              <CardDescription>{opp.company}</CardDescription>
+                            </div>
+                          </div>
+                          <Badge variant="outline">{opp.type}</Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-2 text-sm text-gray-600">
+                            <MapPin className="w-4 h-4" />
+                            <span>{opp.location}</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-sm text-gray-600">
+                            <Calendar className="w-4 h-4" />
+                            <span>{opp.deadline}</span>
+                          </div>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
+                            {opp.description}
+                          </p>
+                          <div className="flex items-center justify-between pt-2">
+                            <div className="flex items-center space-x-2">
+                              <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                              <span className="text-sm font-medium">{opp.match}% match</span>
+                            </div>
+                            <Button size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                              Apply Now
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="social">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Social Feed</CardTitle>
+                    <CardDescription>Connect with the entertainment community</CardDescription>
+                  </div>
+                  <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Post
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Access your social feed by visiting the Social page
+                  </p>
+                  <Button variant="outline" className="mt-4">
+                    <Globe className="w-4 h-4 mr-2" />
+                    Go to Social
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="portfolio">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Portfolio</CardTitle>
+                    <CardDescription>Showcase your work and talent</CardDescription>
+                  </div>
+                  <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Add Media
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card className="border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors">
+                    <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+                      <Camera className="w-12 h-12 text-gray-400 mb-4" />
+                      <p className="text-sm text-gray-600 mb-2">Add Photos</p>
+                      <Button variant="outline" size="sm">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Upload
+                      </Button>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors">
+                    <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+                      <PlayCircle className="w-12 h-12 text-gray-400 mb-4" />
+                      <p className="text-sm text-gray-600 mb-2">Add Videos</p>
+                      <Button variant="outline" size="sm">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Upload
+                      </Button>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors">
+                    <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+                      <Award className="w-12 h-12 text-gray-400 mb-4" />
+                      <p className="text-sm text-gray-600 mb-2">Add Achievements</p>
+                      <Button variant="outline" size="sm">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="calendar">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Availability Calendar</CardTitle>
+                    <CardDescription>Manage your schedule and availability</CardDescription>
+                  </div>
+                  <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Event
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Calendar functionality would be integrated here
+                  </p>
+                  <Button variant="outline" className="mt-4">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Open Calendar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
-    </ThemeProvider>
+    </div>
   );
 }

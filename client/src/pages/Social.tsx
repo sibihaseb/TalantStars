@@ -139,9 +139,51 @@ export default function Social() {
     enabled: !!user && searchQuery.length > 2,
   });
 
+  // Media upload handler
+  const handleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      setUploadProgress(10);
+      const response = await fetch('/api/social/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const uploadResult = await response.json();
+      setUploadProgress(100);
+      
+      setSelectedMedia(prev => [...prev, {
+        id: Date.now(),
+        url: uploadResult.url,
+        type: uploadResult.type,
+        originalName: uploadResult.originalName,
+        size: uploadResult.size,
+      }]);
+
+      setTimeout(() => setUploadProgress(0), 1000);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload media file",
+        variant: "destructive",
+      });
+      setUploadProgress(0);
+    }
+  };
+
   // Create post mutation
   const createPostMutation = useMutation({
-    mutationFn: async (postData: { content: string; mediaIds: number[]; privacy: string; taggedUsers: number[] }) => {
+    mutationFn: async (postData: { content: string; mediaUrls: string[]; privacy: string }) => {
       const response = await apiRequest('POST', '/api/social/posts', postData);
       return response.json();
     },
@@ -153,7 +195,7 @@ export default function Social() {
       setTaggedUsers([]);
       setPostPrivacy('public');
       toast({
-        title: "Post shared! 🎉",
+        title: "Post shared!",
         description: "Your update has been shared with your network.",
       });
     },
@@ -195,9 +237,8 @@ export default function Social() {
     
     createPostMutation.mutate({
       content: newPostContent,
-      mediaIds: selectedMedia.map(m => m.id),
+      mediaUrls: selectedMedia.map(m => m.url),
       privacy: postPrivacy,
-      taggedUsers: taggedUsers.map(u => u.id),
     });
   };
 
@@ -411,8 +452,40 @@ export default function Social() {
                           <DialogHeader>
                             <DialogTitle>Add Media</DialogTitle>
                           </DialogHeader>
-                          <div className="text-center py-8">
-                            <p className="text-gray-600">Media upload feature would be implemented here</p>
+                          <div className="space-y-4">
+                            <input
+                              type="file"
+                              accept="image/*,video/*,audio/*"
+                              onChange={handleMediaUpload}
+                              className="w-full"
+                            />
+                            {uploadProgress > 0 && (
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                  style={{ width: `${uploadProgress}%` }}
+                                />
+                              </div>
+                            )}
+                            {selectedMedia.length > 0 && (
+                              <div className="grid grid-cols-3 gap-2">
+                                {selectedMedia.map((media, index) => (
+                                  <div key={index} className="relative">
+                                    <img 
+                                      src={media.url} 
+                                      alt="Upload preview" 
+                                      className="w-full h-16 object-cover rounded"
+                                    />
+                                    <button
+                                      onClick={() => setSelectedMedia(prev => prev.filter((_, i) => i !== index))}
+                                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </DialogContent>
                       </Dialog>

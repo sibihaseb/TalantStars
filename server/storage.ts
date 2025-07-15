@@ -383,155 +383,139 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Social media operations
-  async createSocialPost(post: InsertSocialPost): Promise<SocialPost> {
-    const [newPost] = await db.insert(socialPosts).values(post).returning();
-    return newPost;
+  async createSocialPost(post: any): Promise<any> {
+    const [newPost] = await db.execute(
+      sql`INSERT INTO social_posts (user_id, content, privacy, media_urls) 
+          VALUES (${post.userId}, ${post.content}, ${post.privacy}, ${post.mediaUrls}) 
+          RETURNING *`
+    );
+    return newPost.rows[0];
   }
 
-  async getSocialPosts(userId: number, limit: number = 20, offset: number = 0): Promise<SocialPost[]> {
-    return await db
-      .select()
-      .from(socialPosts)
-      .where(eq(socialPosts.userId, userId))
-      .orderBy(desc(socialPosts.createdAt))
-      .limit(limit)
-      .offset(offset);
+  async getSocialPosts(userId: number, limit: number = 20, offset: number = 0): Promise<any[]> {
+    const result = await db.execute(
+      sql`SELECT * FROM social_posts 
+          WHERE user_id = ${userId} 
+          ORDER BY created_at DESC 
+          LIMIT ${limit} OFFSET ${offset}`
+    );
+    return result.rows;
   }
 
-  async getFeedPosts(userId: number, limit: number = 20, offset: number = 0): Promise<SocialPost[]> {
+  async getFeedPosts(userId: number, limit: number = 20, offset: number = 0): Promise<any[]> {
     // Get posts from friends and user's own posts
-    const friendIds = await db
-      .select({ id: users.id })
-      .from(friendships)
-      .innerJoin(users, or(
-        and(eq(friendships.requesterId, userId), eq(friendships.addresseeId, users.id)),
-        and(eq(friendships.addresseeId, userId), eq(friendships.requesterId, users.id))
-      ))
-      .where(eq(friendships.status, "accepted"));
-
-    const friendUserIds = friendIds.map(f => f.id);
-    friendUserIds.push(userId); // Include user's own posts
-
-    return await db
-      .select()
-      .from(socialPosts)
-      .where(or(
-        ...friendUserIds.map(id => eq(socialPosts.userId, id)),
-        eq(socialPosts.privacy, "public")
-      ))
-      .orderBy(desc(socialPosts.createdAt))
-      .limit(limit)
-      .offset(offset);
+    const result = await db.execute(
+      sql`SELECT sp.*, u.username, u.first_name, u.last_name 
+          FROM social_posts sp 
+          JOIN users u ON sp.user_id = u.id 
+          WHERE sp.user_id = ${userId} 
+             OR sp.privacy = 'public'
+             OR sp.user_id IN (
+               SELECT CASE 
+                 WHEN user_id = ${userId} THEN friend_id 
+                 ELSE user_id 
+               END 
+               FROM social_friendships 
+               WHERE (user_id = ${userId} OR friend_id = ${userId}) 
+                 AND status = 'accepted'
+             )
+          ORDER BY sp.created_at DESC 
+          LIMIT ${limit} OFFSET ${offset}`
+    );
+    return result.rows;
   }
 
-  async getUserSocialPosts(userId: number): Promise<SocialPost[]> {
-    return await db
-      .select()
-      .from(socialPosts)
-      .where(eq(socialPosts.userId, userId))
-      .orderBy(desc(socialPosts.createdAt));
+  async getUserSocialPosts(userId: number): Promise<any[]> {
+    const result = await db.execute(
+      sql`SELECT sp.*, u.username, u.first_name, u.last_name 
+          FROM social_posts sp 
+          JOIN users u ON sp.user_id = u.id 
+          WHERE sp.user_id = ${userId} 
+          ORDER BY sp.created_at DESC`
+    );
+    return result.rows;
   }
 
   async likeSocialPost(postId: number, userId: number): Promise<void> {
-    await db.insert(postLikes).values({ postId, userId });
-    await db
-      .update(socialPosts)
-      .set({ 
-        likes: sql`${socialPosts.likes} + 1`,
-        updatedAt: new Date()
-      })
-      .where(eq(socialPosts.id, postId));
+    await db.execute(
+      sql`INSERT INTO social_likes (post_id, user_id) VALUES (${postId}, ${userId})`
+    );
   }
 
   async unlikeSocialPost(postId: number, userId: number): Promise<void> {
-    await db.delete(postLikes).where(and(
-      eq(postLikes.postId, postId),
-      eq(postLikes.userId, userId)
-    ));
-    await db
-      .update(socialPosts)
-      .set({ 
-        likes: sql`${socialPosts.likes} - 1`,
-        updatedAt: new Date()
-      })
-      .where(eq(socialPosts.id, postId));
+    await db.execute(
+      sql`DELETE FROM social_likes WHERE post_id = ${postId} AND user_id = ${userId}`
+    );
   }
 
-  async commentOnPost(comment: InsertPostComment): Promise<PostComment> {
-    const [newComment] = await db.insert(postComments).values(comment).returning();
-    await db
-      .update(socialPosts)
-      .set({ 
-        comments: sql`${socialPosts.comments} + 1`,
-        updatedAt: new Date()
-      })
-      .where(eq(socialPosts.id, comment.postId));
-    return newComment;
+  async commentOnPost(comment: any): Promise<any> {
+    const result = await db.execute(
+      sql`INSERT INTO social_comments (post_id, user_id, content) 
+          VALUES (${comment.postId}, ${comment.userId}, ${comment.content}) 
+          RETURNING *`
+    );
+    return result.rows[0];
   }
 
-  async getPostComments(postId: number): Promise<PostComment[]> {
-    return await db
-      .select()
-      .from(postComments)
-      .where(eq(postComments.postId, postId))
-      .orderBy(asc(postComments.createdAt));
+  async getPostComments(postId: number): Promise<any[]> {
+    const result = await db.execute(
+      sql`SELECT sc.*, u.username, u.first_name, u.last_name 
+          FROM social_comments sc 
+          JOIN users u ON sc.user_id = u.id 
+          WHERE sc.post_id = ${postId} 
+          ORDER BY sc.created_at ASC`
+    );
+    return result.rows;
   }
 
   // Friend operations
-  async sendFriendRequest(requesterId: number, addresseeId: number): Promise<Friendship> {
-    const [friendship] = await db
-      .insert(friendships)
-      .values({ requesterId, addresseeId, status: "pending" })
-      .returning();
-    return friendship;
+  async sendFriendRequest(requesterId: number, addresseeId: number): Promise<any> {
+    const result = await db.execute(
+      sql`INSERT INTO social_friendships (user_id, friend_id, status) 
+          VALUES (${requesterId}, ${addresseeId}, 'pending') 
+          RETURNING *`
+    );
+    return result.rows[0];
   }
 
-  async acceptFriendRequest(friendshipId: number): Promise<Friendship> {
-    const [friendship] = await db
-      .update(friendships)
-      .set({ status: "accepted", updatedAt: new Date() })
-      .where(eq(friendships.id, friendshipId))
-      .returning();
-    return friendship;
+  async acceptFriendRequest(friendshipId: number): Promise<any> {
+    const result = await db.execute(
+      sql`UPDATE social_friendships 
+          SET status = 'accepted' 
+          WHERE id = ${friendshipId} 
+          RETURNING *`
+    );
+    return result.rows[0];
   }
 
   async rejectFriendRequest(friendshipId: number): Promise<void> {
-    await db.delete(friendships).where(eq(friendships.id, friendshipId));
-  }
-
-  async getFriendRequests(userId: number): Promise<Friendship[]> {
-    return await db
-      .select()
-      .from(friendships)
-      .where(and(
-        eq(friendships.addresseeId, userId),
-        eq(friendships.status, "pending")
-      ))
-      .orderBy(desc(friendships.createdAt));
-  }
-
-  async getFriends(userId: number): Promise<User[]> {
-    const friendships = await db
-      .select()
-      .from(friendships)
-      .where(and(
-        or(
-          eq(friendships.requesterId, userId),
-          eq(friendships.addresseeId, userId)
-        ),
-        eq(friendships.status, "accepted")
-      ));
-
-    const friendIds = friendships.map(f => 
-      f.requesterId === userId ? f.addresseeId : f.requesterId
+    await db.execute(
+      sql`DELETE FROM social_friendships WHERE id = ${friendshipId}`
     );
+  }
 
-    if (friendIds.length === 0) return [];
+  async getFriendRequests(userId: number): Promise<any[]> {
+    const result = await db.execute(
+      sql`SELECT sf.*, u.username, u.first_name, u.last_name 
+          FROM social_friendships sf 
+          JOIN users u ON sf.user_id = u.id 
+          WHERE sf.friend_id = ${userId} AND sf.status = 'pending' 
+          ORDER BY sf.created_at DESC`
+    );
+    return result.rows;
+  }
 
-    return await db
-      .select()
-      .from(users)
-      .where(or(...friendIds.map(id => eq(users.id, id))));
+  async getFriends(userId: number): Promise<any[]> {
+    const result = await db.execute(
+      sql`SELECT u.* 
+          FROM users u 
+          JOIN social_friendships sf ON (
+            (sf.user_id = ${userId} AND sf.friend_id = u.id) OR 
+            (sf.friend_id = ${userId} AND sf.user_id = u.id)
+          ) 
+          WHERE sf.status = 'accepted'`
+    );
+    return result.rows;
   }
 
   async searchUsers(query: string, currentUserId: number): Promise<User[]> {

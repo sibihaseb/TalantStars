@@ -405,15 +405,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Upload media for social posts
+  app.post("/api/social/upload", isAuthenticated, upload.single('file'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const uploadResult = await uploadFileToWasabi(req.file, "social");
+      
+      res.json({
+        url: uploadResult.url,
+        key: uploadResult.key,
+        type: getFileTypeFromMimeType(uploadResult.type),
+        originalName: uploadResult.originalName,
+        size: uploadResult.size
+      });
+    } catch (error: any) {
+      console.error("Error uploading social media file:", error);
+      res.status(500).json({ message: "Error uploading file: " + error.message });
+    }
+  });
+
   // Create post
   app.post("/api/social/posts", isAuthenticated, async (req: any, res) => {
     try {
       const postData = {
         userId: req.user.id,
         content: req.body.content,
-        mediaIds: req.body.mediaIds || [],
+        mediaUrls: req.body.mediaUrls || [],
         privacy: req.body.privacy || 'public',
-        taggedUsers: req.body.taggedUsers || [],
       };
       
       const post = await storage.createSocialPost(postData);
