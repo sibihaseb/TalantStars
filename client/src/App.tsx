@@ -37,6 +37,7 @@ import Media from "@/pages/Media";
 import Social from "@/pages/SocialModern";
 import Checkout from "@/pages/Checkout";
 import FeaturedTalents from "@/pages/FeaturedTalents";
+import TestUpload from "@/pages/TestUpload";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -60,6 +61,7 @@ function Router() {
       <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/mascot-demo" component={MascotDemo} />
       <Route path="/featured-talents" component={FeaturedTalents} />
+      <Route path="/test-upload" component={TestUpload} />
       
       {/* Protected admin routes */}
       <Route path="/admin">

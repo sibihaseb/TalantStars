@@ -47,7 +47,6 @@ const uploadSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
   description: z.string().optional(),
   category: z.string().min(1, 'Category is required'),
-  file: z.instanceof(File).optional(),
   externalUrl: z.string().url('Please enter a valid URL').optional(),
 });
 
@@ -102,7 +101,7 @@ export default function Media() {
   });
 
   const uploadMutation = useMutation({
-    mutationFn: async (data: UploadFormData & { file?: File }) => {
+    mutationFn: async (data: { formData: FormData | null, jsonData: any | null }) => {
       setIsUploading(true);
       setUploadProgress(0);
 
@@ -120,26 +119,13 @@ export default function Media() {
       try {
         let response;
         
-        if (data.file) {
+        if (data.formData) {
           // For file uploads, use FormData
-          const formData = new FormData();
-          formData.append('title', data.title);
-          formData.append('description', data.description || '');
-          formData.append('category', data.category);
-          formData.append('file', data.file);
-          
-          // Use fetch directly instead of apiRequest to avoid any header conflicts
-          console.log('Uploading file:', data.file?.name, 'size:', data.file?.size);
-          console.log('FormData contents:', {
-            title: data.title,
-            description: data.description,
-            category: data.category,
-            hasFile: !!data.file
-          });
+          console.log('Uploading file via FormData');
           
           const res = await fetch('/api/media', {
             method: 'POST',
-            body: formData,
+            body: data.formData,
             credentials: 'include'
           });
           
@@ -150,14 +136,10 @@ export default function Media() {
           }
           
           response = res;
-        } else if (data.externalUrl) {
+        } else if (data.jsonData) {
           // For external URLs, use the dedicated endpoint
-          response = await apiRequest('POST', '/api/media/external', {
-            title: data.title,
-            description: data.description || '',
-            category: data.category,
-            url: data.externalUrl
-          });
+          console.log('Uploading external URL via JSON');
+          response = await apiRequest('POST', '/api/media/external', data.jsonData);
         }
         
         clearInterval(progressInterval);
@@ -179,6 +161,7 @@ export default function Media() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/media'] });
       form.reset();
+      setUploadType('file'); // Reset to default
       toast({
         title: "Success",
         description: "Media uploaded successfully!",
@@ -237,7 +220,10 @@ export default function Media() {
 
   const onSubmit = (data: UploadFormData) => {
     if (uploadType === 'file') {
-      if (!data.file) {
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      const file = fileInput?.files?.[0];
+      
+      if (!file) {
         toast({
           title: "Error",
           description: "Please select a file to upload",
@@ -246,30 +232,41 @@ export default function Media() {
         return;
       }
       
-      // Validate file type
-      if (!(data.file instanceof File)) {
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('title', data.title);
+      formData.append('description', data.description || '');
+      formData.append('category', data.category);
+      formData.append('file', file);
+      
+      console.log('Submitting file upload:', file.name, 'size:', file.size);
+      
+      uploadMutation.mutate({
+        formData,
+        jsonData: null
+      });
+    } else if (uploadType === 'external') {
+      if (!data.externalUrl) {
         toast({
           title: "Error",
-          description: "Invalid file selected",
+          description: "Please enter a valid external URL",
           variant: "destructive",
         });
         return;
       }
-    }
-    
-    if (uploadType === 'external' && !data.externalUrl) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid external URL",
-        variant: "destructive",
+      
+      console.log('Submitting external URL upload:', data.externalUrl);
+      
+      uploadMutation.mutate({
+        formData: null,
+        jsonData: {
+          title: data.title,
+          description: data.description || '',
+          category: data.category,
+          url: data.externalUrl
+        }
       });
-      return;
     }
-    
-    uploadMutation.mutate({
-      ...data,
-      file: uploadType === 'file' ? data.file : undefined,
-    });
   };
 
   const onEditSubmit = (data: UploadFormData) => {

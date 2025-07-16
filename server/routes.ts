@@ -406,7 +406,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Media routes - support single file and external URLs
-  app.post('/api/media', isAuthenticated, requirePlan, upload.single('file'), async (req: any, res) => {
+  app.post('/api/media', isAuthenticated, requirePlan, (req: any, res: any, next: any) => {
+    // Custom error handler for multer
+    upload.single('file')(req, res, (err: any) => {
+      if (err) {
+        console.error('Multer error:', err);
+        
+        if (err.message && err.message.includes('Multipart: Boundary not found')) {
+          return res.status(400).json({ 
+            message: "Invalid file upload format. Please try again or use a different file.",
+            error: "BOUNDARY_NOT_FOUND"
+          });
+        }
+        
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ 
+            message: "File too large. Maximum size is 50MB.",
+            error: "FILE_TOO_LARGE"
+          });
+        }
+        
+        return res.status(400).json({ 
+          message: "File upload error: " + err.message,
+          error: "UPLOAD_ERROR"
+        });
+      }
+      
+      next();
+    });
+  }, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const file = req.file as Express.Multer.File;
@@ -415,6 +443,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('=== MEDIA UPLOAD DEBUG ===');
       console.log('File:', file ? `Present (${file.originalname})` : 'Missing');
       console.log('Body:', req.body);
+      console.log('Content-Type:', req.get('Content-Type'));
       console.log('ExternalUrl:', externalUrl);
       
       // This endpoint is now only for file uploads
