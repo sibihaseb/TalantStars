@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -160,7 +160,7 @@ export default function TalentDashboard() {
     return progressItems;
   };
 
-  const profileProgress = calculateProfileProgress();
+  const profileProgress = useMemo(() => calculateProfileProgress(), [profile, jobHistory]);
 
   const handleProgressItemClick = (item: any) => {
     console.log('handleProgressItemClick called with:', item);
