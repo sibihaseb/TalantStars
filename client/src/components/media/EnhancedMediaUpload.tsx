@@ -29,10 +29,13 @@ import {
   Image as ImageIcon,
   Film,
   Mic,
-  Globe
+  Globe,
+  Crop,
+  Scissors
 } from "lucide-react";
 import { UpgradePrompt } from "@/components/upgrade/UpgradePrompt";
 import MediaGallery from './MediaGallery';
+import ImageCropper from './ImageCropper';
 
 interface MediaUploadProps {
   onUploadComplete?: (media: any) => void;
@@ -78,6 +81,8 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
     maxAllowed: number;
     currentPlan?: string;
   } | null>(null);
+  const [showImageCropper, setShowImageCropper] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<File | null>(null);
   
   const [mediaFormData, setMediaFormData] = useState<MediaFormData>({
     title: '',
@@ -226,6 +231,33 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
         title: files.length === 1 ? files[0].name.replace(/\.[^/.]+$/, "") : `${files.length} files selected`
       }));
     }
+  };
+
+  const handleCropImage = (file: File) => {
+    setImageToCrop(file);
+    setShowImageCropper(true);
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    // Replace the original file with the cropped one
+    const fileIndex = selectedFiles.findIndex(f => f === imageToCrop);
+    if (fileIndex !== -1) {
+      const newFiles = [...selectedFiles];
+      newFiles[fileIndex] = croppedFile;
+      setSelectedFiles(newFiles);
+      setMediaFormData(prev => ({ ...prev, files: newFiles }));
+      
+      // Update preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const newPreviews = [...filePreviews];
+        newPreviews[fileIndex] = e.target?.result as string;
+        setFilePreviews(newPreviews);
+      };
+      reader.readAsDataURL(croppedFile);
+    }
+    
+    setImageToCrop(null);
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -465,6 +497,20 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
                                     </div>
                                   )}
                                 </div>
+                                
+                                {/* Optional crop button for images */}
+                                {file.type.startsWith('image/') && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleCropImage(file)}
+                                    className="absolute -top-2 -left-2 h-6 w-6 p-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
+                                    title="Crop image (optional)"
+                                  >
+                                    <Crop className="h-3 w-3" />
+                                  </Button>
+                                )}
+                                
                                 <Button
                                   variant="ghost"
                                   size="sm"
@@ -675,6 +721,16 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
           currentCount={upgradePromptData.currentCount}
           maxAllowed={upgradePromptData.maxAllowed}
           currentPlan={upgradePromptData.currentPlan}
+        />
+      )}
+
+      {/* Image Cropper */}
+      {showImageCropper && imageToCrop && (
+        <ImageCropper
+          isOpen={showImageCropper}
+          onClose={() => setShowImageCropper(false)}
+          imageFile={imageToCrop}
+          onCropComplete={handleCropComplete}
         />
       )}
     </div>

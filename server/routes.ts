@@ -476,7 +476,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const fileType = getFileTypeFromMimeType(file.mimetype);
+        const fileType = file.mimetype.startsWith('image/') ? 'image' : 
+                        file.mimetype.startsWith('video/') ? 'video' : 'audio';
         
         // Check individual file limits
         if (tierLimits) {
@@ -536,9 +537,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
           
-          // Create media record - for simple storage, we'll return mock data
+          // Create media record using storage interface
           const mediaData = {
-            id: Date.now() + i,
             userId,
             filename: uploadResult.key,
             originalName: uploadResult.originalName,
@@ -557,12 +557,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               processedForHLS: !!hlsUrl,
               originalFileSize: uploadResult.size,
               processingDate: hlsUrl ? new Date().toISOString() : null
-            },
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            }
           };
           
-          uploadedMedia.push(mediaData);
+          const createdMedia = await simpleStorage.createMediaFile(mediaData);
+          uploadedMedia.push(createdMedia);
         } catch (error) {
           console.error(`Error uploading file ${file.originalname}:`, error);
           // Continue with other files even if one fails
@@ -610,7 +609,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isExternal: true
       };
       
-      const media = await storage.createMediaFile(mediaData);
+      const media = await simpleStorage.createMediaFile(mediaData);
       res.json(media);
     } catch (error) {
       console.error("Error creating external media file:", error);
@@ -621,7 +620,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/media', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const media = await storage.getUserMediaFiles(userId);
+      const media = await simpleStorage.getUserMediaFiles(userId);
       res.json(media);
     } catch (error) {
       console.error("Error fetching media:", error);
@@ -637,7 +636,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Get media file to verify ownership
-      const mediaFiles = await storage.getUserMediaFiles(userId);
+      const mediaFiles = await simpleStorage.getUserMediaFiles(userId);
       const mediaFile = mediaFiles.find(m => m.id === id);
       
       if (!mediaFile) {
@@ -645,7 +644,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Update media file
-      const updatedMedia = await storage.updateMediaFile(id, {
+      const updatedMedia = await simpleStorage.updateMediaFile(id, {
         title,
         description,
         category,
@@ -663,7 +662,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       
       // Get media file info before deletion
-      const mediaFiles = await storage.getUserMediaFiles(req.user.id);
+      const mediaFiles = await simpleStorage.getUserMediaFiles(req.user.id);
       const mediaFile = mediaFiles.find(m => m.id === id);
       
       if (mediaFile && mediaFile.filename && !mediaFile.isExternal) {

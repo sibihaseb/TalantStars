@@ -26,6 +26,13 @@ export interface IStorage {
   // Tier operations
   updateUserTier(userId: number, tierId: number): Promise<User>;
   getPricingTier(id: number): Promise<PricingTier | undefined>;
+  
+  // Media operations (mock implementation for simple storage)
+  getUserMediaFiles(userId: number): Promise<any[]>;
+  createMediaFile(mediaData: any): Promise<any>;
+  updateMediaFile(id: number, mediaData: any): Promise<any>;
+  deleteMediaFile(id: number): Promise<void>;
+  getUserLimits(userId: number): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -92,6 +99,40 @@ export class DatabaseStorage implements IStorage {
       .from(pricingTiers)
       .where(eq(pricingTiers.id, id));
     return tier || undefined;
+  }
+
+  // Media operations (mock implementation for simple storage)
+  async getUserMediaFiles(userId: number): Promise<any[]> {
+    // Return empty array for now - media files would be stored in a real database
+    return [];
+  }
+
+  async createMediaFile(mediaData: any): Promise<any> {
+    // Mock implementation - return the data with an ID
+    return {
+      id: Date.now(),
+      ...mediaData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async updateMediaFile(id: number, mediaData: any): Promise<any> {
+    // Mock implementation - return updated data
+    return {
+      id,
+      ...mediaData,
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async deleteMediaFile(id: number): Promise<void> {
+    // Mock implementation - no action needed
+  }
+
+  async getUserLimits(userId: number): Promise<any> {
+    // Return null for now - user limits would be stored in a real database
+    return null;
   }
 }
 
