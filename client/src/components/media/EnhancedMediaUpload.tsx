@@ -480,20 +480,20 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
       </div>
       
       {/* Media info */}
-      <div className="p-4">
-        <h3 className="font-medium text-gray-900 dark:text-white truncate mb-1">
+      <div className="p-4 space-y-2">
+        <h3 className="font-medium text-gray-900 dark:text-white truncate text-sm">
           {media.title || media.originalName}
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-          {media.category.replace('_', ' ')}
+        <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+          {media.category?.replace('_', ' ') || 'Portfolio'}
         </p>
         {media.description && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-2">
+          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
             {media.description}
           </p>
         )}
         
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pt-2">
           <div className="flex items-center space-x-2">
             {media.isExternal && (
               <Badge variant="outline" className="text-xs">
@@ -511,10 +511,10 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Upload Section - Clean Modern Design */}
       <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 bg-gray-50 dark:bg-gray-800/50">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-2">
             <Upload className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Upload New Media</h2>
@@ -818,11 +818,11 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
 
       {/* Gallery Section */}
       {showGallery && (
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <ImageIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Media Gallery</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Media Gallery</h2>
               <Badge variant="secondary" className="ml-2">
                 {mediaFiles.length} files
               </Badge>
@@ -831,10 +831,10 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
           
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {[...Array(8)].map((_, i) => (
                   <div key={i} className="animate-pulse">
-                    <div className="aspect-video bg-gray-300 dark:bg-gray-700 rounded-lg mb-2"></div>
+                    <div className="aspect-video bg-gray-300 dark:bg-gray-700 rounded-lg mb-3"></div>
                     <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
                     <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
                   </div>
@@ -847,7 +847,7 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
                 <p className="text-sm">Upload your first media to get started</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {mediaFiles.map((media, index) => renderMediaCard(media, index))}
               </div>
             )}
