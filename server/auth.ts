@@ -41,12 +41,12 @@ async function getSessionDurationFromAdmin(): Promise<number> {
       return hours * 60 * 60 * 1000; // Convert hours to milliseconds
     }
     
-    // Default to 48 hours if no setting found
-    return 48 * 60 * 60 * 1000;
+    // Default to 168 hours (7 days) for testing if no setting found
+    return 168 * 60 * 60 * 1000;
   } catch (error) {
     console.error('Error getting session duration from admin settings:', error);
-    // Default to 48 hours if error
-    return 48 * 60 * 60 * 1000;
+    // Default to 168 hours (7 days) for testing if error
+    return 168 * 60 * 60 * 1000;
   }
 }
 

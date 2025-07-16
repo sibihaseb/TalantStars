@@ -149,8 +149,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const sessionDurationExists = settings.find(s => s.key === 'session_duration_hours');
     
     if (!sessionDurationExists) {
-      console.log('Initializing default session duration (48 hours)...');
-      await simpleStorage.updateAdminSetting('session_duration_hours', '48', 'system');
+      console.log('Initializing default session duration (168 hours for testing)...');
+      await simpleStorage.updateAdminSetting('session_duration_hours', '168', 'system');
+    } else {
+      // Force update for testing to ensure 7-day sessions
+      console.log('Updating session duration to 168 hours for testing...');
+      await simpleStorage.updateAdminSetting('session_duration_hours', '168', 'system');
     }
   } catch (error) {
     console.error('Error initializing session duration setting:', error);
