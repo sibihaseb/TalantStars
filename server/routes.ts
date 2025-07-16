@@ -402,7 +402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const file = req.file;
-      const { title, description, category, externalUrl } = req.body;
+      const { title, description, category, externalUrl, processVideo } = req.body;
       
       if (!file && !externalUrl) {
         return res.status(400).json({ message: "Either file or external URL is required" });
@@ -414,6 +414,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Upload file to Wasabi
         const uploadResult = await uploadFileToWasabi(file, `user-${userId}/media`);
         
+        const fileType = getFileTypeFromMimeType(uploadResult.type);
+        let thumbnailUrl = null;
+        let hlsUrl = null;
+        
+        // Process video for HLS streaming if requested and it's a video file
+        if (processVideo === 'true' && fileType === 'video') {
+          try {
+            const VideoProcessor = (await import('./video-processing')).default;
+            const tempDir = `/tmp/video-processing-${userId}-${Date.now()}`;
+            
+            const processingResult = await VideoProcessor.processVideo({
+              inputPath: file.path,
+              outputDir: tempDir,
+              resolution: '720p',
+              quality: 'medium'
+            });
+            
+            thumbnailUrl = processingResult.thumbnailUrl;
+            hlsUrl = processingResult.hlsUrl;
+          } catch (error) {
+            console.error("Error processing video:", error);
+            // Continue with regular upload if video processing fails
+          }
+        }
+        
         // Create media record in database
         mediaData = {
           userId,
@@ -422,13 +447,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           mimeType: uploadResult.type,
           size: uploadResult.size,
           url: uploadResult.url,
-          thumbnailUrl: null,
-          mediaType: getFileTypeFromMimeType(uploadResult.type),
+          thumbnailUrl,
+          mediaType: fileType,
           tags: [],
           title: title || '',
           description: description || '',
           isPublic: true,
-          category: category || 'portfolio'
+          category: category || 'portfolio',
+          hlsUrl, // Store HLS URL for streaming
+          metadata: {
+            processedForHLS: !!hlsUrl,
+            originalFileSize: uploadResult.size,
+            processingDate: hlsUrl ? new Date().toISOString() : null
+          }
         };
       } else if (externalUrl) {
         // Handle external URL

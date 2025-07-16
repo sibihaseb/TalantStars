@@ -147,6 +147,9 @@ export const mediaFiles = pgTable("media_files", {
   externalId: varchar("external_id"), // Video ID from platform
   duration: integer("duration"), // in seconds
   isExternal: boolean("is_external").default(false),
+  // HLS streaming support
+  hlsUrl: varchar("hls_url"), // URL to HLS playlist file (.m3u8)
+  metadata: jsonb("metadata"), // Additional media metadata
   createdAt: timestamp("created_at").defaultNow(),
 });
 
