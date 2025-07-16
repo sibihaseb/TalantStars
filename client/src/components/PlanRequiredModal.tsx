@@ -4,9 +4,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Crown, Star, Users, Briefcase } from "lucide-react";
+import { Check, Crown, Star, Users, Briefcase, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 
 interface PlanRequiredModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ interface PlanRequiredModalProps {
 
 export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredModalProps) {
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const { data: pricingTiers = [], isLoading } = useQuery({
@@ -31,13 +33,17 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
     onSuccess: () => {
       toast({
         title: "Plan Selected",
-        description: "Your plan has been selected successfully. You can now access all features.",
+        description: "Your free plan has been activated successfully.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       onClose();
       window.location.reload(); // Force refresh to update user data
     },
     onError: (error: any) => {
+      // If it's a paid tier, don't show error, just proceed to payment
+      if (error.requiresPayment) {
+        return;
+      }
       toast({
         title: "Error",
         description: error.message || "Failed to select plan. Please try again.",
@@ -46,8 +52,50 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
     },
   });
 
-  const handleSelectPlan = (tierId: number) => {
-    selectTierMutation.mutate(tierId);
+  const createPaymentMutation = useMutation({
+    mutationFn: async ({ tierId, isAnnual }: { tierId: number; isAnnual: boolean }) => {
+      const tier = pricingTiers.find((t: any) => t.id === tierId);
+      const amount = isAnnual ? parseFloat(tier.annualPrice) : parseFloat(tier.price);
+      
+      const response = await apiRequest("POST", "/api/create-payment-intent", {
+        amount,
+        tierId,
+        isAnnual,
+        description: `${tier.name} Plan ${isAnnual ? '(Annual)' : '(Monthly)'}`
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // Redirect to checkout page with payment intent
+      const params = new URLSearchParams({
+        client_secret: data.clientSecret,
+        tier_id: data.tierId.toString(),
+        annual: data.isAnnual.toString()
+      });
+      setLocation(`/checkout?${params.toString()}`);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Payment Error",
+        description: error.message || "Failed to create payment. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSelectPlan = (tierId: number, isAnnual: boolean = false) => {
+    setSelectedTier(tierId);
+    
+    const tier = pricingTiers.find((t: any) => t.id === tierId);
+    const price = isAnnual ? parseFloat(tier.annualPrice) : parseFloat(tier.price);
+    
+    if (price === 0) {
+      // Free tier - direct selection
+      selectTierMutation.mutate(tierId);
+    } else {
+      // Paid tier - create payment intent
+      createPaymentMutation.mutate({ tierId, isAnnual });
+    }
   };
 
   const getRoleIcon = (role: string) => {
@@ -156,23 +204,54 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
                   ))}
                 </div>
 
-                <Button
-                  onClick={() => handleSelectPlan(tier.id)}
-                  disabled={selectTierMutation.isPending}
-                  className="w-full"
-                  variant={tier.price === "0.00" ? "outline" : "default"}
-                >
-                  {selectTierMutation.isPending ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                      Selecting...
-                    </div>
-                  ) : (
-                    <>
-                      {tier.price === "0.00" ? "Get Started Free" : `Choose ${tier.name}`}
-                    </>
+                <div className="space-y-2">
+                  <Button
+                    onClick={() => handleSelectPlan(tier.id, false)}
+                    disabled={selectTierMutation.isPending || createPaymentMutation.isPending}
+                    className="w-full"
+                    variant={tier.price === "0.00" ? "outline" : "default"}
+                  >
+                    {(selectTierMutation.isPending || createPaymentMutation.isPending) ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                        {tier.price === "0.00" ? "Selecting..." : "Processing..."}
+                      </div>
+                    ) : (
+                      <>
+                        {tier.price === "0.00" ? (
+                          "Get Started Free"
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <CreditCard className="h-4 w-4" />
+                            Choose Monthly - ${tier.price}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </Button>
+                  
+                  {tier.annualPrice && parseFloat(tier.annualPrice) > 0 && (
+                    <Button
+                      onClick={() => handleSelectPlan(tier.id, true)}
+                      disabled={selectTierMutation.isPending || createPaymentMutation.isPending}
+                      className="w-full"
+                      variant="secondary"
+                    >
+                      {(selectTierMutation.isPending || createPaymentMutation.isPending) ? (
+                        <div className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                          Processing...
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="h-4 w-4" />
+                          Choose Annual - ${tier.annualPrice}
+                          <Badge variant="outline" className="ml-auto">Save ${(parseFloat(tier.price) * 12 - parseFloat(tier.annualPrice)).toFixed(2)}</Badge>
+                        </div>
+                      )}
+                    </Button>
                   )}
-                </Button>
+                </div>
               </CardContent>
             </Card>
           ))}

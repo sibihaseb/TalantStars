@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/layout/Header";
+import StripeCheckout from "@/components/StripeCheckout";
 
 interface PricingTier {
   id: number;
@@ -79,12 +80,47 @@ export default function Checkout() {
     },
   });
 
-  const handleMockPayment = async () => {
+  const confirmPaymentMutation = useMutation({
+    mutationFn: async (paymentIntentId: string) => {
+      const response = await apiRequest('POST', '/api/confirm-payment', { paymentIntentId });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Payment Successful!",
+        description: "Your tier has been activated. Welcome to your new plan!",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      setLocation("/");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Payment Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleStripePayment = async () => {
+    if (!clientSecret) {
+      toast({
+        title: "Error",
+        description: "Payment not properly initialized. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setPaymentProcessing(true);
     
-    // Simulate payment processing
+    // For demo purposes, simulate successful payment
+    // In production, you would use actual Stripe Elements here
     setTimeout(() => {
       setPaymentProcessing(false);
+      
+      // Extract payment intent ID from client secret
+      const paymentIntentId = clientSecret.split('_secret_')[0];
       
       if (tier) {
         selectTierMutation.mutate(tier.id);
@@ -241,82 +277,25 @@ export default function Checkout() {
             </CardContent>
           </Card>
 
-          {/* Payment Form */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <CreditCard className="w-5 h-5 mr-2" />
-                Payment Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                <div className="flex items-center text-blue-700 dark:text-blue-400">
-                  <Shield className="w-4 h-4 mr-2" />
-                  <span className="text-sm">
-                    This is a demo checkout. No real payment will be processed.
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-medium mb-2">Payment Method</h4>
-                  <div className="flex items-center">
-                    <CreditCard className="w-5 h-5 mr-2 text-gray-500" />
-                    <span className="text-sm">Demo Payment (No charges)</span>
-                  </div>
-                </div>
-
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-medium mb-2">Billing Details</h4>
-                  <div className="space-y-1 text-sm">
-                    <p><strong>Name:</strong> {user?.firstName} {user?.lastName}</p>
-                    <p><strong>Email:</strong> {user?.email}</p>
-                    <p><strong>Plan:</strong> {tier.name} ({isAnnual ? 'Annual' : 'Monthly'})</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-t">
-                  <span className="font-medium">Total</span>
-                  <span className="text-2xl font-bold text-blue-600">
-                    ${calculatePrice().toFixed(2)}
-                  </span>
-                </div>
-
-                <Button
-                  onClick={handleMockPayment}
-                  disabled={paymentProcessing || selectTierMutation.isPending}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                >
-                  {paymentProcessing || selectTierMutation.isPending ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
-                      Processing...
-                    </div>
-                  ) : (
-                    <div className="flex items-center">
-                      <Shield className="w-4 h-4 mr-2" />
-                      Complete Purchase
-                    </div>
-                  )}
-                </Button>
-
-                <div className="text-center">
-                  <Button
-                    variant="ghost"
-                    onClick={() => setLocation("/")}
-                    className="text-sm"
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-1" />
-                    Back to Dashboard
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Stripe Payment Form */}
+          <div className="space-y-4">
+            <StripeCheckout 
+              clientSecret={clientSecret}
+              tier={tier}
+              isAnnual={isAnnual}
+            />
+            
+            <div className="text-center">
+              <Button
+                variant="ghost"
+                onClick={() => setLocation("/")}
+                className="text-sm"
+              >
+                <ArrowLeft className="w-4 h-4 mr-1" />
+                Back to Dashboard
+              </Button>
+            </div>
+          </div>
         </div>
 
         <div className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">

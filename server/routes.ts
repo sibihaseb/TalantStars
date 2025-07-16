@@ -28,8 +28,14 @@ import { scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
 import { uploadFileToWasabi, deleteFileFromWasabi, getFileTypeFromMimeType } from "./wasabi-config";
 import multer from "multer";
+import Stripe from "stripe";
 
 const scryptAsync = promisify(scrypt);
+
+// Initialize Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2024-06-20',
+});
 
 async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -2566,39 +2572,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tier Selection and Payment Processing
-  app.post('/api/user/select-tier', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.id.toString(); // Convert to string
-      const { tierId } = req.body;
-      
-      // Update user's selected tier
-      const updatedUser = await storage.updateUserTier(userId, tierId);
-      res.json(updatedUser);
-    } catch (error) {
-      console.error("Error selecting tier:", error);
-      res.status(500).json({ message: "Failed to select tier" });
-    }
-  });
-
+  // Stripe payment processing endpoints
   app.post('/api/create-payment-intent', isAuthenticated, async (req: any, res) => {
     try {
       const { amount, tierId, isAnnual, description } = req.body;
+      const userId = req.user.id;
       
-      // Here you would integrate with Stripe to create a payment intent
-      // For now, we'll return a mock client secret
-      const clientSecret = `pi_mock_${Date.now()}_secret_${Math.random().toString(36).substr(2, 9)}`;
+      // Get tier information
+      const tiers = await storage.getPricingTiers();
+      const tier = tiers.find(t => t.id === tierId);
+      
+      if (!tier) {
+        return res.status(400).json({ message: "Invalid tier ID" });
+      }
+      
+      // Calculate the actual amount based on tier pricing
+      const actualAmount = isAnnual ? parseFloat(tier.annualPrice) : parseFloat(tier.price);
+      
+      // Create Stripe payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(actualAmount * 100), // Convert to cents
+        currency: 'usd',
+        metadata: {
+          userId: userId.toString(),
+          tierId: tierId.toString(),
+          isAnnual: isAnnual.toString(),
+          tierName: tier.name,
+        },
+        description: description || `${tier.name} Plan - ${req.user.firstName} ${req.user.lastName}`,
+      });
       
       res.json({ 
-        clientSecret,
-        amount,
+        clientSecret: paymentIntent.client_secret,
+        amount: actualAmount,
         tierId,
         isAnnual,
-        description
+        description: paymentIntent.description
       });
     } catch (error) {
       console.error("Error creating payment intent:", error);
       res.status(500).json({ message: "Failed to create payment intent" });
+    }
+  });
+
+  // Confirm payment and update user tier
+  app.post('/api/confirm-payment', isAuthenticated, async (req: any, res) => {
+    try {
+      const { paymentIntentId } = req.body;
+      const userId = req.user.id;
+      
+      // Retrieve the payment intent from Stripe
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      // Check if payment was successful
+      if (paymentIntent.status === 'succeeded') {
+        const tierId = parseInt(paymentIntent.metadata.tierId);
+        
+        // Update user's selected tier
+        const updatedUser = await storage.updateUserTier(userId, tierId);
+        
+        res.json({ 
+          success: true, 
+          user: updatedUser,
+          message: "Payment successful and tier updated"
+        });
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          message: "Payment not completed" 
+        });
+      }
+    } catch (error) {
+      console.error("Error confirming payment:", error);
+      res.status(500).json({ message: "Failed to confirm payment" });
+    }
+  });
+
+  // Direct tier selection for free plans
+  app.post('/api/user/select-tier', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { tierId } = req.body;
+      
+      // Get tier information
+      const tiers = await storage.getPricingTiers();
+      const tier = tiers.find(t => t.id === tierId);
+      
+      if (!tier) {
+        return res.status(400).json({ message: "Invalid tier ID" });
+      }
+      
+      // Check if it's a free tier
+      if (parseFloat(tier.price) === 0) {
+        // For free tiers, directly update the user
+        const updatedUser = await storage.updateUserTier(userId, tierId);
+        res.json(updatedUser);
+      } else {
+        // For paid tiers, require payment processing
+        res.status(400).json({ 
+          message: "This tier requires payment. Please use the payment flow.",
+          requiresPayment: true
+        });
+      }
+    } catch (error) {
+      console.error("Error selecting tier:", error);
+      res.status(500).json({ message: "Failed to select tier" });
     }
   });
 
