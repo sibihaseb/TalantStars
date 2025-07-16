@@ -215,10 +215,7 @@ export default function Media() {
   });
 
   const onSubmit = (data: UploadFormData) => {
-    const fileInput = document.getElementById('file') as HTMLInputElement;
-    const file = fileInput?.files?.[0];
-    
-    if (uploadType === 'file' && !file) {
+    if (uploadType === 'file' && !data.file) {
       toast({
         title: "Error",
         description: "Please select a file to upload",
@@ -238,7 +235,7 @@ export default function Media() {
     
     uploadMutation.mutate({
       ...data,
-      file: uploadType === 'file' ? file : undefined,
+      file: uploadType === 'file' ? data.file : undefined,
     });
   };
 
@@ -375,18 +372,31 @@ export default function Media() {
                           </TabsList>
 
                           <TabsContent value="file" className="space-y-4">
-                            <div>
-                              <Label htmlFor="file">Select File</Label>
-                              <Input
-                                id="file"
-                                type="file"
-                                accept="image/*,video/*,audio/*"
-                                className="mt-1 cursor-pointer"
-                              />
-                              <p className="text-sm text-gray-500 mt-1">
-                                Supported formats: Images (JPG, PNG, GIF), Videos (MP4, MOV, AVI), Audio (MP3, WAV)
-                              </p>
-                            </div>
+                            <FormField
+                              control={form.control}
+                              name="file"
+                              render={({ field: { onChange, value, ...field } }) => (
+                                <FormItem>
+                                  <FormLabel>Select File</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="file"
+                                      accept="image/*,video/*,audio/*"
+                                      className="mt-1 cursor-pointer"
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        onChange(file);
+                                      }}
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <p className="text-sm text-gray-500 mt-1">
+                                    Supported formats: Images (JPG, PNG, GIF), Videos (MP4, MOV, AVI), Audio (MP3, WAV)
+                                  </p>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
                           </TabsContent>
 
                           <TabsContent value="external" className="space-y-4">

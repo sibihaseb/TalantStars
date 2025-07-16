@@ -404,7 +404,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Media routes - support multiple files
+  // Media routes - support single file and external URLs
   app.post('/api/media', isAuthenticated, requirePlan, (req, res, next) => {
     const contentType = req.headers['content-type'] || '';
     
