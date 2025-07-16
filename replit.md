@@ -25,6 +25,7 @@ Preferred communication style: Simple, everyday language.
 - **Storage Integration**: Confirmed proper integration with singleton storage pattern for data persistence
 - **Wasabi S3 Integration**: Verified files are properly uploaded to Wasabi S3 with correct URLs and public access
 - **Testing**: Verified both external URL uploads and file uploads work correctly with proper validation
+- **User Experience Fix**: Separated file upload and external URL upload into distinct endpoints to eliminate confusion
 - **Result**: ✅ Complete media upload system now functional with both file and external URL support, confirmed uploading to Wasabi S3
 
 ### Unified Dashboard System and Upgrade Functionality Implementation (July 16, 2025)

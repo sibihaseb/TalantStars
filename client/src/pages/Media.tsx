@@ -142,12 +142,12 @@ export default function Media() {
           
           response = res;
         } else if (data.externalUrl) {
-          // For external URLs, use JSON
-          response = await apiRequest('POST', '/api/media', {
+          // For external URLs, use the dedicated endpoint
+          response = await apiRequest('POST', '/api/media/external', {
             title: data.title,
             description: data.description || '',
             category: data.category,
-            externalUrl: data.externalUrl
+            url: data.externalUrl
           });
         }
         

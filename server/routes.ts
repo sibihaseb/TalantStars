@@ -417,8 +417,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Body:', req.body);
       console.log('ExternalUrl:', externalUrl);
       
-      if (!file && !externalUrl) {
-        return res.status(400).json({ message: "Either a file or external URL is required" });
+      // This endpoint is now only for file uploads
+      if (!file) {
+        return res.status(400).json({ message: "File is required for this endpoint. Use /api/media/external for external URLs." });
       }
 
       // Check user's pricing tier limits
@@ -435,41 +436,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const audioCount = 0; // TODO: Implement actual media counting
       const externalLinkCount = 0; // TODO: Implement actual media counting
 
-      // Handle external URL uploads
-      if (externalUrl) {
-        // Check limits if user has a tier
-        if (tierLimits && tierLimits.maxExternalLinks > 0 && externalLinkCount >= tierLimits.maxExternalLinks) {
-          return res.status(400).json({ 
-            message: `External link limit reached. Your plan allows ${tierLimits.maxExternalLinks} external links. Upgrade your plan to add more.`,
-            limitType: 'external_links',
-            currentCount: externalLinkCount,
-            maxAllowed: tierLimits.maxExternalLinks
-          });
-        }
-        
-        // Create media record for external URL
-        const mediaData = {
-          userId,
-          filename: null,
-          originalName: null,
-          mimeType: null,
-          size: 0,
-          url: externalUrl,
-          thumbnailUrl: null,
-          mediaType: 'external',
-          tags: [],
-          title: title || '',
-          description: description || '',
-          isPublic: true,
-          category: category || 'portfolio',
-          hlsUrl: null,
-          metadata: { isExternalUrl: true }
-        };
-        
-        // Create media record using storage
-        const media = await simpleStorage.createMediaFile(mediaData);
-        
-        return res.json(media);
+      // This endpoint is now only for file uploads
+      if (!file) {
+        return res.status(400).json({ message: "File is required for this endpoint. Use /api/media/external for external URLs." });
       }
 
       // Handle single file upload
