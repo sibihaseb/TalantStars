@@ -36,6 +36,7 @@ import {
 import { UpgradePrompt } from "@/components/upgrade/UpgradePrompt";
 import MediaGallery from './MediaGallery';
 import ImageCropper from './ImageCropper';
+import { SafeImage } from './SafeImage';
 
 interface MediaUploadProps {
   onUploadComplete?: (media: any) => void;
@@ -514,24 +515,13 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
       {/* Media Preview */}
       <div className="aspect-video bg-gray-100 dark:bg-gray-900 relative overflow-hidden">
         {media.mediaType === "image" ? (
-          <img 
-            src={media.url} 
+          <SafeImage 
+            src={media.url}
             alt={media.title || media.originalName}
             className="w-full h-full object-cover"
-            crossOrigin="anonymous"
-            onError={(e) => {
-              console.error('Media card image loading error:', media.url);
-              // Try to reload the image after a short delay
-              setTimeout(() => {
-                if (e.target) {
-                  (e.target as HTMLImageElement).src = media.url;
-                }
-              }, 1000);
-            }}
-            onLoad={() => {
-              console.log('Media card image loaded successfully:', media.url);
-            }}
-            loading="lazy"
+            fallbackClassName="w-full h-full"
+            maxRetries={3}
+            retryDelay={1000}
           />
         ) : media.mediaType === "video" ? (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500">

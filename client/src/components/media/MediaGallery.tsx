@@ -17,6 +17,7 @@ import {
   Info
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { SafeImage } from "./SafeImage";
 
 interface MediaItem {
   id: number;
@@ -162,24 +163,13 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({
       case 'image':
         return (
           <div className="relative w-full h-full flex items-center justify-center">
-            <img 
-              src={currentItem.url} 
+            <SafeImage 
+              src={currentItem.url}
               alt={currentItem.title}
               className="max-w-full max-h-full object-contain rounded-lg"
-              crossOrigin="anonymous"
-              onError={(e) => {
-                console.error('Image loading error:', currentItem.url);
-                // Try to reload the image after a short delay
-                setTimeout(() => {
-                  if (e.target) {
-                    (e.target as HTMLImageElement).src = currentItem.url;
-                  }
-                }, 1000);
-              }}
-              onLoad={() => {
-                console.log('Image loaded successfully:', currentItem.url);
-              }}
-              loading="lazy"
+              fallbackClassName="max-w-full max-h-full flex items-center justify-center"
+              maxRetries={3}
+              retryDelay={1000}
             />
           </div>
         );
