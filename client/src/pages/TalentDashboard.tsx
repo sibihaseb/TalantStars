@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useLocation } from 'wouter';
+import { useLocation, useRoute } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -423,7 +423,7 @@ export default function TalentDashboard() {
             </div>
             <div className="flex items-center space-x-3">
               <NotificationDropdown />
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setLocation('/profile-sharing')}>
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
