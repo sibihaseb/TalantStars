@@ -424,10 +424,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Media routes - support single file and external URLs
   app.post('/api/media', isAuthenticated, requirePlan, (req: any, res: any, next: any) => {
+    console.log('=== MEDIA UPLOAD REQUEST RECEIVED ===');
+    console.log('Request headers:', {
+      'content-type': req.headers['content-type'],
+      'content-length': req.headers['content-length'],
+      'user-agent': req.headers['user-agent']
+    });
+    console.log('Request body keys:', Object.keys(req.body || {}));
+    
     // Custom error handler for multer
     upload.single('file')(req, res, (err: any) => {
       if (err) {
-        console.error('Multer error:', err);
+        console.error('=== MULTER ERROR ===', err);
         
         if (err.message && err.message.includes('Multipart: Boundary not found')) {
           return res.status(400).json({ 
@@ -446,6 +454,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ 
           message: "File upload error: " + err.message,
           error: "UPLOAD_ERROR"
+        });
+      }
+      
+      console.log('=== MULTER SUCCESS ===');
+      console.log('File received:', req.file ? 'YES' : 'NO');
+      if (req.file) {
+        console.log('File details:', {
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          hasBuffer: !!req.file.buffer
         });
       }
       
@@ -529,10 +548,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           // Upload file to Wasabi
           console.log('Attempting to upload file to Wasabi:', {
-            filename: file.filename,
             originalname: file.originalname,
-            path: file.path,
-            size: file.size
+            mimetype: file.mimetype,
+            size: file.size,
+            hasBuffer: !!file.buffer
           });
           const uploadResult = await uploadFileToWasabi(file, `user-${userId}/media`);
           console.log('Wasabi upload result:', uploadResult);
@@ -543,18 +562,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Process video for HLS streaming if requested and it's a video file
           if (processVideo === 'true' && fileType === 'video') {
             try {
-              const VideoProcessor = (await import('./video-processing')).default;
-              const tempDir = `/tmp/video-processing-${userId}-${Date.now()}`;
-              
-              const processingResult = await VideoProcessor.processVideo({
-                inputPath: file.path,
-                outputDir: tempDir,
-                resolution: '720p',
-                quality: 'medium'
-              });
-              
-              thumbnailUrl = processingResult.thumbnailUrl;
-              hlsUrl = processingResult.hlsUrl;
+              // Note: Video processing requires disk storage, but we're using memory storage
+              // For now, we'll skip video processing when using memory storage
+              console.log('Video processing skipped: requires disk storage, but using memory storage');
             } catch (error) {
               console.error("Error processing video:", error);
               // Continue with regular upload if video processing fails
