@@ -380,6 +380,12 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
   };
 
   const handleFormSubmit = useCallback(async () => {
+    console.log(`=== FORM SUBMIT TRIGGERED ===`);
+    console.log(`Upload type: ${uploadType}`);
+    console.log(`Selected files:`, selectedFiles);
+    console.log(`File metadata:`, fileMetadata);
+    console.log(`Media form data:`, mediaFormData);
+    
     if (uploadType === 'file' && (!selectedFiles || selectedFiles.length === 0)) {
       toast({
         title: "File required",
@@ -419,11 +425,21 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
         formData.append('category', meta.category);
         formData.append('file', meta.file);
 
+        console.log(`=== PREPARING UPLOAD ===`);
+        console.log(`File: ${meta.file.name} (${meta.file.size} bytes)`);
+        console.log(`Title: ${meta.title}`);
+        console.log(`Category: ${meta.category}`);
+        console.log(`Description: ${mediaFormData.description || ''}`);
+
         try {
+          console.log(`=== STARTING UPLOAD MUTATION ===`);
           await uploadMutation.mutateAsync(formData);
+          console.log(`=== UPLOAD SUCCESS ===`);
           successfulUploads++;
         } catch (error) {
+          console.error('=== UPLOAD FAILED ===');
           console.error('Upload failed for file:', meta.file.name, error);
+          console.error('Error details:', error);
           failedUploads++;
         }
       }
