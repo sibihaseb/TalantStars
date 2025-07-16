@@ -136,7 +136,7 @@ export const mediaFiles = pgTable("media_files", {
   url: varchar("url").notNull(),
   thumbnailUrl: varchar("thumbnail_url"),
   mediaType: varchar("media_type").notNull(), // 'image', 'video', 'audio', 'external'
-  // tags: text("tags").array(), // Removed tag functionality
+  tags: text("tags").array(), // Keep in database but not used in frontend
   title: varchar("title"),
   description: text("description"),
   category: varchar("category").default("portfolio"), // portfolio, demo, headshot, resume, other
