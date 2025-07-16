@@ -594,15 +594,35 @@ export async function registerEnhancedRoutes(app: Express): Promise<Server> {
         return res.json({ translatedText: text });
       }
 
-      // Import OpenAI at the function level to avoid circular dependencies
-      const { generateEmailReply } = await import('./enhanced-openai');
+      // Import OpenAI module
+      const OpenAI = require('openai');
       
-      // Use OpenAI for translation via the existing enhanced-openai module
-      const translatedText = await generateEmailReply(
-        `Translate the following text from ${sourceLanguage} to ${targetLanguage}. Return only the translated text, no explanations: "${text}"`,
-        '',
-        'translation'
-      );
+      if (!process.env.OPENAI_API_KEY) {
+        throw new Error('OpenAI API key not configured');
+      }
+      
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+      
+      // Use OpenAI for translation
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are a professional translator. Translate the following text from ${sourceLanguage} to ${targetLanguage}. Maintain the original tone, context, and formatting. Only return the translated text, no explanations.`
+          },
+          {
+            role: "user",
+            content: text
+          }
+        ],
+        temperature: 0.1,
+        max_tokens: 2000
+      });
+
+      const translatedText = response.choices[0].message.content?.trim() || text;
 
       res.json({ translatedText });
     } catch (error) {

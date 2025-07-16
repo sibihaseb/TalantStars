@@ -28,10 +28,26 @@ export function TranslatedText({
 
       setIsLoading(true);
       try {
-        const translated = await translate(text, currentLang);
-        setTranslatedText(translated);
+        const response = await fetch('/api/translate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text,
+            targetLanguage: currentLang,
+            sourceLanguage: 'en'
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Translation failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setTranslatedText(data.translatedText || text);
       } catch (error) {
-        console.error('Translation failed:', error);
+        console.error('Translation error:', error);
         setTranslatedText(text);
       } finally {
         setIsLoading(false);
