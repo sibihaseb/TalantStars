@@ -1626,7 +1626,7 @@ export class DatabaseStorage implements IStorage {
 
   async getPricingTiersByRole(role: string): Promise<PricingTier[]> {
     return await db.select().from(pricingTiers)
-      .where(and(eq(pricingTiers.active, true), eq(pricingTiers.targetRole, role)))
+      .where(and(eq(pricingTiers.active, true), eq(pricingTiers.category, role)))
       .orderBy(asc(pricingTiers.price));
   }
 
