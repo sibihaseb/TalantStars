@@ -17,7 +17,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ProgressMascot } from "@/components/mascot/ProgressMascot";
-import { MultipleMediaUpload } from "@/components/media/MultipleMediaUpload";
 import { EnhancedMediaUpload } from "@/components/media/EnhancedMediaUpload";
 import UsageDashboard from "@/components/usage/UsageDashboard";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
@@ -903,12 +902,12 @@ export default function TalentDashboard() {
                       <CardDescription>Showcase your work and talent with photos, videos, and audio</CardDescription>
                     </div>
                     <div className="flex space-x-2">
-                      <MultipleMediaUpload 
-                        maxFiles={10}
+                      <EnhancedMediaUpload 
+                        showGallery={true}
                         onUploadComplete={(media) => {
                           toast({
                             title: "Upload Complete",
-                            description: `Successfully uploaded ${media.length} files`,
+                            description: "Successfully uploaded file",
                           });
                           queryClient.invalidateQueries({ queryKey: ['/api/media'] });
                         }}
