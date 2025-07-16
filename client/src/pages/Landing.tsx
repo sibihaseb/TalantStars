@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { TranslatedText } from "@/components/ui/TranslatedText";
 import { 
   Star, 
   Play, 
@@ -104,7 +105,7 @@ export default function Landing() {
             <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.1%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%221%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
             <div className="absolute inset-0 flex items-center justify-center opacity-20">
               <img 
-                src="/attached_assets/PNG FILE 9_1752709459651.png" 
+                src="/attached_assets/PNG FILE 9_1752709598561.png" 
                 alt="Talents & Stars Logo" 
                 className="h-32 w-32 object-contain filter brightness-0 invert" 
               />
@@ -118,11 +119,11 @@ export default function Landing() {
           
           <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-fade-in">
-              Where Talent Meets{" "}
-              <span className="text-yellow-400">Opportunity</span>
+              <TranslatedText text="Where Talent Meets" />{" "}
+              <span className="text-yellow-400"><TranslatedText text="Opportunity" /></span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-12 animate-fade-in">
-              AI-powered platform connecting entertainment professionals with their next big break
+              <TranslatedText text="AI-powered platform connecting entertainment professionals with their next big break" />
             </p>
             
             <div className="flex flex-col md:flex-row gap-6 justify-center items-center animate-fade-in">
@@ -132,7 +133,7 @@ export default function Landing() {
                 onClick={() => window.location.href = "/auth"}
               >
                 <UserPlus className="h-5 w-5 mr-2" />
-                Join Now
+                <TranslatedText text="Join Now" />
               </Button>
               <Button 
                 size="lg"
@@ -141,7 +142,7 @@ export default function Landing() {
                 onClick={() => window.location.href = "/find-talent"}
               >
                 <Search className="h-5 w-5 mr-2" />
-                Find Talent
+                <TranslatedText text="Find Talent" />
               </Button>
               <Button 
                 size="lg"
@@ -149,7 +150,7 @@ export default function Landing() {
                 onClick={() => window.location.href = "/auth"}
               >
                 <Briefcase className="h-5 w-5 mr-2" />
-                Post a Gig
+                <TranslatedText text="Post a Gig" />
               </Button>
             </div>
             
