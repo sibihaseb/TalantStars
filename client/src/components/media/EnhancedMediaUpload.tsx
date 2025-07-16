@@ -344,105 +344,107 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
   };
 
   const renderMediaCard = (media: any, index: number) => (
-    <Card key={media.id} className="group relative overflow-hidden hover:shadow-lg transition-shadow">
-      <CardContent className="p-0">
-        <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 relative overflow-hidden">
-          {media.mediaType === "image" ? (
-            <img 
-              src={media.url} 
-              alt={media.title || media.originalName}
-              className="w-full h-full object-cover"
-            />
-          ) : media.mediaType === "video" ? (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500">
-              <Play className="h-8 w-8 text-white" />
-            </div>
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-500">
-              <Music className="h-8 w-8 text-white" />
-            </div>
-          )}
-          
-          {/* Overlay with actions */}
-          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => openGallery(index)}
-              className="bg-white/20 hover:bg-white/30 text-white border-white/30"
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => deleteMutation.mutate(media.id)}
-              className="bg-red-500/80 hover:bg-red-500 text-white"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+    <div key={media.id} className="group relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all">
+      {/* Media Preview */}
+      <div className="aspect-video bg-gray-100 dark:bg-gray-900 relative overflow-hidden">
+        {media.mediaType === "image" ? (
+          <img 
+            src={media.url} 
+            alt={media.title || media.originalName}
+            className="w-full h-full object-cover"
+          />
+        ) : media.mediaType === "video" ? (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500">
+            <Play className="h-8 w-8 text-white" />
           </div>
-          
-          {/* Media type badge */}
-          <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium text-white ${getMediaTypeColor(media.mediaType)}`}>
-            {getMediaIcon(media.mediaType)}
-            <span className="ml-1 capitalize">{media.mediaType}</span>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-500 to-blue-500">
+            <Music className="h-8 w-8 text-white" />
           </div>
+        )}
+        
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => openGallery(index)}
+            className="bg-white/90 hover:bg-white text-gray-900 border-0"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => deleteMutation.mutate(media.id)}
+            className="bg-red-500/90 hover:bg-red-600 text-white border-0"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
         
-        <div className="p-4">
-          <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                {media.title || media.originalName}
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {media.category.replace('_', ' ')}
-              </p>
-              {media.description && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">
-                  {media.description}
-                </p>
-              )}
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between mt-3">
-            <div className="flex items-center space-x-2">
-              {media.isExternal && (
-                <Badge variant="outline" className="text-xs">
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  External
-                </Badge>
-              )}
-            </div>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {new Date(media.createdAt).toLocaleDateString()}
-            </span>
-          </div>
+        {/* Media type badge */}
+        <div className={`absolute top-3 left-3 px-2 py-1 rounded-md text-xs font-medium text-white ${getMediaTypeColor(media.mediaType)}`}>
+          {getMediaIcon(media.mediaType)}
+          <span className="ml-1 capitalize">{media.mediaType}</span>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      
+      {/* Media info */}
+      <div className="p-4">
+        <h3 className="font-medium text-gray-900 dark:text-white truncate mb-1">
+          {media.title || media.originalName}
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+          {media.category.replace('_', ' ')}
+        </p>
+        {media.description && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-2">
+            {media.description}
+          </p>
+        )}
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            {media.isExternal && (
+              <Badge variant="outline" className="text-xs">
+                <ExternalLink className="h-3 w-3 mr-1" />
+                External
+              </Badge>
+            )}
+          </div>
+          <span className="text-xs text-gray-400">
+            {new Date(media.createdAt).toLocaleDateString()}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 
   return (
     <div className="space-y-6">
-      {/* Upload Section */}
-      <Card className="border-2 border-dashed border-blue-300 dark:border-blue-700 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Upload className="h-5 w-5 text-blue-600" />
-            <span>Upload New Media</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-            <DialogTrigger asChild>
-              <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
-                <Plus className="h-4 w-4 mr-2" />
-                Add New Media
-              </Button>
-            </DialogTrigger>
+      {/* Upload Section - Clean Modern Design */}
+      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 bg-gray-50 dark:bg-gray-800/50">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <Upload className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Upload New Media</h2>
+          </div>
+          {showGallery && (
+            <Button variant="outline" size="sm" className="flex items-center space-x-2">
+              <ImageIcon className="h-4 w-4" />
+              <span>View All Media</span>
+            </Button>
+          )}
+        </div>
+        
+        <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+          <DialogTrigger asChild>
+            <Button className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium text-base">
+              <Plus className="h-5 w-5 mr-2" />
+              Add New Media
+            </Button>
+          </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="flex items-center space-x-2">
@@ -541,22 +543,30 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
                           </div>
                         </div>
                       ) : (
-                        <>
-                          <FileImage className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                          <p className="text-lg text-gray-600 dark:text-gray-300 mb-2">
-                            Drag and drop your media files here
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                            or click to browse
-                          </p>
-                          <Button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="bg-blue-600 hover:bg-blue-700"
-                          >
-                            Select Files
-                          </Button>
-                        </>
+                        <div className="space-y-6">
+                          <div className="flex flex-col items-center justify-center py-8">
+                            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4">
+                              <Upload className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                              Drop your files here or click to browse
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-md">
+                              Supported formats: Images (JPG, PNG, GIF), Videos (MP4, MOV, AVI), Audio (MP3, WAV, AAC)
+                            </p>
+                          </div>
+                          
+                          <div className="flex justify-center">
+                            <Button
+                              onClick={() => fileInputRef.current?.click()}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg"
+                              size="lg"
+                            >
+                              <Camera className="h-5 w-5 mr-2" />
+                              Choose Files
+                            </Button>
+                          </div>
+                        </div>
                       )}
                       
                       <input
@@ -663,22 +673,22 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
               </div>
             </DialogContent>
           </Dialog>
-        </CardContent>
-      </Card>
+      </div>
 
       {/* Gallery Section */}
       {showGallery && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <ImageIcon className="h-5 w-5" />
-              <span>Media Gallery</span>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <ImageIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Media Gallery</h2>
               <Badge variant="secondary" className="ml-2">
                 {mediaFiles.length} files
               </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </div>
+          </div>
+          
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {[...Array(8)].map((_, i) => (
@@ -700,8 +710,8 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
                 {mediaFiles.map((media, index) => renderMediaCard(media, index))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
       
       {/* Media Gallery Modal */}
