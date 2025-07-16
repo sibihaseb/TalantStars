@@ -46,6 +46,16 @@ export async function uploadFileToWasabi(
     throw new Error("File buffer is empty or corrupted");
   }
   
+  // Additional buffer integrity check
+  if (file.buffer.length !== file.size) {
+    console.error("CRITICAL: File buffer size mismatch", {
+      bufferLength: file.buffer.length,
+      reportedSize: file.size,
+      filename: file.originalname
+    });
+    throw new Error(`File buffer size mismatch: buffer=${file.buffer.length}, size=${file.size}`);
+  }
+  
   const uploadParams = {
     Bucket: BUCKET_NAME,
     Key: key,
@@ -54,27 +64,49 @@ export async function uploadFileToWasabi(
     ACL: "public-read" as const,
   };
 
-  try {
-    const result = await s3Client.send(new PutObjectCommand(uploadParams));
-    console.log("WASABI UPLOAD SUCCESS:", {
-      key,
-      etag: result.ETag,
-      versionId: result.VersionId
-    });
-    
-    const url = `https://s3.${process.env.WASABI_REGION}.wasabisys.com/${BUCKET_NAME}/${key}`;
-    
-    return {
-      key,
-      url,
-      originalName: file.originalname,
-      size: file.size,
-      type: file.mimetype,
-    };
-  } catch (error) {
-    console.error("Error uploading file to Wasabi:", error);
-    throw new Error("Failed to upload file to cloud storage");
+  // Retry upload logic to handle intermittent failures
+  const maxRetries = 3;
+  let lastError;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`WASABI UPLOAD ATTEMPT ${attempt}/${maxRetries}:`, {
+        key,
+        bufferLength: file.buffer.length,
+        size: file.size,
+        mimetype: file.mimetype
+      });
+      
+      const result = await s3Client.send(new PutObjectCommand(uploadParams));
+      console.log("WASABI UPLOAD SUCCESS:", {
+        key,
+        etag: result.ETag,
+        versionId: result.VersionId,
+        attempt
+      });
+      
+      const url = `https://s3.${process.env.WASABI_REGION}.wasabisys.com/${BUCKET_NAME}/${key}`;
+      
+      return {
+        key,
+        url,
+        originalName: file.originalname,
+        size: file.size,
+        type: file.mimetype,
+      };
+    } catch (error) {
+      lastError = error;
+      console.error(`WASABI UPLOAD ATTEMPT ${attempt} FAILED:`, error);
+      
+      if (attempt < maxRetries) {
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
+    }
   }
+  
+  console.error("Error uploading file to Wasabi after all retries:", lastError);
+  throw new Error("Failed to upload file to cloud storage after " + maxRetries + " attempts");
 }
 
 export async function deleteFileFromWasabi(key: string): Promise<void> {

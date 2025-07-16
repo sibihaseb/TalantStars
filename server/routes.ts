@@ -722,11 +722,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isExternal: true
       };
       
-      const media = await simpleStorage.createMediaFile(mediaData);
+      logger.mediaUpload('Creating external media file', {
+        mediaData,
+        userId,
+        url
+      }, req);
+      
+      const media = await storage.createMediaFile(mediaData);
       res.json(media);
     } catch (error) {
       console.error("Error creating external media file:", error);
-      res.status(500).json({ message: "Failed to create external media file" });
+      logger.error('MEDIA_UPLOAD', 'Failed to create external media file', {
+        error: error.message,
+        stack: error.stack,
+        mediaData,
+        userId
+      }, req);
+      res.status(500).json({ message: "Failed to create external media file: " + error.message });
     }
   });
 

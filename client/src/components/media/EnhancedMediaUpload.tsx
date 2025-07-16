@@ -473,7 +473,7 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
       formData.append('title', mediaFormData.title);
       formData.append('description', mediaFormData.description);
       formData.append('category', mediaFormData.category);
-      formData.append('externalUrl', mediaFormData.externalUrl);
+      formData.append('url', mediaFormData.externalUrl);
 
       externalUploadMutation.mutate(formData);
     }
