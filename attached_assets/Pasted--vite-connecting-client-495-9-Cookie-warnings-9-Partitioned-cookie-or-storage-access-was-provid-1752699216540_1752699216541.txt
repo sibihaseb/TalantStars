@@ -1,0 +1,96 @@
+
+[vite] connecting... client:495:9
+Cookie warnings 9
+Partitioned cookie or storage access was provided to “https://www.youtube.com/embed/test?autoplay=1&rel=0&modestbranding=1” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+www-embed-player.js:409:40
+unreachable code after return statement
+test:2594:24454
+unreachable code after return statement
+test:2594:24885
+unreachable code after return statement
+test:2594:26553
+unreachable code after return statement
+test:2594:26727
+unreachable code after return statement
+test:2594:26796
+unreachable code after return statement
+test:2594:27106
+unreachable code after return statement
+test:2594:27360
+unreachable code after return statement
+test:2594:30228
+unreachable code after return statement
+test:2594:38403
+unreachable code after return statement
+test:2594:45830
+unreachable code after return statement
+test:2594:53413
+unreachable code after return statement
+test:2594:24454
+unreachable code after return statement
+test:2594:38403
+unreachable code after return statement
+test:2594:24885
+unreachable code after return statement
+test:2594:30228
+unreachable code after return statement
+test:1:88
+unreachable code after return statement
+test:1:88
+unreachable code after return statement
+test:1:126
+unreachable code after return statement
+test:1:126
+unreachable code after return statement
+test:1:147
+unreachable code after return statement
+test:1:147
+unreachable code after return statement
+test:2594:26727
+unreachable code after return statement
+test:2594:26796
+unreachable code after return statement
+test:2594:27106
+unreachable code after return statement
+test:2594:27360
+unreachable code after return statement
+test:1:90
+unreachable code after return statement
+test:1:128
+unreachable code after return statement
+test:1:149
+unreachable code after return statement
+test:1:149
+unreachable code after return statement
+test:1:128
+unreachable code after return statement
+test:1:90
+MouseEvent.mozPressure is deprecated. Use PointerEvent.pressure instead. base.js:1801:353
+MouseEvent.mozInputSource is deprecated. Use PointerEvent.pointerType instead. base.js:1801:353
+WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER. base.js:11493:165
+=== FORM SUBMIT TRIGGERED === main.tsx:54:22
+Upload type: external main.tsx:54:22
+Selected files: 
+Array []
+main.tsx:54:22
+File metadata: 
+Array []
+main.tsx:54:22
+Media form data: 
+Object { title: "WOW!", description: "", category: "demo_reel", files: [], externalUrl: "https://www.youtube.com/watch?v=HZNustXoRrk" }
+main.tsx:54:22
+=== FRONTEND API REQUEST === main.tsx:54:22
+Method: POST, URL: /api/media/external main.tsx:54:22
+FormData entries: 
+Array(4) [ (2) […], (2) […], (2) […], (2) […] ]
+main.tsx:54:22
+XHRPOST
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/media/external
+[HTTP/1.1 500 Internal Server Error 116ms]
+
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 500, URL: /api/media/external main.tsx:54:22
+🚨 API ERROR: 500 - {"message":"Failed to create external media file: Cannot read properties of undefined (reading 'includes')"} main.tsx:54:22
+
+​
+

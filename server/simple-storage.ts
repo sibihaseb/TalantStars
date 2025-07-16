@@ -127,6 +127,17 @@ export class DatabaseStorage implements IStorage {
     return this.mediaFiles.get(userId) || [];
   }
 
+  async getMediaFile(id: number): Promise<any | undefined> {
+    // Find media file by ID across all users
+    for (const [userId, userMedia] of this.mediaFiles.entries()) {
+      const media = userMedia.find(media => media.id === id);
+      if (media) {
+        return media;
+      }
+    }
+    return undefined;
+  }
+
   async createMediaFile(mediaData: any): Promise<any> {
     const userId = mediaData.userId;
     const media = {

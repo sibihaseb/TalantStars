@@ -39,6 +39,7 @@ import Checkout from "@/pages/Checkout";
 import FeaturedTalents from "@/pages/FeaturedTalents";
 import TestUpload from "@/pages/TestUpload";
 import DebugLogs from "@/pages/DebugLogs";
+import VerificationDemo from "@/pages/verification-demo";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -64,6 +65,7 @@ function Router() {
       <Route path="/featured-talents" component={FeaturedTalents} />
       <Route path="/test-upload" component={TestUpload} />
       <Route path="/debug-logs" component={DebugLogs} />
+      <Route path="/verification-demo" component={VerificationDemo} />
       
       {/* Protected admin routes */}
       <Route path="/admin">

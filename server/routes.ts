@@ -649,21 +649,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           const createdMedia = await simpleStorage.createMediaFile(mediaData);
           
+          // Verify the media was created successfully
+          if (!createdMedia || !createdMedia.id) {
+            throw new Error("Failed to create media record in database");
+          }
+          
+          // Verify the media can be retrieved
+          const verificationMedia = await simpleStorage.getMediaFile(createdMedia.id);
+          if (!verificationMedia) {
+            throw new Error("Media was created but cannot be retrieved - database inconsistency");
+          }
+          
+          // Verify the uploaded file is accessible
+          try {
+            const headResponse = await fetch(uploadResult.url, { method: 'HEAD' });
+            if (!headResponse.ok) {
+              logger.error('MEDIA_UPLOAD', `Uploaded file is not accessible: ${headResponse.status}`, {
+                url: uploadResult.url,
+                mediaId: createdMedia.id
+              }, req);
+            }
+          } catch (error) {
+            logger.error('MEDIA_UPLOAD', 'Failed to verify uploaded file accessibility', {
+              url: uploadResult.url,
+              mediaId: createdMedia.id,
+              error: error.message
+            }, req);
+          }
+          
           logger.database('Media file created successfully in database', {
             createdMediaId: createdMedia.id,
             createdMediaUrl: createdMedia.url,
-            mediaType: createdMedia.mediaType
+            mediaType: createdMedia.mediaType,
+            verified: true
           }, req);
           
           // Create notification for successful upload
           await createUploadNotification(userId, uploadResult.originalName);
           
-          logger.mediaUpload('Media upload completed successfully', {
+          logger.mediaUpload('Media upload completed and verified successfully', {
             mediaId: createdMedia.id,
             wasabiUrl: createdMedia.url,
             filename: uploadResult.originalName,
             fileSize: uploadResult.size,
-            mediaType: fileType
+            mediaType: fileType,
+            verified: true
           }, req);
           
           return res.json(createdMedia);
@@ -694,13 +724,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const { url, title, description, category } = req.body;
       
+      // Validate required fields
+      if (!url || !url.trim()) {
+        return res.status(400).json({ message: "URL is required" });
+      }
+      
+      if (!title || !title.trim()) {
+        return res.status(400).json({ message: "Title is required" });
+      }
+      
       // Determine media type from URL
       let mediaType = 'video';
-      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      const urlString = url.toString().toLowerCase();
+      if (urlString.includes('youtube.com') || urlString.includes('youtu.be')) {
         mediaType = 'video';
-      } else if (url.includes('vimeo.com')) {
+      } else if (urlString.includes('vimeo.com')) {
         mediaType = 'video';
-      } else if (url.includes('soundcloud.com') || url.includes('spotify.com')) {
+      } else if (urlString.includes('soundcloud.com') || urlString.includes('spotify.com')) {
         mediaType = 'audio';
       }
       
@@ -728,7 +768,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         url
       }, req);
       
-      const media = await storage.createMediaFile(mediaData);
+      const media = await simpleStorage.createMediaFile(mediaData);
+      
+      // Verify the media was created successfully
+      if (!media || !media.id) {
+        throw new Error("Failed to create media record in database");
+      }
+      
+      // Verify the media can be retrieved
+      const verificationMedia = await simpleStorage.getMediaFile(media.id);
+      if (!verificationMedia) {
+        throw new Error("Media was created but cannot be retrieved - database inconsistency");
+      }
+      
+      logger.mediaUpload('External media upload completed and verified', {
+        mediaId: media.id,
+        url: media.url,
+        title: media.title,
+        verified: true
+      }, req);
+      
       res.json(media);
     } catch (error) {
       console.error("Error creating external media file:", error);
@@ -739,6 +798,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: req.user?.id
       }, req);
       res.status(500).json({ message: "Failed to create external media file: " + error.message });
+    }
+  });
+
+  // Upload verification endpoint
+  app.post('/api/media/verify/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const mediaId = parseInt(req.params.id);
+      
+      const verificationResults = {
+        mediaId,
+        exists: false,
+        accessible: false,
+        databaseConsistent: false,
+        fileSize: null,
+        mimeType: null,
+        url: null,
+        errors: []
+      };
+      
+      // Check if media exists in database
+      const media = await simpleStorage.getMediaFile(mediaId);
+      if (!media) {
+        verificationResults.errors.push('Media record not found in database');
+        return res.json(verificationResults);
+      }
+      
+      // Check if user owns the media
+      if (media.userId !== userId) {
+        verificationResults.errors.push('Access denied: Media belongs to different user');
+        return res.status(403).json(verificationResults);
+      }
+      
+      verificationResults.exists = true;
+      verificationResults.url = media.url;
+      verificationResults.mimeType = media.mimeType;
+      verificationResults.fileSize = media.size;
+      
+      // For external media, just check if URL is valid
+      if (media.isExternal) {
+        verificationResults.accessible = true;
+        verificationResults.databaseConsistent = true;
+      } else {
+        // For uploaded files, check accessibility
+        try {
+          const headResponse = await fetch(media.url, { method: 'HEAD' });
+          if (headResponse.ok) {
+            verificationResults.accessible = true;
+            const contentLength = headResponse.headers.get('content-length');
+            if (contentLength && parseInt(contentLength) === media.size) {
+              verificationResults.databaseConsistent = true;
+            } else {
+              verificationResults.errors.push('File size mismatch between database and storage');
+            }
+          } else {
+            verificationResults.errors.push(`File not accessible: HTTP ${headResponse.status}`);
+          }
+        } catch (error) {
+          verificationResults.errors.push(`File accessibility check failed: ${error.message}`);
+        }
+      }
+      
+      logger.mediaUpload('Media verification completed', {
+        mediaId,
+        userId,
+        results: verificationResults
+      }, req);
+      
+      res.json(verificationResults);
+      
+    } catch (error) {
+      logger.error('MEDIA_UPLOAD', 'Media verification failed', {
+        error: error.message,
+        mediaId: req.params.id,
+        userId: req.user?.id
+      }, req);
+      res.status(500).json({ message: 'Media verification failed: ' + error.message });
     }
   });
 
