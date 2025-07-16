@@ -46,6 +46,7 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   mainImageUrl: varchar("main_image_url"), // 1:1 cropped main profile image
   role: userRoleEnum("role").default("talent"),
+  pricingTierId: integer("pricing_tier_id"),
   language: varchar("language").default("en"), // User's preferred language
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

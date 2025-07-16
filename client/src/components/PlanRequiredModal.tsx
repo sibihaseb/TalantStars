@@ -185,12 +185,15 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
                   <div className="text-3xl font-bold">
                     ${tier.price}
                     <span className="text-sm font-normal text-muted-foreground">
-                      /{tier.duration}
+                      /30
                     </span>
                   </div>
-                  {tier.annualPrice && (
-                    <div className="text-sm text-muted-foreground">
+                  {tier.annualPrice && parseFloat(tier.annualPrice) > 0 && (
+                    <div className="text-sm text-muted-foreground mt-1">
                       Annual: ${tier.annualPrice}/year
+                      <Badge variant="outline" className="ml-2 text-green-600 border-green-600 text-xs">
+                        Save ${(parseFloat(tier.price) * 12 - parseFloat(tier.annualPrice)).toFixed(0)}
+                      </Badge>
                     </div>
                   )}
                 </div>
@@ -204,7 +207,8 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
                   ))}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
+                  {/* Monthly Option */}
                   <Button
                     onClick={() => handleSelectPlan(tier.id, false)}
                     disabled={selectTierMutation.isPending || createPaymentMutation.isPending}
@@ -221,21 +225,25 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
                         {tier.price === "0.00" ? (
                           "Get Started Free"
                         ) : (
-                          <div className="flex items-center gap-2">
-                            <CreditCard className="h-4 w-4" />
-                            Choose Monthly - ${tier.price}
+                          <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center gap-2">
+                              <CreditCard className="h-4 w-4" />
+                              Choose Monthly
+                            </div>
+                            <span className="font-semibold">${tier.price}/30</span>
                           </div>
                         )}
                       </>
                     )}
                   </Button>
                   
+                  {/* Annual Option */}
                   {tier.annualPrice && parseFloat(tier.annualPrice) > 0 && (
                     <Button
                       onClick={() => handleSelectPlan(tier.id, true)}
                       disabled={selectTierMutation.isPending || createPaymentMutation.isPending}
-                      className="w-full"
-                      variant="secondary"
+                      className="w-full bg-green-600 hover:bg-green-700 text-white border-green-600"
+                      variant="default"
                     >
                       {(selectTierMutation.isPending || createPaymentMutation.isPending) ? (
                         <div className="flex items-center gap-2">
@@ -243,10 +251,17 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
                           Processing...
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2">
-                          <CreditCard className="h-4 w-4" />
-                          Choose Annual - ${tier.annualPrice}
-                          <Badge variant="outline" className="ml-auto">Save ${(parseFloat(tier.price) * 12 - parseFloat(tier.annualPrice)).toFixed(2)}</Badge>
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-2">
+                            <CreditCard className="h-4 w-4" />
+                            Choose Annual
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold">${tier.annualPrice}/year</span>
+                            <Badge variant="secondary" className="bg-white text-green-600 font-semibold">
+                              Save ${(parseFloat(tier.price) * 12 - parseFloat(tier.annualPrice)).toFixed(0)}
+                            </Badge>
+                          </div>
                         </div>
                       )}
                     </Button>
