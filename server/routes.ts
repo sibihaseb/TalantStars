@@ -407,10 +407,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Media routes - support single file and external URLs
   app.post('/api/media', isAuthenticated, requirePlan, (req: any, res: any, next: any) => {
-    console.log('=== MEDIA UPLOAD START ===');
-    console.log('Content-Type:', req.get('Content-Type'));
-    console.log('Body before multer:', req.body);
-    
     // Custom error handler for multer
     upload.single('file')(req, res, (err: any) => {
       if (err) {
@@ -436,7 +432,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      console.log('Multer processed successfully');
       next();
     });
   }, async (req: any, res) => {
@@ -445,15 +440,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const file = req.file as Express.Multer.File;
       const { title, description, category, externalUrl, processVideo } = req.body;
       
-      console.log('=== MEDIA UPLOAD DEBUG ===');
-      console.log('File:', file ? `Present (${file.originalname})` : 'Missing');
-      console.log('Body:', req.body);
-      console.log('Content-Type:', req.get('Content-Type'));
-      console.log('ExternalUrl:', externalUrl);
+      // Media upload processing
       
       // This endpoint is now only for file uploads
       if (!file) {
-        console.log('ERROR: No file found in request');
         return res.status(400).json({ message: "File is required for this endpoint. Use /api/media/external for external URLs." });
       }
 
