@@ -20,6 +20,7 @@ import { ProgressMascot } from "@/components/mascot/ProgressMascot";
 import { MultipleMediaUpload } from "@/components/media/MultipleMediaUpload";
 import { EnhancedMediaUpload } from "@/components/media/EnhancedMediaUpload";
 import UsageDashboard from "@/components/usage/UsageDashboard";
+import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { 
   Calendar, 
   Briefcase, 
@@ -426,10 +427,7 @@ export default function TalentDashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
-                <Bell className="w-4 h-4 mr-2" />
-                Notifications
-              </Button>
+              <NotificationDropdown />
               <Button variant="outline" size="sm">
                 <Settings className="w-4 h-4 mr-2" />
                 Settings

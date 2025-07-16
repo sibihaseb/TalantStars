@@ -28,6 +28,16 @@ Preferred communication style: Simple, everyday language.
 - **User Experience Fix**: Separated file upload and external URL upload into distinct endpoints to eliminate confusion
 - **Result**: ✅ Complete media upload system now functional with both file and external URL support, confirmed uploading to Wasabi S3
 
+### Notification System Dashboard Integration (July 16, 2025)
+- **User Request**: Moved notification functionality from header menu to dashboard and removed from menu
+- **Implementation**: 
+  - Removed NotificationDropdown component from Header.tsx
+  - Added NotificationDropdown component to TalentDashboard.tsx header section
+  - Replaced static "Notifications" button with functional dropdown component
+  - Maintained all existing notification features: bell icon, unread count, dropdown with mock data
+- **Features**: Bell icon with unread count badge, sample notifications, mark as read/archive functionality
+- **Result**: ✅ Notification system now integrated into dashboard instead of header menu
+
 ### Unified Dashboard System and Upgrade Functionality Implementation (July 16, 2025)
 - **Single Dashboard Architecture**: Implemented unified dashboard system that routes users to appropriate role-based dashboard internally
 - **Route Consolidation**: All dashboard routes (`/dashboard`, `/talent-dashboard`, `/producer-dashboard`, `/manager-dashboard`) now point to single Dashboard component
