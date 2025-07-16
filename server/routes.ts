@@ -710,7 +710,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         originalName: title || 'External Media',
         mimeType: `${mediaType}/external`,
         size: 0,
-        url: null,
+        url: url, // Use the external URL as the main URL for external media
         thumbnailUrl: null,
         mediaType,
         tags: [],
@@ -735,8 +735,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       logger.error('MEDIA_UPLOAD', 'Failed to create external media file', {
         error: error.message,
         stack: error.stack,
-        mediaData,
-        userId
+        requestBody: req.body,
+        userId: req.user?.id
       }, req);
       res.status(500).json({ message: "Failed to create external media file: " + error.message });
     }
