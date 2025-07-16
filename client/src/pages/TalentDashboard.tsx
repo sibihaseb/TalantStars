@@ -88,6 +88,16 @@ export default function TalentDashboard() {
     enabled: !!user,
   });
 
+  // Fetch job history early so it's available for progress calculation
+  const { data: jobHistory } = useQuery({
+    queryKey: ['/api/job-history', user?.id],
+    queryFn: async () => {
+      const response = await apiRequest('GET', `/api/job-history/${user?.id}`);
+      return response.json();
+    },
+    enabled: !!user,
+  });
+
   // Calculate dynamic progress based on user profile
   const calculateProfileProgress = () => {
     if (!profile) return [];
@@ -237,15 +247,6 @@ export default function TalentDashboard() {
     queryKey: ['/api/opportunities'],
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/opportunities');
-      return response.json();
-    },
-    enabled: !!user,
-  });
-
-  const { data: jobHistory } = useQuery({
-    queryKey: ['/api/job-history', user?.id],
-    queryFn: async () => {
-      const response = await apiRequest('GET', `/api/job-history/${user?.id}`);
       return response.json();
     },
     enabled: !!user,
