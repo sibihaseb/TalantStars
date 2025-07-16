@@ -427,7 +427,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Media routes - support single file and external URLs
-  app.post('/api/media', isAuthenticated, requirePlan, (req: any, res: any, next: any) => {
+  app.post('/api/media', (req: any, res: any, next: any) => {
+    console.log('=== RAW MEDIA UPLOAD REQUEST RECEIVED ===');
+    console.log('URL:', req.url);
+    console.log('Method:', req.method);
+    console.log('Content-Type:', req.headers['content-type']);
+    next();
+  }, isAuthenticated, requirePlan, (req: any, res: any, next: any) => {
     console.log('=== MEDIA UPLOAD REQUEST RECEIVED ===');
     console.log('Request headers:', {
       'content-type': req.headers['content-type'],
