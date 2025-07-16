@@ -154,8 +154,11 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
   const { data: mediaFiles = [], isLoading } = useQuery({
     queryKey: ["/api/media"],
     queryFn: async () => {
+      console.log("=== FETCHING MEDIA FILES ===");
       const response = await apiRequest("GET", "/api/media");
-      return response.json();
+      const data = await response.json();
+      console.log("=== MEDIA FILES RESPONSE ===", data);
+      return data;
     },
     enabled: !!user && showGallery
   });
@@ -167,14 +170,21 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
       return response.json();
     },
     onSuccess: async (data) => {
+      console.log("=== UPLOAD SUCCESS - INVALIDATING QUERIES ===");
       queryClient.invalidateQueries({ queryKey: ["/api/media"] });
       
       // Trigger automatic verification for uploaded media
       // Server returns a single media object directly
       if (data && data.id) {
         const mediaId = data.id;
+        console.log("=== STARTING VERIFICATION FOR MEDIA ID ===", mediaId);
         setUploadedMediaId(mediaId);
         await verifyUpload(mediaId);
+        
+        // Force refresh the media query after verification
+        console.log("=== FORCING MEDIA QUERY REFRESH ===");
+        queryClient.invalidateQueries({ queryKey: ["/api/media"] });
+        queryClient.refetchQueries({ queryKey: ["/api/media"] });
       }
     },
     onError: (error: any) => {

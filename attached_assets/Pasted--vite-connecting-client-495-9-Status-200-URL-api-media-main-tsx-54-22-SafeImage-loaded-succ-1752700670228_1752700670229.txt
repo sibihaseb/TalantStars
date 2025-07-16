@@ -1,0 +1,74 @@
+
+[vite] connecting... client:495:9
+Status: 200, URL: /api/media main.tsx:54:22
+SafeImage loaded successfully: https://s3.us-east-1.wasabisys.com/talent/user-5/media/8bda1d49-d63b-4eed-86e3-bc0ca3a5b701.png main.tsx:54:22
+Partitioned cookie or storage access was provided to “https://m.stripe.network/inner.html#url=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&title=&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&muid=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&sid=725d458d-17dc-4914-8cbd-6667b632e3faa60851&version=6&preview=false&__shared_params__[version]=basil” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+out-4.5.44.js:1:39660
+Cookie warnings 3
+=== FORM SUBMIT TRIGGERED === main.tsx:54:22
+Upload type: file main.tsx:54:22
+Selected files: 
+Array [ File ]
+main.tsx:54:22
+File metadata: 
+Array [ {…} ]
+main.tsx:54:22
+Media form data: 
+Object { title: "", description: "", category: "portfolio", files: (1) […], externalUrl: "" }
+main.tsx:54:22
+=== PREPARING UPLOAD === main.tsx:54:22
+File: GMP Ad Specs.jpg (997623 bytes) main.tsx:54:22
+Title: GMP Ad Specs main.tsx:54:22
+Category: portfolio main.tsx:54:22
+Description: main.tsx:54:22
+=== STARTING UPLOAD MUTATION === main.tsx:54:22
+=== FRONTEND API REQUEST === main.tsx:54:22
+Method: POST, URL: /api/media main.tsx:54:22
+FormData entries: 
+Array(4) [ (2) […], (2) […], (2) […], (2) […] ]
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media/verify/1752700631511 main.tsx:54:22
+Verification attempt 1 result: 
+Object { mediaId: 1752700631511, exists: true, accessible: true, databaseConsistent: true, fileSize: 997623, mimeType: "image/jpeg", url: "https://s3.us-east-1.wasabisys.com/talent/user-5/media/9cbc3c3e-81e7-4eb3-b3df-8cc6ffb0de34.jpg", errors: [], verificationAttempts: 1, s3Accessible: true, … }
+main.tsx:54:22
+=== UPLOAD SUCCESS === main.tsx:54:22
+=== FORM SUBMIT TRIGGERED === main.tsx:54:22
+Upload type: file main.tsx:54:22
+Selected files: 
+Array [ File ]
+main.tsx:54:22
+File metadata: 
+Array [ {…} ]
+main.tsx:54:22
+Media form data: 
+Object { title: "", description: "", category: "portfolio", files: (1) […], externalUrl: "" }
+main.tsx:54:22
+=== PREPARING UPLOAD === main.tsx:54:22
+File: 68754f2e69227.jpg.webp (23696 bytes) main.tsx:54:22
+Title: 68754f2e69227.jpg main.tsx:54:22
+Category: portfolio main.tsx:54:22
+Description: main.tsx:54:22
+=== STARTING UPLOAD MUTATION === main.tsx:54:22
+=== FRONTEND API REQUEST === main.tsx:54:22
+Method: POST, URL: /api/media main.tsx:54:22
+FormData entries: 
+Array(4) [ (2) […], (2) […], (2) […], (2) […] ]
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media/verify/1752700648837 main.tsx:54:22
+Verification attempt 1 result: 
+Object { mediaId: 1752700648837, exists: true, accessible: true, databaseConsistent: true, fileSize: 23696, mimeType: "image/webp", url: "https://s3.us-east-1.wasabisys.com/talent/user-5/media/eeff03c0-04c9-46ba-a62a-167fbae9444f.webp", errors: [], verificationAttempts: 1, s3Accessible: true, … }
+main.tsx:54:22
+=== UPLOAD SUCCESS === main.tsx:54:22
+
+​
+
