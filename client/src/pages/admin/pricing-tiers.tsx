@@ -44,6 +44,7 @@ interface PricingTier {
   maxPhotos: number;
   maxVideos: number;
   maxAudio: number;
+  maxExternalLinks: number;
   maxStorageGB: number;
   maxProjects: number;
   maxApplications: number;
@@ -85,6 +86,7 @@ export default function PricingTiersPage() {
     maxPhotos: 10,
     maxVideos: 5,
     maxAudio: 5,
+    maxExternalLinks: 3,
     maxStorageGB: 1,
     maxProjects: 3,
     maxApplications: 10,
@@ -227,6 +229,7 @@ export default function PricingTiersPage() {
       maxPhotos: tier.maxPhotos,
       maxVideos: tier.maxVideos,
       maxAudio: tier.maxAudio,
+      maxExternalLinks: tier.maxExternalLinks,
       maxStorageGB: tier.maxStorageGB,
       maxProjects: tier.maxProjects,
       maxApplications: tier.maxApplications,
@@ -618,6 +621,7 @@ export default function PricingTiersPage() {
                     <div>Photos: {tier.maxPhotos}</div>
                     <div>Videos: {tier.maxVideos}</div>
                     <div>Audio: {tier.maxAudio}</div>
+                    <div>Links: {tier.maxExternalLinks}</div>
                     <div>Storage: {tier.maxStorageGB}GB</div>
                   </div>
                 </div>
@@ -799,6 +803,15 @@ export default function PricingTiersPage() {
                       type="number"
                       value={formData.maxAudio}
                       onChange={(e) => setFormData(prev => ({ ...prev, maxAudio: parseInt(e.target.value) }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="maxExternalLinks">Max External Links</Label>
+                    <Input
+                      id="maxExternalLinks"
+                      type="number"
+                      value={formData.maxExternalLinks}
+                      onChange={(e) => setFormData(prev => ({ ...prev, maxExternalLinks: parseInt(e.target.value) }))}
                     />
                   </div>
                   <div>

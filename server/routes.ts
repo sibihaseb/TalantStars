@@ -165,7 +165,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const user = await simpleStorage.getUser(userId);
       const profile = await simpleStorage.getUserProfile(userId);
-      res.json({ ...user, profile });
+      
+      // Get user's pricing tier limits
+      let tierLimits = null;
+      if (user.pricingTierId) {
+        tierLimits = await storage.getPricingTier(user.pricingTierId);
+      }
+      
+      res.json({ ...user, profile, tierLimits });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -406,6 +413,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!file && !externalUrl) {
         return res.status(400).json({ message: "Either file or external URL is required" });
+      }
+
+      // Check user's pricing tier limits
+      const user = await simpleStorage.getUser(userId);
+      let tierLimits = null;
+      if (user?.pricingTierId) {
+        tierLimits = await simpleStorage.getPricingTier(user.pricingTierId);
+      }
+
+      // For simple storage, we'll use a simplified approach
+      // In a real implementation, you'd track media uploads in the database
+      const photoCount = 0; // TODO: Implement actual media counting
+      const videoCount = 0; // TODO: Implement actual media counting
+      const audioCount = 0; // TODO: Implement actual media counting
+      const externalLinkCount = 0; // TODO: Implement actual media counting
+
+      // Check limits if user has a tier
+      if (tierLimits) {
+        const fileType = file ? getFileTypeFromMimeType(file.mimetype) : 'external';
+        
+        if (externalUrl) {
+          if (tierLimits.maxExternalLinks > 0 && externalLinkCount >= tierLimits.maxExternalLinks) {
+            return res.status(400).json({ 
+              message: `External link limit reached. Your plan allows ${tierLimits.maxExternalLinks} external links. Upgrade your plan to add more.`,
+              limitType: 'external_links',
+              currentCount: externalLinkCount,
+              maxAllowed: tierLimits.maxExternalLinks
+            });
+          }
+        } else if (file) {
+          if (fileType === 'image' && tierLimits.maxPhotos > 0 && photoCount >= tierLimits.maxPhotos) {
+            return res.status(400).json({ 
+              message: `Photo limit reached. Your plan allows ${tierLimits.maxPhotos} photos. Upgrade your plan to add more.`,
+              limitType: 'photos',
+              currentCount: photoCount,
+              maxAllowed: tierLimits.maxPhotos
+            });
+          }
+          
+          if (fileType === 'video' && tierLimits.maxVideos > 0 && videoCount >= tierLimits.maxVideos) {
+            return res.status(400).json({ 
+              message: `Video limit reached. Your plan allows ${tierLimits.maxVideos} videos. Upgrade your plan to add more.`,
+              limitType: 'videos',
+              currentCount: videoCount,
+              maxAllowed: tierLimits.maxVideos
+            });
+          }
+          
+          if (fileType === 'audio' && tierLimits.maxAudio > 0 && audioCount >= tierLimits.maxAudio) {
+            return res.status(400).json({ 
+              message: `Audio limit reached. Your plan allows ${tierLimits.maxAudio} audio files. Upgrade your plan to add more.`,
+              limitType: 'audio',
+              currentCount: audioCount,
+              maxAllowed: tierLimits.maxAudio
+            });
+          }
+        }
       }
 
       let mediaData;

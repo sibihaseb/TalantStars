@@ -252,6 +252,7 @@ export const pricingTiers = pgTable("pricing_tiers", {
   maxPhotos: integer("max_photos").default(0), // 0 = unlimited
   maxVideos: integer("max_videos").default(0),
   maxAudio: integer("max_audio").default(0),
+  maxExternalLinks: integer("max_external_links").default(0), // 0 = unlimited
   maxStorageGB: integer("max_storage_gb").default(1),
   maxProjects: integer("max_projects").default(0),
   maxApplications: integer("max_applications").default(0),

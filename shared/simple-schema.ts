@@ -113,11 +113,32 @@ export const userProfiles = pgTable("user_profiles", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Pricing tiers table
+export const pricingTiers = pgTable("pricing_tiers", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  category: varchar("category").notNull(), // talent, manager, producer, agent
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  annualPrice: decimal("annual_price", { precision: 10, scale: 2 }),
+  isActive: boolean("is_active").default(true),
+  maxPhotos: integer("max_photos").default(5),
+  maxVideos: integer("max_videos").default(2),
+  maxAudio: integer("max_audio").default(3),
+  maxExternalLinks: integer("max_external_links").default(3),
+  permissions: jsonb("permissions").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(userProfiles, {
     fields: [users.id],
     references: [userProfiles.userId],
+  }),
+  pricingTier: one(pricingTiers, {
+    fields: [users.pricingTierId],
+    references: [pricingTiers.id],
   }),
 }));
 
@@ -126,6 +147,10 @@ export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
     fields: [userProfiles.userId],
     references: [users.id],
   }),
+}));
+
+export const pricingTiersRelations = relations(pricingTiers, ({ many }) => ({
+  users: many(users),
 }));
 
 // Insert schemas
@@ -141,8 +166,16 @@ export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
   updatedAt: true,
 });
 
+export const insertPricingTierSchema = createInsertSchema(pricingTiers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UserProfile = typeof userProfiles.$inferSelect;
 export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
+export type PricingTier = typeof pricingTiers.$inferSelect;
+export type InsertPricingTier = z.infer<typeof insertPricingTierSchema>;

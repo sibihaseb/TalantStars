@@ -1,10 +1,12 @@
 import {
   users,
   userProfiles,
+  pricingTiers,
   type User,
   type InsertUser,
   type UserProfile,
   type InsertUserProfile,
+  type PricingTier,
 } from "@shared/simple-schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -23,6 +25,7 @@ export interface IStorage {
   
   // Tier operations
   updateUserTier(userId: number, tierId: number): Promise<User>;
+  getPricingTier(id: number): Promise<PricingTier | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -81,6 +84,14 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+  
+  async getPricingTier(id: number): Promise<PricingTier | undefined> {
+    const [tier] = await db
+      .select()
+      .from(pricingTiers)
+      .where(eq(pricingTiers.id, id));
+    return tier || undefined;
   }
 }
 

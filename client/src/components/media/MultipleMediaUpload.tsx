@@ -25,7 +25,8 @@ import {
   Mic,
   Check,
   AlertCircle,
-  Plus
+  Plus,
+  Crown
 } from "lucide-react";
 
 interface MultipleMediaUploadProps {
@@ -223,11 +224,50 @@ export function MultipleMediaUpload({
           
           uploadedMedia.push(result);
           
-        } catch (error) {
-          updateFileMetadata(fileData.id, { 
-            uploading: false, 
-            error: error instanceof Error ? error.message : 'Upload failed' 
-          });
+        } catch (error: any) {
+          // Handle tier limit errors specifically
+          if (error.response && error.response.status === 400) {
+            try {
+              const errorData = await error.response.json();
+              if (errorData.limitType) {
+                // Show upgrade prompt for tier limits
+                updateFileMetadata(fileData.id, { 
+                  uploading: false, 
+                  error: errorData.message 
+                });
+                
+                toast({
+                  title: "Upload Limit Reached",
+                  description: errorData.message,
+                  variant: "destructive",
+                  action: (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.location.href = '/pricing'}
+                    >
+                      <Crown className="w-4 h-4 mr-2" />
+                      Upgrade Plan
+                    </Button>
+                  ),
+                });
+                
+                // Stop further uploads if limit reached
+                break;
+              }
+            } catch (parseError) {
+              // Fallback to generic error
+              updateFileMetadata(fileData.id, { 
+                uploading: false, 
+                error: 'Upload failed' 
+              });
+            }
+          } else {
+            updateFileMetadata(fileData.id, { 
+              uploading: false, 
+              error: error instanceof Error ? error.message : 'Upload failed' 
+            });
+          }
         }
         
         // Update overall progress
