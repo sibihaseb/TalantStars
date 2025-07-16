@@ -94,15 +94,15 @@ function Router() {
         {isAuthenticated ? <PlanProtectedRoute><Dashboard /></PlanProtectedRoute> : <Auth />}
       </Route>
       
-      {/* Legacy routes that redirect to unified dashboard */}
+      {/* Direct dashboard routes */}
       <Route path="/talent-dashboard">
-        {isAuthenticated ? <PlanProtectedRoute><Dashboard /></PlanProtectedRoute> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><TalentDashboard /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/producer-dashboard">
-        {isAuthenticated ? <PlanProtectedRoute><Dashboard /></PlanProtectedRoute> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><ProducerDashboard /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/manager-dashboard">
-        {isAuthenticated ? <PlanProtectedRoute><Dashboard /></PlanProtectedRoute> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><ManagerDashboard /></PlanProtectedRoute> : <Auth />}
       </Route>
       
       {/* Other protected routes */}

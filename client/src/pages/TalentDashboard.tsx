@@ -102,9 +102,6 @@ export default function TalentDashboard() {
   const calculateProfileProgress = () => {
     if (!profile) return [];
     
-    console.log('Profile data:', profile);
-    console.log('Job history:', jobHistory);
-    
     const progressItems = [
       {
         id: 'basic-info',
@@ -164,21 +161,16 @@ export default function TalentDashboard() {
       }
     ];
 
-    console.log('Progress items:', progressItems);
-    console.log('Incomplete items:', progressItems.filter(item => !item.completed));
-
     return progressItems;
   };
 
   const profileProgress = useMemo(() => calculateProfileProgress(), [profile, jobHistory]);
 
   const handleProgressItemClick = (item: any) => {
-    console.log('handleProgressItemClick called with:', item);
     // Navigate to appropriate section based on item
     switch (item.id) {
       case 'basic-info':
         if (!item.completed) {
-          console.log('Navigating to onboarding for basic-info');
           setLocation('/onboarding');
         } else {
           setActiveTab('overview');
