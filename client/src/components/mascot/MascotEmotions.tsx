@@ -183,7 +183,7 @@ export function MascotEmotions({
             stroke="#333"
             strokeWidth="2"
             fill="none"
-            animate={{ d: ["M 42 58 Q 50 64 58 58", "M 42 58 Q 50 66 58 58"] }}
+            animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
           />
         );
@@ -215,7 +215,7 @@ export function MascotEmotions({
             stroke="#333"
             strokeWidth="2"
             fill="none"
-            animate={{ d: ["M 44 58 Q 50 62 56 58", "M 44 58 Q 50 64 56 58"] }}
+            animate={{ scale: [1, 1.05, 1] }}
             transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
           />
         );
