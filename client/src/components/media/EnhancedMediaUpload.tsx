@@ -170,8 +170,9 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
       queryClient.invalidateQueries({ queryKey: ["/api/media"] });
       
       // Trigger automatic verification for uploaded media
-      if (data && data.length > 0) {
-        const mediaId = data[0].id;
+      // Server returns a single media object directly
+      if (data && data.id) {
+        const mediaId = data.id;
         setUploadedMediaId(mediaId);
         await verifyUpload(mediaId);
       }

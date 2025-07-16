@@ -1,0 +1,50 @@
+
+[vite] connecting... client:495:9
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools react-dom.development.js:29895:17
+Partitioned cookie or storage access was provided to “https://js.stripe.com/v3/controller-with-preconnect-67e7d76025729db8840021afbc80d0db.html#__shared_params__[version]=basil&apiKey=pk_test_51NwxezAhOiHhM1yQX94ydY61tL8LaN6K1HeVYkAzhAaV36YpuWt9pdJ1XCYLjoxOWn4fsNzENnfeFzC0lFoB7Z3100t4ZBV3JL&apiVersion=2025-03-31.basil&stripeJsId=1cbe0985-a394-45e3-a402-870124cdc621&stripeObjId=sobj-02f39998-b34c-451d-91ec-c12aab0d5509&firstStripeInstanceCreatedLatency=4&controllerCount=1&isCheckout=false&stripeJsLoadTime=1752700290443&manualBrowserDeprecationRollout=false&mids[guid]=NA&mids[muid]=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&mids[sid]=725d458d-17dc-4914-8cbd-6667b632e3faa60851&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&controllerId=__privateStripeController5581” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+controller-with-preconnect-795459fc652e8f946a758c90649e58b6.js:1:22427
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/6 main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/applications main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/opportunities main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/user/profile main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/social/stats main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+Partitioned cookie or storage access was provided to “https://m.stripe.network/inner.html#url=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&title=&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&muid=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&sid=725d458d-17dc-4914-8cbd-6667b632e3faa60851&version=6&preview=false&__shared_params__[version]=basil” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+out-4.5.44.js:1:39660
+Cookie warnings 3
+=== FORM SUBMIT TRIGGERED === main.tsx:54:22
+Upload type: file main.tsx:54:22
+Selected files: 
+Array [ File ]
+main.tsx:54:22
+File metadata: 
+Array [ {…} ]
+main.tsx:54:22
+Media form data: 
+Object { title: "", description: "", category: "portfolio", files: (1) […], externalUrl: "" }
+main.tsx:54:22
+=== PREPARING UPLOAD === main.tsx:54:22
+File: GMP Ad Specs.jpg (997623 bytes) main.tsx:54:22
+Title: GMP Ad Specs main.tsx:54:22
+Category: portfolio main.tsx:54:22
+Description: main.tsx:54:22
+=== STARTING UPLOAD MUTATION === main.tsx:54:22
+=== FRONTEND API REQUEST === main.tsx:54:22
+Method: POST, URL: /api/media main.tsx:54:22
+FormData entries: 
+Array(4) [ (2) […], (2) […], (2) […], (2) […] ]
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+=== UPLOAD SUCCESS === main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+
+​
+
