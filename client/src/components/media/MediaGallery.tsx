@@ -166,6 +166,20 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({
               src={currentItem.url} 
               alt={currentItem.title}
               className="max-w-full max-h-full object-contain rounded-lg"
+              crossOrigin="anonymous"
+              onError={(e) => {
+                console.error('Image loading error:', currentItem.url);
+                // Try to reload the image after a short delay
+                setTimeout(() => {
+                  if (e.target) {
+                    (e.target as HTMLImageElement).src = currentItem.url;
+                  }
+                }, 1000);
+              }}
+              onLoad={() => {
+                console.log('Image loaded successfully:', currentItem.url);
+              }}
+              loading="lazy"
             />
           </div>
         );

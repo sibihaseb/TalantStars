@@ -1,0 +1,70 @@
+
+[vite] connecting... client:495:9
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/applications main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+Image corrupt or truncated. 99dedafd-451b-4d47-8b63-1f1fbb5dfa6b.png
+Partitioned cookie or storage access was provided to “https://m.stripe.network/inner.html#url=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&title=&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&muid=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&sid=725d458d-17dc-4914-8cbd-6667b632e3faa60851&version=6&preview=false&__shared_params__[version]=basil” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+out-4.5.44.js:1:39660
+Cookie warnings 4
+=== FORM SUBMIT TRIGGERED === main.tsx:54:22
+Upload type: file main.tsx:54:22
+Selected files: 
+Array [ File ]
+main.tsx:54:22
+File metadata: 
+Array [ {…} ]
+main.tsx:54:22
+Media form data: 
+Object { title: "", description: "", category: "portfolio", files: (1) […], externalUrl: "" }
+main.tsx:54:22
+=== PREPARING UPLOAD === main.tsx:54:22
+File: GMP Ad Specs.jpg (997623 bytes) main.tsx:54:22
+Title: GMP Ad Specs main.tsx:54:22
+Category: portfolio main.tsx:54:22
+Description: main.tsx:54:22
+=== STARTING UPLOAD MUTATION === main.tsx:54:22
+=== FRONTEND API REQUEST === main.tsx:54:22
+Method: POST, URL: /api/media main.tsx:54:22
+FormData entries: 
+Array(4) [ (2) […], (2) […], (2) […], (2) […] ]
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+=== UPLOAD SUCCESS === main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+Image corrupt or truncated. 99dedafd-451b-4d47-8b63-1f1fbb5dfa6b.png
+=== FORM SUBMIT TRIGGERED === main.tsx:54:22
+Upload type: file main.tsx:54:22
+Selected files: 
+Array [ File ]
+main.tsx:54:22
+File metadata: 
+Array [ {…} ]
+main.tsx:54:22
+Media form data: 
+Object { title: "", description: "", category: "portfolio", files: (1) […], externalUrl: "" }
+main.tsx:54:22
+=== PREPARING UPLOAD === main.tsx:54:22
+File: LOGO.png (1806479 bytes) main.tsx:54:22
+Title: LOGO main.tsx:54:22
+Category: portfolio main.tsx:54:22
+Description: main.tsx:54:22
+=== STARTING UPLOAD MUTATION === main.tsx:54:22
+=== FRONTEND API REQUEST === main.tsx:54:22
+Method: POST, URL: /api/media main.tsx:54:22
+FormData entries: 
+Array(4) [ (2) […], (2) […], (2) […], (2) […] ]
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+=== UPLOAD SUCCESS === main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+
+​
+

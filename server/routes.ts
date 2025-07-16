@@ -900,6 +900,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         files: uploadedFiles.map(f => ({ name: f.originalName, type: f.type }))
       }, req);
 
+      // Add a small delay to ensure images are fully available from Wasabi S3
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       res.json({ files: uploadedFiles });
     } catch (error: any) {
       logger.error("MEDIA_UPLOAD", "Media upload failed", { 
