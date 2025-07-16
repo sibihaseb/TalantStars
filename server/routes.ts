@@ -1020,7 +1020,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/media', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const media = await storage.getUserMediaFiles(userId);
+      const media = await simpleStorage.getUserMediaFiles(userId);
       
       // Add empty tags array for now to avoid the database column issue
       const mediaWithTags = media.map(mediaFile => ({
@@ -1082,7 +1082,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      await storage.deleteMediaFile(id);
+      await simpleStorage.deleteMediaFile(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting media:", error);
