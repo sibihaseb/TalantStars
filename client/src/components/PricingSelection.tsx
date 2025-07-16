@@ -68,9 +68,9 @@ export function PricingSelection({ userRole, onComplete }: PricingSelectionProps
   const category = getCategoryFromRole(userRole);
 
   const { data: pricingTiers, isLoading } = useQuery({
-    queryKey: ['/api/admin/pricing-tiers'],
+    queryKey: ['/api/pricing-tiers', category],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/admin/pricing-tiers');
+      const response = await apiRequest('GET', `/api/pricing-tiers?role=${category}`);
       return response.json();
     },
   });

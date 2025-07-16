@@ -48,9 +48,9 @@ export default function Checkout() {
   const [paymentProcessing, setPaymentProcessing] = useState(false);
 
   const { data: tier } = useQuery({
-    queryKey: ['/api/admin/pricing-tiers', tierId],
+    queryKey: ['/api/pricing-tiers', tierId],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/admin/pricing-tiers');
+      const response = await apiRequest('GET', '/api/pricing-tiers');
       const tiers = await response.json();
       return tiers.find((t: PricingTier) => t.id === parseInt(tierId || '0'));
     },
