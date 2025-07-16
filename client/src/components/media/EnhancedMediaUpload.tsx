@@ -279,8 +279,8 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
 
     if (uploadType === 'file' && (!mediaFormData.files || mediaFormData.files.length === 0)) {
       toast({
-        title: "Files required",
-        description: "Please select one or more files to upload",
+        title: "File required",
+        description: "Please select a file to upload",
         variant: "destructive",
       });
       return;
@@ -301,10 +301,10 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
     formData.append('category', mediaFormData.category);
     
     if (uploadType === 'file' && mediaFormData.files) {
-      // Append multiple files
-      mediaFormData.files.forEach((file) => {
-        formData.append('files', file);
-      });
+      // Server expects single file with field name 'file'
+      if (mediaFormData.files.length > 0) {
+        formData.append('file', mediaFormData.files[0]);
+      }
     } else if (uploadType === 'external' && mediaFormData.externalUrl) {
       formData.append('externalUrl', mediaFormData.externalUrl);
     }
