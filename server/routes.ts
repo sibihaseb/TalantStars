@@ -19,7 +19,8 @@ import {
   insertSocialPostSchema,
   insertJobHistorySchema,
   insertSocialConnectionSchema,
-  insertSocialInteractionSchema
+  insertSocialInteractionSchema,
+  jobCommunications
 } from "@shared/schema";
 import { z } from "zod";
 import { requestPasswordReset, validatePasswordResetToken, resetPassword } from "./passwordUtils";
@@ -884,6 +885,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching job applications:", error);
       res.status(500).json({ message: "Failed to fetch job applications" });
+    }
+  });
+
+  // Job communications routes
+  app.post('/api/jobs/:id/communications', isAuthenticated, async (req: any, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      const senderId = req.user.id;
+      const { message, receiverId } = req.body;
+
+      if (!message || !receiverId) {
+        return res.status(400).json({ message: "Message and receiver ID are required" });
+      }
+
+      const communication = await storage.createJobCommunication(jobId, senderId, receiverId, message);
+      res.json(communication);
+    } catch (error) {
+      console.error("Error creating job communication:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  app.get('/api/jobs/:id/communications', isAuthenticated, async (req, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      const communications = await storage.getJobCommunications(jobId);
+      res.json(communications);
+    } catch (error) {
+      console.error("Error fetching job communications:", error);
+      res.status(500).json({ message: "Failed to fetch communications" });
+    }
+  });
+
+  app.patch('/api/job-communications/:id/read', isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.markJobCommunicationAsRead(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking communication as read:", error);
+      res.status(500).json({ message: "Failed to mark as read" });
     }
   });
 

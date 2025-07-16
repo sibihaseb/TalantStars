@@ -150,137 +150,182 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-bold">
-            Plan Selection Required
-          </DialogTitle>
-          <DialogDescription className="text-center text-muted-foreground">
-            <div className="flex items-center justify-center gap-2 mb-2">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg mb-6">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-3 mb-4">
               {getRoleIcon(userRole)}
-              <span>Welcome, {getRoleLabel(userRole)}!</span>
+              <h1 className="text-3xl font-bold">Welcome, {getRoleLabel(userRole)}!</h1>
             </div>
-            <p>To access the platform, please select a plan that suits your needs.</p>
-            <p className="text-sm text-red-600 mt-2">This step is mandatory and cannot be skipped.</p>
-          </DialogDescription>
-        </DialogHeader>
+            <p className="text-lg opacity-90">Choose the perfect plan to unlock your potential</p>
+            <p className="text-sm opacity-75 mt-2">Select a plan to continue - this step is required to access the platform</p>
+          </div>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-          {roleSpecificTiers.map((tier: any) => (
-            <Card 
-              key={tier.id} 
-              className={`relative transition-all duration-200 hover:shadow-lg ${
-                selectedTier === tier.id ? 'ring-2 ring-primary' : ''
-              }`}
-            >
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{tier.name}</CardTitle>
-                  <Badge variant="outline">{tier.category}</Badge>
-                </div>
-                <CardDescription>{tier.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold">
-                    ${tier.price}
-                    <span className="text-sm font-normal text-muted-foreground">
-                      /30
-                    </span>
+        {/* Plans Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {roleSpecificTiers.map((tier: any, index: number) => {
+            const isPopular = index === 1; // Make middle tier popular
+            const isFree = parseFloat(tier.price) === 0;
+            const isPremium = parseFloat(tier.price) > 50;
+            
+            return (
+              <Card 
+                key={tier.id} 
+                className={`relative transition-all duration-300 hover:shadow-xl hover:scale-105 ${
+                  selectedTier === tier.id ? 'ring-2 ring-blue-500 shadow-lg' : ''
+                } ${isPopular ? 'border-2 border-blue-500' : ''} ${isPremium ? 'border-2 border-purple-500' : ''}`}
+              >
+                {/* Popular Badge */}
+                {isPopular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-blue-500 text-white px-4 py-1 text-xs font-semibold">
+                      MOST POPULAR
+                    </Badge>
                   </div>
-                  {tier.annualPrice && parseFloat(tier.annualPrice) > 0 && (
-                    <div className="text-sm text-muted-foreground mt-1">
-                      Annual: ${tier.annualPrice}/year
-                      <Badge variant="outline" className="ml-2 text-green-600 border-green-600 text-xs">
-                        Save ${(parseFloat(tier.price) * 12 - parseFloat(tier.annualPrice)).toFixed(0)}
-                      </Badge>
-                    </div>
-                  )}
-                </div>
+                )}
+                
+                {/* Premium Badge */}
+                {isPremium && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-purple-500 text-white px-4 py-1 text-xs font-semibold">
+                      PREMIUM
+                    </Badge>
+                  </div>
+                )}
 
-                <div className="space-y-2">
-                  {tier.permissions && tier.permissions.map((permission: any, index: number) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      <span className="text-sm">{permission.name}</span>
+                <CardHeader className={`text-center pb-4 ${isPopular ? 'bg-blue-50' : isPremium ? 'bg-purple-50' : ''}`}>
+                  <div className="mb-4">
+                    <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${
+                      isFree ? 'bg-gray-100 text-gray-600' : 
+                      isPopular ? 'bg-blue-100 text-blue-600' : 
+                      'bg-purple-100 text-purple-600'
+                    }`}>
+                      {isFree ? <Star className="h-8 w-8" /> : 
+                       isPopular ? <Crown className="h-8 w-8" /> : 
+                       <Briefcase className="h-8 w-8" />}
                     </div>
-                  ))}
-                </div>
-
-                <div className="space-y-3">
-                  {/* Monthly Option */}
-                  <Button
-                    onClick={() => handleSelectPlan(tier.id, false)}
-                    disabled={selectTierMutation.isPending || createPaymentMutation.isPending}
-                    className="w-full"
-                    variant={tier.price === "0.00" ? "outline" : "default"}
-                  >
-                    {(selectTierMutation.isPending || createPaymentMutation.isPending) ? (
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                        {tier.price === "0.00" ? "Selecting..." : "Processing..."}
-                      </div>
-                    ) : (
-                      <>
-                        {tier.price === "0.00" ? (
-                          "Get Started Free"
-                        ) : (
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-2">
-                              <CreditCard className="h-4 w-4" />
-                              Choose Monthly
-                            </div>
-                            <span className="font-semibold">${tier.price}/30</span>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </Button>
+                  </div>
                   
-                  {/* Annual Option */}
-                  {tier.annualPrice && parseFloat(tier.annualPrice) > 0 && (
+                  <CardTitle className="text-2xl font-bold mb-2">{tier.name}</CardTitle>
+                  <CardDescription className="text-base">{tier.description}</CardDescription>
+                  
+                  {/* Pricing */}
+                  <div className="mt-4">
+                    <div className="text-4xl font-bold text-gray-900">
+                      {isFree ? 'Free' : `$${tier.price}`}
+                      {!isFree && (
+                        <span className="text-sm font-normal text-gray-500">/month</span>
+                      )}
+                    </div>
+                    {tier.annualPrice && parseFloat(tier.annualPrice) > 0 && (
+                      <div className="text-sm text-gray-600 mt-2">
+                        <span className="line-through">${(parseFloat(tier.price) * 12).toFixed(0)}</span>
+                        <span className="ml-2 font-semibold text-green-600">${tier.annualPrice}/year</span>
+                        <Badge variant="outline" className="ml-2 text-green-600 border-green-600 text-xs">
+                          {Math.round((1 - parseFloat(tier.annualPrice) / (parseFloat(tier.price) * 12)) * 100)}% OFF
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-6">
+                  {/* Features List */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900 mb-3">What's included:</h4>
+                    {tier.permissions && tier.permissions.slice(0, 6).map((permission: any, index: number) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                        <span className="text-sm text-gray-700">{permission.name}</span>
+                      </div>
+                    ))}
+                    {tier.permissions && tier.permissions.length > 6 && (
+                      <div className="text-sm text-gray-500">
+                        + {tier.permissions.length - 6} more features
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="space-y-3 pt-4">
+                    {/* Monthly Button */}
                     <Button
-                      onClick={() => handleSelectPlan(tier.id, true)}
+                      onClick={() => handleSelectPlan(tier.id, false)}
                       disabled={selectTierMutation.isPending || createPaymentMutation.isPending}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white border-green-600"
-                      variant="default"
+                      className={`w-full h-12 font-semibold transition-all ${
+                        isFree ? 'bg-gray-600 hover:bg-gray-700' :
+                        isPopular ? 'bg-blue-600 hover:bg-blue-700' :
+                        'bg-purple-600 hover:bg-purple-700'
+                      }`}
+                      size="lg"
                     >
                       {(selectTierMutation.isPending || createPaymentMutation.isPending) ? (
                         <div className="flex items-center gap-2">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                          Processing...
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+                          {isFree ? "Activating..." : "Processing..."}
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between w-full">
-                          <div className="flex items-center gap-2">
-                            <CreditCard className="h-4 w-4" />
-                            Choose Annual
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold">${tier.annualPrice}/year</span>
-                            <Badge variant="secondary" className="bg-white text-green-600 font-semibold">
-                              Save ${(parseFloat(tier.price) * 12 - parseFloat(tier.annualPrice)).toFixed(0)}
-                            </Badge>
-                          </div>
-                        </div>
+                        <>
+                          {isFree ? (
+                            <>
+                              <Star className="h-5 w-5 mr-2" />
+                              Get Started Free
+                            </>
+                          ) : (
+                            <>
+                              <CreditCard className="h-5 w-5 mr-2" />
+                              Start Monthly - ${tier.price}/mo
+                            </>
+                          )}
+                        </>
                       )}
                     </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    
+                    {/* Annual Button */}
+                    {tier.annualPrice && parseFloat(tier.annualPrice) > 0 && (
+                      <Button
+                        onClick={() => handleSelectPlan(tier.id, true)}
+                        disabled={selectTierMutation.isPending || createPaymentMutation.isPending}
+                        className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-semibold"
+                        size="lg"
+                        variant="default"
+                      >
+                        {(selectTierMutation.isPending || createPaymentMutation.isPending) ? (
+                          <div className="flex items-center gap-2">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+                            Processing...
+                          </div>
+                        ) : (
+                          <>
+                            <Crown className="h-5 w-5 mr-2" />
+                            Save with Annual - ${tier.annualPrice}/yr
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
-        <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-          <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
-            <Crown className="h-4 w-4" />
-            <span className="font-medium">Important Notice</span>
+        {/* Footer Notice */}
+        <div className="mt-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+          <div className="flex items-start gap-3">
+            <Crown className="h-6 w-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">
+                Why do I need to select a plan?
+              </h3>
+              <p className="text-sm text-amber-700 dark:text-amber-300 leading-relaxed">
+                Plan selection ensures you get the right features and helps us provide the best experience for your role. 
+                Even our free plan requires selection so you understand what's available. You can always upgrade later!
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-            Plan selection is mandatory to access platform features. Even our free plan requires explicit selection 
-            to ensure you understand the features available to you.
-          </p>
         </div>
       </DialogContent>
     </Dialog>

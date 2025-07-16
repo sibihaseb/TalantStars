@@ -183,6 +183,7 @@ export const jobs = pgTable("jobs", {
   requirements: text("requirements"),
   status: jobStatusEnum("status").default("open"),
   isPublic: boolean("is_public").default(true),
+  allowCommunication: boolean("allow_communication").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -195,6 +196,17 @@ export const jobApplications = pgTable("job_applications", {
   coverLetter: text("cover_letter"),
   proposedRate: decimal("proposed_rate", { precision: 10, scale: 2 }),
   status: varchar("status").default("pending"), // pending, accepted, rejected
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Job communication messages
+export const jobCommunications = pgTable("job_communications", {
+  id: serial("id").primaryKey(),
+  jobId: integer("job_id").references(() => jobs.id).notNull(),
+  senderId: integer("sender_id").references(() => users.id).notNull(),
+  receiverId: integer("receiver_id").references(() => users.id).notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

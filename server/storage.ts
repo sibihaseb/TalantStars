@@ -37,6 +37,7 @@ import {
   paymentTransactions,
   paymentRefunds,
   paymentAnalytics,
+  jobCommunications,
   type User,
   type UpsertUser,
   type UserProfile,
@@ -194,6 +195,11 @@ export interface IStorage {
   getJob(id: number): Promise<Job | undefined>;
   updateJob(id: number, job: Partial<InsertJob>): Promise<Job>;
   deleteJob(id: number): Promise<void>;
+  
+  // Job communications
+  createJobCommunication(jobId: number, senderId: number, receiverId: number, message: string): Promise<any>;
+  getJobCommunications(jobId: number): Promise<any[]>;
+  markJobCommunicationAsRead(id: number): Promise<void>;
   
   // Job application operations
   createJobApplication(application: InsertJobApplication): Promise<JobApplication>;
@@ -754,6 +760,48 @@ export class DatabaseStorage implements IStorage {
 
   async deleteJob(id: number): Promise<void> {
     await db.delete(jobs).where(eq(jobs.id, id));
+  }
+
+  // Job communications
+  async createJobCommunication(jobId: number, senderId: number, receiverId: number, message: string): Promise<any> {
+    const [newCommunication] = await db
+      .insert(jobCommunications)
+      .values({
+        jobId,
+        senderId,
+        receiverId,
+        message,
+        isRead: false,
+        createdAt: new Date(),
+      })
+      .returning();
+    return newCommunication;
+  }
+
+  async getJobCommunications(jobId: number): Promise<any[]> {
+    return await db
+      .select({
+        id: jobCommunications.id,
+        jobId: jobCommunications.jobId,
+        senderId: jobCommunications.senderId,
+        receiverId: jobCommunications.receiverId,
+        message: jobCommunications.message,
+        isRead: jobCommunications.isRead,
+        createdAt: jobCommunications.createdAt,
+        senderName: sql`CONCAT(${users.firstName}, ' ', ${users.lastName})`.as('senderName'),
+        senderImage: users.profileImageUrl,
+      })
+      .from(jobCommunications)
+      .leftJoin(users, eq(jobCommunications.senderId, users.id))
+      .where(eq(jobCommunications.jobId, jobId))
+      .orderBy(asc(jobCommunications.createdAt));
+  }
+
+  async markJobCommunicationAsRead(id: number): Promise<void> {
+    await db
+      .update(jobCommunications)
+      .set({ isRead: true })
+      .where(eq(jobCommunications.id, id));
   }
 
   // Job application operations

@@ -363,11 +363,23 @@ export default function TalentDashboard() {
 
   const handleCompleteProfile = () => {
     // Navigate to onboarding page for profile completion
-    window.location.href = '/onboarding';
+    setLocation('/onboarding');
   };
 
   const handleViewApplications = () => {
     setActiveTab("applications");
+  };
+
+  const handleEditProfile = () => {
+    setLocation('/onboarding');
+  };
+
+  const handleUpdateProfile = () => {
+    setLocation('/onboarding');
+  };
+
+  const handleUploadMedia = () => {
+    setIsMediaDialogOpen(true);
   };
 
   const { data: socialStats } = useQuery({
@@ -419,7 +431,10 @@ export default function TalentDashboard() {
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
-              <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+              <Button 
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                onClick={handleEditProfile}
+              >
                 <Edit3 className="w-4 h-4 mr-2" />
                 Edit Profile
               </Button>
@@ -803,9 +818,32 @@ export default function TalentDashboard() {
                               <Star className="w-4 h-4 text-yellow-500 fill-current" />
                               <span className="text-sm font-medium">{opp.match}% match</span>
                             </div>
-                            <Button size="sm" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-                              Apply Now
-                            </Button>
+                            <div className="flex items-center space-x-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  // Navigate to job details page
+                                  setLocation(`/jobs/${opp.id}`);
+                                }}
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                View Details
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                                onClick={() => {
+                                  // Handle apply/accept action
+                                  toast({
+                                    title: "Application Submitted",
+                                    description: "Your application has been sent to the producer.",
+                                  });
+                                }}
+                              >
+                                Accept
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </CardContent>

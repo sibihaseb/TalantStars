@@ -21,6 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { JobCommunication } from "@/components/JobCommunication";
 import { 
   Search, 
   MapPin, 
@@ -47,6 +48,8 @@ interface Job {
   requirements: string;
   status: string;
   isPublic: boolean;
+  allowCommunication: boolean;
+  userId: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -214,7 +217,7 @@ export default function BrowseJobs() {
     <ThemeProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
         <Header />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
           {/* Page Header */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -523,6 +526,13 @@ export default function BrowseJobs() {
                               </div>
                             </DialogContent>
                           </Dialog>
+                          <JobCommunication 
+                            jobId={job.id}
+                            jobTitle={job.title}
+                            posterId={job.userId}
+                            posterName="Job Poster"
+                            allowCommunication={job.allowCommunication}
+                          />
                         </div>
                       </div>
                     </CardContent>
