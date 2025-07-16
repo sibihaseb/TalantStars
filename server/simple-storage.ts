@@ -7,7 +7,7 @@ import {
   type UserProfile,
   type InsertUserProfile,
   type PricingTier,
-} from "@shared/simple-schema";
+} from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -94,11 +94,18 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getPricingTier(id: number): Promise<PricingTier | undefined> {
-    const [tier] = await db
-      .select()
-      .from(pricingTiers)
-      .where(eq(pricingTiers.id, id));
-    return tier || undefined;
+    try {
+      console.log('Getting pricing tier with ID:', id);
+      const [tier] = await db
+        .select()
+        .from(pricingTiers)
+        .where(eq(pricingTiers.id, id));
+      console.log('Found tier:', tier);
+      return tier || undefined;
+    } catch (error) {
+      console.error('Error getting pricing tier:', error);
+      throw error;
+    }
   }
 
   // Media operations (mock implementation for simple storage)

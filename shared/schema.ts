@@ -245,7 +245,7 @@ export const pricingTiers = pgTable("pricing_tiers", {
   annualPrice: decimal("annual_price", { precision: 10, scale: 2 }).default("0"),
   duration: integer("duration").notNull(), // in days
   features: text("features").array().notNull(),
-  active: boolean("active").default(true),
+  active: boolean("is_active").default(true),
   category: categoryEnum("category").notNull().default("talent"),
   
   // Resource limits
