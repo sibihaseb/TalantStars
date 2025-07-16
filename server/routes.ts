@@ -413,6 +413,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       upload.single('file')(req, res, (err) => {
         if (err) {
           console.error('Multer error:', err);
+          // Handle boundary errors more gracefully
+          if (err.message.includes('Boundary') || err.message.includes('boundary')) {
+            return res.status(500).json({ message: 'File upload error: Invalid file format or corrupted request' });
+          }
           return res.status(500).json({ message: 'File upload error: ' + err.message });
         }
         next();

@@ -47,7 +47,7 @@ const uploadSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
   description: z.string().optional(),
   category: z.string().min(1, 'Category is required'),
-  file: z.any().optional(),
+  file: z.instanceof(File).optional(),
   externalUrl: z.string().url('Please enter a valid URL').optional(),
 });
 
@@ -215,13 +215,25 @@ export default function Media() {
   });
 
   const onSubmit = (data: UploadFormData) => {
-    if (uploadType === 'file' && !data.file) {
-      toast({
-        title: "Error",
-        description: "Please select a file to upload",
-        variant: "destructive",
-      });
-      return;
+    if (uploadType === 'file') {
+      if (!data.file) {
+        toast({
+          title: "Error",
+          description: "Please select a file to upload",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Validate file type
+      if (!(data.file instanceof File)) {
+        toast({
+          title: "Error",
+          description: "Invalid file selected",
+          variant: "destructive",
+        });
+        return;
+      }
     }
     
     if (uploadType === 'external' && !data.externalUrl) {
