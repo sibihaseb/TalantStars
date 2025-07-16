@@ -189,6 +189,60 @@ export class DatabaseStorage implements IStorage {
     return null;
   }
 
+  // Profile sharing storage
+  private profileSharing: Map<number, any> = new Map();
+
+  async getProfileSharingSettings(userId: number): Promise<any> {
+    return this.profileSharing.get(userId) || {
+      customUrl: null,
+      isPublic: false,
+      allowDirectMessages: false,
+      showContactInfo: false,
+      showSocialLinks: false,
+      showMediaGallery: false,
+      shareableFields: [],
+      profileViews: 0,
+      lastShared: null
+    };
+  }
+
+  async updateProfileSharingSettings(userId: number, settings: any): Promise<any> {
+    const currentSettings = await this.getProfileSharingSettings(userId);
+    const updatedSettings = {
+      ...currentSettings,
+      ...settings,
+      updatedAt: new Date().toISOString()
+    };
+    
+    this.profileSharing.set(userId, updatedSettings);
+    return updatedSettings;
+  }
+
+  async getProfileByCustomUrl(customUrl: string): Promise<any> {
+    // Find profile by custom URL
+    for (const [userId, settings] of this.profileSharing.entries()) {
+      if (settings.customUrl === customUrl) {
+        return { userId, ...settings };
+      }
+    }
+    return null;
+  }
+
+  async incrementProfileViews(userId: number): Promise<void> {
+    const settings = await this.getProfileSharingSettings(userId);
+    settings.profileViews = (settings.profileViews || 0) + 1;
+    this.profileSharing.set(userId, settings);
+  }
+
+  async checkCustomUrlAvailable(customUrl: string, excludeUserId?: number): Promise<boolean> {
+    for (const [userId, settings] of this.profileSharing.entries()) {
+      if (settings.customUrl === customUrl && userId !== excludeUserId) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   // In-memory storage for admin settings
   private adminSettings: Map<string, any> = new Map([
     ['session_duration_hours', { 

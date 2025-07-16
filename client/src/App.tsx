@@ -40,6 +40,7 @@ import FeaturedTalents from "@/pages/FeaturedTalents";
 import TestUpload from "@/pages/TestUpload";
 import DebugLogs from "@/pages/DebugLogs";
 import VerificationDemo from "@/pages/verification-demo";
+import ProfileSharingPage from "@/pages/ProfileSharingPage";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -148,6 +149,9 @@ function Router() {
       </Route>
       <Route path="/social">
         {isAuthenticated ? <PlanProtectedRoute><Social /></PlanProtectedRoute> : <Auth />}
+      </Route>
+      <Route path="/profile-sharing">
+        {isAuthenticated ? <PlanProtectedRoute><ProfileSharingPage /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/checkout">
         {isAuthenticated ? <Checkout /> : <Auth />}

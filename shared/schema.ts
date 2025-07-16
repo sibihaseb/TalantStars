@@ -1120,30 +1120,7 @@ export const userRepresentationRelations = relations(userRepresentation, ({ one 
   }),
 }));
 
-// Schema types
-export type User = typeof users.$inferSelect;
-export type InsertUser = typeof users.$inferInsert;
-export type UserProfile = typeof userProfiles.$inferSelect;
-export type InsertUserProfile = typeof userProfiles.$inferInsert;
-export type UserRepresentation = typeof userRepresentation.$inferSelect;
-export type InsertUserRepresentation = typeof userRepresentation.$inferInsert;
-export type PricingTier = typeof pricingTiers.$inferSelect;
-export type InsertPricingTier = typeof pricingTiers.$inferInsert;
-export type ProfileQuestion = typeof profileQuestions.$inferSelect;
-export type InsertProfileQuestion = typeof profileQuestions.$inferInsert;
-export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
-export type InsertPaymentTransaction = typeof paymentTransactions.$inferInsert;
-export type PaymentRefund = typeof paymentRefunds.$inferSelect;
-export type InsertPaymentRefund = typeof paymentRefunds.$inferInsert;
-export type PaymentAnalytics = typeof paymentAnalytics.$inferSelect;
-export type InsertPaymentAnalytics = typeof paymentAnalytics.$inferInsert;
 
-// Zod schemas for validation
-export const insertUserSchema = createInsertSchema(users);
-export const insertUserRepresentationSchema = createInsertSchema(userRepresentation);
-export const insertPaymentTransactionSchema = createInsertSchema(paymentTransactions);
-export const insertPaymentRefundSchema = createInsertSchema(paymentRefunds);
-export const insertPaymentAnalyticsSchema = createInsertSchema(paymentAnalytics);
 
 export const chatRoomsRelations = relations(chatRooms, ({ one, many }) => ({
   creator: one(users, {
@@ -1357,53 +1334,7 @@ export const insertVerificationDocumentSchema = createInsertSchema(verificationD
   submittedAt: true,
 });
 
-// Types
-export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type UserProfile = typeof userProfiles.$inferSelect;
-export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
-export type MediaFile = typeof mediaFiles.$inferSelect;
-export type InsertMediaFile = z.infer<typeof insertMediaFileSchema>;
-export type Job = typeof jobs.$inferSelect;
-export type InsertJob = z.infer<typeof insertJobSchema>;
-export type JobApplication = typeof jobApplications.$inferSelect;
-export type InsertJobApplication = z.infer<typeof insertJobApplicationSchema>;
-export type Message = typeof messages.$inferSelect;
-export type InsertMessage = z.infer<typeof insertMessageSchema>;
-export type PricingTier = typeof pricingTiers.$inferSelect;
-export type InsertPricingTier = z.infer<typeof insertPricingTierSchema>;
-export type ProfileQuestion = typeof profileQuestions.$inferSelect;
-export type InsertProfileQuestion = z.infer<typeof insertProfileQuestionSchema>;
-export type SystemSetting = typeof systemSettings.$inferSelect;
-export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
-export type AdminLog = typeof adminLogs.$inferSelect;
-export type InsertAdminLog = z.infer<typeof insertAdminLogSchema>;
-export type Analytics = typeof analytics.$inferSelect;
-export type InsertAnalytics = z.infer<typeof insertAnalyticsSchema>;
-export type Meeting = typeof meetings.$inferSelect;
-export type InsertMeeting = z.infer<typeof insertMeetingSchema>;
-export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
-export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
-export type RolePermission = typeof rolePermissions.$inferSelect;
-export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
-export type UserPermission = typeof userPermissions.$inferSelect;
-export type InsertUserPermission = z.infer<typeof insertUserPermissionSchema>;
-export type Notification = typeof notifications.$inferSelect;
-export type InsertNotification = z.infer<typeof insertNotificationSchema>;
-export type AvailabilityCalendar = typeof availabilityCalendar.$inferSelect;
-export type InsertAvailabilityCalendar = z.infer<typeof insertAvailabilityCalendarSchema>;
-export type MediaUpload = typeof mediaUploads.$inferSelect;
-export type InsertMediaUpload = z.infer<typeof insertMediaUploadSchema>;
-export type UserAvailability = typeof userAvailability.$inferSelect;
-export type InsertUserAvailability = z.infer<typeof insertUserAvailabilitySchema>;
-export type VerificationDocument = typeof verificationDocuments.$inferSelect;
-export type InsertVerificationDocument = z.infer<typeof insertVerificationDocumentSchema>;
-export type JobHistory = typeof jobHistory.$inferSelect;
-export type InsertJobHistory = z.infer<typeof insertJobHistorySchema>;
-export type SocialPost = typeof socialPosts.$inferSelect;
-export type InsertSocialPost = z.infer<typeof insertSocialPostSchema>;
-export type SocialConnection = typeof socialConnections.$inferSelect;
-export type InsertSocialConnection = z.infer<typeof insertSocialConnectionSchema>;
+
 
 export const insertSkillEndorsementSchema = createInsertSchema(skillEndorsements).omit({
   id: true,
@@ -1526,24 +1457,6 @@ export const insertEmailCampaignSchema = createInsertSchema(emailCampaigns);
 
 export type EmailCampaign = typeof emailCampaigns.$inferSelect;
 export type InsertEmailCampaign = z.infer<typeof insertEmailCampaignSchema>;
-export type UserSubscription = typeof userSubscriptions.$inferSelect;
-export type InsertUserSubscription = z.infer<typeof insertUserSubscriptionSchema>;
-export type ChatRoom = typeof chatRooms.$inferSelect;
-export type InsertChatRoom = z.infer<typeof insertChatRoomSchema>;
-export type ChatRoomParticipant = typeof chatRoomParticipants.$inferSelect;
-export type InsertChatRoomParticipant = z.infer<typeof insertChatRoomParticipantSchema>;
-export type ChatMessage = typeof chatMessages.$inferSelect;
-export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
-export type JobMatch = typeof jobMatches.$inferSelect;
-export type InsertJobMatch = z.infer<typeof insertJobMatchSchema>;
-export type EmailTemplate = typeof emailTemplates.$inferSelect;
-export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
-export type AiGeneratedContent = typeof aiGeneratedContent.$inferSelect;
-export type InsertAiGeneratedContent = z.infer<typeof insertAiGeneratedContentSchema>;
-export type MediaProcessingQueue = typeof mediaProcessingQueue.$inferSelect;
-export type InsertMediaProcessingQueue = z.infer<typeof insertMediaProcessingQueueSchema>;
-export type VerificationRequest = typeof verificationRequests.$inferSelect;
-export type InsertVerificationRequest = z.infer<typeof insertVerificationRequestSchema>;
 
 // Insert schemas for social media features
 export const insertFriendshipSchema = createInsertSchema(friendships).omit({
@@ -1605,6 +1518,36 @@ export const insertUserTagSchema = createInsertSchema(userTags).omit({
   createdAt: true,
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserRepresentationSchema = createInsertSchema(userRepresentation).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPaymentTransactionSchema = createInsertSchema(paymentTransactions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPaymentRefundSchema = createInsertSchema(paymentRefunds).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPaymentAnalyticsSchema = createInsertSchema(paymentAnalytics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertMediaFileTagSchema = createInsertSchema(mediaFileTags).omit({
   id: true,
   createdAt: true,
@@ -1616,11 +1559,14 @@ export const insertSocialInteractionSchema = createInsertSchema(socialInteractio
 });
 
 // Types
-export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpsertUser = typeof users.$inferInsert;
 export type UserProfile = typeof userProfiles.$inferSelect;
-export type UserWithProfile = User & { profile?: UserProfile };
 export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
+export type UserWithProfile = User & { profile?: UserProfile };
+export type UserRepresentation = typeof userRepresentation.$inferSelect;
+export type InsertUserRepresentation = z.infer<typeof insertUserRepresentationSchema>;
 export type MediaFile = typeof mediaFiles.$inferSelect;
 export type InsertMediaFile = z.infer<typeof insertMediaFileSchema>;
 export type Job = typeof jobs.$inferSelect;
@@ -1658,6 +1604,12 @@ export type UserTag = typeof userTags.$inferSelect;
 export type InsertUserTag = z.infer<typeof insertUserTagSchema>;
 export type MediaFileTag = typeof mediaFileTags.$inferSelect;
 export type InsertMediaFileTag = z.infer<typeof insertMediaFileTagSchema>;
+export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
+export type InsertPaymentTransaction = z.infer<typeof insertPaymentTransactionSchema>;
+export type PaymentRefund = typeof paymentRefunds.$inferSelect;
+export type InsertPaymentRefund = z.infer<typeof insertPaymentRefundSchema>;
+export type PaymentAnalytics = typeof paymentAnalytics.$inferSelect;
+export type InsertPaymentAnalytics = z.infer<typeof insertPaymentAnalyticsSchema>;
 
 // Types for new tables
 export type UserSubscription = typeof userSubscriptions.$inferSelect;
@@ -1678,6 +1630,8 @@ export type MediaProcessingQueue = typeof mediaProcessingQueue.$inferSelect;
 export type InsertMediaProcessingQueue = z.infer<typeof insertMediaProcessingQueueSchema>;
 export type VerificationRequest = typeof verificationRequests.$inferSelect;
 export type InsertVerificationRequest = z.infer<typeof insertVerificationRequestSchema>;
+
+
 
 // Social media types
 export type Friendship = typeof friendships.$inferSelect;

@@ -606,6 +606,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           let thumbnailUrl = null;
           let hlsUrl = null;
           
+          // Generate thumbnail for video files
+          if (fileType === 'video' && file.buffer) {
+            try {
+              const { generateVideoThumbnail } = await import('./video-processing');
+              thumbnailUrl = await generateVideoThumbnail(file.buffer, file.originalname, userId);
+              
+              logger.mediaUpload('Video thumbnail generation attempted', {
+                originalFilename: file.originalname,
+                thumbnailGenerated: !!thumbnailUrl,
+                thumbnailUrl: thumbnailUrl
+              }, req);
+            } catch (error) {
+              logger.error('VIDEO_PROCESSING', 'Failed to generate video thumbnail', {
+                error: error.message,
+                originalFilename: file.originalname
+              }, req);
+              // Continue with upload even if thumbnail generation fails
+            }
+          }
+          
           // Process video for HLS streaming if requested and it's a video file
           if (processVideo === 'true' && fileType === 'video') {
             try {
@@ -4439,6 +4459,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/debug/logs', isAuthenticated, (req: any, res) => {
     logger.clearLogs();
     res.json({ message: 'Logs cleared successfully' });
+  });
+
+  // Profile Sharing API
+  app.get('/api/profile/sharing', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const settings = await simpleStorage.getProfileSharingSettings(userId);
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get profile sharing settings' });
+    }
+  });
+
+  app.put('/api/profile/sharing', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const settings = await simpleStorage.updateProfileSharingSettings(userId, req.body);
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update profile sharing settings' });
+    }
+  });
+
+  app.put('/api/profile/sharing/custom-url', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { customUrl } = req.body;
+
+      if (!customUrl) {
+        return res.status(400).json({ error: 'Custom URL is required' });
+      }
+
+      // Validate URL format (alphanumeric, hyphens, underscores)
+      const urlPattern = /^[a-zA-Z0-9-_]+$/;
+      if (!urlPattern.test(customUrl)) {
+        return res.status(400).json({ error: 'Custom URL can only contain letters, numbers, hyphens, and underscores' });
+      }
+
+      // Check if URL is available
+      const isAvailable = await simpleStorage.checkCustomUrlAvailable(customUrl, userId);
+      if (!isAvailable) {
+        return res.status(409).json({ error: 'This custom URL is already taken' });
+      }
+
+      const settings = await simpleStorage.updateProfileSharingSettings(userId, { customUrl });
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update custom URL' });
+    }
+  });
+
+  // Public profile view endpoint
+  app.get('/api/profile/:identifier', async (req: any, res) => {
+    try {
+      const { identifier } = req.params;
+      let userId: number;
+      let profileData: any;
+
+      // Check if identifier is a custom URL
+      if (isNaN(Number(identifier))) {
+        const customProfile = await simpleStorage.getProfileByCustomUrl(identifier);
+        if (!customProfile) {
+          return res.status(404).json({ error: 'Profile not found' });
+        }
+        userId = customProfile.userId;
+        profileData = customProfile;
+      } else {
+        userId = Number(identifier);
+        profileData = await simpleStorage.getProfileSharingSettings(userId);
+      }
+
+      // Check if profile is public
+      if (!profileData.isPublic) {
+        return res.status(403).json({ error: 'This profile is private' });
+      }
+
+      // Get user and profile data
+      const user = await simpleStorage.getUser(userId);
+      const profile = await simpleStorage.getUserProfile(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Increment profile views
+      await simpleStorage.incrementProfileViews(userId);
+
+      // Build response based on sharing settings
+      const response: any = {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl,
+        role: user.role,
+        bio: profile?.bio,
+        location: profile?.location,
+        displayName: profile?.displayName,
+        isVerified: profile?.isVerified || false,
+        profileViews: profileData.profileViews + 1,
+        customUrl: profileData.customUrl
+      };
+
+      // Add optional fields based on sharing settings
+      if (profileData.showContactInfo) {
+        response.email = user.email;
+        response.phoneNumber = profile?.phoneNumber;
+      }
+
+      if (profileData.showSocialLinks) {
+        response.website = profile?.website;
+        response.socialLinks = profile?.socialLinks;
+      }
+
+      if (profileData.showMediaGallery) {
+        const mediaFiles = await simpleStorage.getUserMediaFiles(userId);
+        response.mediaFiles = mediaFiles;
+      }
+
+      res.json(response);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get profile' });
+    }
   });
 
   return httpServer;
