@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -371,6 +371,9 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
                   <Upload className="h-5 w-5 text-blue-600" />
                   <span>Upload Media</span>
                 </DialogTitle>
+                <DialogDescription>
+                  Upload images, videos, audio files, or add external links to your media gallery.
+                </DialogDescription>
               </DialogHeader>
               
               <div className="space-y-6">

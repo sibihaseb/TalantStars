@@ -17,6 +17,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ProgressMascot } from "@/components/mascot/ProgressMascot";
+import { MultipleMediaUpload } from "@/components/media/MultipleMediaUpload";
+import { EnhancedMediaUpload } from "@/components/media/EnhancedMediaUpload";
 import { 
   Calendar, 
   Briefcase, 
@@ -891,86 +893,67 @@ export default function TalentDashboard() {
           </TabsContent>
 
           <TabsContent value="portfolio">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Portfolio</CardTitle>
-                    <CardDescription>Showcase your work and talent</CardDescription>
+            <div className="space-y-6">
+              {/* Enhanced Media Upload with Gallery */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Media Gallery</CardTitle>
+                      <CardDescription>Showcase your work and talent with photos, videos, and audio</CardDescription>
+                    </div>
+                    <div className="flex space-x-2">
+                      <MultipleMediaUpload 
+                        maxFiles={10}
+                        onUploadComplete={(media) => {
+                          toast({
+                            title: "Upload Complete",
+                            description: `Successfully uploaded ${media.length} files`,
+                          });
+                          queryClient.invalidateQueries({ queryKey: ['/api/media'] });
+                        }}
+                      />
+                      <Button 
+                        onClick={() => setLocation('/media')}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <Camera className="w-4 h-4" />
+                        View All Media
+                      </Button>
+                    </div>
                   </div>
-                  <Dialog open={isMediaDialogOpen} onOpenChange={setIsMediaDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-                        <Upload className="w-4 h-4 mr-2" />
-                        Add Media
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Upload Media</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="media-file">Select File</Label>
-                          <Input
-                            id="media-file"
-                            type="file"
-                            accept="image/*,video/*,audio/*"
-                            onChange={(e) => setMediaFile(e.target.files?.[0] || null)}
-                          />
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setIsMediaDialogOpen(false)}>
-                            Cancel
-                          </Button>
-                          <Button 
-                            onClick={handleMediaUpload}
-                            disabled={!mediaFile || uploadMediaMutation.isPending}
-                          >
-                            {uploadMediaMutation.isPending ? "Uploading..." : "Upload"}
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Card className="border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors">
-                    <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-                      <Camera className="w-12 h-12 text-gray-400 mb-4" />
-                      <p className="text-sm text-gray-600 mb-2">Add Photos</p>
-                      <Button variant="outline" size="sm" onClick={() => setIsMediaDialogOpen(true)}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Upload
-                      </Button>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors">
-                    <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-                      <PlayCircle className="w-12 h-12 text-gray-400 mb-4" />
-                      <p className="text-sm text-gray-600 mb-2">Add Videos</p>
-                      <Button variant="outline" size="sm" onClick={() => setIsMediaDialogOpen(true)}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Upload
-                      </Button>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors">
-                    <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-                      <Award className="w-12 h-12 text-gray-400 mb-4" />
-                      <p className="text-sm text-gray-600 mb-2">Add Achievements</p>
-                      <Dialog open={isJobHistoryDialogOpen} onOpenChange={setIsJobHistoryDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
+                </CardHeader>
+                <CardContent>
+                  <EnhancedMediaUpload 
+                    showGallery={true}
+                    onUploadComplete={(media) => {
+                      toast({
+                        title: "Media Uploaded",
+                        description: "Your media has been added to your portfolio",
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['/api/media'] });
+                    }}
+                  />
+                </CardContent>
+              </Card>
+              
+              {/* Achievements Section */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Achievements & Experience</CardTitle>
+                      <CardDescription>Add your work history and achievements</CardDescription>
+                    </div>
+                    <Dialog open={isJobHistoryDialogOpen} onOpenChange={setIsJobHistoryDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Achievement
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
                           <DialogHeader>
                             <DialogTitle>Add Job History</DialogTitle>
                           </DialogHeader>
@@ -1055,12 +1038,19 @@ export default function TalentDashboard() {
                           </div>
                         </DialogContent>
                       </Dialog>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-8">
+                      <Award className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600 dark:text-gray-400">
+                        Add your work history and achievements to showcase your experience
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
 
           <TabsContent value="calendar">
             <Card>
