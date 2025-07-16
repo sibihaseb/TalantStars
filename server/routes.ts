@@ -31,6 +31,7 @@ import { scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
 import { uploadFileToWasabi, deleteFileFromWasabi, getFileTypeFromMimeType } from "./wasabi-config";
 import multer from "multer";
+import { logger } from "./logger";
 import { createUploadNotification } from "./simple-notifications";
 import { subscriptionManager } from './subscription-management';
 import { cronJobManager } from './cron-jobs';
@@ -428,24 +429,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Media routes - support single file and external URLs
   app.post('/api/media', (req: any, res: any, next: any) => {
-    console.log('=== RAW MEDIA UPLOAD REQUEST RECEIVED ===');
-    console.log('URL:', req.url);
-    console.log('Method:', req.method);
-    console.log('Content-Type:', req.headers['content-type']);
+    logger.mediaUpload('Raw media upload request received', {
+      url: req.url,
+      method: req.method,
+      contentType: req.headers['content-type'],
+      contentLength: req.headers['content-length'],
+      userAgent: req.headers['user-agent']
+    }, req);
     next();
   }, isAuthenticated, requirePlan, (req: any, res: any, next: any) => {
-    console.log('=== MEDIA UPLOAD REQUEST RECEIVED ===');
-    console.log('Request headers:', {
-      'content-type': req.headers['content-type'],
-      'content-length': req.headers['content-length'],
-      'user-agent': req.headers['user-agent']
-    });
-    console.log('Request body keys:', Object.keys(req.body || {}));
+    logger.mediaUpload('Media upload request passed authentication', {
+      userId: req.user?.id,
+      sessionId: req.sessionID,
+      bodyKeys: Object.keys(req.body || {}),
+      hasFile: !!req.file
+    }, req);
     
     // Custom error handler for multer
     upload.single('file')(req, res, (err: any) => {
       if (err) {
-        console.error('=== MULTER ERROR ===', err);
+        logger.error('MEDIA_UPLOAD', 'Multer error occurred', {
+          error: err.message,
+          code: err.code,
+          stack: err.stack
+        }, req);
         
         if (err.message && err.message.includes('Multipart: Boundary not found')) {
           return res.status(400).json({ 
@@ -467,16 +474,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      console.log('=== MULTER SUCCESS ===');
-      console.log('File received:', req.file ? 'YES' : 'NO');
-      if (req.file) {
-        console.log('File details:', {
+      logger.mediaUpload('Multer processing completed successfully', {
+        fileReceived: !!req.file,
+        fileDetails: req.file ? {
           originalname: req.file.originalname,
           mimetype: req.file.mimetype,
           size: req.file.size,
           hasBuffer: !!req.file.buffer
-        });
-      }
+        } : null
+      }, req);
       
       next();
     });
@@ -486,23 +492,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const file = req.file as Express.Multer.File;
       const { title, description, category, externalUrl, processVideo } = req.body;
       
-      console.log('Media upload request received:', {
+      logger.mediaUpload('Processing media upload request', {
         userId,
         hasFile: !!file,
         title,
         description,
         category,
+        externalUrl,
+        processVideo,
         fileDetails: file ? {
           filename: file.filename,
           originalname: file.originalname,
           mimetype: file.mimetype,
           size: file.size
         } : null
-      });
+      }, req);
       
       // This endpoint is now only for file uploads
       if (!file) {
-        console.error('No file received in media upload request');
+        logger.error('MEDIA_UPLOAD', 'No file received in media upload request', {
+          bodyKeys: Object.keys(req.body || {}),
+          hasFile: !!file
+        }, req);
         return res.status(400).json({ message: "File is required for this endpoint. Use /api/media/external for external URLs." });
       }
 
@@ -556,15 +567,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         try {
-          // Upload file to Wasabi
-          console.log('Attempting to upload file to Wasabi:', {
+          logger.mediaUpload('Attempting to upload file to Wasabi', {
             originalname: file.originalname,
             mimetype: file.mimetype,
             size: file.size,
-            hasBuffer: !!file.buffer
-          });
+            hasBuffer: !!file.buffer,
+            path: `user-${userId}/media`
+          }, req);
+          
           const uploadResult = await uploadFileToWasabi(file, `user-${userId}/media`);
-          console.log('Wasabi upload result:', uploadResult);
+          
+          logger.mediaUpload('Wasabi upload completed successfully', {
+            uploadResult,
+            wasabiKey: uploadResult.key,
+            wasabiUrl: uploadResult.url,
+            fileSize: uploadResult.size
+          }, req);
           
           let thumbnailUrl = null;
           let hlsUrl = null;
@@ -604,21 +622,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           };
           
-          console.log('Creating media file with data:', mediaData);
+          logger.database('Creating media file record in database', {
+            mediaData,
+            userId,
+            filename: uploadResult.key
+          }, req);
+          
           const createdMedia = await simpleStorage.createMediaFile(mediaData);
-          console.log('Media file created successfully:', createdMedia);
+          
+          logger.database('Media file created successfully in database', {
+            createdMediaId: createdMedia.id,
+            createdMediaUrl: createdMedia.url,
+            mediaType: createdMedia.mediaType
+          }, req);
           
           // Create notification for successful upload
           await createUploadNotification(userId, uploadResult.originalName);
           
+          logger.mediaUpload('Media upload completed successfully', {
+            mediaId: createdMedia.id,
+            wasabiUrl: createdMedia.url,
+            filename: uploadResult.originalName,
+            fileSize: uploadResult.size,
+            mediaType: fileType
+          }, req);
+          
           return res.json(createdMedia);
         } catch (error) {
-          console.error(`Error uploading file ${file.originalname}:`, error);
+          logger.error('MEDIA_UPLOAD', `Error uploading file ${file.originalname}`, {
+            error: error.message,
+            stack: error.stack,
+            fileName: file.originalname,
+            fileSize: file.size,
+            mimetype: file.mimetype
+          }, req);
           return res.status(500).json({ message: "Failed to upload file: " + error.message });
         }
       }
     } catch (error) {
-      console.error("Error creating media:", error);
+      logger.error('MEDIA_UPLOAD', 'Error creating media', {
+        error: error.message,
+        stack: error.stack,
+        bodyKeys: Object.keys(req.body || {}),
+        hasFile: !!req.file
+      }, req);
       res.status(500).json({ message: "Failed to create media" });
     }
   });
@@ -3973,6 +4020,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error recording payment transaction:", error);
       res.status(500).json({ message: "Failed to record payment transaction" });
     }
+  });
+
+  // Debug logging endpoints
+  app.get('/api/debug/logs', isAuthenticated, (req: any, res) => {
+    const { count = 100, level, category } = req.query;
+    const logs = logger.getRecentLogs(parseInt(count), level, category);
+    res.json({ logs, totalCount: logs.length });
+  });
+
+  app.get('/api/debug/logs/media', isAuthenticated, (req: any, res) => {
+    const logs = logger.getRecentLogs(200, undefined, 'MEDIA_UPLOAD');
+    res.json({ logs: logs.slice(-50), totalCount: logs.length });
+  });
+
+  app.get('/api/debug/logs/auth', isAuthenticated, (req: any, res) => {
+    const logs = logger.getRecentLogs(200, undefined, 'AUTH');
+    res.json({ logs: logs.slice(-50), totalCount: logs.length });
+  });
+
+  app.delete('/api/debug/logs', isAuthenticated, (req: any, res) => {
+    logger.clearLogs();
+    res.json({ message: 'Logs cleared successfully' });
   });
 
   return httpServer;

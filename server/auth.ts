@@ -9,6 +9,7 @@ import { User } from "@shared/simple-schema";
 import connectPg from "connect-pg-simple";
 import createMemoryStore from "memorystore";
 import { pool } from "./db";
+import { logger } from "./logger";
 
 declare global {
   namespace Express {
@@ -240,14 +241,25 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated = (req: any, res: any, next: any) => {
-  console.log("Traditional auth middleware - isAuthenticated:", req.isAuthenticated());
-  console.log("Traditional auth middleware - user:", req.user);
-  console.log("Traditional auth middleware - session:", req.session);
-  console.log("Traditional auth middleware - sessionID:", req.sessionID);
+  logger.auth('Authentication check', {
+    isAuthenticated: req.isAuthenticated(),
+    hasUser: !!req.user,
+    userId: req.user?.id,
+    username: req.user?.username,
+    sessionId: req.sessionID,
+    hasSession: !!req.session,
+    url: req.url,
+    method: req.method
+  }, req);
   
   if (req.isAuthenticated()) {
     return next();
   }
+  logger.auth('Authentication failed - unauthorized', {
+    url: req.url,
+    method: req.method,
+    sessionId: req.sessionID
+  }, req);
   res.status(401).json({ message: "Unauthorized" });
 };
 
