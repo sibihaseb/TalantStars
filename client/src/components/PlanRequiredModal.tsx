@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -88,6 +88,10 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
     return (
       <Dialog open={isOpen} onOpenChange={() => {}}>
         <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Loading Plans</DialogTitle>
+            <DialogDescription>Please wait while we load your available plans.</DialogDescription>
+          </DialogHeader>
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
@@ -103,14 +107,14 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
           <DialogTitle className="text-center text-2xl font-bold">
             Plan Selection Required
           </DialogTitle>
-          <div className="text-center text-muted-foreground">
+          <DialogDescription className="text-center text-muted-foreground">
             <div className="flex items-center justify-center gap-2 mb-2">
               {getRoleIcon(userRole)}
               <span>Welcome, {getRoleLabel(userRole)}!</span>
             </div>
             <p>To access the platform, please select a plan that suits your needs.</p>
             <p className="text-sm text-red-600 mt-2">This step is mandatory and cannot be skipped.</p>
-          </div>
+          </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">

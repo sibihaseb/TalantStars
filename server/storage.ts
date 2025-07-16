@@ -874,16 +874,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserTier(userId: string | number, tierId: number): Promise<User> {
-    const userIdStr = typeof userId === 'string' ? userId : userId.toString();
+    const userIdNum = typeof userId === 'string' ? parseInt(userId) : userId;
     
     // Update the pricing tier in the users table
     await db
       .update(users)
       .set({ pricingTierId: tierId })
-      .where(eq(users.id, userIdStr));
+      .where(eq(users.id, userIdNum));
     
     // Return the updated user
-    const user = await this.getUser(userIdStr);
+    const user = await this.getUser(userIdNum);
     return user!;
   }
 
