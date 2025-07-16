@@ -406,33 +406,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Media routes - support multiple files
   app.post('/api/media', isAuthenticated, requirePlan, (req, res, next) => {
-    console.log('Content-Type header:', req.headers['content-type']);
-    console.log('Request method:', req.method);
-    console.log('Request URL:', req.url);
-    console.log('Request body keys:', Object.keys(req.body || {}));
-    
-    // Try different multer configurations based on content type
     const contentType = req.headers['content-type'] || '';
     
     if (contentType.includes('multipart/form-data')) {
-      // Handle multipart form data
-      upload.array('files', 10)(req, res, (err) => {
+      // Handle multipart form data (file uploads)
+      upload.single('file')(req, res, (err) => {
         if (err) {
           console.error('Multer error:', err);
-          console.error('Error type:', err.constructor.name);
-          console.error('Error code:', err.code);
-          
-          // Try single file upload if array fails
-          upload.single('file')(req, res, (singleErr) => {
-            if (singleErr) {
-              console.error('Single file multer error:', singleErr);
-              return res.status(500).json({ message: 'File upload error: ' + singleErr.message });
-            }
-            next();
-          });
-        } else {
-          next();
+          return res.status(500).json({ message: 'File upload error: ' + err.message });
         }
+        next();
       });
     } else {
       // Handle JSON requests (for external URLs)
@@ -441,15 +424,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const files = req.files as Express.Multer.File[];
+      const file = req.file as Express.Multer.File;
       const { title, description, category, externalUrl, processVideo } = req.body;
       
-      console.log('Media upload request received');
-      console.log('Files:', files);
-      console.log('Body:', req.body);
-      
-      if ((!files || files.length === 0) && !externalUrl) {
-        return res.status(400).json({ message: "Either files or external URL is required" });
+      if (!file && !externalUrl) {
+        return res.status(400).json({ message: "Either a file or external URL is required" });
       }
 
       // Check user's pricing tier limits
@@ -503,11 +482,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(media);
       }
 
-      // Handle multiple file uploads
-      const uploadedMedia = [];
-      
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+      // Handle single file upload
+      if (file) {
         const fileType = file.mimetype.startsWith('image/') ? 'image' : 
                         file.mimetype.startsWith('video/') ? 'video' : 'audio';
         
@@ -580,8 +556,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             thumbnailUrl,
             mediaType: fileType,
             tags: [],
-            title: (Array.isArray(title) ? title[i] : title) || uploadResult.originalName,
-            description: (Array.isArray(description) ? description[i] : description) || '',
+            title: title || uploadResult.originalName,
+            description: description || '',
             isPublic: true,
             category: category || 'portfolio',
             hlsUrl,
@@ -593,15 +569,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
           
           const createdMedia = await simpleStorage.createMediaFile(mediaData);
-          uploadedMedia.push(createdMedia);
+          return res.json(createdMedia);
         } catch (error) {
           console.error(`Error uploading file ${file.originalname}:`, error);
-          // Continue with other files even if one fails
+          return res.status(500).json({ message: "Failed to upload file: " + error.message });
         }
       }
-      
-      // Return array of uploaded media or single item if only one file
-      res.json(uploadedMedia.length === 1 ? uploadedMedia[0] : uploadedMedia);
     } catch (error) {
       console.error("Error creating media:", error);
       res.status(500).json({ message: "Failed to create media" });

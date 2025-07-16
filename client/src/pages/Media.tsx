@@ -103,17 +103,6 @@ export default function Media() {
 
   const uploadMutation = useMutation({
     mutationFn: async (data: UploadFormData & { file?: File }) => {
-      const formData = new FormData();
-      formData.append('title', data.title);
-      formData.append('description', data.description || '');
-      formData.append('category', data.category);
-      
-      if (data.file) {
-        formData.append('file', data.file);
-      } else if (data.externalUrl) {
-        formData.append('externalUrl', data.externalUrl);
-      }
-
       setIsUploading(true);
       setUploadProgress(0);
 
@@ -129,7 +118,27 @@ export default function Media() {
       }, 500);
       
       try {
-        const response = await apiRequest('POST', '/api/media', formData);
+        let response;
+        
+        if (data.file) {
+          // For file uploads, use FormData
+          const formData = new FormData();
+          formData.append('title', data.title);
+          formData.append('description', data.description || '');
+          formData.append('category', data.category);
+          formData.append('file', data.file);
+          
+          response = await apiRequest('POST', '/api/media', formData);
+        } else if (data.externalUrl) {
+          // For external URLs, use JSON
+          response = await apiRequest('POST', '/api/media', {
+            title: data.title,
+            description: data.description || '',
+            category: data.category,
+            externalUrl: data.externalUrl
+          });
+        }
+        
         clearInterval(progressInterval);
         setUploadProgress(100);
         
