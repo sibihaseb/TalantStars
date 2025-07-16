@@ -84,14 +84,20 @@ export async function setupAuth(app: Express) {
   // Session middleware
   app.use(session(sessionSettings));
   
-  // Session debugging middleware
+  // Session debugging middleware with CORS for credentials
   app.use((req: any, res: any, next: any) => {
-    console.log("Session middleware - ID:", req.sessionID, "exists:", !!req.session, "user:", req.session?.passport?.user);
+    // Set CORS headers for credentials
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:5000');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    
     if (req.session && req.session.cookie) {
       req.session.cookie.secure = false;
       req.session.cookie.httpOnly = false;
       req.session.cookie.sameSite = 'lax';
     }
+    
     next();
   });
   
@@ -175,12 +181,21 @@ export async function setupAuth(app: Express) {
   app.post("/api/login", passport.authenticate("local"), (req, res) => {
     const user = req.user as any;
     
-    // Force secure to false after login
-    if (req.session && req.session.cookie) {
-      req.session.cookie.secure = false;
-    }
-    
-    res.status(200).json({ ...user, password: undefined });
+    // Force session to be saved properly
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error:", err);
+        return res.status(500).json({ message: "Login failed" });
+      }
+      
+      // Force secure to false after login
+      if (req.session && req.session.cookie) {
+        req.session.cookie.secure = false;
+        req.session.cookie.httpOnly = false;
+      }
+      
+      res.status(200).json({ ...user, password: undefined });
+    });
   });
 
   // Add admin login endpoint that matches the scratchpad
@@ -214,20 +229,26 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
+    console.log("User endpoint - isAuthenticated:", req.isAuthenticated(), "user:", req.user);
     if (!req.isAuthenticated()) return res.sendStatus(401);
     const user = req.user as any;
     res.json({ ...user, password: undefined });
   });
 
-  // Test route to check session middleware
+  // Test route to check session middleware and cookies
   app.get("/api/test-session", (req, res) => {
     console.log("Test session route called");
     console.log("Session ID:", req.sessionID);
     console.log("Session exists:", !!req.session);
+    console.log("Cookies:", req.headers.cookie);
+    console.log("User Agent:", req.headers['user-agent']);
+    console.log("Referer:", req.headers.referer);
     res.json({ 
       sessionID: req.sessionID,
       hasSession: !!req.session,
-      sessionData: req.session
+      cookies: req.headers.cookie,
+      isAuthenticated: req.isAuthenticated(),
+      user: req.user ? { ...req.user, password: undefined } : null
     });
   });
 }
