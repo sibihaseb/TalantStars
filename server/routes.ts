@@ -801,11 +801,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Upload verification endpoint
+  // Enhanced upload verification endpoint with retry logic
   app.post('/api/media/verify/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const mediaId = parseInt(req.params.id);
+      const maxRetries = 10;
+      const baseDelayMs = 500;
       
       const verificationResults = {
         mediaId,
@@ -815,57 +817,194 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fileSize: null,
         mimeType: null,
         url: null,
-        errors: []
+        errors: [],
+        verificationAttempts: 0,
+        s3Accessible: false,
+        databaseComplete: false,
+        finalAttempt: false
       };
-      
-      // Check if media exists in database
-      const media = await simpleStorage.getMediaFile(mediaId);
-      if (!media) {
-        verificationResults.errors.push('Media record not found in database');
-        return res.json(verificationResults);
-      }
-      
-      // Check if user owns the media
-      if (media.userId !== userId) {
-        verificationResults.errors.push('Access denied: Media belongs to different user');
-        return res.status(403).json(verificationResults);
-      }
-      
-      verificationResults.exists = true;
-      verificationResults.url = media.url;
-      verificationResults.mimeType = media.mimeType;
-      verificationResults.fileSize = media.size;
-      
-      // For external media, just check if URL is valid
-      if (media.isExternal) {
-        verificationResults.accessible = true;
-        verificationResults.databaseConsistent = true;
-      } else {
-        // For uploaded files, check accessibility
-        try {
-          const headResponse = await fetch(media.url, { method: 'HEAD' });
-          if (headResponse.ok) {
-            verificationResults.accessible = true;
-            const contentLength = headResponse.headers.get('content-length');
-            if (contentLength && parseInt(contentLength) === media.size) {
-              verificationResults.databaseConsistent = true;
-            } else {
-              verificationResults.errors.push('File size mismatch between database and storage');
-            }
-          } else {
-            verificationResults.errors.push(`File not accessible: HTTP ${headResponse.status}`);
-          }
-        } catch (error) {
-          verificationResults.errors.push(`File accessibility check failed: ${error.message}`);
-        }
-      }
-      
-      logger.mediaUpload('Media verification completed', {
+
+      logger.mediaUpload('Starting enhanced verification with retry logic', {
         mediaId,
         userId,
-        results: verificationResults
+        maxRetries
       }, req);
-      
+
+      // Retry verification with exponential backoff
+      let media = null;
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        verificationResults.verificationAttempts = attempt;
+        verificationResults.finalAttempt = (attempt === maxRetries);
+        
+        logger.mediaUpload(`Verification attempt ${attempt}/${maxRetries}`, {
+          mediaId,
+          userId,
+          attempt
+        }, req);
+
+        // Check if media exists in database
+        media = await simpleStorage.getMediaFile(mediaId);
+        if (!media) {
+          verificationResults.errors.push(`Attempt ${attempt}: Media record not found in database`);
+          logger.mediaUpload(`Attempt ${attempt}: No database record`, { mediaId, userId }, req);
+          
+          if (attempt < maxRetries) {
+            // Wait before retrying with exponential backoff
+            const delay = baseDelayMs * Math.pow(1.5, attempt - 1);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          } else {
+            logger.mediaUpload('Final attempt failed - media not found in database', { mediaId, userId }, req);
+            return res.json(verificationResults);
+          }
+        }
+
+        // Check if user owns the media
+        if (media.userId !== userId) {
+          verificationResults.errors.push('Access denied: Media belongs to different user');
+          logger.mediaUpload('Access denied - wrong user', { 
+            mediaId, 
+            mediaUserId: media.userId, 
+            requestUserId: userId 
+          }, req);
+          return res.status(403).json(verificationResults);
+        }
+
+        verificationResults.exists = true;
+        verificationResults.url = media.url;
+        verificationResults.mimeType = media.mimeType;
+        verificationResults.fileSize = media.size;
+        verificationResults.databaseComplete = !!(media.url && media.mimeType && media.size !== undefined);
+
+        logger.mediaUpload(`Attempt ${attempt}: Database record found`, {
+          mediaId,
+          url: media.url,
+          mimeType: media.mimeType,
+          size: media.size,
+          isExternal: media.isExternal,
+          databaseComplete: verificationResults.databaseComplete
+        }, req);
+
+        // For external media, validate URL accessibility
+        if (media.isExternal) {
+          try {
+            const response = await fetch(media.url, { 
+              method: 'HEAD',
+              timeout: 8000,
+              headers: { 'User-Agent': 'Mozilla/5.0 (compatible; TalentStars/1.0)' }
+            });
+            
+            if (response.ok) {
+              verificationResults.accessible = true;
+              verificationResults.s3Accessible = true;
+              verificationResults.databaseConsistent = true;
+              logger.mediaUpload(`Attempt ${attempt}: External URL accessible`, {
+                mediaId,
+                url: media.url,
+                status: response.status
+              }, req);
+              break; // Success, exit retry loop
+            } else {
+              verificationResults.errors.push(`Attempt ${attempt}: External URL not accessible: ${response.status} ${response.statusText}`);
+              logger.mediaUpload(`Attempt ${attempt}: External URL not accessible`, {
+                mediaId,
+                url: media.url,
+                status: response.status
+              }, req);
+            }
+          } catch (error) {
+            verificationResults.errors.push(`Attempt ${attempt}: External URL check failed: ${error.message}`);
+            logger.mediaUpload(`Attempt ${attempt}: External URL error`, {
+              mediaId,
+              url: media.url,
+              error: error.message
+            }, req);
+          }
+        } else {
+          // For uploaded files, check S3 accessibility with comprehensive validation
+          try {
+            const headResponse = await fetch(media.url, { 
+              method: 'HEAD',
+              timeout: 8000,
+              headers: { 'User-Agent': 'Mozilla/5.0 (compatible; TalentStars/1.0)' }
+            });
+            
+            if (headResponse.ok) {
+              verificationResults.accessible = true;
+              verificationResults.s3Accessible = true;
+              
+              const contentLength = headResponse.headers.get('content-length');
+              const contentType = headResponse.headers.get('content-type');
+              
+              // Validate file size consistency
+              if (contentLength && parseInt(contentLength) === media.size) {
+                verificationResults.databaseConsistent = true;
+                logger.mediaUpload(`Attempt ${attempt}: S3 file fully verified`, {
+                  mediaId,
+                  url: media.url,
+                  status: headResponse.status,
+                  contentLength,
+                  contentType,
+                  expectedSize: media.size
+                }, req);
+                break; // Success, exit retry loop
+              } else {
+                verificationResults.errors.push(`Attempt ${attempt}: File size mismatch - expected ${media.size}, got ${contentLength}`);
+                logger.mediaUpload(`Attempt ${attempt}: File size mismatch`, {
+                  mediaId,
+                  expectedSize: media.size,
+                  actualSize: contentLength
+                }, req);
+              }
+            } else {
+              verificationResults.errors.push(`Attempt ${attempt}: File not accessible: HTTP ${headResponse.status}`);
+              logger.mediaUpload(`Attempt ${attempt}: S3 file not accessible`, {
+                mediaId,
+                url: media.url,
+                status: headResponse.status
+              }, req);
+            }
+          } catch (error) {
+            verificationResults.errors.push(`Attempt ${attempt}: S3 accessibility check failed: ${error.message}`);
+            logger.mediaUpload(`Attempt ${attempt}: S3 accessibility error`, {
+              mediaId,
+              url: media.url,
+              error: error.message
+            }, req);
+          }
+        }
+
+        // If this is the last attempt, break regardless
+        if (attempt === maxRetries) {
+          logger.mediaUpload('Max retry attempts reached', { mediaId, userId, attempts: attempt }, req);
+          break;
+        }
+
+        // Wait before next attempt with exponential backoff
+        const delay = baseDelayMs * Math.pow(1.5, attempt - 1);
+        logger.mediaUpload(`Waiting ${delay}ms before next attempt`, { mediaId, attempt, delay }, req);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+
+      const isFullyVerified = verificationResults.exists && 
+                             verificationResults.accessible && 
+                             verificationResults.databaseConsistent && 
+                             verificationResults.s3Accessible &&
+                             verificationResults.databaseComplete;
+
+      logger.mediaUpload('Final verification results', {
+        mediaId,
+        userId,
+        isFullyVerified,
+        attempts: verificationResults.verificationAttempts,
+        exists: verificationResults.exists,
+        accessible: verificationResults.accessible,
+        databaseConsistent: verificationResults.databaseConsistent,
+        s3Accessible: verificationResults.s3Accessible,
+        databaseComplete: verificationResults.databaseComplete,
+        errorCount: verificationResults.errors.length
+      }, req);
+
       res.json(verificationResults);
       
     } catch (error) {

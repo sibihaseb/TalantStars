@@ -92,6 +92,10 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
   } | null>(null);
   const [showImageCropper, setShowImageCropper] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<File | null>(null);
+  const [uploadInProgress, setUploadInProgress] = useState(false);
+  const [verificationInProgress, setVerificationInProgress] = useState(false);
+  const [uploadedMediaId, setUploadedMediaId] = useState<number | null>(null);
+  const [verificationStatus, setVerificationStatus] = useState<string>('');
   
   const [mediaFormData, setMediaFormData] = useState<MediaFormData>({
     title: '',
@@ -162,11 +166,20 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
       const response = await apiRequest("POST", "/api/media", formData);
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/media"] });
-      // Don't close dialog or show success message here - handled in form submit
+      
+      // Trigger automatic verification for uploaded media
+      if (data && data.length > 0) {
+        const mediaId = data[0].id;
+        setUploadedMediaId(mediaId);
+        await verifyUpload(mediaId);
+      }
     },
     onError: (error: any) => {
+      setUploadInProgress(false);
+      setVerificationInProgress(false);
+      
       // Parse error response for limit information
       let errorData = error;
       if (error.response) {
@@ -197,17 +210,19 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
       const response = await apiRequest("POST", "/api/media/external", formData);
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/media"] });
-      onUploadComplete?.(data);
-      setShowUploadDialog(false);
-      resetForm();
-      toast({
-        title: "Upload successful",
-        description: "External link added successfully.",
-      });
+      
+      // Trigger automatic verification for external media
+      if (data && data.id) {
+        setUploadedMediaId(data.id);
+        await verifyUpload(data.id);
+      }
     },
     onError: (error: any) => {
+      setUploadInProgress(false);
+      setVerificationInProgress(false);
+      
       // Parse error response for limit information
       let errorData = error;
       if (error.response) {
@@ -270,9 +285,78 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
     setFilePreviews([]);
     setFileMetadata([]);
     setUploadType('file');
+    setUploadInProgress(false);
+    setVerificationInProgress(false);
+    setUploadedMediaId(null);
+    setVerificationStatus('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  // Verification function with retry logic
+  const verifyUpload = async (mediaId: number, maxRetries = 10) => {
+    setVerificationInProgress(true);
+    setVerificationStatus('Starting verification...');
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        setVerificationStatus(`Verification attempt ${attempt}/${maxRetries}...`);
+        
+        const response = await apiRequest('POST', `/api/media/verify/${mediaId}`);
+        const result = await response.json();
+        
+        console.log(`Verification attempt ${attempt} result:`, result);
+        
+        const isFullyVerified = result.exists && 
+                               result.accessible && 
+                               result.databaseConsistent && 
+                               result.s3Accessible &&
+                               result.databaseComplete;
+        
+        if (isFullyVerified) {
+          setVerificationStatus('✓ Upload verified successfully!');
+          setVerificationInProgress(false);
+          
+          // Success! Close dialog and show success message
+          setShowUploadDialog(false);
+          resetForm();
+          
+          toast({
+            title: "Upload successful",
+            description: "Your media has been uploaded and verified successfully.",
+          });
+          
+          return true;
+        } else {
+          setVerificationStatus(`Attempt ${attempt}: ${result.errors.join(', ')}`);
+        }
+        
+        // Wait before next attempt
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+      } catch (error) {
+        console.error(`Verification attempt ${attempt} failed:`, error);
+        setVerificationStatus(`Attempt ${attempt}: Verification request failed`);
+        
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+      }
+    }
+    
+    // All attempts failed
+    setVerificationStatus('❌ Upload verification failed after maximum retries');
+    setVerificationInProgress(false);
+    
+    toast({
+      title: "Upload verification failed",
+      description: "The upload completed but couldn't be verified. Please try again.",
+      variant: "destructive"
+    });
+    
+    return false;
   };
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -405,6 +489,10 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
       return;
     }
 
+    // Set upload in progress
+    setUploadInProgress(true);
+    setVerificationStatus('');
+
     if (uploadType === 'file' && fileMetadata.length > 0) {
       // Upload files individually with their metadata
       let successfulUploads = 0;
@@ -417,6 +505,7 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
             description: `Please enter a title for ${meta.file.name}`,
             variant: "destructive",
           });
+          setUploadInProgress(false);
           return;
         }
 
@@ -442,31 +531,13 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
           console.error('Upload failed for file:', meta.file.name, error);
           console.error('Error details:', error);
           failedUploads++;
+          setUploadInProgress(false);
+          setVerificationInProgress(false);
         }
       }
       
-      // Show success/failure message
-      if (successfulUploads > 0) {
-        toast({
-          title: "Upload Complete",
-          description: `${successfulUploads} file${successfulUploads > 1 ? 's' : ''} ${successfulUploads > 1 ? 'were' : 'was'} successfully uploaded${failedUploads > 0 ? ` (${failedUploads} failed)` : ''}`,
-        });
-        
-        // Close dialog and reset form
-        setShowUploadDialog(false);
-        resetForm();
-        
-        // Call onUploadComplete callback
-        if (onUploadComplete) {
-          onUploadComplete(fileMetadata);
-        }
-      } else if (failedUploads > 0) {
-        toast({
-          title: "Upload Failed",
-          description: `All ${failedUploads} file${failedUploads > 1 ? 's' : ''} failed to upload`,
-          variant: "destructive",
-        });
-      }
+      // Note: Success handling is now done in the mutation onSuccess callback
+      // which triggers automatic verification
     } else if (uploadType === 'external' && mediaFormData.externalUrl) {
       // Handle external URL upload
       const formData = new FormData();
@@ -475,7 +546,12 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
       formData.append('category', mediaFormData.category);
       formData.append('url', mediaFormData.externalUrl);
 
-      externalUploadMutation.mutate(formData);
+      try {
+        await externalUploadMutation.mutateAsync(formData);
+      } catch (error) {
+        setUploadInProgress(false);
+        setVerificationInProgress(false);
+      }
     }
   }, [mediaFormData, uploadType, uploadMutation, externalUploadMutation, toast, selectedFiles, fileMetadata, onUploadComplete, resetForm]);
 
@@ -879,21 +955,52 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
                   </div>
                 )}
                 
+                {/* Upload Progress and Verification Status */}
+                {(uploadInProgress || verificationInProgress) && (
+                  <div className="border-t pt-4">
+                    <div className="space-y-3">
+                      {uploadInProgress && (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                          <span className="text-sm text-gray-600">Uploading media...</span>
+                        </div>
+                      )}
+                      
+                      {verificationInProgress && (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+                          <span className="text-sm text-gray-600">Verifying upload...</span>
+                        </div>
+                      )}
+                      
+                      {verificationStatus && (
+                        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                          <p className="text-sm font-mono text-gray-700 dark:text-gray-300">
+                            {verificationStatus}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Action Buttons */}
                 <div className="flex justify-end space-x-3 pt-4 border-t">
                   <Button
                     variant="outline"
                     onClick={() => setShowUploadDialog(false)}
-                    disabled={uploadMutation.isPending || externalUploadMutation.isPending}
+                    disabled={uploadInProgress || verificationInProgress}
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handleFormSubmit}
-                    disabled={uploadMutation.isPending || externalUploadMutation.isPending}
+                    disabled={uploadInProgress || verificationInProgress}
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
                   >
-                    {(uploadMutation.isPending || externalUploadMutation.isPending) ? 'Uploading...' : 'Upload Media'}
+                    {uploadInProgress ? 'Uploading...' : 
+                     verificationInProgress ? 'Verifying...' : 
+                     'Upload Media'}
                   </Button>
                 </div>
               </div>

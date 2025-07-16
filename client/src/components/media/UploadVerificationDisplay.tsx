@@ -15,6 +15,10 @@ interface VerificationResult {
   mimeType: string | null;
   url: string | null;
   errors: string[];
+  verificationAttempts: number;
+  s3Accessible: boolean;
+  databaseComplete: boolean;
+  finalAttempt: boolean;
 }
 
 interface UploadVerificationDisplayProps {
@@ -25,15 +29,35 @@ interface UploadVerificationDisplayProps {
 export function UploadVerificationDisplay({ mediaId, onVerificationComplete }: UploadVerificationDisplayProps) {
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
+  const [autoRetry, setAutoRetry] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
-  const handleVerify = async () => {
+  const handleVerify = async (isAutoRetry: boolean = false) => {
     setIsVerifying(true);
+    if (!isAutoRetry) {
+      setRetryCount(0);
+    }
+    
     try {
       const response = await apiRequest('POST', `/api/media/verify/${mediaId}`);
       const result = await response.json();
       
+      console.log('Verification result:', result);
       setVerificationResult(result);
       onVerificationComplete?.(result);
+      
+      // Check if verification failed but we should auto-retry
+      const isFullyVerified = result.exists && 
+                             result.accessible && 
+                             result.databaseConsistent && 
+                             result.s3Accessible &&
+                             result.databaseComplete;
+      
+      if (!isFullyVerified && autoRetry && retryCount < 10) {
+        setRetryCount(prev => prev + 1);
+        console.log(`Auto-retry ${retryCount + 1}/10 in 2 seconds...`);
+        setTimeout(() => handleVerify(true), 2000);
+      }
     } catch (error) {
       console.error('Verification failed:', error);
       setVerificationResult({
@@ -44,10 +68,16 @@ export function UploadVerificationDisplay({ mediaId, onVerificationComplete }: U
         fileSize: null,
         mimeType: null,
         url: null,
-        errors: ['Verification request failed']
+        errors: ['Verification request failed'],
+        verificationAttempts: 0,
+        s3Accessible: false,
+        databaseComplete: false,
+        finalAttempt: true
       });
     } finally {
-      setIsVerifying(false);
+      if (!autoRetry || retryCount >= 10) {
+        setIsVerifying(false);
+      }
     }
   };
 
@@ -72,6 +102,8 @@ export function UploadVerificationDisplay({ mediaId, onVerificationComplete }: U
     verificationResult.exists && 
     verificationResult.accessible && 
     verificationResult.databaseConsistent && 
+    verificationResult.s3Accessible &&
+    verificationResult.databaseComplete &&
     verificationResult.errors.length === 0;
 
   return (
@@ -79,32 +111,43 @@ export function UploadVerificationDisplay({ mediaId, onVerificationComplete }: U
       <CardHeader>
         <CardTitle className="text-lg">Upload Verification</CardTitle>
         <CardDescription>
-          Verify your upload has been properly processed and stored
+          Comprehensive verification with retry logic and S3 accessibility checks
         </CardDescription>
       </CardHeader>
       
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">Media ID: {mediaId}</span>
-          <Button
-            onClick={handleVerify}
-            disabled={isVerifying}
-            size="sm"
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            {isVerifying ? (
-              <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                Verifying...
-              </>
-            ) : (
-              <>
-                <CheckCircle className="w-4 h-4" />
-                Verify Upload
-              </>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-2 text-xs">
+              <input
+                type="checkbox"
+                checked={autoRetry}
+                onChange={(e) => setAutoRetry(e.target.checked)}
+                className="w-3 h-3"
+              />
+              Auto-retry
+            </label>
+            <Button
+              onClick={() => handleVerify(false)}
+              disabled={isVerifying}
+              size="sm"
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              {isVerifying ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  {autoRetry && retryCount > 0 ? `Retry ${retryCount}/10` : 'Verifying...'}
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Verify Upload
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
         {verificationResult && (
@@ -116,13 +159,23 @@ export function UploadVerificationDisplay({ mediaId, onVerificationComplete }: U
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-sm">File Accessible:</span>
-                {getStatusBadge(verificationResult.accessible, verificationResult.accessible ? "Yes" : "No")}
+                <span className="text-sm">Database Complete:</span>
+                {getStatusBadge(verificationResult.databaseComplete, verificationResult.databaseComplete ? "Yes" : "No")}
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-sm">S3 Accessible:</span>
+                {getStatusBadge(verificationResult.s3Accessible, verificationResult.s3Accessible ? "Yes" : "No")}
               </div>
               
               <div className="flex items-center justify-between">
                 <span className="text-sm">Data Consistent:</span>
                 {getStatusBadge(verificationResult.databaseConsistent, verificationResult.databaseConsistent ? "Yes" : "No")}
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Verification Attempts:</span>
+                <Badge variant="secondary">{verificationResult.verificationAttempts}</Badge>
               </div>
             </div>
 
