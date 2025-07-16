@@ -578,8 +578,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
             mimetype: file.mimetype,
             size: file.size,
             hasBuffer: !!file.buffer,
+            bufferLength: file.buffer?.length || 0,
+            bufferType: typeof file.buffer,
             path: `user-${userId}/media`
           }, req);
+          
+          // Debug: Check if file buffer is properly formed
+          console.log("PRE-UPLOAD FILE BUFFER DEBUG:", {
+            originalname: file.originalname,
+            size: file.size,
+            bufferLength: file.buffer?.length || 0,
+            bufferMatch: file.buffer?.length === file.size,
+            bufferFirst10Bytes: file.buffer?.slice(0, 10),
+            bufferLast10Bytes: file.buffer?.slice(-10),
+            mimetype: file.mimetype
+          });
           
           const uploadResult = await uploadFileToWasabi(file, `user-${userId}/media`);
           
@@ -862,8 +875,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: req.user.id,
           filename: file.originalname,
           size: file.size,
-          mimeType: file.mimetype
+          mimeType: file.mimetype,
+          bufferLength: file.buffer?.length || 0,
+          hasBuffer: !!file.buffer,
+          bufferType: typeof file.buffer
         }, req);
+
+        // Debug: Check file buffer integrity before upload
+        console.log("MULTER FILE DEBUG:", {
+          originalname: file.originalname,
+          size: file.size,
+          mimetype: file.mimetype,
+          bufferLength: file.buffer?.length || 0,
+          hasBuffer: !!file.buffer,
+          bufferType: typeof file.buffer,
+          encoding: file.encoding,
+          fieldname: file.fieldname
+        });
 
         // Upload to Wasabi S3
         const uploadResult = await uploadFileToWasabi(file, `user-${req.user.id}/media`);

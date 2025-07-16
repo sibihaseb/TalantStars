@@ -30,6 +30,22 @@ export async function uploadFileToWasabi(
   const fileExtension = file.originalname.split('.').pop();
   const key = `${folder}/${uuidv4()}.${fileExtension}`;
   
+  // Debug: Check file buffer integrity
+  console.log("WASABI UPLOAD DEBUG:", {
+    originalName: file.originalname,
+    size: file.size,
+    mimetype: file.mimetype,
+    bufferLength: file.buffer?.length || 0,
+    hasBuffer: !!file.buffer,
+    bufferType: typeof file.buffer,
+    key: key
+  });
+  
+  if (!file.buffer || file.buffer.length === 0) {
+    console.error("CRITICAL: File buffer is empty or undefined");
+    throw new Error("File buffer is empty or corrupted");
+  }
+  
   const uploadParams = {
     Bucket: BUCKET_NAME,
     Key: key,
@@ -39,7 +55,12 @@ export async function uploadFileToWasabi(
   };
 
   try {
-    await s3Client.send(new PutObjectCommand(uploadParams));
+    const result = await s3Client.send(new PutObjectCommand(uploadParams));
+    console.log("WASABI UPLOAD SUCCESS:", {
+      key,
+      etag: result.ETag,
+      versionId: result.VersionId
+    });
     
     const url = `https://s3.${process.env.WASABI_REGION}.wasabisys.com/${BUCKET_NAME}/${key}`;
     
