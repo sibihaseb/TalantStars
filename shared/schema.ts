@@ -217,13 +217,17 @@ export const talentManagers = pgTable("talent_managers", {
 });
 
 // Admin-specific tables
+export const categoryEnum = pgEnum("category", ["talent", "manager", "producer", "agent"]);
+
 export const pricingTiers = pgTable("pricing_tiers", {
   id: serial("id").primaryKey(),
   name: varchar("name").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  annualPrice: decimal("annual_price", { precision: 10, scale: 2 }).default("0"),
   duration: integer("duration").notNull(), // in days
   features: text("features").array().notNull(),
   active: boolean("active").default(true),
+  category: categoryEnum("category").notNull().default("talent"),
   
   // Resource limits
   maxPhotos: integer("max_photos").default(0), // 0 = unlimited
@@ -243,6 +247,7 @@ export const pricingTiers = pgTable("pricing_tiers", {
   canCreateJobs: boolean("can_create_jobs").default(false),
   canViewProfiles: boolean("can_view_profiles").default(true),
   canExportData: boolean("can_export_data").default(false),
+  hasSocialFeatures: boolean("has_social_features").default(true),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

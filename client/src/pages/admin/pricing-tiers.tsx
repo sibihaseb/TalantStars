@@ -36,9 +36,11 @@ interface PricingTier {
   id: number;
   name: string;
   price: string;
+  annualPrice: string;
   duration: number;
   features: string[];
   active: boolean;
+  category: 'talent' | 'manager' | 'producer' | 'agent';
   maxPhotos: number;
   maxVideos: number;
   maxAudio: number;
@@ -52,6 +54,7 @@ interface PricingTier {
   canCreateJobs: boolean;
   canViewProfiles: boolean;
   canExportData: boolean;
+  hasSocialFeatures: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -67,15 +70,18 @@ export default function PricingTiersPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priceFilter, setPriceFilter] = useState<string>("all");
   const [durationFilter, setDurationFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("name");
   const [sortOrder, setSortOrder] = useState<string>("asc");
   
   const [formData, setFormData] = useState({
     name: "",
     price: "",
+    annualPrice: "",
     duration: 30,
     features: [] as string[],
     active: true,
+    category: "talent" as const,
     maxPhotos: 10,
     maxVideos: 5,
     maxAudio: 5,
@@ -89,6 +95,7 @@ export default function PricingTiersPage() {
     canCreateJobs: false,
     canViewProfiles: true,
     canExportData: false,
+    hasSocialFeatures: true,
   });
 
   // Fetch pricing tiers
@@ -185,9 +192,11 @@ export default function PricingTiersPage() {
     setFormData({
       name: "",
       price: "",
+      annualPrice: "",
       duration: 30,
       features: [],
       active: true,
+      category: "talent",
       maxPhotos: 10,
       maxVideos: 5,
       maxAudio: 5,
@@ -201,6 +210,7 @@ export default function PricingTiersPage() {
       canCreateJobs: false,
       canViewProfiles: true,
       canExportData: false,
+      hasSocialFeatures: true,
     });
   };
 
@@ -209,9 +219,11 @@ export default function PricingTiersPage() {
     setFormData({
       name: tier.name,
       price: tier.price,
+      annualPrice: tier.annualPrice,
       duration: tier.duration,
       features: tier.features,
       active: tier.active,
+      category: tier.category,
       maxPhotos: tier.maxPhotos,
       maxVideos: tier.maxVideos,
       maxAudio: tier.maxAudio,
@@ -225,6 +237,7 @@ export default function PricingTiersPage() {
       canCreateJobs: tier.canCreateJobs,
       canViewProfiles: tier.canViewProfiles,
       canExportData: tier.canExportData,
+      hasSocialFeatures: tier.hasSocialFeatures,
     });
     setIsEditDialogOpen(true);
   };
@@ -258,8 +271,9 @@ export default function PricingTiersPage() {
         (durationFilter === "monthly" && tier.duration === 30) ||
         (durationFilter === "quarterly" && tier.duration === 90) ||
         (durationFilter === "yearly" && tier.duration === 365);
+      const matchesCategory = categoryFilter === "all" || tier.category === categoryFilter;
       
-      return matchesSearch && matchesStatus && matchesPrice && matchesDuration;
+      return matchesSearch && matchesStatus && matchesPrice && matchesDuration && matchesCategory;
     })
     .sort((a, b) => {
       let aValue: any = a[sortBy as keyof PricingTier];
@@ -277,8 +291,23 @@ export default function PricingTiersPage() {
       return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
     });
 
-  const formatPrice = (price: string) => {
-    return parseFloat(price) === 0 ? 'Free' : `$${parseFloat(price).toFixed(2)}/month`;
+  const formatPrice = (price: string, annualPrice: string) => {
+    if (parseFloat(price) === 0) return 'Free';
+    const monthly = parseFloat(price);
+    const annual = parseFloat(annualPrice);
+    const annualSavings = annual > 0 ? ((monthly * 12 - annual) / (monthly * 12) * 100).toFixed(0) : 0;
+    
+    return (
+      <div className="space-y-1">
+        <div className="text-2xl font-bold">${monthly.toFixed(2)}/month</div>
+        {annual > 0 && (
+          <div className="text-sm text-gray-600">
+            ${annual.toFixed(2)}/year 
+            {annualSavings > 0 && <span className="text-green-600 ml-1">({annualSavings}% off)</span>}
+          </div>
+        )}
+      </div>
+    );
   };
 
   const getTierIcon = (tier: PricingTier) => {
@@ -342,7 +371,7 @@ export default function PricingTiersPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
               <div>
                 <Label htmlFor="search">Search Tiers</Label>
                 <div className="relative">
@@ -355,6 +384,21 @@ export default function PricingTiersPage() {
                     className="pl-10"
                   />
                 </div>
+              </div>
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="talent">🎭 Talent</SelectItem>
+                    <SelectItem value="manager">👔 Manager</SelectItem>
+                    <SelectItem value="producer">🎬 Producer</SelectItem>
+                    <SelectItem value="agent">🤝 Agent</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="status">Status</Label>
@@ -409,6 +453,7 @@ export default function PricingTiersPage() {
                     <SelectItem value="name">Name</SelectItem>
                     <SelectItem value="price">Price</SelectItem>
                     <SelectItem value="duration">Duration</SelectItem>
+                    <SelectItem value="category">Category</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -420,6 +465,7 @@ export default function PricingTiersPage() {
                     setStatusFilter("all");
                     setPriceFilter("all");
                     setDurationFilter("all");
+                    setCategoryFilter("all");
                     setSortBy("name");
                     setSortOrder("asc");
                   }}
@@ -463,7 +509,7 @@ export default function PricingTiersPage() {
                 Sorted by {sortBy} ({sortOrder === 'asc' ? 'ascending' : 'descending'})
               </span>
             </div>
-            {(searchTerm || statusFilter !== "all" || priceFilter !== "all" || durationFilter !== "all") && (
+            {(searchTerm || statusFilter !== "all" || priceFilter !== "all" || durationFilter !== "all" || categoryFilter !== "all") && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -472,6 +518,7 @@ export default function PricingTiersPage() {
                   setStatusFilter("all");
                   setPriceFilter("all");
                   setDurationFilter("all");
+                  setCategoryFilter("all");
                 }}
                 className="text-blue-600 hover:text-blue-700"
               >
@@ -509,14 +556,22 @@ export default function PricingTiersPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     {getTierIcon(tier)}
-                    <CardTitle className="text-xl">{tier.name}</CardTitle>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <span className="text-sm text-gray-600">{tier.duration} days</span>
+                    <div>
+                      <CardTitle className="text-xl">{tier.name}</CardTitle>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <Badge variant="secondary" className="text-xs">
+                          {tier.category === 'talent' && '🎭 Talent'}
+                          {tier.category === 'manager' && '👔 Manager'}
+                          {tier.category === 'producer' && '🎬 Producer'}
+                          {tier.category === 'agent' && '🤝 Agent'}
+                        </Badge>
+                        <span className="text-sm text-gray-600">{tier.duration} days</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="text-3xl font-bold text-blue-600">
-                  {formatPrice(tier.price)}
+                <div className="text-blue-600">
+                  {formatPrice(tier.price, tier.annualPrice)}
                 </div>
               </CardHeader>
 
@@ -548,6 +603,10 @@ export default function PricingTiersPage() {
                     <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
                       <span>📝 Create Jobs</span>
                       {tier.canCreateJobs ? <CheckCircle className="w-3 h-3 text-green-500" /> : <XCircle className="w-3 h-3 text-red-500" />}
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                      <span>🌟 Social Features</span>
+                      {tier.hasSocialFeatures ? <CheckCircle className="w-3 h-3 text-green-500" /> : <XCircle className="w-3 h-3 text-red-500" />}
                     </div>
                   </div>
                 </div>
@@ -638,7 +697,7 @@ export default function PricingTiersPage() {
             
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Basic Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="name">Tier Name</Label>
                   <Input
@@ -650,7 +709,33 @@ export default function PricingTiersPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="price">Price ($)</Label>
+                  <Label htmlFor="category">Category</Label>
+                  <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value as any }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="talent">🎭 Talent</SelectItem>
+                      <SelectItem value="manager">👔 Manager</SelectItem>
+                      <SelectItem value="producer">🎬 Producer</SelectItem>
+                      <SelectItem value="agent">🤝 Agent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="active"
+                    checked={formData.active}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, active: checked }))}
+                  />
+                  <Label htmlFor="active">Active</Label>
+                </div>
+              </div>
+
+              {/* Pricing */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="price">Monthly Price ($)</Label>
                   <Input
                     id="price"
                     type="number"
@@ -661,9 +746,18 @@ export default function PricingTiersPage() {
                     required
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="annualPrice">Annual Price ($)</Label>
+                  <Input
+                    id="annualPrice"
+                    type="number"
+                    step="0.01"
+                    value={formData.annualPrice}
+                    onChange={(e) => setFormData(prev => ({ ...prev, annualPrice: e.target.value }))}
+                    placeholder="0.00 (optional)"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Leave empty for monthly-only plans</p>
+                </div>
                 <div>
                   <Label htmlFor="duration">Duration (days)</Label>
                   <Input
@@ -673,14 +767,6 @@ export default function PricingTiersPage() {
                     onChange={(e) => setFormData(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
                     required
                   />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="active"
-                    checked={formData.active}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, active: checked }))}
-                  />
-                  <Label htmlFor="active">Active</Label>
                 </div>
               </div>
 
@@ -845,6 +931,26 @@ export default function PricingTiersPage() {
                           checked={formData.canCreateJobs}
                           onCheckedChange={(checked) => 
                             setFormData(prev => ({ ...prev, canCreateJobs: checked }))
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Social Features */}
+                  <div>
+                    <h4 className="font-medium text-sm mb-3 text-pink-600">🌟 Social Features</h4>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <Label htmlFor="hasSocialFeatures" className="font-medium">Social Networking</Label>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Create posts, follow others, and engage with the community</p>
+                        </div>
+                        <Switch
+                          id="hasSocialFeatures"
+                          checked={formData.hasSocialFeatures}
+                          onCheckedChange={(checked) => 
+                            setFormData(prev => ({ ...prev, hasSocialFeatures: checked }))
                           }
                         />
                       </div>

@@ -10,30 +10,50 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Enhanced Pricing Tiers Management System (July 15, 2025)
-- **Implementation**: Complete rebuild of pricing tiers management with professional admin interface
+### Enhanced Pricing Tiers Management System with Dynamic Access Control (July 15, 2025)
+- **Implementation**: Complete rebuild of pricing tiers management with professional admin interface and dynamic access control
 - **Advanced Filtering Features**:
   - Search functionality by tier name
+  - Category filtering (Talent, Manager, Producer, Agent)
   - Status filtering (active/inactive)
   - Price range filtering (free, low $1-$25, medium $26-$100, high $100+)
   - Duration filtering (monthly, quarterly, yearly)
-  - Sortable columns (name, price, duration) with ascending/descending order
+  - Sortable columns (name, price, duration, category) with ascending/descending order
   - Real-time results counter and filter status display
   - Quick filter reset functionality
+- **Annual Pricing Options**:
+  - Monthly and annual pricing support for all tiers
+  - Automatic savings calculation and display
+  - Percentage discount indicators for annual plans
+  - Flexible pricing structure with optional annual rates
+- **Role-Based Categories**:
+  - Talent-specific tiers (🎭 Talent)
+  - Manager-specific tiers (👔 Manager)  
+  - Producer-specific tiers (🎬 Producer)
+  - Agent-specific tiers (🤝 Agent)
+  - Category-based filtering and organization
 - **User-Friendly Permissions System**:
   - Categorized permissions with emoji icons and clear descriptions
   - Analytics & Reporting section (analytics dashboard, export data)
   - Communication section (messaging system, priority support)
   - AI & Smart Features section (AI-powered features)
   - Platform Access section (view profiles, create jobs)
+  - Social Features section (social networking, community engagement)
   - Card-based permission toggles with explanatory text
+- **Dynamic Access Control**:
+  - Feature-gated access based on user tier and permissions
+  - Upgrade prompts when users try to access restricted features
+  - Visual overlay on locked features with upgrade messaging
+  - Comprehensive upgrade modal with feature descriptions
+  - Direct links to pricing page for easy upgrading
 - **UI Improvements**:
   - Professional card-based layout with gradients and status badges
-  - Visual tier indicators with icons
+  - Visual tier indicators with role-specific icons
   - Modal dialogs for creating/editing tiers
   - Results summary with filter status
   - Responsive grid layout with hover effects
-- **Result**: ✅ Complete pricing tiers management system with advanced filtering, user-friendly permissions, and professional UI
+  - Enhanced pricing display with annual savings
+- **Result**: ✅ Complete pricing tiers management system with advanced filtering, role-based categories, annual pricing, dynamic access control, and professional UI
 
 ### Logo Update (July 15, 2025)
 - **Change**: Replaced Star icon logo with custom Talents & Stars logo image
