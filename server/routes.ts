@@ -1227,6 +1227,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin user limits management routes
+  app.get('/api/admin/users-with-limits', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const users = await storage.getUsersWithLimits();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users with limits:", error);
+      res.status(500).json({ message: "Failed to fetch users with limits" });
+    }
+  });
+
+  app.post('/api/admin/grant-user-limits', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId, limits } = req.body;
+      const adminId = req.user.id;
+      
+      if (!userId || !limits) {
+        return res.status(400).json({ message: "User ID and limits are required" });
+      }
+
+      const result = await storage.grantUserLimits(userId, limits, adminId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error granting user limits:", error);
+      res.status(500).json({ message: "Failed to grant user limits" });
+    }
+  });
+
+  app.delete('/api/admin/revoke-user-limits/:userId', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      await storage.revokeUserLimits(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error revoking user limits:", error);
+      res.status(500).json({ message: "Failed to revoke user limits" });
+    }
+  });
+
   app.post('/api/admin/talent-categories', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const category = await storage.createTalentCategory(req.body);

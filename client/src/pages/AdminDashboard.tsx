@@ -57,6 +57,7 @@ import {
   Gift,
   ArrowLeft
 } from "lucide-react";
+import UserLimitsManagement from '@/components/admin/UserLimitsManagement';
 import EmailCampaigns from "./admin/email-campaigns";
 import AdminPayments from "./AdminPayments";
 import AdminUsageAnalytics from "@/components/admin/AdminUsageAnalytics";
@@ -724,6 +725,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="settings" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <Settings className="w-4 h-4 mr-2" />
               Settings
+            </TabsTrigger>
+            <TabsTrigger value="limits" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
+              <Shield className="w-4 h-4 mr-2" />
+              User Limits
             </TabsTrigger>
             <TabsTrigger value="analytics" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <Activity className="w-4 h-4 mr-2" />
@@ -3011,6 +3016,10 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="limits" className="space-y-6">
+            <UserLimitsManagement />
           </TabsContent>
         </Tabs>
       </div>

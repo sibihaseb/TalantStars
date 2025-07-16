@@ -1,0 +1,22 @@
+
+[vite] connecting... client:495:9
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools react-dom.development.js:29895:17
+Partitioned cookie or storage access was provided to “https://js.stripe.com/v3/controller-with-preconnect-b1af44bede70208aed49163849c3e0e2.html#__shared_params__[version]=basil&apiKey=pk_test_51NwxezAhOiHhM1yQX94ydY61tL8LaN6K1HeVYkAzhAaV36YpuWt9pdJ1XCYLjoxOWn4fsNzENnfeFzC0lFoB7Z3100t4ZBV3JL&apiVersion=2025-03-31.basil&stripeJsId=780ff278-b044-463d-8097-134ffeb7b9f8&stripeObjId=sobj-c2c05b0a-8f08-4db6-87c7-3e036eaf6ed9&firstStripeInstanceCreatedLatency=4&controllerCount=1&isCheckout=false&stripeJsLoadTime=1752670068306&manualBrowserDeprecationRollout=false&mids[guid]=NA&mids[muid]=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&mids[sid]=f13363ad-d94e-4f9e-a135-1b16d686e27e01e4bf&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&controllerId=__privateStripeController4581” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+controller-with-preconnect-8cb7c302622e12350c470072c969d836.js:1:22427
+Partitioned cookie or storage access was provided to “https://m.stripe.network/inner.html#url=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&title=&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&muid=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&sid=f13363ad-d94e-4f9e-a135-1b16d686e27e01e4bf&version=6&preview=false&__shared_params__[version]=basil” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+out-4.5.44.js:1:39660
+Cookie warnings 3
+XHRGET
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/media
+[HTTP/1.1 500 Internal Server Error 254ms]
+
+XHRPOST
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/media
+[HTTP/1.1 500 Internal Server Error 430ms]
+
+XHRGET
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/media
+[HTTP/1.1 500 Internal Server Error 433ms]
+
+​
+

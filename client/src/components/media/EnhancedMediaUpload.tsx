@@ -31,6 +31,7 @@ import {
   Mic,
   Globe
 } from "lucide-react";
+import { UpgradePrompt } from "@/components/upgrade/UpgradePrompt";
 import MediaGallery from './MediaGallery';
 
 interface MediaUploadProps {
@@ -70,6 +71,13 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryStartIndex, setGalleryStartIndex] = useState(0);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [upgradePromptData, setUpgradePromptData] = useState<{
+    limitType: 'photos' | 'videos' | 'audio' | 'external_links' | 'storage';
+    currentCount: number;
+    maxAllowed: number;
+    currentPlan?: string;
+  } | null>(null);
   
   const [mediaFormData, setMediaFormData] = useState<MediaFormData>({
     title: '',
@@ -106,12 +114,33 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
         description: `${fileCount} file${fileCount > 1 ? 's' : ''} uploaded successfully.`,
       });
     },
-    onError: (error) => {
-      toast({
-        title: "Upload failed",
-        description: error.message,
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      // Parse error response for limit information
+      let errorData = error;
+      if (error.response) {
+        try {
+          errorData = typeof error.response === 'string' ? JSON.parse(error.response) : error.response;
+        } catch (e) {
+          errorData = error;
+        }
+      }
+      
+      // Check if error is related to limits
+      if (errorData.limitType && errorData.currentCount !== undefined && errorData.maxAllowed !== undefined) {
+        setUpgradePromptData({
+          limitType: errorData.limitType as 'photos' | 'videos' | 'audio' | 'external_links' | 'storage',
+          currentCount: errorData.currentCount,
+          maxAllowed: errorData.maxAllowed,
+          currentPlan: 'Free' // TODO: Get actual plan from user data
+        });
+        setShowUpgradePrompt(true);
+      } else {
+        toast({
+          title: "Upload failed",
+          description: errorData.message || error.message || 'Upload failed',
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -636,6 +665,18 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
         mediaItems={mediaFiles}
         initialIndex={galleryStartIndex}
       />
+
+      {/* Upgrade Prompt */}
+      {showUpgradePrompt && upgradePromptData && (
+        <UpgradePrompt
+          isOpen={showUpgradePrompt}
+          onClose={() => setShowUpgradePrompt(false)}
+          limitType={upgradePromptData.limitType}
+          currentCount={upgradePromptData.currentCount}
+          maxAllowed={upgradePromptData.maxAllowed}
+          currentPlan={upgradePromptData.currentPlan}
+        />
+      )}
     </div>
   );
 }

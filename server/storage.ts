@@ -342,6 +342,12 @@ export interface IStorage {
   getSkillEndorsementsBySkill(userId: string, skill: string): Promise<SkillEndorsement[]>;
   deleteSkillEndorsement(id: number): Promise<void>;
   hasUserEndorsedSkill(endorserId: string, endorsedUserId: string, skill: string): Promise<boolean>;
+
+  // User limits management
+  getUsersWithLimits(): Promise<any[]>;
+  grantUserLimits(userId: string, limits: any, adminId: string): Promise<any>;
+  revokeUserLimits(userId: string): Promise<void>;
+  getUserLimits(userId: string): Promise<any | null>;
   
   // User Representation operations
   createUserRepresentation(representation: InsertUserRepresentation): Promise<UserRepresentation>;
@@ -2379,6 +2385,51 @@ export class DatabaseStorage implements IStorage {
     };
   }
   */
+
+  // User limits management
+  async getUsersWithLimits(): Promise<any[]> {
+    const users = await this.getAllUsers();
+    return users.map(user => ({
+      id: user.id.toString(),
+      username: user.username,
+      email: user.email,
+      fullName: `${user.firstName} ${user.lastName}`,
+      profileImage: user.profileImageUrl,
+      role: user.role,
+      pricingTier: user.pricingTierId ? `Tier ${user.pricingTierId}` : 'Free',
+      currentUsage: {
+        photos: Math.floor(Math.random() * 10), // Mock usage data
+        videos: Math.floor(Math.random() * 5),
+        audio: Math.floor(Math.random() * 5),
+        externalLinks: Math.floor(Math.random() * 3),
+        storage: Math.floor(Math.random() * 100)
+      }
+    }));
+  }
+
+  async grantUserLimits(userId: string, limits: any, adminId: string): Promise<any> {
+    // TODO: Implement when database tables are created
+    // For now, return mock success
+    return {
+      id: Date.now(),
+      userId,
+      ...limits,
+      grantedBy: adminId,
+      grantedAt: new Date().toISOString(),
+      customLimits: true
+    };
+  }
+
+  async revokeUserLimits(userId: string): Promise<void> {
+    // TODO: Implement when database tables are created
+    // For now, just log the action
+    console.log(`Revoking limits for user ${userId}`);
+  }
+
+  async getUserLimits(userId: string): Promise<any | null> {
+    // TODO: Implement when database tables are created
+    return null;
+  }
 }
 
 export const storage = new DatabaseStorage();
