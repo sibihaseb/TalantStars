@@ -54,8 +54,10 @@ import {
   UserPlus,
   Briefcase,
   X,
-  Gift
+  Gift,
+  ArrowLeft
 } from "lucide-react";
+import EmailCampaigns from "./admin/email-campaigns";
 
 interface User {
   id: string;
@@ -680,7 +682,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-9 mb-8 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-lg">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-10 mb-8 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-lg">
             <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <BarChart3 className="w-4 h-4 mr-2" />
               Overview
@@ -700,6 +702,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="emails" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <Mail className="w-4 h-4 mr-2" />
               Emails
+            </TabsTrigger>
+            <TabsTrigger value="campaigns" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
+              <Zap className="w-4 h-4 mr-2" />
+              Campaigns
             </TabsTrigger>
             <TabsTrigger value="pricing" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <DollarSign className="w-4 h-4 mr-2" />
@@ -1513,6 +1519,303 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="emails" className="space-y-6">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Email Management</h3>
+                  <p className="text-sm text-gray-600">Send individual emails and manage email configuration</p>
+                </div>
+                <Button onClick={() => setIsMassEmailDialogOpen(true)}>
+                  <Mail className="w-4 h-4 mr-2" />
+                  Send Mass Email
+                </Button>
+              </div>
+              
+              {/* Email Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Sent</p>
+                        <p className="text-2xl font-bold">2,847</p>
+                      </div>
+                      <Mail className="w-8 h-8 text-blue-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Delivered</p>
+                        <p className="text-2xl font-bold">2,782</p>
+                      </div>
+                      <CheckCircle className="w-8 h-8 text-green-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Bounced</p>
+                        <p className="text-2xl font-bold">65</p>
+                      </div>
+                      <XCircle className="w-8 h-8 text-red-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Delivery Rate</p>
+                        <p className="text-2xl font-bold">97.7%</p>
+                      </div>
+                      <TrendingUp className="w-8 h-8 text-purple-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Mass Email Dialog */}
+              <Dialog open={isMassEmailDialogOpen} onOpenChange={setIsMassEmailDialogOpen}>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Send Mass Email</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    sendMassEmailMutation.mutate({
+                      subject: emailSubject,
+                      message: emailTemplate,
+                      targetGroups: selectedUserGroups
+                    });
+                  }} className="space-y-4">
+                    <div>
+                      <Label htmlFor="email-subject">Subject</Label>
+                      <Input
+                        id="email-subject"
+                        value={emailSubject}
+                        onChange={(e) => setEmailSubject(e.target.value)}
+                        placeholder="Enter email subject"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="email-template">Message</Label>
+                      <Textarea
+                        id="email-template"
+                        value={emailTemplate}
+                        onChange={(e) => setEmailTemplate(e.target.value)}
+                        placeholder="Enter your email message"
+                        rows={8}
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label>Target Audience</Label>
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="all-users"
+                              checked={selectedUserGroups.includes("all")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(["all"]);
+                                } else {
+                                  setSelectedUserGroups([]);
+                                }
+                              }}
+                            />
+                            <Label htmlFor="all-users" className="text-sm">All Users</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="managers"
+                              checked={selectedUserGroups.includes("manager")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "manager"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "manager"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="managers" className="text-sm">Managers</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="producers"
+                              checked={selectedUserGroups.includes("producer")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "producer"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "producer"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="producers" className="text-sm">Producers</Label>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="talents"
+                              checked={selectedUserGroups.includes("talent")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "talent"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "talent"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="talents" className="text-sm">All Talents</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="actors"
+                              checked={selectedUserGroups.includes("actor")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "actor"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "actor"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="actors" className="text-sm">Actors</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="musicians"
+                              checked={selectedUserGroups.includes("musician")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "musician"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "musician"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="musicians" className="text-sm">Musicians</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="voice_artists"
+                              checked={selectedUserGroups.includes("voice_artist")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "voice_artist"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "voice_artist"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="voice_artists" className="text-sm">Voice Artists</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="models"
+                              checked={selectedUserGroups.includes("model")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "model"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "model"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="models" className="text-sm">Models</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="agents"
+                              checked={selectedUserGroups.includes("agent")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "agent"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "agent"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="agents" className="text-sm">Agents</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="verified"
+                              checked={selectedUserGroups.includes("verified")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "verified"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "verified"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="verified" className="text-sm">Verified Users</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="premium"
+                              checked={selectedUserGroups.includes("premium")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "premium"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "premium"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="premium" className="text-sm">Premium Users</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="new_users"
+                              checked={selectedUserGroups.includes("new_users")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "new_users"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "new_users"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="new_users" className="text-sm">New Users (Last 30 Days)</Label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-end space-x-2">
+                      <Button type="button" variant="outline" onClick={() => setIsMassEmailDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={sendMassEmailMutation.isPending}>
+                        {sendMassEmailMutation.isPending ? "Sending..." : "Send Email"}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="campaigns" className="space-y-6">
+            <EmailCampaigns />
+          </TabsContent>
+
+          <TabsContent value="pricing" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl">
                 <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-lg">
@@ -1623,6 +1926,104 @@ export default function AdminDashboard() {
                               }}
                             />
                             <Label htmlFor="actors" className="text-sm">Actors</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="musicians"
+                              checked={selectedUserGroups.includes("musician")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "musician"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "musician"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="musicians" className="text-sm">Musicians</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="voice_artists"
+                              checked={selectedUserGroups.includes("voice_artist")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "voice_artist"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "voice_artist"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="voice_artists" className="text-sm">Voice Artists</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="models"
+                              checked={selectedUserGroups.includes("model")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "model"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "model"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="models" className="text-sm">Models</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="agents"
+                              checked={selectedUserGroups.includes("agent")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "agent"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "agent"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="agents" className="text-sm">Agents</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="verified"
+                              checked={selectedUserGroups.includes("verified")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "verified"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "verified"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="verified" className="text-sm">Verified Users</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="premium"
+                              checked={selectedUserGroups.includes("premium")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "premium"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "premium"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="premium" className="text-sm">Premium Users</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="new_users"
+                              checked={selectedUserGroups.includes("new_users")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "new_users"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "new_users"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="new_users" className="text-sm">New Users (Last 30 Days)</Label>
                           </div>
                           <div className="flex items-center space-x-2">
                             <Checkbox

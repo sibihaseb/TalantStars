@@ -1770,6 +1770,121 @@ export class DatabaseStorage implements IStorage {
       .where(eq(promoCodeUsage.promoCodeId, promoCodeId))
       .orderBy(desc(promoCodeUsage.usedAt));
   }
+
+  // Email campaigns methods
+  async getEmailCampaigns() {
+    return await db.select().from(emailCampaigns).orderBy(desc(emailCampaigns.createdAt));
+  }
+
+  async createEmailCampaign(campaign: any) {
+    const [newCampaign] = await db
+      .insert(emailCampaigns)
+      .values({
+        ...campaign,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return newCampaign;
+  }
+
+  async updateEmailCampaign(id: number, updates: any) {
+    const [updatedCampaign] = await db
+      .update(emailCampaigns)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(emailCampaigns.id, id))
+      .returning();
+    return updatedCampaign;
+  }
+
+  async deleteEmailCampaign(id: number) {
+    await db.delete(emailCampaigns).where(eq(emailCampaigns.id, id));
+  }
+
+  async updateEmailCampaignStatus(id: number, status: string, stats?: any) {
+    const updates: any = { status, updatedAt: new Date() };
+    if (stats) {
+      updates.sentCount = stats.sentCount;
+      updates.failedCount = stats.failedCount;
+      updates.totalTargets = stats.totalTargets;
+    }
+    
+    await db
+      .update(emailCampaigns)
+      .set(updates)
+      .where(eq(emailCampaigns.id, id));
+  }
+
+  async getEmailTemplates() {
+    return await db.select().from(emailTemplates).orderBy(desc(emailTemplates.createdAt));
+  }
+
+  async createEmailTemplate(template: any) {
+    const [newTemplate] = await db
+      .insert(emailTemplates)
+      .values({
+        ...template,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return newTemplate;
+  }
+
+  async updateEmailTemplate(id: number, updates: any) {
+    const [updatedTemplate] = await db
+      .update(emailTemplates)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(emailTemplates.id, id))
+      .returning();
+    return updatedTemplate;
+  }
+
+  async deleteEmailTemplate(id: number) {
+    await db.delete(emailTemplates).where(eq(emailTemplates.id, id));
+  }
+
+  async getUsersByGroups(groups: string[]) {
+    // Build query to get users based on target groups
+    const baseQuery = db.select({
+      id: users.id,
+      email: users.email,
+      role: users.role,
+      firstName: users.firstName,
+      lastName: users.lastName
+    }).from(users);
+
+    if (groups.includes('all')) {
+      return await baseQuery;
+    }
+
+    const conditions = [];
+    
+    if (groups.includes('talent')) {
+      conditions.push(eq(users.role, 'talent'));
+    }
+    if (groups.includes('manager')) {
+      conditions.push(eq(users.role, 'manager'));
+    }
+    if (groups.includes('producer')) {
+      conditions.push(eq(users.role, 'producer'));
+    }
+    if (groups.includes('agent')) {
+      conditions.push(eq(users.role, 'agent'));
+    }
+    
+    if (conditions.length > 0) {
+      return await baseQuery.where(or(...conditions));
+    }
+
+    return await baseQuery;
+  }
 }
 
 export const storage = new DatabaseStorage();

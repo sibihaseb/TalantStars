@@ -751,6 +751,12 @@ export const emailTemplates = pgTable("email_templates", {
   textContent: text("text_content"),
   category: varchar("category").notNull(), // welcome, job_alert, password_reset, etc.
   active: boolean("active").default(true),
+  description: text("description"),
+  content: text("content"),
+  elements: jsonb("elements").array(),
+  previewText: text("preview_text"),
+  isDefault: boolean("is_default").default(false),
+  createdBy: integer("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1336,6 +1342,37 @@ export type PromoCode = typeof promoCodes.$inferSelect;
 export type InsertPromoCode = z.infer<typeof insertPromoCodeSchema>;
 export type PromoCodeUsage = typeof promoCodeUsage.$inferSelect;
 export type InsertPromoCodeUsage = z.infer<typeof insertPromoCodeUsageSchema>;
+
+// Email campaign tables
+export const emailCampaigns = pgTable('email_campaigns', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  type: varchar('type', { length: 50 }).notNull(), // 'instant' or 'scheduled'
+  status: varchar('status', { length: 50 }).notNull(), // 'draft', 'scheduled', 'sending', 'sent', 'failed'
+  targetGroups: text('target_groups').array().notNull(),
+  template: jsonb('template').notNull(),
+  scheduledFor: timestamp('scheduled_for'),
+  sentCount: integer('sent_count').default(0),
+  failedCount: integer('failed_count').default(0),
+  totalTargets: integer('total_targets').default(0),
+  createdBy: integer('created_by').references(() => users.id).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const emailCampaignsRelations = relations(emailCampaigns, ({ one }) => ({
+  creator: one(users, {
+    fields: [emailCampaigns.createdBy],
+    references: [users.id]
+  })
+}));
+
+// Email campaign types
+export const insertEmailCampaignSchema = createInsertSchema(emailCampaigns);
+
+export type EmailCampaign = typeof emailCampaigns.$inferSelect;
+export type InsertEmailCampaign = z.infer<typeof insertEmailCampaignSchema>;
 export type UserSubscription = typeof userSubscriptions.$inferSelect;
 export type InsertUserSubscription = z.infer<typeof insertUserSubscriptionSchema>;
 export type ChatRoom = typeof chatRooms.$inferSelect;

@@ -37,6 +37,99 @@ async function hashPassword(password: string) {
   return `${buf.toString("hex")}.${salt}`;
 }
 
+// Email template helper functions
+function generateEmailHtml(template: any): string {
+  const { subject, content, elements } = template;
+  
+  let html = `
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>${subject}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
+          .container { max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+          .header { text-align: center; margin-bottom: 30px; }
+          .content { line-height: 1.6; }
+          .button { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; margin: 10px 0; }
+          .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Talents & Stars</h1>
+          </div>
+          <div class="content">
+  `;
+  
+  if (elements && elements.length > 0) {
+    elements.forEach((element: any) => {
+      switch (element.type) {
+        case 'text':
+          html += `<p>${element.content}</p>`;
+          break;
+        case 'heading':
+          html += `<h2>${element.content}</h2>`;
+          break;
+        case 'button':
+          html += `<a href="${element.url}" class="button">${element.text}</a>`;
+          break;
+        case 'image':
+          html += `<img src="${element.url}" alt="${element.alt}" style="max-width: 100%; height: auto;">`;
+          break;
+      }
+    });
+  } else {
+    html += `<p>${content}</p>`;
+  }
+  
+  html += `
+          </div>
+          <div class="footer">
+            <p>You received this email because you're a member of Talents & Stars.</p>
+            <p>© 2025 Talents & Stars. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+  
+  return html;
+}
+
+function generateEmailText(template: any): string {
+  const { subject, content, elements } = template;
+  
+  let text = `TALENTS & STARS\n\n`;
+  
+  if (elements && elements.length > 0) {
+    elements.forEach((element: any) => {
+      switch (element.type) {
+        case 'text':
+          text += `${element.content}\n\n`;
+          break;
+        case 'heading':
+          text += `${element.content.toUpperCase()}\n\n`;
+          break;
+        case 'button':
+          text += `${element.text}: ${element.url}\n\n`;
+          break;
+        case 'image':
+          text += `[Image: ${element.alt}]\n\n`;
+          break;
+      }
+    });
+  } else {
+    text += `${content}\n\n`;
+  }
+  
+  text += `---\nYou received this email because you're a member of Talents & Stars.\n© 2025 Talents & Stars. All rights reserved.`;
+  
+  return text;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup traditional authentication for all routes
   setupAuth(app);
@@ -1247,6 +1340,140 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching promo code usage:", error);
       res.status(500).json({ message: "Failed to fetch promo code usage" });
+    }
+  });
+
+  // Email campaigns management routes
+  app.get('/api/admin/email-campaigns', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const campaigns = await storage.getEmailCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching email campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch email campaigns" });
+    }
+  });
+
+  app.post('/api/admin/email-campaigns', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      console.log("Creating email campaign:", req.body);
+      const campaignData = {
+        ...req.body,
+        createdBy: req.user.id,
+        status: req.body.type === 'instant' ? 'sending' : 'scheduled'
+      };
+      const campaign = await storage.createEmailCampaign(campaignData);
+      
+      // If it's an instant campaign, send immediately
+      if (req.body.type === 'instant') {
+        try {
+          // Get target users based on groups
+          const targetUsers = await storage.getUsersByGroups(req.body.targetGroups);
+          
+          // Send emails to all target users
+          let sentCount = 0;
+          let failedCount = 0;
+          
+          for (const user of targetUsers) {
+            try {
+              await sendEmail({
+                to: user.email,
+                subject: req.body.template.subject,
+                html: generateEmailHtml(req.body.template),
+                text: generateEmailText(req.body.template)
+              });
+              sentCount++;
+            } catch (emailError) {
+              failedCount++;
+              console.error(`Failed to send email to ${user.email}:`, emailError);
+            }
+          }
+          
+          // Update campaign status and stats
+          await storage.updateEmailCampaignStatus(campaign.id, 'sent', {
+            sentCount,
+            failedCount,
+            totalTargets: targetUsers.length
+          });
+        } catch (sendError) {
+          console.error("Error sending instant campaign:", sendError);
+          await storage.updateEmailCampaignStatus(campaign.id, 'failed');
+        }
+      }
+      
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error creating email campaign:", error);
+      res.status(500).json({ message: "Failed to create email campaign", error: error.message });
+    }
+  });
+
+  app.put('/api/admin/email-campaigns/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      const campaign = await storage.updateEmailCampaign(campaignId, req.body);
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error updating email campaign:", error);
+      res.status(500).json({ message: "Failed to update email campaign" });
+    }
+  });
+
+  app.delete('/api/admin/email-campaigns/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      await storage.deleteEmailCampaign(campaignId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting email campaign:", error);
+      res.status(500).json({ message: "Failed to delete email campaign" });
+    }
+  });
+
+  app.get('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const templates = await storage.getEmailTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching email templates:", error);
+      res.status(500).json({ message: "Failed to fetch email templates" });
+    }
+  });
+
+  app.post('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      console.log("Creating email template:", req.body);
+      const templateData = {
+        ...req.body,
+        createdBy: req.user.id
+      };
+      const template = await storage.createEmailTemplate(templateData);
+      res.json(template);
+    } catch (error) {
+      console.error("Error creating email template:", error);
+      res.status(500).json({ message: "Failed to create email template", error: error.message });
+    }
+  });
+
+  app.put('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const templateId = parseInt(req.params.id);
+      const template = await storage.updateEmailTemplate(templateId, req.body);
+      res.json(template);
+    } catch (error) {
+      console.error("Error updating email template:", error);
+      res.status(500).json({ message: "Failed to update email template" });
+    }
+  });
+
+  app.delete('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const templateId = parseInt(req.params.id);
+      await storage.deleteEmailTemplate(templateId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting email template:", error);
+      res.status(500).json({ message: "Failed to delete email template" });
     }
   });
 

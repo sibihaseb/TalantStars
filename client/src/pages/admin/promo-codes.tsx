@@ -485,7 +485,7 @@ const PromoCodeManagement = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No Restriction</SelectItem>
+                      <SelectItem value="no_restriction">No Restriction</SelectItem>
                       <SelectItem value="talent">Talent Only</SelectItem>
                       <SelectItem value="manager">Manager Only</SelectItem>
                       <SelectItem value="producer">Producer Only</SelectItem>
