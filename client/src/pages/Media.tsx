@@ -129,6 +129,14 @@ export default function Media() {
           formData.append('file', data.file);
           
           // Use fetch directly instead of apiRequest to avoid any header conflicts
+          console.log('Uploading file:', data.file?.name, 'size:', data.file?.size);
+          console.log('FormData contents:', {
+            title: data.title,
+            description: data.description,
+            category: data.category,
+            hasFile: !!data.file
+          });
+          
           const res = await fetch('/api/media', {
             method: 'POST',
             body: formData,
@@ -137,6 +145,7 @@ export default function Media() {
           
           if (!res.ok) {
             const errorText = await res.text();
+            console.error('Upload error:', res.status, errorText);
             throw new Error(`${res.status}: ${errorText}`);
           }
           
