@@ -2972,5 +2972,242 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== PAYMENT MANAGEMENT ROUTES =====
+  
+  // Payment Transactions Routes
+  app.get('/api/admin/payments', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { page = 1, limit = 50, status, userId } = req.query;
+      const offset = (page - 1) * limit;
+      
+      let transactions = await storage.getPaymentTransactions(parseInt(limit), offset);
+      
+      // Filter by status if provided
+      if (status && status !== 'all') {
+        transactions = transactions.filter(t => t.status === status);
+      }
+      
+      // Filter by user if provided
+      if (userId) {
+        transactions = transactions.filter(t => t.userId === parseInt(userId));
+      }
+      
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching payment transactions:", error);
+      res.status(500).json({ message: "Failed to fetch payment transactions" });
+    }
+  });
+
+  app.get('/api/admin/payments/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const transaction = await storage.getPaymentTransaction(id);
+      
+      if (!transaction) {
+        return res.status(404).json({ message: "Payment transaction not found" });
+      }
+      
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error fetching payment transaction:", error);
+      res.status(500).json({ message: "Failed to fetch payment transaction" });
+    }
+  });
+
+  app.post('/api/admin/payments/:id/refund', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const transactionId = parseInt(req.params.id);
+      const { amount, reason, adminNotes } = req.body;
+      const adminId = parseInt(req.user.id);
+      
+      // Get the original transaction
+      const transaction = await storage.getPaymentTransaction(transactionId);
+      if (!transaction) {
+        return res.status(404).json({ message: "Payment transaction not found" });
+      }
+      
+      // Check if transaction can be refunded
+      if (transaction.status !== 'succeeded') {
+        return res.status(400).json({ message: "Transaction cannot be refunded" });
+      }
+      
+      // Create refund in Stripe
+      const refundAmount = amount || transaction.amount;
+      const stripeRefund = await stripe.refunds.create({
+        payment_intent: transaction.stripePaymentIntentId!,
+        amount: Math.round(parseFloat(refundAmount.toString()) * 100), // Convert to cents
+        reason: reason || 'requested_by_customer',
+        metadata: {
+          admin_id: adminId.toString(),
+          transaction_id: transactionId.toString(),
+        }
+      });
+      
+      // Create refund record
+      const refundRecord = await storage.createPaymentRefund({
+        transactionId,
+        stripeRefundId: stripeRefund.id,
+        amount: refundAmount,
+        reason: reason || 'requested_by_customer',
+        status: stripeRefund.status,
+        adminNotes: adminNotes || '',
+        processedBy: adminId,
+      });
+      
+      // Update transaction status
+      const refundedAmount = parseFloat(transaction.refundedAmount.toString()) + parseFloat(refundAmount.toString());
+      const newStatus = refundedAmount >= parseFloat(transaction.amount.toString()) ? 'refunded' : 'partially_refunded';
+      
+      await storage.updatePaymentTransaction(transactionId, {
+        status: newStatus,
+        refundedAmount: refundedAmount.toString(),
+        refundReason: reason,
+        refundedAt: new Date(),
+        refundedBy: adminId,
+      });
+      
+      res.json({ 
+        success: true, 
+        refund: refundRecord, 
+        stripeRefund: stripeRefund 
+      });
+    } catch (error) {
+      console.error("Error processing refund:", error);
+      res.status(500).json({ message: "Failed to process refund" });
+    }
+  });
+
+  app.get('/api/admin/payments/:id/refunds', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const transactionId = parseInt(req.params.id);
+      const refunds = await storage.getPaymentRefunds(transactionId);
+      res.json(refunds);
+    } catch (error) {
+      console.error("Error fetching refunds:", error);
+      res.status(500).json({ message: "Failed to fetch refunds" });
+    }
+  });
+
+  // Payment Analytics Routes
+  app.get('/api/admin/payments/analytics/summary', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const summary = await storage.getPaymentAnalyticsSummary();
+      res.json(summary);
+    } catch (error) {
+      console.error("Error fetching payment analytics summary:", error);
+      res.status(500).json({ message: "Failed to fetch payment analytics summary" });
+    }
+  });
+
+  app.get('/api/admin/payments/analytics/revenue', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { period = 'daily' } = req.query;
+      const revenue = await storage.getRevenueByPeriod(period as 'daily' | 'weekly' | 'monthly');
+      res.json(revenue);
+    } catch (error) {
+      console.error("Error fetching revenue analytics:", error);
+      res.status(500).json({ message: "Failed to fetch revenue analytics" });
+    }
+  });
+
+  // User Payment History Routes
+  app.get('/api/user/payments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.user.id);
+      const transactions = await storage.getUserPaymentTransactions(userId);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching user payments:", error);
+      res.status(500).json({ message: "Failed to fetch user payments" });
+    }
+  });
+
+  // Payment Webhook for Stripe
+  app.post('/api/webhook/stripe', async (req, res) => {
+    try {
+      const sig = req.headers['stripe-signature'];
+      const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      
+      let event;
+      try {
+        event = stripe.webhooks.constructEvent(req.body, sig!, endpointSecret!);
+      } catch (err) {
+        console.error('Webhook signature verification failed:', err);
+        return res.status(400).send('Webhook signature verification failed');
+      }
+      
+      // Handle the event
+      switch (event.type) {
+        case 'payment_intent.succeeded':
+          const paymentIntent = event.data.object;
+          
+          // Update payment transaction
+          const transaction = await storage.getPaymentTransactionByStripeId(paymentIntent.id);
+          if (transaction) {
+            await storage.updatePaymentTransaction(transaction.id, {
+              status: 'succeeded',
+              stripeChargeId: paymentIntent.latest_charge as string,
+              receiptUrl: paymentIntent.receipt_url,
+              metadata: paymentIntent.metadata as any,
+            });
+          }
+          break;
+          
+        case 'payment_intent.payment_failed':
+          const failedPayment = event.data.object;
+          
+          // Update payment transaction
+          const failedTransaction = await storage.getPaymentTransactionByStripeId(failedPayment.id);
+          if (failedTransaction) {
+            await storage.updatePaymentTransaction(failedTransaction.id, {
+              status: 'failed',
+              metadata: failedPayment.metadata as any,
+            });
+          }
+          break;
+          
+        case 'charge.dispute.created':
+          const dispute = event.data.object;
+          
+          // Handle dispute - could create a dispute record
+          console.log('Dispute created:', dispute);
+          break;
+          
+        default:
+          console.log(`Unhandled event type ${event.type}`);
+      }
+      
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Webhook error:', error);
+      res.status(500).json({ message: 'Webhook processing failed' });
+    }
+  });
+
+  // Enhanced Stripe Payment Routes
+  app.post('/api/payments/record-transaction', isAuthenticated, async (req: any, res) => {
+    try {
+      const { stripePaymentIntentId, tierId, amount, isAnnual } = req.body;
+      const userId = parseInt(req.user.id);
+      
+      const transaction = await storage.createPaymentTransaction({
+        userId,
+        stripePaymentIntentId,
+        amount: amount.toString(),
+        currency: 'usd',
+        status: 'pending',
+        tierId: tierId || null,
+        isAnnual: isAnnual || false,
+        description: `Payment for ${isAnnual ? 'annual' : 'monthly'} subscription`,
+      });
+      
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error recording payment transaction:", error);
+      res.status(500).json({ message: "Failed to record payment transaction" });
+    }
+  });
+
   return httpServer;
 }

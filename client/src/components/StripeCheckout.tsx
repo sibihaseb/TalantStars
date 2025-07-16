@@ -72,6 +72,18 @@ function CheckoutForm({ tier, isAnnual }: { tier: any; isAnnual: boolean }) {
           variant: "destructive",
         });
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        // Record payment transaction in database
+        try {
+          await apiRequest('POST', '/api/payments/record-transaction', {
+            stripePaymentIntentId: paymentIntent.id,
+            tierId: tier.id,
+            amount: paymentIntent.amount / 100, // Convert from cents
+            isAnnual: isAnnual
+          });
+        } catch (recordError) {
+          console.error('Failed to record payment transaction:', recordError);
+        }
+        
         confirmPaymentMutation.mutate(paymentIntent.id);
       }
     } catch (err) {

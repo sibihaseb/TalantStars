@@ -34,6 +34,9 @@ import {
   userRepresentation,
   promoCodes,
   promoCodeUsage,
+  paymentTransactions,
+  paymentRefunds,
+  paymentAnalytics,
   type User,
   type UpsertUser,
   type UserProfile,
@@ -109,6 +112,12 @@ import {
   type InsertPromoCode,
   type PromoCodeUsage,
   type InsertPromoCodeUsage,
+  type PaymentTransaction,
+  type InsertPaymentTransaction,
+  type PaymentRefund,
+  type InsertPaymentRefund,
+  type PaymentAnalytics,
+  type InsertPaymentAnalytics,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc, like, ilike, sql, ne } from "drizzle-orm";
@@ -329,6 +338,37 @@ export interface IStorage {
   getPricingTiers(): Promise<PricingTier[]>;
   getPricingTiersByRole(role: string): Promise<PricingTier[]>;
   getPricingTier(id: number): Promise<PricingTier | undefined>;
+  
+  // Payment Transaction operations
+  createPaymentTransaction(transaction: InsertPaymentTransaction): Promise<PaymentTransaction>;
+  getPaymentTransactions(limit?: number, offset?: number): Promise<PaymentTransaction[]>;
+  getPaymentTransaction(id: number): Promise<PaymentTransaction | undefined>;
+  getPaymentTransactionByStripeId(stripeId: string): Promise<PaymentTransaction | undefined>;
+  getUserPaymentTransactions(userId: number): Promise<PaymentTransaction[]>;
+  updatePaymentTransaction(id: number, transaction: Partial<InsertPaymentTransaction>): Promise<PaymentTransaction>;
+  updatePaymentTransactionStatus(id: number, status: string): Promise<PaymentTransaction>;
+  
+  // Payment Refund operations
+  createPaymentRefund(refund: InsertPaymentRefund): Promise<PaymentRefund>;
+  getPaymentRefunds(transactionId?: number): Promise<PaymentRefund[]>;
+  getPaymentRefund(id: number): Promise<PaymentRefund | undefined>;
+  updatePaymentRefund(id: number, refund: Partial<InsertPaymentRefund>): Promise<PaymentRefund>;
+  
+  // Payment Analytics operations
+  getPaymentAnalytics(startDate?: Date, endDate?: Date): Promise<PaymentAnalytics[]>;
+  createPaymentAnalytics(analytics: InsertPaymentAnalytics): Promise<PaymentAnalytics>;
+  getPaymentAnalyticsSummary(): Promise<{
+    totalRevenue: number;
+    totalTransactions: number;
+    successRate: number;
+    refundRate: number;
+    averageTransaction: number;
+  }>;
+  getRevenueByPeriod(period: 'daily' | 'weekly' | 'monthly'): Promise<{
+    period: string;
+    revenue: number;
+    transactions: number;
+  }[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1918,6 +1958,173 @@ export class DatabaseStorage implements IStorage {
     }
 
     return await baseQuery;
+  }
+
+  // Payment Transaction operations
+  async createPaymentTransaction(transaction: InsertPaymentTransaction): Promise<PaymentTransaction> {
+    const [result] = await db.insert(paymentTransactions)
+      .values(transaction)
+      .returning();
+    return result;
+  }
+
+  async getPaymentTransactions(limit: number = 50, offset: number = 0): Promise<PaymentTransaction[]> {
+    return await db.select()
+      .from(paymentTransactions)
+      .limit(limit)
+      .offset(offset)
+      .orderBy(desc(paymentTransactions.createdAt));
+  }
+
+  async getPaymentTransaction(id: number): Promise<PaymentTransaction | undefined> {
+    const [result] = await db.select()
+      .from(paymentTransactions)
+      .where(eq(paymentTransactions.id, id));
+    return result;
+  }
+
+  async getPaymentTransactionByStripeId(stripeId: string): Promise<PaymentTransaction | undefined> {
+    const [result] = await db.select()
+      .from(paymentTransactions)
+      .where(eq(paymentTransactions.stripePaymentIntentId, stripeId));
+    return result;
+  }
+
+  async getUserPaymentTransactions(userId: number): Promise<PaymentTransaction[]> {
+    return await db.select()
+      .from(paymentTransactions)
+      .where(eq(paymentTransactions.userId, userId))
+      .orderBy(desc(paymentTransactions.createdAt));
+  }
+
+  async updatePaymentTransaction(id: number, transaction: Partial<InsertPaymentTransaction>): Promise<PaymentTransaction> {
+    const [result] = await db.update(paymentTransactions)
+      .set({ ...transaction, updatedAt: new Date() })
+      .where(eq(paymentTransactions.id, id))
+      .returning();
+    return result;
+  }
+
+  async updatePaymentTransactionStatus(id: number, status: string): Promise<PaymentTransaction> {
+    const [result] = await db.update(paymentTransactions)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(paymentTransactions.id, id))
+      .returning();
+    return result;
+  }
+
+  // Payment Refund operations
+  async createPaymentRefund(refund: InsertPaymentRefund): Promise<PaymentRefund> {
+    const [result] = await db.insert(paymentRefunds)
+      .values(refund)
+      .returning();
+    return result;
+  }
+
+  async getPaymentRefunds(transactionId?: number): Promise<PaymentRefund[]> {
+    const query = db.select().from(paymentRefunds);
+    if (transactionId) {
+      query.where(eq(paymentRefunds.transactionId, transactionId));
+    }
+    return await query.orderBy(desc(paymentRefunds.createdAt));
+  }
+
+  async getPaymentRefund(id: number): Promise<PaymentRefund | undefined> {
+    const [result] = await db.select()
+      .from(paymentRefunds)
+      .where(eq(paymentRefunds.id, id));
+    return result;
+  }
+
+  async updatePaymentRefund(id: number, refund: Partial<InsertPaymentRefund>): Promise<PaymentRefund> {
+    const [result] = await db.update(paymentRefunds)
+      .set({ ...refund, updatedAt: new Date() })
+      .where(eq(paymentRefunds.id, id))
+      .returning();
+    return result;
+  }
+
+  // Payment Analytics operations
+  async getPaymentAnalytics(startDate?: Date, endDate?: Date): Promise<PaymentAnalytics[]> {
+    const query = db.select().from(paymentAnalytics);
+    if (startDate && endDate) {
+      query.where(and(
+        eq(paymentAnalytics.date, startDate),
+        eq(paymentAnalytics.date, endDate)
+      ));
+    }
+    return await query.orderBy(desc(paymentAnalytics.date));
+  }
+
+  async createPaymentAnalytics(analytics: InsertPaymentAnalytics): Promise<PaymentAnalytics> {
+    const [result] = await db.insert(paymentAnalytics)
+      .values(analytics)
+      .returning();
+    return result;
+  }
+
+  async getPaymentAnalyticsSummary(): Promise<{
+    totalRevenue: number;
+    totalTransactions: number;
+    successRate: number;
+    refundRate: number;
+    averageTransaction: number;
+  }> {
+    const [summary] = await db.select({
+      totalRevenue: sql<number>`COALESCE(SUM(CASE WHEN status = 'succeeded' THEN amount ELSE 0 END), 0)`,
+      totalTransactions: sql<number>`COUNT(*)`,
+      successfulTransactions: sql<number>`COUNT(CASE WHEN status = 'succeeded' THEN 1 END)`,
+      refundedTransactions: sql<number>`COUNT(CASE WHEN status = 'refunded' OR status = 'partially_refunded' THEN 1 END)`,
+      averageTransaction: sql<number>`COALESCE(AVG(CASE WHEN status = 'succeeded' THEN amount ELSE NULL END), 0)`,
+    }).from(paymentTransactions);
+
+    const successRate = summary.totalTransactions > 0 ? (summary.successfulTransactions / summary.totalTransactions) * 100 : 0;
+    const refundRate = summary.totalTransactions > 0 ? (summary.refundedTransactions / summary.totalTransactions) * 100 : 0;
+
+    return {
+      totalRevenue: Number(summary.totalRevenue),
+      totalTransactions: summary.totalTransactions,
+      successRate: Number(successRate.toFixed(2)),
+      refundRate: Number(refundRate.toFixed(2)),
+      averageTransaction: Number(summary.averageTransaction),
+    };
+  }
+
+  async getRevenueByPeriod(period: 'daily' | 'weekly' | 'monthly'): Promise<{
+    period: string;
+    revenue: number;
+    transactions: number;
+  }[]> {
+    let dateFormat: string;
+    switch (period) {
+      case 'daily':
+        dateFormat = 'YYYY-MM-DD';
+        break;
+      case 'weekly':
+        dateFormat = 'YYYY-"W"WW';
+        break;
+      case 'monthly':
+        dateFormat = 'YYYY-MM';
+        break;
+      default:
+        dateFormat = 'YYYY-MM-DD';
+    }
+
+    const results = await db.select({
+      period: sql<string>`TO_CHAR(created_at, '${dateFormat}')`,
+      revenue: sql<number>`SUM(CASE WHEN status = 'succeeded' THEN amount ELSE 0 END)`,
+      transactions: sql<number>`COUNT(CASE WHEN status = 'succeeded' THEN 1 END)`,
+    })
+    .from(paymentTransactions)
+    .groupBy(sql`TO_CHAR(created_at, '${dateFormat}')`)
+    .orderBy(sql`TO_CHAR(created_at, '${dateFormat}') DESC`)
+    .limit(30);
+
+    return results.map(row => ({
+      period: row.period,
+      revenue: Number(row.revenue),
+      transactions: row.transactions,
+    }));
   }
 }
 

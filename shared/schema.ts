@@ -254,6 +254,62 @@ export const pricingTiers = pgTable("pricing_tiers", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Payment transactions table
+export const paymentTransactions = pgTable("payment_transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id").unique(),
+  stripeChargeId: varchar("stripe_charge_id"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency").default("usd"),
+  status: varchar("status").notNull(), // pending, succeeded, failed, refunded, partially_refunded
+  paymentMethod: varchar("payment_method"), // card, bank_transfer, etc.
+  tierId: integer("tier_id").references(() => pricingTiers.id),
+  isAnnual: boolean("is_annual").default(false),
+  description: text("description"),
+  metadata: jsonb("metadata"), // Additional payment data
+  stripeCustomerId: varchar("stripe_customer_id"),
+  receiptUrl: varchar("receipt_url"),
+  refundedAmount: decimal("refunded_amount", { precision: 10, scale: 2 }).default("0.00"),
+  refundReason: text("refund_reason"),
+  refundedAt: timestamp("refunded_at"),
+  refundedBy: integer("refunded_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Payment refunds table for detailed refund tracking
+export const paymentRefunds = pgTable("payment_refunds", {
+  id: serial("id").primaryKey(),
+  transactionId: integer("transaction_id").references(() => paymentTransactions.id).notNull(),
+  stripeRefundId: varchar("stripe_refund_id").unique(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  reason: varchar("reason"), // requested_by_customer, duplicate, fraudulent, etc.
+  status: varchar("status").notNull(), // pending, succeeded, failed, canceled
+  adminNotes: text("admin_notes"),
+  processedBy: integer("processed_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Payment analytics aggregation table
+export const paymentAnalytics = pgTable("payment_analytics", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull(),
+  totalRevenue: decimal("total_revenue", { precision: 10, scale: 2 }).default("0.00"),
+  totalTransactions: integer("total_transactions").default(0),
+  successfulTransactions: integer("successful_transactions").default(0),
+  failedTransactions: integer("failed_transactions").default(0),
+  refundedTransactions: integer("refunded_transactions").default(0),
+  totalRefunds: decimal("total_refunds", { precision: 10, scale: 2 }).default("0.00"),
+  averageTransactionAmount: decimal("average_transaction_amount", { precision: 10, scale: 2 }).default("0.00"),
+  newCustomers: integer("new_customers").default(0),
+  monthlySubscriptions: integer("monthly_subscriptions").default(0),
+  annualSubscriptions: integer("annual_subscriptions").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 
 
 export const profileQuestions = pgTable("profile_questions", {
@@ -850,6 +906,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   passwordResetTokens: many(passwordResetTokens),
   permissions: many(userPermissions),
   notifications: many(notifications),
+  paymentTransactions: many(paymentTransactions),
+  refundedPayments: many(paymentTransactions, { relationName: "refundedPayments" }),
 }));
 
 export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
@@ -989,6 +1047,33 @@ export const userSubscriptionsRelations = relations(userSubscriptions, ({ one })
   }),
 }));
 
+export const paymentTransactionsRelations = relations(paymentTransactions, ({ one, many }) => ({
+  user: one(users, {
+    fields: [paymentTransactions.userId],
+    references: [users.id],
+  }),
+  tier: one(pricingTiers, {
+    fields: [paymentTransactions.tierId],
+    references: [pricingTiers.id],
+  }),
+  refundedByUser: one(users, {
+    fields: [paymentTransactions.refundedBy],
+    references: [users.id],
+  }),
+  refunds: many(paymentRefunds),
+}));
+
+export const paymentRefundsRelations = relations(paymentRefunds, ({ one }) => ({
+  transaction: one(paymentTransactions, {
+    fields: [paymentRefunds.transactionId],
+    references: [paymentTransactions.id],
+  }),
+  processedBy: one(users, {
+    fields: [paymentRefunds.processedBy],
+    references: [users.id],
+  }),
+}));
+
 export const userRepresentationRelations = relations(userRepresentation, ({ one }) => ({
   user: one(users, {
     fields: [userRepresentation.userId],
@@ -1007,10 +1092,19 @@ export type PricingTier = typeof pricingTiers.$inferSelect;
 export type InsertPricingTier = typeof pricingTiers.$inferInsert;
 export type ProfileQuestion = typeof profileQuestions.$inferSelect;
 export type InsertProfileQuestion = typeof profileQuestions.$inferInsert;
+export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
+export type InsertPaymentTransaction = typeof paymentTransactions.$inferInsert;
+export type PaymentRefund = typeof paymentRefunds.$inferSelect;
+export type InsertPaymentRefund = typeof paymentRefunds.$inferInsert;
+export type PaymentAnalytics = typeof paymentAnalytics.$inferSelect;
+export type InsertPaymentAnalytics = typeof paymentAnalytics.$inferInsert;
 
 // Zod schemas for validation
 export const insertUserSchema = createInsertSchema(users);
 export const insertUserRepresentationSchema = createInsertSchema(userRepresentation);
+export const insertPaymentTransactionSchema = createInsertSchema(paymentTransactions);
+export const insertPaymentRefundSchema = createInsertSchema(paymentRefunds);
+export const insertPaymentAnalyticsSchema = createInsertSchema(paymentAnalytics);
 
 export const chatRoomsRelations = relations(chatRooms, ({ one, many }) => ({
   creator: one(users, {
