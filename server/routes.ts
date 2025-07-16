@@ -405,11 +405,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Media routes - support multiple files
-  app.post('/api/media', isAuthenticated, upload.array('files', 10), async (req: any, res) => {
+  app.post('/api/media', isAuthenticated, (req, res, next) => {
+    console.log('Content-Type header:', req.headers['content-type']);
+    console.log('Request method:', req.method);
+    console.log('Request URL:', req.url);
+    
+    upload.array('files', 10)(req, res, (err) => {
+      if (err) {
+        console.error('Multer error:', err);
+        console.error('Error type:', err.constructor.name);
+        console.error('Error code:', err.code);
+        return res.status(500).json({ message: 'File upload error: ' + err.message });
+      }
+      next();
+    });
+  }, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const files = req.files as Express.Multer.File[];
       const { title, description, category, externalUrl, processVideo } = req.body;
+      
+      console.log('Media upload request received');
+      console.log('Files:', files);
+      console.log('Body:', req.body);
       
       if ((!files || files.length === 0) && !externalUrl) {
         return res.status(400).json({ message: "Either files or external URL is required" });
