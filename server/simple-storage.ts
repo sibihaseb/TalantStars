@@ -20,6 +20,9 @@ export interface IStorage {
   getUserProfile(userId: number): Promise<UserProfile | undefined>;
   createUserProfile(profile: InsertUserProfile): Promise<UserProfile>;
   updateUserProfile(userId: number, profile: Partial<InsertUserProfile>): Promise<UserProfile>;
+  
+  // Tier operations
+  updateUserTier(userId: number, tierId: number): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -69,6 +72,15 @@ export class DatabaseStorage implements IStorage {
       .where(eq(userProfiles.userId, userId))
       .returning();
     return userProfile;
+  }
+  
+  async updateUserTier(userId: number, tierId: number): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ pricingTierId: tierId })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
   }
 }
 

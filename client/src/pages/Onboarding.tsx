@@ -67,6 +67,7 @@ import {
 } from "lucide-react";
 import { EmotionalProgress } from "@/components/ui/emotional-progress";
 import ProfileImageUpload from "@/components/ProfileImageUpload";
+import { PricingSelection } from "@/components/PricingSelection";
 
 const onboardingSchema = insertUserProfileSchema.extend({
   // Required fields with enhanced validation
@@ -490,6 +491,7 @@ function Onboarding() {
   const [newSkill, setNewSkill] = useState("");
   const [isStepChanging, setIsStepChanging] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showPricingSelection, setShowPricingSelection] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const totalSteps = 7;
 
@@ -591,9 +593,10 @@ function Onboarding() {
         queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
         toast({
           title: "🎉 Welcome to Talents & Stars!",
-          description: "Your profile has been created successfully. Get ready to shine!",
+          description: "Your profile has been created successfully. Time to choose your plan!",
         });
-        setLocation("/");
+        setShowPricingSelection(true);
+        setShowCelebration(false);
       }, 1000);
     },
     onError: (error) => {
@@ -1945,6 +1948,23 @@ function Onboarding() {
           </div>
         </main>
       </div>
+
+      {/* Pricing Selection Modal */}
+      {showPricingSelection && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-lg w-full max-w-7xl max-h-[90vh] overflow-y-auto mx-4">
+            <div className="p-6">
+              <PricingSelection
+                userRole={user?.role || 'talent'}
+                onComplete={() => {
+                  setShowPricingSelection(false);
+                  setLocation("/");
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </ThemeProvider>
   );
 }

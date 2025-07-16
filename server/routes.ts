@@ -2205,6 +2205,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tier Selection and Payment Processing
+  app.post('/api/user/select-tier', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { tierId } = req.body;
+      
+      // Update user's selected tier
+      const updatedUser = await storage.updateUserTier(userId, tierId);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error selecting tier:", error);
+      res.status(500).json({ message: "Failed to select tier" });
+    }
+  });
+
+  app.post('/api/create-payment-intent', isAuthenticated, async (req: any, res) => {
+    try {
+      const { amount, tierId, isAnnual, description } = req.body;
+      
+      // Here you would integrate with Stripe to create a payment intent
+      // For now, we'll return a mock client secret
+      const clientSecret = `pi_mock_${Date.now()}_secret_${Math.random().toString(36).substr(2, 9)}`;
+      
+      res.json({ 
+        clientSecret,
+        amount,
+        tierId,
+        isAnnual,
+        description
+      });
+    } catch (error) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ message: "Failed to create payment intent" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time messaging

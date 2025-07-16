@@ -33,6 +33,7 @@ import Availability from "@/pages/Availability";
 import MascotDemo from "@/pages/MascotDemo";
 import Media from "@/pages/Media";
 import Social from "@/pages/SocialModern";
+import Checkout from "@/pages/Checkout";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -132,6 +133,9 @@ function Router() {
       </Route>
       <Route path="/social">
         {isAuthenticated ? <Social /> : <Auth />}
+      </Route>
+      <Route path="/checkout">
+        {isAuthenticated ? <Checkout /> : <Auth />}
       </Route>
       
       {/* Conditional home route */}
