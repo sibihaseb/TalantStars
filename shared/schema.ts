@@ -113,10 +113,13 @@ export const userProfiles = pgTable("user_profiles", {
   // Analytics
   profileViews: integer("profile_views").default(0),
   
-  // Featured talent system
-  isFeatured: boolean("is_featured").default(false),
-  featuredAt: timestamp("featured_at"),
-  featuredTier: varchar("featured_tier"), // premium, gold, platinum, etc.
+  // Featured talent system (commented out until database is updated)
+  // isFeatured: boolean("is_featured").default(false),
+  // featuredAt: timestamp("featured_at"),
+  // featuredTier: varchar("featured_tier"), // premium, gold, platinum, etc.
+  
+  // Public profile visibility (commented out until database is updated)
+  // isPublic: boolean("is_public").default(true),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

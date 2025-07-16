@@ -34,9 +34,10 @@ export default function FindTalent() {
     talentType: "",
     location: "",
     availability: "",
+    featured: false,
   });
 
-  // Fetch real talent data from API
+  // Fetch real talent data from API - public access for discovery
   const { data: talents = [], isLoading: isTalentsLoading } = useQuery({
     queryKey: ['/api/search/talents', searchFilters],
     queryFn: async () => {
@@ -44,46 +45,25 @@ export default function FindTalent() {
       if (searchFilters.query) params.append('q', searchFilters.query);
       if (searchFilters.talentType) params.append('talentType', searchFilters.talentType);
       if (searchFilters.location) params.append('location', searchFilters.location);
+      if (searchFilters.featured) params.append('featured', 'true');
       
       const response = await fetch(`/api/search/talents?${params}`);
       if (!response.ok) throw new Error('Failed to fetch talents');
       return response.json();
     },
-    enabled: isAuthenticated,
   });
 
   const handleViewTalent = (userId: string) => {
+    if (!isAuthenticated) {
+      setLocation('/auth');
+      return;
+    }
     setLocation(`/talent/${userId}`);
   };
 
-  // Redirect if not authenticated
-  if (!isLoading && !isAuthenticated) {
-    return (
-      <ThemeProvider>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900 flex items-center justify-center">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle className="text-center text-gray-900 dark:text-white">
-                Authentication Required
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Please log in to find talent
-              </p>
-              <Button 
-                onClick={() => window.location.href = "/api/login"}
-                className="w-full"
-              >
-                Log In
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </ThemeProvider>
-    );
-  }
+  // Show public talent discovery - no authentication required
 
+  // Filter talents (featured functionality temporarily disabled)
   const filteredTalents = talents.filter((talent: any) => {
     const matchesQuery = !searchFilters.query || 
       talent.displayName?.toLowerCase().includes(searchFilters.query.toLowerCase()) ||
@@ -196,6 +176,8 @@ export default function FindTalent() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* Featured filter temporarily disabled */}
               </div>
             </CardContent>
           </Card>
@@ -239,7 +221,8 @@ export default function FindTalent() {
                       <div>
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold text-gray-900 dark:text-white">{talent.displayName}</h3>
-                          {talent.verified && (
+                          {/* Featured badge temporarily disabled */}
+                          {talent.isVerified && (
                             <Badge variant="secondary" className="text-xs">
                               ✓ Verified
                             </Badge>

@@ -218,6 +218,7 @@ export interface IStorage {
   
   // Search operations
   searchTalents(query: string, filters?: { talentType?: string; location?: string }): Promise<UserProfile[]>;
+  searchTalentsPublic(params: { query?: string; talentType?: string; location?: string; featured?: boolean }): Promise<UserProfile[]>;
   
   // Admin operations
   getAllUsers(): Promise<User[]>;
@@ -933,7 +934,42 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(userProfiles)
       .where(and(...conditions))
-      .orderBy(desc(userProfiles.profileViews));
+      .orderBy(desc(userProfiles.isVerified), desc(userProfiles.updatedAt));
+  }
+
+  async searchTalentsPublic(params: { query?: string; talentType?: string; location?: string; featured?: boolean }): Promise<UserProfile[]> {
+    const conditions = [eq(userProfiles.role, "talent")];
+
+    if (params.query) {
+      conditions.push(
+        or(
+          ilike(userProfiles.displayName, `%${params.query}%`),
+          ilike(userProfiles.bio, `%${params.query}%`)
+        )!
+      );
+    }
+
+    if (params.talentType) {
+      conditions.push(eq(userProfiles.talentType, params.talentType as any));
+    }
+
+    if (params.location) {
+      conditions.push(ilike(userProfiles.location, `%${params.location}%`));
+    }
+
+    // Skip featured filter for now
+    // if (params.featured) {
+    //   conditions.push(eq(userProfiles.isFeatured, true));
+    // }
+
+    return await db
+      .select()
+      .from(userProfiles)
+      .where(and(...conditions))
+      .orderBy(
+        desc(userProfiles.isVerified),
+        desc(userProfiles.updatedAt)
+      );
   }
 
   // Admin operations

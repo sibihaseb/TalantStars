@@ -155,7 +155,7 @@ export default function BrowseJobs() {
                     </ul>
                   </div>
                   <Button 
-                    onClick={() => window.location.href = "/api/login"}
+                    onClick={() => window.location.href = "/auth"}
                     className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
                   >
                     <Search className="h-4 w-4 mr-2" />

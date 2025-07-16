@@ -972,11 +972,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Search routes
   app.get('/api/search/talents', async (req, res) => {
     try {
-      const { q, talentType, location } = req.query;
-      const talents = await storage.searchTalents(q as string, {
+      const { q, talentType, location, featured } = req.query;
+      
+      // Build search parameters
+      const searchParams = {
+        query: q as string,
         talentType: talentType as string,
         location: location as string,
-      });
+        featured: featured === 'true',
+      };
+      
+      const talents = await storage.searchTalentsPublic(searchParams);
       res.json(talents);
     } catch (error) {
       console.error("Error searching talents:", error);
@@ -1753,6 +1759,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create profile question", error: error.message });
     }
   });
+
+
 
   // Featured talent management endpoints
   app.get('/api/admin/featured-talent', isAuthenticated, isAdmin, async (req: any, res) => {
