@@ -202,45 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Registration endpoint
-  app.post('/api/register', async (req: any, res) => {
-    try {
-      const { username, email, password, firstName, lastName, role } = req.body;
-      
-      // Check if user already exists
-      const existingUser = await simpleStorage.getUserByUsername(username);
-      if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-      
-      // Hash password
-      const hashedPassword = await hashPassword(password);
-      
-      // Create user
-      const userData = {
-        username,
-        email,
-        password: hashedPassword,
-        firstName,
-        lastName,
-        role: role || 'talent'
-      };
-      
-      const user = await simpleStorage.createUser(userData);
-      
-      // Auto-login after registration
-      req.login(user, (err) => {
-        if (err) {
-          console.error("Auto-login error:", err);
-          return res.status(500).json({ message: "Registration successful but login failed" });
-        }
-        res.status(201).json(user);
-      });
-    } catch (error) {
-      console.error("Registration error:", error);
-      res.status(500).json({ message: "Registration failed", error: error.message });
-    }
-  });
+  // Registration endpoint - removed duplicate from routes.ts as it's handled in auth.ts
 
 
 

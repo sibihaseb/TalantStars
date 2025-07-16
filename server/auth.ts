@@ -131,11 +131,18 @@ export async function setupAuth(app: Express) {
   // Auth routes
   app.post("/api/register", async (req, res, next) => {
     try {
-      const { username, password, email, firstName, lastName } = req.body;
+      const { username, password, email, firstName, lastName, role } = req.body;
       
+      // Check if username already exists
       const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
+      }
+      
+      // Check if email already exists
+      const existingEmail = await storage.getUserByEmail(email);
+      if (existingEmail) {
+        return res.status(400).json({ message: "Email already exists" });
       }
 
       const user = await storage.createUser({
@@ -144,6 +151,7 @@ export async function setupAuth(app: Express) {
         email,
         firstName,
         lastName,
+        role: role || 'talent'
       });
 
       req.login(user, (err) => {
@@ -152,7 +160,15 @@ export async function setupAuth(app: Express) {
       });
     } catch (error) {
       console.error("Registration error:", error);
-      res.status(500).json({ message: "Registration failed" });
+      if (error.code === '23505') {
+        if (error.constraint === 'users_email_key') {
+          return res.status(400).json({ message: "Email already exists" });
+        }
+        if (error.constraint === 'users_username_key') {
+          return res.status(400).json({ message: "Username already exists" });
+        }
+      }
+      res.status(500).json({ message: "Registration failed", error: error.message });
     }
   });
 

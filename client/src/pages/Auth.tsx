@@ -49,7 +49,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function Auth() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, refetch } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
@@ -114,6 +114,9 @@ export default function Auth() {
           description: `Successfully logged in as ${userData.username}`,
         });
         
+        // Refetch user data to update auth state
+        await refetch();
+        
         // Redirect based on role
         switch (userData.role) {
           case "admin":
@@ -166,6 +169,9 @@ export default function Auth() {
           title: "Account created!",
           description: `Welcome to the platform, ${userData.firstName}!`,
         });
+        
+        // Refetch user data to update auth state
+        await refetch();
         
         // Redirect to onboarding for new users
         window.location.href = "/onboarding";
