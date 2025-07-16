@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Media Upload Debug Test</title>
+</head>
+<body>
+    <h1>Media Upload Debug Test</h1>
+    <form id="uploadForm">
+        <input type="file" id="fileInput" accept="image/*" required>
+        <input type="text" id="titleInput" placeholder="Title" required>
+        <select id="categoryInput">
+            <option value="portfolio">Portfolio</option>
+            <option value="other">Other</option>
+        </select>
+        <button type="submit">Upload</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const file = document.getElementById('fileInput').files[0];
+            const title = document.getElementById('titleInput').value;
+            const category = document.getElementById('categoryInput').value;
+            
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('title', title);
+            formData.append('category', category);
+            formData.append('description', '');
+            
+            console.log('🔥 STARTING UPLOAD TEST');
+            console.log('File:', file.name, file.size, 'bytes');
+            console.log('Title:', title);
+            console.log('Category:', category);
+            console.log('FormData entries:', Array.from(formData.entries()));
+            
+            try {
+                const response = await fetch('/api/media', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                console.log('🚀 RESPONSE STATUS:', response.status);
+                console.log('🚀 RESPONSE HEADERS:', Object.fromEntries(response.headers.entries()));
+                
+                const result = await response.text();
+                console.log('🚀 RESPONSE BODY:', result);
+                
+                document.getElementById('result').innerHTML = `
+                    <h3>Response:</h3>
+                    <p>Status: ${response.status}</p>
+                    <p>Body: ${result}</p>
+                `;
+                
+            } catch (error) {
+                console.error('🚨 UPLOAD ERROR:', error);
+                document.getElementById('result').innerHTML = `
+                    <h3>Error:</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

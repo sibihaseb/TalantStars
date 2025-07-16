@@ -429,13 +429,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Media routes - support single file and external URLs
   app.post('/api/media', (req: any, res: any, next: any) => {
-    logger.mediaUpload('Raw media upload request received', {
+    logger.mediaUpload('🔥 MEDIA UPLOAD ENDPOINT HIT - INITIAL ENTRY', {
       url: req.url,
       method: req.method,
       contentType: req.headers['content-type'],
       contentLength: req.headers['content-length'],
-      userAgent: req.headers['user-agent']
+      userAgent: req.headers['user-agent'],
+      timestamp: new Date().toISOString()
     }, req);
+    console.log('🔥 MEDIA UPLOAD ENDPOINT HIT - INITIAL ENTRY', {
+      url: req.url,
+      method: req.method,
+      contentType: req.headers['content-type']
+    });
     next();
   }, isAuthenticated, requirePlan, (req: any, res: any, next: any) => {
     logger.mediaUpload('Media upload request passed authentication', {
