@@ -1675,6 +1675,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test email configuration
+  app.post('/api/admin/test-email', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { to, subject, message } = req.body;
+      
+      if (!to || !subject || !message) {
+        return res.status(400).json({ message: "Missing required fields: to, subject, message" });
+      }
+
+      const emailSent = await sendEmail({
+        to,
+        subject: subject || "Test Email from Talents & Stars",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">Test Email</h2>
+            <p>${message}</p>
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+            <p style="font-size: 12px; color: #666;">This is a test email sent from the Talents & Stars admin panel.</p>
+          </div>
+        `,
+        text: message
+      });
+
+      if (emailSent) {
+        res.json({ success: true, message: "Test email sent successfully" });
+      } else {
+        res.status(500).json({ success: false, message: "Failed to send test email" });
+      }
+    } catch (error) {
+      console.error("Error sending test email:", error);
+      res.status(500).json({ success: false, message: "Failed to send test email", error: error.message });
+    }
+  });
+
   app.post('/api/admin/settings', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Creating system setting:", req.body);

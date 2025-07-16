@@ -1,10 +1,104 @@
 import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
+import { storage } from './storage';
 
-if (!process.env.RESEND_API_KEY) {
-  throw new Error("RESEND_API_KEY environment variable must be set");
+let resend: Resend | null = null;
+let smtpTransporter: nodemailer.Transporter | null = null;
+
+interface EmailSettings {
+  provider: 'resend' | 'smtp';
+  fromAddress: string;
+  fromName: string;
+  resendApiKey?: string;
+  smtpHost?: string;
+  smtpPort?: number;
+  smtpUsername?: string;
+  smtpPassword?: string;
+  smtpSecure?: boolean;
+  enabled: boolean;
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+async function getEmailSettings(): Promise<EmailSettings> {
+  const settings = await storage.getSystemSettings();
+  const emailSettings = settings.filter(s => s.category === 'email');
+  
+  const config: EmailSettings = {
+    provider: 'resend',
+    fromAddress: 'noreply@talentsandstars.com',
+    fromName: 'Talents & Stars',
+    enabled: true
+  };
+
+  emailSettings.forEach(setting => {
+    switch(setting.key) {
+      case 'email_provider':
+        config.provider = setting.value as 'resend' | 'smtp';
+        break;
+      case 'email_from_address':
+        config.fromAddress = setting.value;
+        break;
+      case 'email_from_name':
+        config.fromName = setting.value;
+        break;
+      case 'resend_api_key':
+        config.resendApiKey = setting.value;
+        break;
+      case 'smtp_host':
+        config.smtpHost = setting.value;
+        break;
+      case 'smtp_port':
+        config.smtpPort = parseInt(setting.value);
+        break;
+      case 'smtp_username':
+        config.smtpUsername = setting.value;
+        break;
+      case 'smtp_password':
+        config.smtpPassword = setting.value;
+        break;
+      case 'smtp_secure':
+        config.smtpSecure = setting.value === 'true';
+        break;
+      case 'email_enabled':
+        config.enabled = setting.value === 'true';
+        break;
+    }
+  });
+
+  return config;
+}
+
+async function initializeEmailProvider(): Promise<void> {
+  const settings = await getEmailSettings();
+  
+  if (!settings.enabled) {
+    console.log('Email sending is disabled');
+    return;
+  }
+
+  if (settings.provider === 'resend') {
+    if (settings.resendApiKey) {
+      resend = new Resend(settings.resendApiKey);
+      console.log('Resend email provider initialized');
+    } else {
+      console.warn('Resend API key not configured');
+    }
+  } else if (settings.provider === 'smtp') {
+    if (settings.smtpHost && settings.smtpUsername && settings.smtpPassword) {
+      smtpTransporter = nodemailer.createTransporter({
+        host: settings.smtpHost,
+        port: settings.smtpPort || 587,
+        secure: settings.smtpSecure || false,
+        auth: {
+          user: settings.smtpUsername,
+          pass: settings.smtpPassword,
+        },
+      });
+      console.log('SMTP email provider initialized');
+    } else {
+      console.warn('SMTP configuration incomplete');
+    }
+  }
+}
 
 interface EmailParams {
   to: string;
@@ -16,21 +110,48 @@ interface EmailParams {
 
 export async function sendEmail(params: EmailParams): Promise<boolean> {
   try {
-    const { data, error } = await resend.emails.send({
-      from: params.from || 'Talents & Stars <noreply@talentsandstars.com>',
-      to: params.to,
-      subject: params.subject,
-      html: params.html,
-      text: params.text,
-    });
-
-    if (error) {
-      console.error('Resend email error:', error);
+    const settings = await getEmailSettings();
+    
+    if (!settings.enabled) {
+      console.log('Email sending is disabled');
       return false;
     }
 
-    console.log('Email sent successfully:', data?.id);
-    return true;
+    await initializeEmailProvider();
+
+    const fromAddress = params.from || `${settings.fromName} <${settings.fromAddress}>`;
+
+    if (settings.provider === 'resend' && resend) {
+      const { data, error } = await resend.emails.send({
+        from: fromAddress,
+        to: params.to,
+        subject: params.subject,
+        html: params.html,
+        text: params.text,
+      });
+
+      if (error) {
+        console.error('Resend email error:', error);
+        return false;
+      }
+
+      console.log('Email sent successfully via Resend:', data?.id);
+      return true;
+    } else if (settings.provider === 'smtp' && smtpTransporter) {
+      const info = await smtpTransporter.sendMail({
+        from: fromAddress,
+        to: params.to,
+        subject: params.subject,
+        html: params.html,
+        text: params.text,
+      });
+
+      console.log('Email sent successfully via SMTP:', info.messageId);
+      return true;
+    } else {
+      console.error('No email provider configured or initialized');
+      return false;
+    }
   } catch (error) {
     console.error('Email sending failed:', error);
     return false;
