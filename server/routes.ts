@@ -32,6 +32,8 @@ import { promisify } from 'util';
 import { uploadFileToWasabi, deleteFileFromWasabi, getFileTypeFromMimeType } from "./wasabi-config";
 import multer from "multer";
 import { createUploadNotification } from "./simple-notifications";
+import { subscriptionManager } from './subscription-management';
+import { cronJobManager } from './cron-jobs';
 import Stripe from "stripe";
 
 const scryptAsync = promisify(scrypt);
@@ -442,10 +444,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const file = req.file as Express.Multer.File;
       const { title, description, category, externalUrl, processVideo } = req.body;
       
-      // Media upload processing
+      console.log('Media upload request received:', {
+        userId,
+        hasFile: !!file,
+        title,
+        description,
+        category,
+        fileDetails: file ? {
+          filename: file.filename,
+          originalname: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size
+        } : null
+      });
       
       // This endpoint is now only for file uploads
       if (!file) {
+        console.error('No file received in media upload request');
         return res.status(400).json({ message: "File is required for this endpoint. Use /api/media/external for external URLs." });
       }
 
@@ -500,7 +515,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         try {
           // Upload file to Wasabi
+          console.log('Attempting to upload file to Wasabi:', {
+            filename: file.filename,
+            originalname: file.originalname,
+            path: file.path,
+            size: file.size
+          });
           const uploadResult = await uploadFileToWasabi(file, `user-${userId}/media`);
+          console.log('Wasabi upload result:', uploadResult);
           
           let thumbnailUrl = null;
           let hlsUrl = null;
@@ -549,7 +571,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           };
           
+          console.log('Creating media file with data:', mediaData);
           const createdMedia = await simpleStorage.createMediaFile(mediaData);
+          console.log('Media file created successfully:', createdMedia);
           
           // Create notification for successful upload
           await createUploadNotification(userId, uploadResult.originalName);
@@ -3345,6 +3369,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+
+  // Subscription Management API endpoints
+  app.post('/api/admin/subscription/trigger-tasks', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      console.log('Admin manually triggering subscription management tasks');
+      await subscriptionManager.runDailyTasks();
+      res.json({ message: 'Subscription management tasks completed successfully' });
+    } catch (error) {
+      console.error('Error running subscription management tasks:', error);
+      res.status(500).json({ error: 'Failed to run subscription management tasks' });
+    }
+  });
+
+  app.get('/api/admin/subscription/cron-status', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const isActive = cronJobManager.isActive();
+      res.json({ isActive });
+    } catch (error) {
+      console.error('Error checking cron status:', error);
+      res.status(500).json({ error: 'Failed to check cron status' });
+    }
+  });
+
+  app.post('/api/admin/subscription/start-cron', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      cronJobManager.start();
+      res.json({ message: 'Cron job manager started successfully' });
+    } catch (error) {
+      console.error('Error starting cron job manager:', error);
+      res.status(500).json({ error: 'Failed to start cron job manager' });
+    }
+  });
+
+  app.post('/api/admin/subscription/stop-cron', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      cronJobManager.stop();
+      res.json({ message: 'Cron job manager stopped successfully' });
+    } catch (error) {
+      console.error('Error stopping cron job manager:', error);
+      res.status(500).json({ error: 'Failed to stop cron job manager' });
+    }
+  });
+
+  // Start the subscription management cron job system
+  cronJobManager.start();
 
   // WebSocket server for real-time messaging
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });

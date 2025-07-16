@@ -193,7 +193,7 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
   // External upload mutation (for single external URLs)
   const externalUploadMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await apiRequest("POST", "/api/media", formData);
+      const response = await apiRequest("POST", "/api/media/external", formData);
       return response.json();
     },
     onSuccess: (data) => {
