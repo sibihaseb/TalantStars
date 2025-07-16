@@ -25,6 +25,7 @@ export function LanguageSelector() {
   }, []);
 
   const handleLanguageChange = async (lang: string) => {
+    console.log('Language selector - changing language to:', lang);
     setLanguage(lang);
     
     toast({

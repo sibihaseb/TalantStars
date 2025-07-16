@@ -32,9 +32,11 @@ export const getCurrentLanguage = (): string => {
 // Set language and persist to localStorage
 export const setLanguage = (lang: string) => {
   if (typeof window !== 'undefined') {
+    console.log('Setting language to:', lang);
     localStorage.setItem('language', lang);
     // Trigger a custom event to notify components of language change
     window.dispatchEvent(new CustomEvent('languageChanged', { detail: lang }));
+    console.log('Language changed event dispatched');
   }
 };
 

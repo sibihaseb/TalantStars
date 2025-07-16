@@ -45,6 +45,7 @@ export function TranslatedText({
         }
 
         const data = await response.json();
+        console.log('Translation response:', data);
         setTranslatedText(data.translatedText || text);
       } catch (error) {
         console.error('Translation error:', error);
@@ -58,6 +59,7 @@ export function TranslatedText({
 
     // Listen for language changes
     const handleLanguageChange = () => {
+      console.log('TranslatedText received language change event');
       translateText();
     };
 

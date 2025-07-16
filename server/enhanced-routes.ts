@@ -624,10 +624,11 @@ export async function registerEnhancedRoutes(app: Express): Promise<Server> {
 
       const translatedText = response.choices[0].message.content?.trim() || text;
 
+      console.log('Translation successful:', { text, targetLanguage, translatedText });
       res.json({ translatedText });
     } catch (error) {
       console.error('Translation error:', error);
-      res.status(500).json({ error: 'Translation failed' });
+      res.status(500).json({ error: 'Translation failed', details: error.message });
     }
   });
 
