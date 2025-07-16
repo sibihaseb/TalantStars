@@ -38,6 +38,8 @@ import {
   paymentRefunds,
   paymentAnalytics,
   jobCommunications,
+  userTags,
+  mediaFileTags,
   // talentCategories,
   // featuredTalents,
   // seoSettings,
@@ -122,6 +124,10 @@ import {
   type InsertPaymentRefund,
   type PaymentAnalytics,
   type InsertPaymentAnalytics,
+  type UserTag,
+  type InsertUserTag,
+  type MediaFileTag,
+  type InsertMediaFileTag,
   // type TalentCategory,
   // type InsertTalentCategory,
   // type FeaturedTalent,
@@ -151,6 +157,18 @@ export interface IStorage {
   getMediaFile(id: number): Promise<MediaFile | undefined>;
   updateMediaFile(id: number, media: Partial<InsertMediaFile>): Promise<MediaFile>;
   deleteMediaFile(id: number): Promise<void>;
+
+  // Tag operations
+  createUserTag(tag: InsertUserTag): Promise<UserTag>;
+  getUserTags(userId: number): Promise<UserTag[]>;
+  updateUserTag(id: number, tag: Partial<InsertUserTag>): Promise<UserTag>;
+  deleteUserTag(id: number): Promise<void>;
+  
+  // Media file tag operations
+  addTagToMediaFile(mediaFileId: number, tagId: number): Promise<MediaFileTag>;
+  removeTagFromMediaFile(mediaFileId: number, tagId: number): Promise<void>;
+  getMediaFilesByTag(tagId: number): Promise<MediaFile[]>;
+  getTagsForMediaFile(mediaFileId: number): Promise<UserTag[]>;
 
   // Social media operations
   createSocialPost(post: InsertSocialPost): Promise<SocialPost>;
@@ -514,6 +532,105 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMediaFile(id: number): Promise<void> {
     await db.delete(mediaFiles).where(eq(mediaFiles.id, id));
+  }
+
+  // Tag operations
+  async createUserTag(tag: InsertUserTag): Promise<UserTag> {
+    const [newTag] = await db
+      .insert(userTags)
+      .values(tag)
+      .returning();
+    return newTag;
+  }
+
+  async getUserTags(userId: number): Promise<UserTag[]> {
+    return await db
+      .select()
+      .from(userTags)
+      .where(eq(userTags.userId, userId))
+      .orderBy(userTags.name);
+  }
+
+  async updateUserTag(id: number, tag: Partial<InsertUserTag>): Promise<UserTag> {
+    const [updatedTag] = await db
+      .update(userTags)
+      .set(tag)
+      .where(eq(userTags.id, id))
+      .returning();
+    return updatedTag;
+  }
+
+  async deleteUserTag(id: number): Promise<void> {
+    // First remove all tag associations
+    await db.delete(mediaFileTags).where(eq(mediaFileTags.tagId, id));
+    // Then delete the tag
+    await db.delete(userTags).where(eq(userTags.id, id));
+  }
+
+  // Media file tag operations
+  async addTagToMediaFile(mediaFileId: number, tagId: number): Promise<MediaFileTag> {
+    const [mediaFileTag] = await db
+      .insert(mediaFileTags)
+      .values({ mediaFileId, tagId })
+      .returning();
+    return mediaFileTag;
+  }
+
+  async removeTagFromMediaFile(mediaFileId: number, tagId: number): Promise<void> {
+    await db
+      .delete(mediaFileTags)
+      .where(and(
+        eq(mediaFileTags.mediaFileId, mediaFileId),
+        eq(mediaFileTags.tagId, tagId)
+      ));
+  }
+
+  async getMediaFilesByTag(tagId: number): Promise<MediaFile[]> {
+    return await db
+      .select({
+        id: mediaFiles.id,
+        userId: mediaFiles.userId,
+        filename: mediaFiles.filename,
+        originalName: mediaFiles.originalName,
+        mimeType: mediaFiles.mimeType,
+        size: mediaFiles.size,
+        url: mediaFiles.url,
+        thumbnailUrl: mediaFiles.thumbnailUrl,
+        mediaType: mediaFiles.mediaType,
+        tags: mediaFiles.tags,
+        title: mediaFiles.title,
+        description: mediaFiles.description,
+        category: mediaFiles.category,
+        isPublic: mediaFiles.isPublic,
+        externalUrl: mediaFiles.externalUrl,
+        externalPlatform: mediaFiles.externalPlatform,
+        externalId: mediaFiles.externalId,
+        duration: mediaFiles.duration,
+        isExternal: mediaFiles.isExternal,
+        hlsUrl: mediaFiles.hlsUrl,
+        metadata: mediaFiles.metadata,
+        createdAt: mediaFiles.createdAt,
+      })
+      .from(mediaFiles)
+      .innerJoin(mediaFileTags, eq(mediaFiles.id, mediaFileTags.mediaFileId))
+      .where(eq(mediaFileTags.tagId, tagId))
+      .orderBy(desc(mediaFiles.createdAt));
+  }
+
+  async getTagsForMediaFile(mediaFileId: number): Promise<UserTag[]> {
+    return await db
+      .select({
+        id: userTags.id,
+        userId: userTags.userId,
+        name: userTags.name,
+        color: userTags.color,
+        description: userTags.description,
+        createdAt: userTags.createdAt,
+      })
+      .from(userTags)
+      .innerJoin(mediaFileTags, eq(userTags.id, mediaFileTags.tagId))
+      .where(eq(mediaFileTags.mediaFileId, mediaFileId))
+      .orderBy(userTags.name);
   }
 
   // Social media operations

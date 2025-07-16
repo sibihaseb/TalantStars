@@ -18,6 +18,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ProgressMascot } from "@/components/mascot/ProgressMascot";
 import { EnhancedMediaUpload } from "@/components/media/EnhancedMediaUpload";
+import { TagManager } from "@/components/media/TagManager";
 import UsageDashboard from "@/components/usage/UsageDashboard";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { 
@@ -73,6 +74,15 @@ export default function TalentDashboard() {
   });
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
+
+  // Fetch media files for tag management
+  const { data: mediaFiles = [] } = useQuery({
+    queryKey: ['/api/media'],
+    queryFn: async () => {
+      const res = await apiRequest('GET', '/api/media');
+      return await res.json();
+    },
+  });
   const { toast } = useToast();
 
   // Fetch user profile and stats
@@ -893,25 +903,15 @@ export default function TalentDashboard() {
 
           <TabsContent value="portfolio">
             <div className="space-y-6">
-              {/* Enhanced Media Upload with Gallery */}
+              {/* Media Portfolio with Tags */}
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle>Media Gallery</CardTitle>
-                      <CardDescription>Showcase your work and talent with photos, videos, and audio</CardDescription>
+                      <CardTitle>Media Portfolio</CardTitle>
+                      <CardDescription>Showcase your work and organize with tags</CardDescription>
                     </div>
                     <div className="flex space-x-2">
-                      <EnhancedMediaUpload 
-                        showGallery={true}
-                        onUploadComplete={(media) => {
-                          toast({
-                            title: "Upload Complete",
-                            description: "Successfully uploaded file",
-                          });
-                          queryClient.invalidateQueries({ queryKey: ['/api/media'] });
-                        }}
-                      />
                       <Button 
                         onClick={() => setLocation('/media')}
                         variant="outline"
@@ -924,16 +924,34 @@ export default function TalentDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <EnhancedMediaUpload 
-                    showGallery={true}
-                    onUploadComplete={(media) => {
-                      toast({
-                        title: "Media Uploaded",
-                        description: "Your media has been added to your portfolio",
-                      });
-                      queryClient.invalidateQueries({ queryKey: ['/api/media'] });
-                    }}
-                  />
+                  <Tabs defaultValue="gallery" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="gallery">Gallery</TabsTrigger>
+                      <TabsTrigger value="tags">Tag Manager</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="gallery" className="space-y-4">
+                      <EnhancedMediaUpload 
+                        showGallery={true}
+                        onUploadComplete={(media) => {
+                          toast({
+                            title: "Media Uploaded",
+                            description: "Your media has been added to your portfolio",
+                          });
+                          queryClient.invalidateQueries({ queryKey: ['/api/media'] });
+                        }}
+                      />
+                    </TabsContent>
+                    
+                    <TabsContent value="tags" className="space-y-4">
+                      <TagManager 
+                        mediaFiles={mediaFiles}
+                        onMediaFilesUpdate={() => {
+                          queryClient.invalidateQueries({ queryKey: ['/api/media'] });
+                        }}
+                      />
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
               

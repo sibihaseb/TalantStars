@@ -20,6 +20,8 @@ import {
   insertJobHistorySchema,
   insertSocialConnectionSchema,
   insertSocialInteractionSchema,
+  insertUserTagSchema,
+  insertMediaFileTagSchema,
   jobCommunications
 } from "@shared/schema";
 import { z } from "zod";
@@ -608,8 +610,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/media', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const media = await simpleStorage.getUserMediaFiles(userId);
-      res.json(media);
+      const media = await storage.getUserMediaFiles(userId);
+      
+      // Add tags to each media file
+      const mediaWithTags = await Promise.all(
+        media.map(async (mediaFile) => {
+          const tags = await storage.getTagsForMediaFile(mediaFile.id);
+          return { ...mediaFile, tags };
+        })
+      );
+      
+      res.json(mediaWithTags);
     } catch (error) {
       console.error("Error fetching media:", error);
       res.status(500).json({ message: "Failed to fetch media" });
@@ -1120,6 +1131,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching talent categories:", error);
       res.status(500).json({ message: "Failed to fetch talent categories" });
+    }
+  });
+
+  // Tag management routes
+  app.post('/api/tags', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const tagData = insertUserTagSchema.parse({ ...req.body, userId });
+      const tag = await storage.createUserTag(tagData);
+      res.json(tag);
+    } catch (error) {
+      console.error("Error creating tag:", error);
+      res.status(500).json({ message: "Failed to create tag" });
+    }
+  });
+
+  app.get('/api/tags', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const tags = await storage.getUserTags(userId);
+      res.json(tags);
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+      res.status(500).json({ message: "Failed to fetch tags" });
+    }
+  });
+
+  app.patch('/api/tags/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      // Verify tag ownership
+      const existingTag = await storage.getUserTags(userId);
+      const tag = existingTag.find(t => t.id === id);
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      const updatedTag = await storage.updateUserTag(id, req.body);
+      res.json(updatedTag);
+    } catch (error) {
+      console.error("Error updating tag:", error);
+      res.status(500).json({ message: "Failed to update tag" });
+    }
+  });
+
+  app.delete('/api/tags/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      // Verify tag ownership
+      const existingTag = await storage.getUserTags(userId);
+      const tag = existingTag.find(t => t.id === id);
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      await storage.deleteUserTag(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting tag:", error);
+      res.status(500).json({ message: "Failed to delete tag" });
+    }
+  });
+
+  // Media file tag association routes
+  app.post('/api/media/:mediaId/tags/:tagId', isAuthenticated, async (req: any, res) => {
+    try {
+      const mediaId = parseInt(req.params.mediaId);
+      const tagId = parseInt(req.params.tagId);
+      const userId = req.user.id;
+      
+      // Verify media file ownership
+      const mediaFile = await storage.getMediaFile(mediaId);
+      if (!mediaFile || mediaFile.userId !== userId) {
+        return res.status(404).json({ message: "Media file not found" });
+      }
+      
+      // Verify tag ownership
+      const userTags = await storage.getUserTags(userId);
+      const tag = userTags.find(t => t.id === tagId);
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      const mediaFileTag = await storage.addTagToMediaFile(mediaId, tagId);
+      res.json(mediaFileTag);
+    } catch (error) {
+      console.error("Error adding tag to media file:", error);
+      res.status(500).json({ message: "Failed to add tag to media file" });
+    }
+  });
+
+  app.delete('/api/media/:mediaId/tags/:tagId', isAuthenticated, async (req: any, res) => {
+    try {
+      const mediaId = parseInt(req.params.mediaId);
+      const tagId = parseInt(req.params.tagId);
+      const userId = req.user.id;
+      
+      // Verify media file ownership
+      const mediaFile = await storage.getMediaFile(mediaId);
+      if (!mediaFile || mediaFile.userId !== userId) {
+        return res.status(404).json({ message: "Media file not found" });
+      }
+      
+      await storage.removeTagFromMediaFile(mediaId, tagId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing tag from media file:", error);
+      res.status(500).json({ message: "Failed to remove tag from media file" });
+    }
+  });
+
+  app.get('/api/media/:mediaId/tags', isAuthenticated, async (req: any, res) => {
+    try {
+      const mediaId = parseInt(req.params.mediaId);
+      const userId = req.user.id;
+      
+      // Verify media file ownership
+      const mediaFile = await storage.getMediaFile(mediaId);
+      if (!mediaFile || mediaFile.userId !== userId) {
+        return res.status(404).json({ message: "Media file not found" });
+      }
+      
+      const tags = await storage.getTagsForMediaFile(mediaId);
+      res.json(tags);
+    } catch (error) {
+      console.error("Error fetching media file tags:", error);
+      res.status(500).json({ message: "Failed to fetch media file tags" });
+    }
+  });
+
+  app.get('/api/tags/:tagId/media', isAuthenticated, async (req: any, res) => {
+    try {
+      const tagId = parseInt(req.params.tagId);
+      const userId = req.user.id;
+      
+      // Verify tag ownership
+      const userTags = await storage.getUserTags(userId);
+      const tag = userTags.find(t => t.id === tagId);
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      
+      const mediaFiles = await storage.getMediaFilesByTag(tagId);
+      res.json(mediaFiles);
+    } catch (error) {
+      console.error("Error fetching media files by tag:", error);
+      res.status(500).json({ message: "Failed to fetch media files by tag" });
     }
   });
 

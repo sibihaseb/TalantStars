@@ -153,6 +153,24 @@ export const mediaFiles = pgTable("media_files", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// User-created tags for media organization
+export const userTags = pgTable("user_tags", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  name: varchar("name").notNull(),
+  color: varchar("color").default("#3B82F6"), // Hex color code
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Many-to-many relationship between media files and tags
+export const mediaFileTags = pgTable("media_file_tags", {
+  id: serial("id").primaryKey(),
+  mediaFileId: integer("media_file_id").references(() => mediaFiles.id).notNull(),
+  tagId: integer("tag_id").references(() => userTags.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Availability calendar for talent
 export const availabilityCalendar = pgTable("availability_calendar", {
   id: serial("id").primaryKey(),
@@ -927,6 +945,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   notifications: many(notifications),
   paymentTransactions: many(paymentTransactions),
   refundedPayments: many(paymentTransactions, { relationName: "refundedPayments" }),
+  tags: many(userTags),
 }));
 
 export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
@@ -936,11 +955,12 @@ export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
   }),
 }));
 
-export const mediaFilesRelations = relations(mediaFiles, ({ one }) => ({
+export const mediaFilesRelations = relations(mediaFiles, ({ one, many }) => ({
   user: one(users, {
     fields: [mediaFiles.userId],
     references: [users.id],
   }),
+  tags: many(mediaFileTags),
 }));
 
 export const jobsRelations = relations(jobs, ({ one, many }) => ({
@@ -1209,6 +1229,25 @@ export const adminSettingsRelations = relations(adminSettings, ({ one }) => ({
   updatedBy: one(users, {
     fields: [adminSettings.updatedBy],
     references: [users.id],
+  }),
+}));
+
+export const userTagsRelations = relations(userTags, ({ one, many }) => ({
+  user: one(users, {
+    fields: [userTags.userId],
+    references: [users.id],
+  }),
+  mediaFiles: many(mediaFileTags),
+}));
+
+export const mediaFileTagsRelations = relations(mediaFileTags, ({ one }) => ({
+  mediaFile: one(mediaFiles, {
+    fields: [mediaFileTags.mediaFileId],
+    references: [mediaFiles.id],
+  }),
+  tag: one(userTags, {
+    fields: [mediaFileTags.tagId],
+    references: [userTags.id],
   }),
 }));
 
@@ -1561,6 +1600,16 @@ export const insertSocialConnectionSchema = createInsertSchema(socialConnections
   updatedAt: true,
 });
 
+export const insertUserTagSchema = createInsertSchema(userTags).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertMediaFileTagSchema = createInsertSchema(mediaFileTags).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertSocialInteractionSchema = createInsertSchema(socialInteractions).omit({
   id: true,
   createdAt: true,
@@ -1605,6 +1654,10 @@ export type AvailabilityCalendar = typeof availabilityCalendar.$inferSelect;
 export type InsertAvailabilityCalendar = z.infer<typeof insertAvailabilityCalendarSchema>;
 export type SkillEndorsement = typeof skillEndorsements.$inferSelect;
 export type InsertSkillEndorsement = z.infer<typeof insertSkillEndorsementSchema>;
+export type UserTag = typeof userTags.$inferSelect;
+export type InsertUserTag = z.infer<typeof insertUserTagSchema>;
+export type MediaFileTag = typeof mediaFileTags.$inferSelect;
+export type InsertMediaFileTag = z.infer<typeof insertMediaFileTagSchema>;
 
 // Types for new tables
 export type UserSubscription = typeof userSubscriptions.$inferSelect;
