@@ -58,64 +58,40 @@ export async function setupAuth(app: Express) {
     checkPeriod: 86400000, // prune expired entries every 24h
   });
 
-  // Force development environment for cookie settings
-  const isDev = process.env.NODE_ENV !== 'production';
-  console.log("Environment:", process.env.NODE_ENV, "isDev:", isDev);
-
   // Get session duration from admin settings
   const sessionDuration = await getSessionDurationFromAdmin();
   console.log("Session duration set to:", sessionDuration / (60 * 60 * 1000), "hours");
 
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "your-secret-key-here",
-    resave: true, // Force save session on every request
-    saveUninitialized: true, // Save empty sessions for debugging
+    secret: process.env.SESSION_SECRET || "your-secret-key-here-development-only",
+    resave: false, // Don't save session if unmodified
+    saveUninitialized: false, // Don't save empty sessions
     store: sessionStore,
     name: "connect.sid",
     cookie: {
-      httpOnly: true,
-      secure: false, // Force secure to false for all environments
+      httpOnly: false, // Allow JavaScript access for debugging
+      secure: false, // Never use secure in development
       maxAge: sessionDuration, // Use admin-controlled session duration
       sameSite: "lax"
     },
   };
 
-  // Force cookie to be non-secure in development
-  if (process.env.NODE_ENV === 'development') {
-    sessionSettings.cookie!.secure = false;
-  }
-
-  // Debug: log the cookie configuration
   console.log("Session cookie configuration:", sessionSettings.cookie);
 
-  // Remove trust proxy setting for development
-  // app.set("trust proxy", 1);
-  
   // Completely disable trust proxy for development
   app.set("trust proxy", false);
   
-  // Test middleware to see if session is working
+  // Session middleware
   app.use(session(sessionSettings));
   
-  // Ensure cookies are not secure in development - more aggressive override
+  // Session debugging middleware
   app.use((req: any, res: any, next: any) => {
+    console.log("Session middleware - ID:", req.sessionID, "exists:", !!req.session, "user:", req.session?.passport?.user);
     if (req.session && req.session.cookie) {
       req.session.cookie.secure = false;
-      req.session.cookie.httpOnly = true;
+      req.session.cookie.httpOnly = false;
       req.session.cookie.sameSite = 'lax';
     }
-    next();
-  });
-  
-  // Force session cookie to be sent without secure flag
-  app.use((req: any, res: any, next: any) => {
-    const originalSend = res.send;
-    res.send = function(body: any) {
-      if (req.session && req.session.cookie) {
-        req.session.cookie.secure = false;
-      }
-      return originalSend.call(this, body);
-    };
     next();
   });
   
