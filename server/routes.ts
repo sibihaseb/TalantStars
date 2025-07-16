@@ -143,8 +143,21 @@ function generateEmailText(template: any): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize default session duration setting
+  try {
+    const settings = await simpleStorage.getAdminSettings();
+    const sessionDurationExists = settings.find(s => s.key === 'session_duration_hours');
+    
+    if (!sessionDurationExists) {
+      console.log('Initializing default session duration (48 hours)...');
+      await simpleStorage.updateAdminSetting('session_duration_hours', '48', 'system');
+    }
+  } catch (error) {
+    console.error('Error initializing session duration setting:', error);
+  }
+
   // Setup traditional authentication for all routes
-  setupAuth(app);
+  await setupAuth(app);
 
   // Configure multer for file uploads
   const upload = multer({

@@ -31,7 +31,26 @@ async function comparePasswords(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
-export function setupAuth(app: Express) {
+async function getSessionDurationFromAdmin(): Promise<number> {
+  try {
+    const settings = await storage.getAdminSettings();
+    const sessionDurationHours = settings.find(s => s.key === 'session_duration_hours')?.value;
+    
+    if (sessionDurationHours) {
+      const hours = parseInt(sessionDurationHours);
+      return hours * 60 * 60 * 1000; // Convert hours to milliseconds
+    }
+    
+    // Default to 48 hours if no setting found
+    return 48 * 60 * 60 * 1000;
+  } catch (error) {
+    console.error('Error getting session duration from admin settings:', error);
+    // Default to 48 hours if error
+    return 48 * 60 * 60 * 1000;
+  }
+}
+
+export async function setupAuth(app: Express) {
   // Use memory store for development to avoid cookie issues
   const MemoryStore = createMemoryStore(session);
   const sessionStore = new MemoryStore({
@@ -42,6 +61,10 @@ export function setupAuth(app: Express) {
   const isDev = process.env.NODE_ENV !== 'production';
   console.log("Environment:", process.env.NODE_ENV, "isDev:", isDev);
 
+  // Get session duration from admin settings
+  const sessionDuration = await getSessionDurationFromAdmin();
+  console.log("Session duration set to:", sessionDuration / (60 * 60 * 1000), "hours");
+
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "your-secret-key-here",
     resave: true, // Force save session on every request
@@ -51,7 +74,7 @@ export function setupAuth(app: Express) {
     cookie: {
       httpOnly: true,
       secure: false, // Force secure to false for all environments
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: sessionDuration, // Use admin-controlled session duration
       sameSite: "lax"
     },
   };

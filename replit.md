@@ -158,6 +158,31 @@ Preferred communication style: Simple, everyday language.
   - Comprehensive logging for debugging plan selection issues
 - **Result**: ✅ Complete mandatory plan selection system preventing payment bypass with professional UI and robust security
 
+### Admin Session Duration Control Implementation (July 16, 2025)
+- **Implementation**: Added comprehensive admin control for user session duration management
+- **Admin Interface Features**:
+  - Dedicated Session Duration Management card in admin dashboard settings tab
+  - Real-time session duration configuration (1-168 hours range)
+  - Visual feedback showing current session duration
+  - Input validation with automatic saving
+  - Clear description of session behavior and limits
+- **Backend Integration**:
+  - Dynamic session duration retrieval from admin settings
+  - Automatic initialization of 48-hour default session duration
+  - Session cookie configuration based on admin-controlled duration
+  - Admin settings storage in memory with fallback to 48-hour default
+- **Technical Implementation**:
+  - Added getAdminSettings() and updateAdminSetting() methods to simple storage
+  - Enhanced auth.ts to dynamically calculate session duration from admin settings
+  - Updated registerRoutes() to initialize default session duration on server startup
+  - Session duration changes take effect for new login sessions
+- **User Experience**:
+  - Session duration displayed in admin interface with current value
+  - Minimum 1 hour, maximum 168 hours (7 days) with validation
+  - Default 48 hours (2 days) for optimal security and user experience
+  - Automatic logout after configured duration of inactivity
+- **Result**: ✅ Complete admin session duration control system with 48-hour default, real-time configuration, and secure session management
+
 ### Comprehensive Email Configuration System Implementation (July 16, 2025)
 - **Implementation**: Enhanced email system with dynamic provider configuration through admin settings
 - **Email Provider Support**:

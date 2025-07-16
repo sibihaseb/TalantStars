@@ -53,6 +53,7 @@ import {
   RefreshCw,
   UserPlus,
   Briefcase,
+  Clock,
   X,
   Gift,
   ArrowLeft
@@ -2737,6 +2738,58 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
+            {/* Session Duration Management Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  Session Duration Management
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  Control how long users can stay logged in before being automatically logged out
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="session-duration">Session Duration (hours)</Label>
+                      <p className="text-sm text-gray-500">
+                        Current: {systemSettings.find(s => s.key === 'session_duration_hours')?.value || '48'} hours
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="session-duration"
+                        type="number"
+                        min="1"
+                        max="168"
+                        defaultValue={systemSettings.find(s => s.key === 'session_duration_hours')?.value || '48'}
+                        className="w-20"
+                        onChange={(e) => {
+                          const hours = parseInt(e.target.value);
+                          if (hours >= 1 && hours <= 168) {
+                            saveSystemSettingMutation.mutate({
+                              key: 'session_duration_hours',
+                              value: e.target.value,
+                              description: `User session duration in hours. Users will be automatically logged out after ${hours} hours of inactivity.`,
+                              category: 'security'
+                            });
+                          }
+                        }}
+                      />
+                      <span className="text-sm text-gray-500">hours</span>
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    <p>• Minimum: 1 hour, Maximum: 168 hours (7 days)</p>
+                    <p>• Default: 48 hours (2 days)</p>
+                    <p>• Changes take effect for new login sessions</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">

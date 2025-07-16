@@ -33,6 +33,10 @@ export interface IStorage {
   updateMediaFile(id: number, mediaData: any): Promise<any>;
   deleteMediaFile(id: number): Promise<void>;
   getUserLimits(userId: number): Promise<any>;
+  
+  // Admin settings operations
+  getAdminSettings(): Promise<any[]>;
+  updateAdminSetting(key: string, value: string, updatedBy: string): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -172,6 +176,36 @@ export class DatabaseStorage implements IStorage {
   async getUserLimits(userId: number): Promise<any> {
     // Return null for now - user limits would be stored in a real database
     return null;
+  }
+
+  // In-memory storage for admin settings
+  private adminSettings: Map<string, any> = new Map([
+    ['session_duration_hours', { 
+      key: 'session_duration_hours', 
+      value: '48', 
+      description: 'User session duration in hours. Users will be automatically logged out after this many hours of inactivity.',
+      category: 'security',
+      updatedBy: 'system',
+      updatedAt: new Date().toISOString()
+    }]
+  ]);
+
+  async getAdminSettings(): Promise<any[]> {
+    return Array.from(this.adminSettings.values());
+  }
+
+  async updateAdminSetting(key: string, value: string, updatedBy: string): Promise<any> {
+    const setting = {
+      key,
+      value,
+      description: this.adminSettings.get(key)?.description || '',
+      category: this.adminSettings.get(key)?.category || 'general',
+      updatedBy,
+      updatedAt: new Date().toISOString()
+    };
+    
+    this.adminSettings.set(key, setting);
+    return setting;
   }
 }
 
