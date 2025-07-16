@@ -21,6 +21,9 @@ export async function apiRequest(
     // For FormData, let browser set Content-Type with boundary
     body = data;
     headers = { ...options?.headers };
+    console.log(`=== FRONTEND API REQUEST ===`);
+    console.log(`Method: ${method}, URL: ${url}`);
+    console.log(`FormData entries:`, Array.from(data.entries()));
   } else if (data) {
     // For regular data, use JSON
     body = JSON.stringify(data);
@@ -38,6 +41,9 @@ export async function apiRequest(
     credentials: "include",
   });
 
+  console.log(`=== FRONTEND API RESPONSE ===`);
+  console.log(`Status: ${res.status}, URL: ${url}`);
+  
   await throwIfResNotOk(res);
   return res;
 }
