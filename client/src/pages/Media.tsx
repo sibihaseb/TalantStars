@@ -128,7 +128,19 @@ export default function Media() {
           formData.append('category', data.category);
           formData.append('file', data.file);
           
-          response = await apiRequest('POST', '/api/media', formData);
+          // Use fetch directly instead of apiRequest to avoid any header conflicts
+          const res = await fetch('/api/media', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+          });
+          
+          if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`${res.status}: ${errorText}`);
+          }
+          
+          response = res;
         } else if (data.externalUrl) {
           // For external URLs, use JSON
           response = await apiRequest('POST', '/api/media', {

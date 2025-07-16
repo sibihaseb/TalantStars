@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Star, Search, Briefcase, Plus, Menu, Calendar, MessageCircle, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 
 import PNG_FILE_6 from "@assets/PNG FILE 6_1752621700970.png";
 
@@ -75,6 +76,7 @@ export function Header() {
             
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
+                <NotificationDropdown />
                 <Link href="/dashboard">
                   <Button variant="ghost" size="sm">
                     Dashboard

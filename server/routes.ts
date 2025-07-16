@@ -411,6 +411,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('=== MEDIA UPLOAD DEBUG ===');
     console.log('Content-Type:', contentType);
     console.log('Raw body present:', !!req.body);
+    console.log('Headers:', JSON.stringify(req.headers, null, 2));
     
     if (contentType.includes('multipart/form-data')) {
       // Handle multipart form data (file uploads)
@@ -1631,6 +1632,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error marking notification as read:", error);
       res.status(500).json({ message: "Failed to mark notification as read", error: error.message });
+    }
+  });
+
+  app.delete('/api/notifications/:notificationId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { notificationId } = req.params;
+      await storage.deleteNotification(parseInt(notificationId));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      res.status(500).json({ message: "Failed to delete notification", error: error.message });
     }
   });
 
