@@ -408,21 +408,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/media', isAuthenticated, requirePlan, (req, res, next) => {
     const contentType = req.headers['content-type'] || '';
     
+    console.log('=== MEDIA UPLOAD DEBUG ===');
+    console.log('Content-Type:', contentType);
+    console.log('Raw body present:', !!req.body);
+    
     if (contentType.includes('multipart/form-data')) {
       // Handle multipart form data (file uploads)
       upload.single('file')(req, res, (err) => {
         if (err) {
-          console.error('Multer error:', err);
-          // Handle boundary errors more gracefully
-          if (err.message.includes('Boundary') || err.message.includes('boundary')) {
-            return res.status(500).json({ message: 'File upload error: Invalid file format or corrupted request' });
+          console.error('Multer error details:', {
+            message: err.message,
+            code: err.code,
+            field: err.field,
+            stack: err.stack
+          });
+          
+          // Handle specific error types
+          if (err.message.includes('File too large')) {
+            return res.status(400).json({ message: 'File too large. Maximum size is 50MB.' });
           }
+          if (err.message.includes('Only image, video, and audio files are allowed')) {
+            return res.status(400).json({ message: 'Invalid file type. Only images, videos, and audio files are allowed.' });
+          }
+          if (err.message.includes('Boundary') || err.message.includes('boundary')) {
+            return res.status(400).json({ message: 'Invalid file upload format. Please try again.' });
+          }
+          
           return res.status(500).json({ message: 'File upload error: ' + err.message });
         }
+        
+        console.log('File upload successful. req.file:', req.file ? 'Present' : 'Missing');
+        console.log('req.body:', req.body);
         next();
       });
     } else {
       // Handle JSON requests (for external URLs)
+      console.log('Handling JSON request for external URL');
       next();
     }
   }, async (req: any, res) => {
