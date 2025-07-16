@@ -235,15 +235,15 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
                   {/* Features List */}
                   <div className="space-y-3">
                     <h4 className="font-semibold text-gray-900 mb-3">What's included:</h4>
-                    {tier.permissions && tier.permissions.slice(0, 6).map((permission: any, index: number) => (
+                    {tier.features && tier.features.slice(0, 8).map((feature: string, index: number) => (
                       <div key={index} className="flex items-center gap-3">
                         <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                        <span className="text-sm text-gray-700">{permission.name}</span>
+                        <span className="text-sm text-gray-700">{feature.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
                       </div>
                     ))}
-                    {tier.permissions && tier.permissions.length > 6 && (
+                    {tier.features && tier.features.length > 8 && (
                       <div className="text-sm text-gray-500">
-                        + {tier.permissions.length - 6} more features
+                        + {tier.features.length - 8} more features
                       </div>
                     )}
                   </div>
