@@ -53,7 +53,8 @@ import {
   RefreshCw,
   UserPlus,
   Briefcase,
-  X
+  X,
+  Gift
 } from "lucide-react";
 
 interface User {
@@ -660,6 +661,13 @@ export default function AdminDashboard() {
             >
               <DollarSign className="w-4 h-4 mr-2" />
               Pricing Tiers
+            </Button>
+            <Button 
+              onClick={() => window.location.href = '/admin/promo-codes'}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
+            >
+              <Gift className="w-4 h-4 mr-2" />
+              Promo Codes
             </Button>
             <Button 
               onClick={() => setIsMassEmailDialogOpen(true)}

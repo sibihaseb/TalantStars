@@ -280,6 +280,59 @@ export const systemSettings = pgTable("system_settings", {
   updatedBy: varchar("updated_by").references(() => users.id),
 });
 
+// Promo code system
+export const promoCodeTypeEnum = pgEnum("promo_code_type", [
+  "percentage", "fixed_amount", "first_month_free", "first_month_discount"
+]);
+
+export const promoCodePlanEnum = pgEnum("promo_code_plan", [
+  "all", "monthly_only", "annual_only", "specific_tier"
+]);
+
+export const promoCodes = pgTable("promo_codes", {
+  id: serial("id").primaryKey(),
+  code: varchar("code").notNull().unique(),
+  name: varchar("name").notNull(), // Display name for admin
+  description: text("description"),
+  type: promoCodeTypeEnum("type").notNull(),
+  value: decimal("value", { precision: 10, scale: 2 }).notNull(), // Amount or percentage
+  
+  // Plan restrictions
+  planRestriction: promoCodePlanEnum("plan_restriction").default("all"),
+  specificTierId: integer("specific_tier_id").references(() => pricingTiers.id),
+  categoryRestriction: categoryEnum("category_restriction"), // null = all categories
+  
+  // Usage limits
+  maxUses: integer("max_uses"), // null = unlimited
+  usedCount: integer("used_count").default(0),
+  maxUsesPerUser: integer("max_uses_per_user").default(1),
+  
+  // Time restrictions
+  startsAt: timestamp("starts_at"),
+  expiresAt: timestamp("expires_at"),
+  
+  // Status
+  active: boolean("active").default(true),
+  
+  // Metadata
+  createdBy: integer("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Track promo code usage
+export const promoCodeUsage = pgTable("promo_code_usage", {
+  id: serial("id").primaryKey(),
+  promoCodeId: integer("promo_code_id").references(() => promoCodes.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  pricingTierId: integer("pricing_tier_id").references(() => pricingTiers.id).notNull(),
+  originalAmount: decimal("original_amount", { precision: 10, scale: 2 }).notNull(),
+  discountAmount: decimal("discount_amount", { precision: 10, scale: 2 }).notNull(),
+  finalAmount: decimal("final_amount", { precision: 10, scale: 2 }).notNull(),
+  planType: varchar("plan_type").notNull(), // "monthly" or "annual"
+  usedAt: timestamp("used_at").defaultNow(),
+});
+
 // Job/Gig history for talents and their managers
 export const jobHistoryEnum = pgEnum("job_history_type", [
   "feature_film", "short_film", "tv_show", "tv_series", "commercial", 
@@ -1261,11 +1314,28 @@ export const insertAdminSettingSchema = createInsertSchema(adminSettings).omit({
   updatedAt: true,
 });
 
+// Promo code insert schemas
+export const insertPromoCodeSchema = createInsertSchema(promoCodes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  usedCount: true,
+});
+
+export const insertPromoCodeUsageSchema = createInsertSchema(promoCodeUsage).omit({
+  id: true,
+  usedAt: true,
+});
+
 // Additional type definitions for new tables
 export type MeetingRequest = typeof meetingRequests.$inferSelect;
 export type InsertMeetingRequest = z.infer<typeof insertMeetingRequestSchema>;
 export type AdminSetting = typeof adminSettings.$inferSelect;
 export type InsertAdminSetting = z.infer<typeof insertAdminSettingSchema>;
+export type PromoCode = typeof promoCodes.$inferSelect;
+export type InsertPromoCode = z.infer<typeof insertPromoCodeSchema>;
+export type PromoCodeUsage = typeof promoCodeUsage.$inferSelect;
+export type InsertPromoCodeUsage = z.infer<typeof insertPromoCodeUsageSchema>;
 export type UserSubscription = typeof userSubscriptions.$inferSelect;
 export type InsertUserSubscription = z.infer<typeof insertUserSubscriptionSchema>;
 export type ChatRoom = typeof chatRooms.$inferSelect;

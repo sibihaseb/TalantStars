@@ -1190,6 +1190,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Promo code management routes
+  app.get('/api/admin/promo-codes', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const promoCodes = await storage.getPromoCodes();
+      res.json(promoCodes);
+    } catch (error) {
+      console.error("Error fetching promo codes:", error);
+      res.status(500).json({ message: "Failed to fetch promo codes" });
+    }
+  });
+
+  app.post('/api/admin/promo-codes', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      console.log("Creating promo code:", req.body);
+      const promoCodeData = {
+        ...req.body,
+        createdBy: req.user.id,
+        usedCount: 0
+      };
+      const promoCode = await storage.createPromoCode(promoCodeData);
+      res.json(promoCode);
+    } catch (error) {
+      console.error("Error creating promo code:", error);
+      res.status(500).json({ message: "Failed to create promo code", error: error.message });
+    }
+  });
+
+  app.put('/api/admin/promo-codes/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const promoCodeId = parseInt(req.params.id);
+      const promoCode = await storage.updatePromoCode(promoCodeId, req.body);
+      res.json(promoCode);
+    } catch (error) {
+      console.error("Error updating promo code:", error);
+      res.status(500).json({ message: "Failed to update promo code" });
+    }
+  });
+
+  app.delete('/api/admin/promo-codes/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const promoCodeId = parseInt(req.params.id);
+      await storage.deletePromoCode(promoCodeId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting promo code:", error);
+      res.status(500).json({ message: "Failed to delete promo code" });
+    }
+  });
+
+  app.get('/api/admin/promo-codes/:id/usage', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const promoCodeId = parseInt(req.params.id);
+      const usage = await storage.getPromoCodeUsage(promoCodeId);
+      res.json(usage);
+    } catch (error) {
+      console.error("Error fetching promo code usage:", error);
+      res.status(500).json({ message: "Failed to fetch promo code usage" });
+    }
+  });
+
+  // Public promo code validation and usage
+  app.post('/api/validate-promo-code', isAuthenticated, async (req: any, res) => {
+    try {
+      const { code, tierId, planType } = req.body;
+      const userId = req.user.id;
+
+      if (!code || !tierId || !planType) {
+        return res.status(400).json({ message: "Missing required fields: code, tierId, planType" });
+      }
+
+      const validation = await storage.validatePromoCode(code, userId, tierId, planType);
+      
+      if (!validation.valid) {
+        return res.status(400).json({ message: validation.error });
+      }
+
+      // Calculate discount
+      const tier = await storage.getPricingTier(tierId);
+      if (!tier) {
+        return res.status(404).json({ message: "Pricing tier not found" });
+      }
+
+      const originalAmount = planType === "annual" ? Number(tier.annualPrice) : Number(tier.price);
+      const discountAmount = await storage.calculateDiscountAmount(validation.promoCode!, originalAmount);
+      const finalAmount = originalAmount - discountAmount;
+
+      res.json({
+        valid: true,
+        promoCode: validation.promoCode,
+        originalAmount,
+        discountAmount,
+        finalAmount,
+        savings: discountAmount
+      });
+    } catch (error) {
+      console.error("Error validating promo code:", error);
+      res.status(500).json({ message: "Failed to validate promo code" });
+    }
+  });
+
   // Profile questions management
   app.get('/api/admin/questions', isAuthenticated, isAdmin, async (req: any, res) => {
     try {

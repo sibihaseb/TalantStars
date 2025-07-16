@@ -32,6 +32,8 @@ import {
   userPrivacySettings,
   professionalConnections,
   userRepresentation,
+  promoCodes,
+  promoCodeUsage,
   type User,
   type UpsertUser,
   type UserProfile,
@@ -103,6 +105,10 @@ import {
   type InsertAdminSetting,
   type MeetingRequest,
   type InsertMeetingRequest,
+  type PromoCode,
+  type InsertPromoCode,
+  type PromoCodeUsage,
+  type InsertPromoCodeUsage,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc, like, ilike, sql, ne } from "drizzle-orm";
@@ -1634,6 +1640,135 @@ export class DatabaseStorage implements IStorage {
     const [result] = await db.select().from(pricingTiers)
       .where(eq(pricingTiers.id, id));
     return result;
+  }
+
+  // Promo code operations
+  async getPromoCodes(): Promise<PromoCode[]> {
+    return await db.select().from(promoCodes)
+      .orderBy(desc(promoCodes.createdAt));
+  }
+
+  async getPromoCodeByCode(code: string): Promise<PromoCode | undefined> {
+    const [result] = await db.select().from(promoCodes)
+      .where(eq(promoCodes.code, code));
+    return result;
+  }
+
+  async createPromoCode(promoCode: InsertPromoCode): Promise<PromoCode> {
+    const [result] = await db.insert(promoCodes)
+      .values(promoCode)
+      .returning();
+    return result;
+  }
+
+  async updatePromoCode(id: number, promoCode: Partial<InsertPromoCode>): Promise<PromoCode> {
+    const [result] = await db.update(promoCodes)
+      .set({ ...promoCode, updatedAt: new Date() })
+      .where(eq(promoCodes.id, id))
+      .returning();
+    return result;
+  }
+
+  async deletePromoCode(id: number): Promise<void> {
+    await db.delete(promoCodes).where(eq(promoCodes.id, id));
+  }
+
+  async validatePromoCode(code: string, userId: number, tierId: number, planType: string): Promise<{
+    valid: boolean;
+    promoCode?: PromoCode;
+    error?: string;
+  }> {
+    const promoCode = await this.getPromoCodeByCode(code);
+    
+    if (!promoCode) {
+      return { valid: false, error: "Invalid promo code" };
+    }
+
+    if (!promoCode.active) {
+      return { valid: false, error: "Promo code is no longer active" };
+    }
+
+    const now = new Date();
+    if (promoCode.startsAt && promoCode.startsAt > now) {
+      return { valid: false, error: "Promo code is not yet active" };
+    }
+
+    if (promoCode.expiresAt && promoCode.expiresAt < now) {
+      return { valid: false, error: "Promo code has expired" };
+    }
+
+    // Check usage limits
+    if (promoCode.maxUses && promoCode.usedCount >= promoCode.maxUses) {
+      return { valid: false, error: "Promo code usage limit exceeded" };
+    }
+
+    // Check user usage limit
+    const userUsage = await db.select().from(promoCodeUsage)
+      .where(and(
+        eq(promoCodeUsage.promoCodeId, promoCode.id),
+        eq(promoCodeUsage.userId, userId)
+      ));
+
+    if (userUsage.length >= promoCode.maxUsesPerUser) {
+      return { valid: false, error: "You have already used this promo code" };
+    }
+
+    // Check plan restrictions
+    if (promoCode.planRestriction === "monthly_only" && planType !== "monthly") {
+      return { valid: false, error: "This promo code is only valid for monthly plans" };
+    }
+
+    if (promoCode.planRestriction === "annual_only" && planType !== "annual") {
+      return { valid: false, error: "This promo code is only valid for annual plans" };
+    }
+
+    if (promoCode.planRestriction === "specific_tier" && promoCode.specificTierId !== tierId) {
+      return { valid: false, error: "This promo code is not valid for this tier" };
+    }
+
+    // Check category restrictions
+    if (promoCode.categoryRestriction) {
+      const tier = await this.getPricingTier(tierId);
+      if (tier && tier.category !== promoCode.categoryRestriction) {
+        return { valid: false, error: `This promo code is only valid for ${promoCode.categoryRestriction} users` };
+      }
+    }
+
+    return { valid: true, promoCode };
+  }
+
+  async calculateDiscountAmount(promoCode: PromoCode, originalAmount: number): Promise<number> {
+    switch (promoCode.type) {
+      case "percentage":
+        return Math.min(originalAmount * (Number(promoCode.value) / 100), originalAmount);
+      case "fixed_amount":
+        return Math.min(Number(promoCode.value), originalAmount);
+      case "first_month_free":
+        return originalAmount;
+      case "first_month_discount":
+        return Math.min(originalAmount * (Number(promoCode.value) / 100), originalAmount);
+      default:
+        return 0;
+    }
+  }
+
+  async recordPromoCodeUsage(usage: InsertPromoCodeUsage): Promise<PromoCodeUsage> {
+    const [result] = await db.insert(promoCodeUsage)
+      .values(usage)
+      .returning();
+
+    // Update usage count
+    await db.update(promoCodes)
+      .set({ usedCount: sql`${promoCodes.usedCount} + 1` })
+      .where(eq(promoCodes.id, usage.promoCodeId));
+
+    return result;
+  }
+
+  async getPromoCodeUsage(promoCodeId: number): Promise<PromoCodeUsage[]> {
+    return await db.select().from(promoCodeUsage)
+      .where(eq(promoCodeUsage.promoCodeId, promoCodeId))
+      .orderBy(desc(promoCodeUsage.usedAt));
   }
 }
 
