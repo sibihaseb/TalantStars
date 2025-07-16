@@ -1064,6 +1064,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Featured talents routes - temporarily returning mock data until tables are created
+  app.get('/api/featured-talents', async (req, res) => {
+    try {
+      // Temporary mock data
+      const featuredTalents = [
+        {
+          id: "1",
+          username: "emma_star",
+          profileImage: "/mock-profile.jpg",
+          fullName: "Emma Star",
+          talentType: "actor",
+          location: "Los Angeles, CA",
+          verificationStatus: "verified",
+          featuredReason: "Outstanding performance in recent productions",
+          skills: ["Acting", "Voice Acting", "Singing"],
+          bio: "Professional actress with 10+ years experience in film and television.",
+          rating: 4.8,
+          category: "Featured Performer"
+        }
+      ];
+      res.json(featuredTalents);
+    } catch (error) {
+      console.error("Error fetching featured talents:", error);
+      res.status(500).json({ message: "Failed to fetch featured talents" });
+    }
+  });
+
+  // Talent categories routes - temporarily returning mock data until tables are created
+  app.get('/api/talent-categories', async (req, res) => {
+    try {
+      // Temporary mock data
+      const categories = [
+        {
+          id: 1,
+          name: "Featured Performer",
+          description: "Top-rated performers showcased on our platform",
+          icon: "🌟",
+          color: "gold",
+          isActive: true,
+          talentCount: 12
+        },
+        {
+          id: 2,
+          name: "Rising Star",
+          description: "Up-and-coming talent making waves",
+          icon: "⭐",
+          color: "silver",
+          isActive: true,
+          talentCount: 8
+        }
+      ];
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching talent categories:", error);
+      res.status(500).json({ message: "Failed to fetch talent categories" });
+    }
+  });
+
   // Search routes
   app.get('/api/search/talents', async (req, res) => {
     try {
@@ -1099,6 +1157,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch talent profile" });
     }
   });
+
+  // Admin featured talents routes - temporarily disabled until tables are created
+  /*
+  app.get('/api/admin/featured-talents', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const featuredTalents = await storage.getFeaturedTalents();
+      res.json(featuredTalents);
+    } catch (error) {
+      console.error("Error fetching featured talents:", error);
+      res.status(500).json({ message: "Failed to fetch featured talents" });
+    }
+  });
+
+  app.post('/api/admin/featured-talents', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const featuredTalent = await storage.createFeaturedTalent(req.body);
+      res.json(featuredTalent);
+    } catch (error) {
+      console.error("Error creating featured talent:", error);
+      res.status(500).json({ message: "Failed to create featured talent" });
+    }
+  });
+
+  app.put('/api/admin/featured-talents/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const featuredTalent = await storage.updateFeaturedTalent(id, req.body);
+      res.json(featuredTalent);
+    } catch (error) {
+      console.error("Error updating featured talent:", error);
+      res.status(500).json({ message: "Failed to update featured talent" });
+    }
+  });
+
+  app.delete('/api/admin/featured-talents/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteFeaturedTalent(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting featured talent:", error);
+      res.status(500).json({ message: "Failed to delete featured talent" });
+    }
+  });
+
+  // Admin talent categories routes
+  app.get('/api/admin/talent-categories', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const categories = await storage.getTalentCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching talent categories:", error);
+      res.status(500).json({ message: "Failed to fetch talent categories" });
+    }
+  });
+
+  app.post('/api/admin/talent-categories', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const category = await storage.createTalentCategory(req.body);
+      res.json(category);
+    } catch (error) {
+      console.error("Error creating talent category:", error);
+      res.status(500).json({ message: "Failed to create talent category" });
+    }
+  });
+
+  app.put('/api/admin/talent-categories/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const category = await storage.updateTalentCategory(id, req.body);
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating talent category:", error);
+      res.status(500).json({ message: "Failed to update talent category" });
+    }
+  });
+
+  app.delete('/api/admin/talent-categories/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteTalentCategory(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting talent category:", error);
+      res.status(500).json({ message: "Failed to delete talent category" });
+    }
+  });
+
+  // Admin SEO routes
+  app.get('/api/admin/seo-settings', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const seoSettings = await storage.getSEOSettings();
+      res.json(seoSettings);
+    } catch (error) {
+      console.error("Error fetching SEO settings:", error);
+      res.status(500).json({ message: "Failed to fetch SEO settings" });
+    }
+  });
+
+  app.post('/api/admin/seo-settings', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const seoSetting = await storage.createOrUpdateSEOSettings(req.body);
+      res.json(seoSetting);
+    } catch (error) {
+      console.error("Error saving SEO settings:", error);
+      res.status(500).json({ message: "Failed to save SEO settings" });
+    }
+  });
+
+  app.post('/api/admin/generate-seo', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { pagePath } = req.body;
+      const generatedSEO = await storage.generateSEOContent(pagePath);
+      res.json(generatedSEO);
+    } catch (error) {
+      console.error("Error generating SEO content:", error);
+      res.status(500).json({ message: "Failed to generate SEO content" });
+    }
+  });
+
+  app.get('/api/admin/seo-analytics', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const analytics = await storage.getSEOAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching SEO analytics:", error);
+      res.status(500).json({ message: "Failed to fetch SEO analytics" });
+    }
+  });
+  */
 
   // Admin routes (for user management, pricing, etc.)
   app.get('/api/admin/users', isAuthenticated, isAdmin, async (req: any, res) => {

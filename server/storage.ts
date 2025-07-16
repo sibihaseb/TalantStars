@@ -38,6 +38,9 @@ import {
   paymentRefunds,
   paymentAnalytics,
   jobCommunications,
+  // talentCategories,
+  // featuredTalents,
+  // seoSettings,
   type User,
   type UpsertUser,
   type UserProfile,
@@ -119,6 +122,12 @@ import {
   type InsertPaymentRefund,
   type PaymentAnalytics,
   type InsertPaymentAnalytics,
+  // type TalentCategory,
+  // type InsertTalentCategory,
+  // type FeaturedTalent,
+  // type InsertFeaturedTalent,
+  // type SeoSettings,
+  // type InsertSeoSettings,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc, like, ilike, sql, ne } from "drizzle-orm";
@@ -2210,6 +2219,166 @@ export class DatabaseStorage implements IStorage {
       transactions: row.transactions,
     }));
   }
+
+  // Featured Talents methods - temporarily commented out until tables are created
+  /*
+  async getFeaturedTalents(): Promise<any[]> {
+    const results = await db.select({
+      id: featuredTalents.id,
+      userId: featuredTalents.userId,
+      categoryId: featuredTalents.categoryId,
+      featuredReason: featuredTalents.featuredReason,
+      displayOrder: featuredTalents.displayOrder,
+      isActive: featuredTalents.isActive,
+      username: users.username,
+      fullName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
+      profileImage: users.profileImageUrl,
+      talentType: userProfiles.talentType,
+      location: userProfiles.location,
+      verificationStatus: sql<string>`CASE WHEN ${userProfiles.isVerified} THEN 'verified' ELSE 'unverified' END`,
+      skills: userProfiles.skills,
+      bio: userProfiles.bio,
+      rating: sql<number>`COALESCE(${userProfiles.profileViews}, 0) * 0.01 + 4.0`,
+      category: talentCategories.name,
+    })
+    .from(featuredTalents)
+    .leftJoin(users, eq(featuredTalents.userId, users.id))
+    .leftJoin(userProfiles, eq(users.id, userProfiles.userId))
+    .leftJoin(talentCategories, eq(featuredTalents.categoryId, talentCategories.id))
+    .where(eq(featuredTalents.isActive, true))
+    .orderBy(featuredTalents.displayOrder);
+
+    return results;
+  }
+
+  async createFeaturedTalent(data: InsertFeaturedTalent): Promise<FeaturedTalent> {
+    const [result] = await db.insert(featuredTalents).values(data).returning();
+    return result;
+  }
+
+  async updateFeaturedTalent(id: number, data: Partial<InsertFeaturedTalent>): Promise<FeaturedTalent> {
+    const [result] = await db.update(featuredTalents)
+      .set(data)
+      .where(eq(featuredTalents.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteFeaturedTalent(id: number): Promise<void> {
+    await db.delete(featuredTalents).where(eq(featuredTalents.id, id));
+  }
+
+  // Talent Categories methods
+  async getTalentCategories(): Promise<any[]> {
+    const results = await db.select({
+      id: talentCategories.id,
+      name: talentCategories.name,
+      description: talentCategories.description,
+      icon: talentCategories.icon,
+      color: talentCategories.color,
+      isActive: talentCategories.isActive,
+      talentCount: sql<number>`COALESCE(COUNT(${featuredTalents.id}), 0)`,
+      createdAt: talentCategories.createdAt,
+      updatedAt: talentCategories.updatedAt,
+    })
+    .from(talentCategories)
+    .leftJoin(featuredTalents, eq(talentCategories.id, featuredTalents.categoryId))
+    .groupBy(talentCategories.id);
+
+    return results;
+  }
+
+  async createTalentCategory(data: InsertTalentCategory): Promise<TalentCategory> {
+    const [result] = await db.insert(talentCategories).values(data).returning();
+    return result;
+  }
+
+  async updateTalentCategory(id: number, data: Partial<InsertTalentCategory>): Promise<TalentCategory> {
+    const [result] = await db.update(talentCategories)
+      .set(data)
+      .where(eq(talentCategories.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteTalentCategory(id: number): Promise<void> {
+    await db.delete(talentCategories).where(eq(talentCategories.id, id));
+  }
+
+  // SEO Settings methods
+  async getSEOSettings(): Promise<SeoSettings[]> {
+    const results = await db.select().from(seoSettings);
+    return results;
+  }
+
+  async createOrUpdateSEOSettings(data: InsertSeoSettings): Promise<SeoSettings> {
+    // Try to update existing record first
+    const existing = await db.select().from(seoSettings).where(eq(seoSettings.pagePath, data.pagePath));
+    
+    if (existing.length > 0) {
+      const [result] = await db.update(seoSettings)
+        .set(data)
+        .where(eq(seoSettings.pagePath, data.pagePath))
+        .returning();
+      return result;
+    } else {
+      const [result] = await db.insert(seoSettings).values(data).returning();
+      return result;
+    }
+  }
+
+  async generateSEOContent(pagePath: string): Promise<any> {
+    // Generate SEO content based on page path
+    const siteName = "Talents & Stars";
+    const baseDescription = "Discover exceptional talent in the entertainment industry. Connect with actors, musicians, voice artists, models, and more on our AI-powered platform.";
+    
+    const pageInfo = {
+      '/': { name: 'Home', description: 'Entertainment talent platform connecting artists with opportunities' },
+      '/featured-talents': { name: 'Featured Talents', description: 'Showcase of exceptional featured talents' },
+      '/browse-talents': { name: 'Browse Talents', description: 'Discover and connect with talented performers' },
+      '/jobs': { name: 'Jobs & Opportunities', description: 'Find casting calls and entertainment industry jobs' },
+      '/about': { name: 'About Us', description: 'Learn about our mission to connect talent with opportunity' },
+      '/contact': { name: 'Contact', description: 'Get in touch with our team' },
+      '/pricing': { name: 'Pricing', description: 'Flexible pricing plans for talent and industry professionals' },
+      '/auth': { name: 'Authentication', description: 'Join our community of entertainment professionals' }
+    };
+
+    const page = pageInfo[pagePath] || { name: 'Page', description: baseDescription };
+
+    return {
+      pageTitle: `${page.name} | ${siteName}`,
+      metaDescription: `${page.description} - ${baseDescription}`,
+      metaKeywords: ['talent', 'entertainment', 'actors', 'musicians', 'voice artists', 'models', 'casting', 'auditions', 'jobs', 'portfolio'],
+      ogTitle: `${page.name} | ${siteName}`,
+      ogDescription: `${page.description} - ${baseDescription}`,
+      ogImage: '/og-image.jpg',
+      twitterTitle: `${page.name} | ${siteName}`,
+      twitterDescription: `${page.description} - ${baseDescription}`,
+      twitterImage: '/twitter-image.jpg',
+      favicon: '/favicon.ico',
+      robots: 'index, follow',
+      canonicalUrl: `https://talents-stars.com${pagePath}`,
+      schemaMarkup: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": siteName,
+        "url": `https://talents-stars.com${pagePath}`,
+        "description": baseDescription
+      }, null, 2),
+      isActive: true,
+      pagePath: pagePath
+    };
+  }
+
+  async getSEOAnalytics(): Promise<any> {
+    return {
+      searchRanking: 15.2,
+      organicTraffic: 1234,
+      keywords: 89,
+      pageSpeed: 92
+    };
+  }
+  */
 }
 
 export const storage = new DatabaseStorage();

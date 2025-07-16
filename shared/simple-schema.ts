@@ -172,6 +172,90 @@ export const insertPricingTierSchema = createInsertSchema(pricingTiers).omit({
   updatedAt: true,
 });
 
+// Talent categories table
+export const talentCategories = pgTable("talent_categories", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  icon: varchar("icon").default("star"),
+  color: varchar("color").default("blue"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Featured talents table
+export const featuredTalents = pgTable("featured_talents", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  categoryId: integer("category_id").references(() => talentCategories.id),
+  featuredReason: text("featured_reason"),
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+  featuredUntil: timestamp("featured_until"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// SEO settings table
+export const seoSettings = pgTable("seo_settings", {
+  id: serial("id").primaryKey(),
+  pagePath: varchar("page_path").notNull(),
+  pageTitle: varchar("page_title"),
+  metaDescription: text("meta_description"),
+  metaKeywords: text("meta_keywords").array(),
+  ogTitle: varchar("og_title"),
+  ogDescription: text("og_description"),
+  ogImage: varchar("og_image"),
+  twitterTitle: varchar("twitter_title"),
+  twitterDescription: text("twitter_description"),
+  twitterImage: varchar("twitter_image"),
+  favicon: varchar("favicon"),
+  robots: varchar("robots").default("index, follow"),
+  canonicalUrl: varchar("canonical_url"),
+  schemaMarkup: text("schema_markup"),
+  googleAnalyticsId: varchar("google_analytics_id"),
+  googleSearchConsoleId: varchar("google_search_console_id"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Relations
+export const talentCategoriesRelations = relations(talentCategories, ({ many }) => ({
+  featuredTalents: many(featuredTalents),
+}));
+
+export const featuredTalentsRelations = relations(featuredTalents, ({ one }) => ({
+  user: one(users, {
+    fields: [featuredTalents.userId],
+    references: [users.id],
+  }),
+  category: one(talentCategories, {
+    fields: [featuredTalents.categoryId],
+    references: [talentCategories.id],
+  }),
+}));
+
+// Insert schemas
+export const insertTalentCategorySchema = createInsertSchema(talentCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFeaturedTalentSchema = createInsertSchema(featuredTalents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSeoSettingsSchema = createInsertSchema(seoSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -179,3 +263,9 @@ export type UserProfile = typeof userProfiles.$inferSelect;
 export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
 export type PricingTier = typeof pricingTiers.$inferSelect;
 export type InsertPricingTier = z.infer<typeof insertPricingTierSchema>;
+export type TalentCategory = typeof talentCategories.$inferSelect;
+export type InsertTalentCategory = z.infer<typeof insertTalentCategorySchema>;
+export type FeaturedTalent = typeof featuredTalents.$inferSelect;
+export type InsertFeaturedTalent = z.infer<typeof insertFeaturedTalentSchema>;
+export type SeoSettings = typeof seoSettings.$inferSelect;
+export type InsertSeoSettings = z.infer<typeof insertSeoSettingsSchema>;
