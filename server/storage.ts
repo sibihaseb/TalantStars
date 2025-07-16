@@ -1655,15 +1655,34 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPromoCode(promoCode: InsertPromoCode): Promise<PromoCode> {
+    // Convert date strings to Date objects if they exist
+    const insertData: any = { ...promoCode };
+    if (insertData.startsAt && typeof insertData.startsAt === 'string') {
+      insertData.startsAt = new Date(insertData.startsAt);
+    }
+    if (insertData.expiresAt && typeof insertData.expiresAt === 'string') {
+      insertData.expiresAt = new Date(insertData.expiresAt);
+    }
+    
     const [result] = await db.insert(promoCodes)
-      .values(promoCode)
+      .values(insertData)
       .returning();
     return result;
   }
 
   async updatePromoCode(id: number, promoCode: Partial<InsertPromoCode>): Promise<PromoCode> {
+    // Convert date strings to Date objects if they exist
+    const updateData: any = { ...promoCode };
+    if (updateData.startsAt && typeof updateData.startsAt === 'string') {
+      updateData.startsAt = new Date(updateData.startsAt);
+    }
+    if (updateData.expiresAt && typeof updateData.expiresAt === 'string') {
+      updateData.expiresAt = new Date(updateData.expiresAt);
+    }
+    updateData.updatedAt = new Date();
+    
     const [result] = await db.update(promoCodes)
-      .set({ ...promoCode, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(promoCodes.id, id))
       .returning();
     return result;
