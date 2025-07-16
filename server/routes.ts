@@ -1920,6 +1920,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User usage dashboard endpoint
+  app.get("/api/user/usage", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await simpleStorage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get tier information
+      let tier = null;
+      if (user.pricingTierId) {
+        tier = await simpleStorage.getPricingTier(user.pricingTierId);
+      }
+
+      // Mock usage data - in production, this would come from actual database
+      const mockUsage = {
+        photos: { current: 3, limit: tier?.maxPhotos || 5 },
+        videos: { current: 1, limit: tier?.maxVideos || 2 },
+        audio: { current: 0, limit: tier?.maxAudio || 3 },
+        externalLinks: { current: 2, limit: tier?.maxExternalLinks || 3 },
+        storage: { current: 2.1 * 1024 * 1024 * 1024, limit: 20 * 1024 * 1024 * 1024, unit: 'GB' },
+        tierName: tier?.name || 'Free Plan',
+        tierCategory: tier?.category || 'talent'
+      };
+
+      res.json(mockUsage);
+    } catch (error) {
+      console.error("Error fetching user usage:", error);
+      res.status(500).json({ message: "Failed to fetch usage data" });
+    }
+  });
+
   // Initialize default pricing tiers
   app.post('/api/admin/init-default-tiers', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
@@ -2178,6 +2212,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating analytics:", error);
       res.status(500).json({ message: "Failed to create analytics" });
+    }
+  });
+
+  // Admin usage analytics endpoint
+  app.get("/api/admin/usage-analytics", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { timeRange = '7d', userType = 'all' } = req.query;
+
+      // Mock analytics data - in production, this would come from actual database queries
+      const mockAnalytics = {
+        totalUsers: 1247,
+        activeUsers: 892,
+        totalStorage: { current: 45.2 * 1024 * 1024 * 1024, limit: 1000 * 1024 * 1024 * 1024, unit: 'GB' },
+        totalUploads: {
+          photos: 12847,
+          videos: 3921,
+          audio: 1205,
+          externalLinks: 2341
+        },
+        tierBreakdown: [
+          { tierName: 'Free Plan', userCount: 892, storageUsed: 12.3 * 1024 * 1024 * 1024, percentage: 27.2 },
+          { tierName: 'Basic Plan', userCount: 234, storageUsed: 18.7 * 1024 * 1024 * 1024, percentage: 41.4 },
+          { tierName: 'Pro Plan', userCount: 98, storageUsed: 10.1 * 1024 * 1024 * 1024, percentage: 22.3 },
+          { tierName: 'Enterprise', userCount: 23, storageUsed: 4.1 * 1024 * 1024 * 1024, percentage: 9.1 }
+        ],
+        topUsers: [
+          { id: 1, username: 'john_actor', tierName: 'Pro Plan', storageUsed: 1.2 * 1024 * 1024 * 1024, uploadCount: 145, lastActive: '2 hours ago' },
+          { id: 2, username: 'sarah_producer', tierName: 'Enterprise', storageUsed: 0.9 * 1024 * 1024 * 1024, uploadCount: 98, lastActive: '1 day ago' },
+          { id: 3, username: 'mike_musician', tierName: 'Basic Plan', storageUsed: 0.7 * 1024 * 1024 * 1024, uploadCount: 87, lastActive: '3 hours ago' },
+          { id: 4, username: 'lisa_model', tierName: 'Pro Plan', storageUsed: 0.6 * 1024 * 1024 * 1024, uploadCount: 73, lastActive: '5 minutes ago' },
+          { id: 5, username: 'david_manager', tierName: 'Basic Plan', storageUsed: 0.5 * 1024 * 1024 * 1024, uploadCount: 62, lastActive: '1 hour ago' }
+        ],
+        usageByType: {
+          talent: { users: 892, storage: 25.3 * 1024 * 1024 * 1024 },
+          manager: { users: 234, storage: 12.1 * 1024 * 1024 * 1024 },
+          producer: { users: 98, storage: 6.2 * 1024 * 1024 * 1024 },
+          admin: { users: 23, storage: 1.6 * 1024 * 1024 * 1024 }
+        },
+        recentActivity: [
+          { date: '2024-01-15', uploads: 287, newUsers: 12, storageUsed: 1.2 * 1024 * 1024 * 1024 },
+          { date: '2024-01-14', uploads: 341, newUsers: 18, storageUsed: 1.5 * 1024 * 1024 * 1024 },
+          { date: '2024-01-13', uploads: 192, newUsers: 8, storageUsed: 0.8 * 1024 * 1024 * 1024 },
+          { date: '2024-01-12', uploads: 423, newUsers: 23, storageUsed: 1.9 * 1024 * 1024 * 1024 },
+          { date: '2024-01-11', uploads: 156, newUsers: 5, storageUsed: 0.6 * 1024 * 1024 * 1024 }
+        ]
+      };
+
+      res.json(mockAnalytics);
+    } catch (error) {
+      console.error("Error fetching admin usage analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics data" });
     }
   });
 

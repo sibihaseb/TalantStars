@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ProgressMascot } from "@/components/mascot/ProgressMascot";
 import { MultipleMediaUpload } from "@/components/media/MultipleMediaUpload";
 import { EnhancedMediaUpload } from "@/components/media/EnhancedMediaUpload";
+import UsageDashboard from "@/components/usage/UsageDashboard";
 import { 
   Calendar, 
   Briefcase, 
@@ -497,12 +498,13 @@ export default function TalentDashboard() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6 mb-8">
+          <TabsList className="grid w-full grid-cols-7 mb-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+            <TabsTrigger value="usage">Usage</TabsTrigger>
             <TabsTrigger value="calendar">Calendar</TabsTrigger>
           </TabsList>
 
@@ -1051,6 +1053,10 @@ export default function TalentDashboard() {
                 </Card>
               </div>
             </TabsContent>
+
+          <TabsContent value="usage">
+            <UsageDashboard />
+          </TabsContent>
 
           <TabsContent value="calendar">
             <Card>

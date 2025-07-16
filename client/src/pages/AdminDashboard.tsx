@@ -59,6 +59,7 @@ import {
 } from "lucide-react";
 import EmailCampaigns from "./admin/email-campaigns";
 import AdminPayments from "./AdminPayments";
+import AdminUsageAnalytics from "@/components/admin/AdminUsageAnalytics";
 
 interface User {
   id: string;
@@ -940,6 +941,8 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+            
+            <AdminUsageAnalytics />
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
