@@ -69,7 +69,8 @@ export default function Checkout() {
         title: "Payment Successful!",
         description: "Your tier has been activated. Welcome to your new plan!",
       });
-      setLocation("/");
+      // Redirect to dashboard after successful payment
+      setTimeout(() => setLocation("/dashboard"), 1000);
     },
     onError: (error: Error) => {
       toast({

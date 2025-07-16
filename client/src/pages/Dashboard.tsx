@@ -59,8 +59,8 @@ export default function Dashboard() {
     );
   }
 
-  // Get user role from profile, default to talent
-  const userRole = profile?.profile?.role || "talent";
+  // Get user role from user object, default to talent
+  const userRole = user?.role || "talent";
 
   // Route to appropriate dashboard based on role
   switch (userRole) {

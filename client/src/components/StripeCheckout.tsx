@@ -36,7 +36,8 @@ function CheckoutForm({ tier, isAnnual }: { tier: any; isAnnual: boolean }) {
         description: "Your tier has been activated. Welcome to your new plan!",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-      setLocation("/");
+      // Redirect to dashboard after successful payment
+      setTimeout(() => setLocation("/dashboard"), 1000);
     },
     onError: (error: Error) => {
       toast({

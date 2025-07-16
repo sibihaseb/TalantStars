@@ -405,20 +405,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Media routes - support multiple files
-  app.post('/api/media', isAuthenticated, (req, res, next) => {
+  app.post('/api/media', isAuthenticated, requirePlan, (req, res, next) => {
     console.log('Content-Type header:', req.headers['content-type']);
     console.log('Request method:', req.method);
     console.log('Request URL:', req.url);
+    console.log('Request body keys:', Object.keys(req.body || {}));
     
-    upload.array('files', 10)(req, res, (err) => {
-      if (err) {
-        console.error('Multer error:', err);
-        console.error('Error type:', err.constructor.name);
-        console.error('Error code:', err.code);
-        return res.status(500).json({ message: 'File upload error: ' + err.message });
-      }
+    // Try different multer configurations based on content type
+    const contentType = req.headers['content-type'] || '';
+    
+    if (contentType.includes('multipart/form-data')) {
+      // Handle multipart form data
+      upload.array('files', 10)(req, res, (err) => {
+        if (err) {
+          console.error('Multer error:', err);
+          console.error('Error type:', err.constructor.name);
+          console.error('Error code:', err.code);
+          
+          // Try single file upload if array fails
+          upload.single('file')(req, res, (singleErr) => {
+            if (singleErr) {
+              console.error('Single file multer error:', singleErr);
+              return res.status(500).json({ message: 'File upload error: ' + singleErr.message });
+            }
+            next();
+          });
+        } else {
+          next();
+        }
+      });
+    } else {
+      // Handle JSON requests (for external URLs)
       next();
-    });
+    }
   }, async (req: any, res) => {
     try {
       const userId = req.user.id;

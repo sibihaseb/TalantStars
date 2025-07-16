@@ -87,15 +87,20 @@ function Router() {
         {isAuthenticated && user?.role === 'admin' ? <FeaturedTalentManagement /> : <Auth />}
       </Route>
       
-      {/* Role-based dashboard routes */}
+      {/* Single unified dashboard that redirects based on role */}
+      <Route path="/dashboard">
+        {isAuthenticated ? <PlanProtectedRoute><Dashboard /></PlanProtectedRoute> : <Auth />}
+      </Route>
+      
+      {/* Legacy routes that redirect to unified dashboard */}
       <Route path="/talent-dashboard">
-        {isAuthenticated ? <PlanProtectedRoute><TalentDashboard /></PlanProtectedRoute> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><Dashboard /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/producer-dashboard">
-        {isAuthenticated ? <PlanProtectedRoute><ProducerDashboard /></PlanProtectedRoute> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><Dashboard /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/manager-dashboard">
-        {isAuthenticated ? <PlanProtectedRoute><ManagerDashboard /></PlanProtectedRoute> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><Dashboard /></PlanProtectedRoute> : <Auth />}
       </Route>
       
       {/* Other protected routes */}
@@ -113,9 +118,6 @@ function Router() {
       </Route>
       <Route path="/messages">
         {isAuthenticated ? <PlanProtectedRoute><Messages /></PlanProtectedRoute> : <Auth />}
-      </Route>
-      <Route path="/dashboard">
-        {isAuthenticated ? <PlanProtectedRoute><Dashboard /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/post-gig">
         {isAuthenticated ? <PlanProtectedRoute><PostGig /></PlanProtectedRoute> : <Auth />}
@@ -150,7 +152,7 @@ function Router() {
         <Route path="/" component={Landing} />
       ) : (
         <Route path="/">
-          <PlanProtectedRoute><Home /></PlanProtectedRoute>
+          <PlanProtectedRoute><Dashboard /></PlanProtectedRoute>
         </Route>
       )}
       
