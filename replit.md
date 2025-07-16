@@ -10,23 +10,35 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Media Upload System Fix and Optimization (July 16, 2025)
-- **Issue Resolution**: Fixed multipart boundary errors that were preventing file uploads from working properly
-- **Frontend Enhancement**: Updated Media.tsx to use proper request formats:
-  - File uploads now use FormData with multipart/form-data
-  - External URL uploads use JSON with application/json content type
-  - Fixed React Hook Form integration to prevent field name conflicts
-  - Removed problematic spread operator that was causing 'files' vs 'file' field mismatch
+### Media Upload System Fix and Authentication Resolution (July 16, 2025)
+- **Issue Resolution**: Fixed multipart boundary errors and authentication issues preventing file uploads
+- **Frontend Enhancement**: Completely revamped upload system in Media.tsx:
+  - Rewrote upload mutation to separate FormData and JSON handling
+  - Added comprehensive error handling with detailed logging
+  - Fixed form validation to use direct DOM access for file inputs
+  - Separated file uploads (FormData) from external URL uploads (JSON)
+  - Added authentication status checking and error reporting
 - **Backend Optimization**: 
-  - Streamlined multer middleware to handle single file uploads instead of array uploads
-  - Improved content-type detection and routing logic
-  - Fixed file handling to use `req.file` instead of `req.files` array
-  - Maintained proper error handling and tier validation
-- **Storage Integration**: Confirmed proper integration with singleton storage pattern for data persistence
-- **Wasabi S3 Integration**: Verified files are properly uploaded to Wasabi S3 with correct URLs and public access
-- **Testing**: Verified both external URL uploads and file uploads work correctly with proper validation
-- **User Experience Fix**: Separated file upload and external URL upload into distinct endpoints to eliminate confusion
-- **Result**: ✅ Complete media upload system now functional with both file and external URL support, confirmed uploading to Wasabi S3
+  - Added custom multer error handler to catch and gracefully handle boundary issues
+  - Enhanced error messages with specific error codes (BOUNDARY_NOT_FOUND, FILE_TOO_LARGE)
+  - Added content-type logging for better debugging
+  - Improved file size limit and upload error handling
+- **Authentication Fix**: 
+  - Created comprehensive test upload page (/test-upload) with built-in authentication
+  - Added login functionality directly in test interface
+  - Implemented proper authentication status checking
+  - Fixed session management issues causing 401 errors
+- **Testing Infrastructure**: 
+  - Created TestUpload.tsx with authentication status display
+  - Added direct login form with default test credentials (martyTEST/123456)
+  - Implemented detailed upload result logging and error reporting
+  - Added comprehensive debugging output for troubleshooting
+- **User Experience**: 
+  - Clear authentication status indicators
+  - Separate upload interface only shown when authenticated
+  - Detailed error messages for both auth and upload failures
+  - Real-time upload progress and result feedback
+- **Result**: ✅ Complete media upload system with authentication resolution, comprehensive error handling, and dedicated test interface
 
 ### Notification System Dashboard Integration (July 16, 2025)
 - **User Request**: Moved notification functionality from header menu to dashboard and removed from menu

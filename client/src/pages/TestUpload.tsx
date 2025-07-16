@@ -6,11 +6,54 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/layout/Header';
 import { ThemeProvider } from '@/components/ui/theme-provider';
+import { useAuth } from '@/hooks/useAuth';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function TestUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<string>('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { toast } = useToast();
+  const { user, isAuthenticated, isLoading, refetch } = useAuth();
+
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsLoggingIn(true);
+    
+    try {
+      const formData = new FormData(event.currentTarget);
+      const username = formData.get('username') as string;
+      const password = formData.get('password') as string;
+      
+      const response = await apiRequest('POST', '/api/login', {
+        username,
+        password
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Logged in successfully!",
+        });
+        refetch(); // Refresh user data
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Login Failed",
+          description: errorData.message || "Invalid credentials",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Login Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
 
   const handleFileUpload = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -86,12 +129,72 @@ export default function TestUpload() {
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <Header />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16">
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="max-w-4xl mx-auto p-6 space-y-6">
+          {/* Authentication Status */}
           <Card>
             <CardHeader>
-              <CardTitle>Test File Upload</CardTitle>
+              <CardTitle>Authentication Status</CardTitle>
             </CardHeader>
             <CardContent>
+              {isLoading ? (
+                <div>Loading authentication status...</div>
+              ) : isAuthenticated ? (
+                <div className="text-green-600">
+                  ✓ Authenticated as: {user?.firstName} {user?.lastName} ({user?.username})
+                </div>
+              ) : (
+                <div className="text-red-600">
+                  ✗ Not authenticated - please login below
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Login Form */}
+          {!isAuthenticated && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Login</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      name="username"
+                      type="text"
+                      defaultValue="martyTEST"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      defaultValue="123456"
+                      required
+                    />
+                  </div>
+                  
+                  <Button type="submit" disabled={isLoggingIn}>
+                    {isLoggingIn ? 'Logging in...' : 'Login'}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* File Upload Form */}
+          {isAuthenticated && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Test File Upload</CardTitle>
+              </CardHeader>
+              <CardContent>
               <form onSubmit={handleFileUpload} className="space-y-4">
                 <div>
                   <Label htmlFor="title">Title</Label>
@@ -138,6 +241,7 @@ export default function TestUpload() {
               )}
             </CardContent>
           </Card>
+          )}
         </div>
       </div>
     </ThemeProvider>
