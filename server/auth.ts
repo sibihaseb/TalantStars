@@ -243,3 +243,23 @@ export const isAdmin = (req: any, res: any, next: any) => {
   
   next();
 };
+
+export const requirePlan = (req: any, res: any, next: any) => {
+  console.log("Plan middleware - isAuthenticated:", req.isAuthenticated());
+  console.log("Plan middleware - user:", req.user);
+  console.log("Plan middleware - user pricingTierId:", req.user?.pricingTierId);
+  
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  
+  // Check if user has selected a pricing tier
+  if (!req.user.pricingTierId) {
+    return res.status(403).json({ 
+      message: "Plan selection required",
+      requiresPlan: true 
+    });
+  }
+  
+  next();
+};

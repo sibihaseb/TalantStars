@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { PlanProtectedRoute } from "@/components/PlanProtectedRoute";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/Landing";
 import Home from "@/pages/Home";
@@ -86,57 +87,57 @@ function Router() {
       
       {/* Role-based dashboard routes */}
       <Route path="/talent-dashboard">
-        {isAuthenticated ? <TalentDashboard /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><TalentDashboard /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/producer-dashboard">
-        {isAuthenticated ? <ProducerDashboard /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><ProducerDashboard /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/manager-dashboard">
-        {isAuthenticated ? <ManagerDashboard /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><ManagerDashboard /></PlanProtectedRoute> : <Auth />}
       </Route>
       
       {/* Other protected routes */}
       <Route path="/onboarding">
-        {isAuthenticated ? <Onboarding /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><Onboarding /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/profile-completion">
-        {isAuthenticated ? <Onboarding /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><Onboarding /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/profile">
-        {isAuthenticated ? <Profile /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><Profile /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/search">
-        {isAuthenticated ? <Search /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><Search /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/messages">
-        {isAuthenticated ? <Messages /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><Messages /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/dashboard">
-        {isAuthenticated ? <Dashboard /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><Dashboard /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/post-gig">
-        {isAuthenticated ? <PostGig /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><PostGig /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/find-talent">
-        {isAuthenticated ? <FindTalent /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><FindTalent /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/talent/:id">
-        {isAuthenticated ? <TalentProfile /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><TalentProfile /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/profile/:userId">
-        {isAuthenticated ? <ProfileViewer /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><ProfileViewer /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/meetings">
-        {isAuthenticated ? <MeetingManagement /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><MeetingManagement /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/availability">
-        {isAuthenticated ? <Availability /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><Availability /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/media">
-        {isAuthenticated ? <Media /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><Media /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/social">
-        {isAuthenticated ? <Social /> : <Auth />}
+        {isAuthenticated ? <PlanProtectedRoute><Social /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/checkout">
         {isAuthenticated ? <Checkout /> : <Auth />}
@@ -146,7 +147,9 @@ function Router() {
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
-        <Route path="/" component={Home} />
+        <Route path="/">
+          <PlanProtectedRoute><Home /></PlanProtectedRoute>
+        </Route>
       )}
       
       {/* Fallback to 404 */}

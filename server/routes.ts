@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { storage as simpleStorage } from "./simple-storage";
-import { setupAuth, isAuthenticated, isAdmin } from "./auth";
+import { setupAuth, isAuthenticated, isAdmin, requirePlan } from "./auth";
 import { requirePermission, requireAnyPermission, PermissionChecks } from "./permissions";
 import { enhanceProfile, generateBio } from "./openai";
 import { 
@@ -208,7 +208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // Profile routes
-  app.post('/api/profile', isAuthenticated, async (req: any, res) => {
+  app.post('/api/profile', isAuthenticated, requirePlan, async (req: any, res) => {
     try {
       const userId = req.user.id;
       console.log("Creating profile for user:", userId);
@@ -251,7 +251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/profile', isAuthenticated, async (req: any, res) => {
+  app.put('/api/profile', isAuthenticated, requirePlan, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const profileData = insertUserProfileSchema.partial().parse(req.body);
@@ -264,7 +264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload profile image
-  app.post('/api/user/profile-image', isAuthenticated, upload.single('image'), async (req: any, res) => {
+  app.post('/api/user/profile-image', isAuthenticated, requirePlan, upload.single('image'), async (req: any, res) => {
     try {
       const userId = req.user.id;
       const file = req.file;
@@ -2569,7 +2569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Tier Selection and Payment Processing
   app.post('/api/user/select-tier', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.id.toString(); // Convert to string
       const { tierId } = req.body;
       
       // Update user's selected tier

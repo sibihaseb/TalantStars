@@ -1,0 +1,52 @@
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. main.tsx:40:23
+Continue Building Profile clicked - forcing navigation to onboarding main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: false, selectedFile: undefined, previewUrl: false, mandatory: true }
+main.tsx:54:22
+Choose Image button clicked main.tsx:54:22
+File input ref: 
+<input class="hidden" data-replit-metadata="client/src/components/Pr…eImageUpload.tsx:393:14" data-component-name="input" type="file" accept="image/*" data-testid="file-input">
+main.tsx:54:22
+File input ref value: <empty string> main.tsx:54:22
+File input changed - event fired main.tsx:54:22
+Event target: 
+<input class="hidden" data-replit-metadata="client/src/components/Pr…eImageUpload.tsx:393:14" data-component-name="input" type="file" accept="image/*" data-testid="file-input">
+main.tsx:54:22
+Files length: 1 main.tsx:54:22
+File list: 
+FileList [ File ]
+main.tsx:54:22
+Selected file: 
+File { name: "LOGO.png", lastModified: 1752520477711, webkitRelativePath: "", size: 1806479, type: "image/png" }
+main.tsx:54:22
+File details: 
+Object { name: "LOGO.png", size: 1806479, type: "image/png" }
+main.tsx:54:22
+File selected: LOGO.png image/png 1806479 main.tsx:54:22
+Setting selected file and preview URL main.tsx:54:22
+Cropper should now be visible main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: true, selectedFile: "LOGO.png", previewUrl: true, mandatory: true }
+main.tsx:54:22
+Canvas blob created: 
+Blob { size: 371277, type: "image/jpeg" }
+main.tsx:54:22
+Blob size: 371277 main.tsx:54:22
+Blob type: image/jpeg main.tsx:54:22
+FormData contents: main.tsx:54:22
+image: 
+File { name: "profile-image.jpg", lastModified: 1752634326230, webkitRelativePath: "", size: 371277, type: "image/jpeg" }
+main.tsx:54:22
+Uploading file to server... main.tsx:54:22
+FormData entries: 
+Array [ (2) […] ]
+main.tsx:54:22
+Upload response status: 200 main.tsx:54:22
+Upload result: 
+Object { profileImageUrl: "https://s3.us-east-1.wasabisys.com/talent/user-6/profile/95d503a6-98f1-4698-9359-3c98c97bf864.jpg", user: {…} }
+main.tsx:54:22
+ProfileImageUpload component rendered 
+Object { showCropper: false, selectedFile: undefined, previewUrl: false, mandatory: true }
+main.tsx:54:22
+XHRPOST
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/user/select-tier

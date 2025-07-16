@@ -119,6 +119,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserProfileImage(userId: string | number, imageUrl: string): Promise<User>;
+  updateUserTier(userId: string | number, tierId: number): Promise<User>;
   
   // Profile operations
   getUserProfile(userId: string): Promise<UserProfile | undefined>;
@@ -869,6 +870,20 @@ export class DatabaseStorage implements IStorage {
     
     // Return the updated user
     const user = await this.getUser(userId);
+    return user!;
+  }
+
+  async updateUserTier(userId: string | number, tierId: number): Promise<User> {
+    const userIdStr = typeof userId === 'string' ? userId : userId.toString();
+    
+    // Update the pricing tier in the users table
+    await db
+      .update(users)
+      .set({ pricingTierId: tierId })
+      .where(eq(users.id, userIdStr));
+    
+    // Return the updated user
+    const user = await this.getUser(userIdStr);
     return user!;
   }
 
