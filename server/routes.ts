@@ -497,15 +497,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           metadata: { isExternalUrl: true }
         };
         
-        // For simple storage, we'll return mock data
-        const mockMedia = {
-          id: Date.now(),
-          ...mediaData,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
+        // Create media record using storage
+        const media = await simpleStorage.createMediaFile(mediaData);
         
-        return res.json(mockMedia);
+        return res.json(media);
       }
 
       // Handle multiple file uploads

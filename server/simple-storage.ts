@@ -36,6 +36,15 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  private static instance: DatabaseStorage;
+  private mediaFiles: Map<number, any[]> = new Map();
+
+  constructor() {
+    if (DatabaseStorage.instance) {
+      return DatabaseStorage.instance;
+    }
+    DatabaseStorage.instance = this;
+  }
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
@@ -108,33 +117,56 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // Media operations (mock implementation for simple storage)
+  // Media operations with simple in-memory storage
+
   async getUserMediaFiles(userId: number): Promise<any[]> {
-    // Return empty array for now - media files would be stored in a real database
-    return [];
+    return this.mediaFiles.get(userId) || [];
   }
 
   async createMediaFile(mediaData: any): Promise<any> {
-    // Mock implementation - return the data with an ID
-    return {
+    const userId = mediaData.userId;
+    const media = {
       id: Date.now(),
       ...mediaData,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
+    
+    // Store in memory
+    const userMedia = this.mediaFiles.get(userId) || [];
+    userMedia.push(media);
+    this.mediaFiles.set(userId, userMedia);
+    
+    return media;
   }
 
   async updateMediaFile(id: number, mediaData: any): Promise<any> {
-    // Mock implementation - return updated data
-    return {
-      id,
-      ...mediaData,
-      updatedAt: new Date().toISOString()
-    };
+    // Find and update the media file
+    for (const [userId, userMedia] of this.mediaFiles.entries()) {
+      const mediaIndex = userMedia.findIndex(media => media.id === id);
+      if (mediaIndex !== -1) {
+        userMedia[mediaIndex] = {
+          ...userMedia[mediaIndex],
+          ...mediaData,
+          updatedAt: new Date().toISOString()
+        };
+        return userMedia[mediaIndex];
+      }
+    }
+    throw new Error('Media file not found');
   }
 
   async deleteMediaFile(id: number): Promise<void> {
-    // Mock implementation - no action needed
+    // Find and delete the media file
+    for (const [userId, userMedia] of this.mediaFiles.entries()) {
+      const mediaIndex = userMedia.findIndex(media => media.id === id);
+      if (mediaIndex !== -1) {
+        userMedia.splice(mediaIndex, 1);
+        this.mediaFiles.set(userId, userMedia);
+        return;
+      }
+    }
+    throw new Error('Media file not found');
   }
 
   async getUserLimits(userId: number): Promise<any> {
