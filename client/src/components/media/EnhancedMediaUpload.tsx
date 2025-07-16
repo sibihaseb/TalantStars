@@ -163,13 +163,47 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/media"] });
+      // Don't close dialog or show success message here - handled in form submit
+    },
+    onError: (error: any) => {
+      // Parse error response for limit information
+      let errorData = error;
+      if (error.response) {
+        try {
+          errorData = typeof error.response === 'string' ? JSON.parse(error.response) : error.response;
+        } catch (e) {
+          errorData = error;
+        }
+      }
+      
+      // Check if error is related to limits
+      if (errorData.limitType && errorData.currentCount !== undefined && errorData.maxAllowed !== undefined) {
+        setUpgradePromptData({
+          limitType: errorData.limitType as 'photos' | 'videos' | 'audio' | 'external_links' | 'storage',
+          currentCount: errorData.currentCount,
+          maxAllowed: errorData.maxAllowed,
+          currentPlan: 'Free' // TODO: Get actual plan from user data
+        });
+        setShowUpgradePrompt(true);
+      }
+      // Error handling for individual files is done in form submit
+    },
+  });
+
+  // External upload mutation (for single external URLs)
+  const externalUploadMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const response = await apiRequest("POST", "/api/media", formData);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/media"] });
       onUploadComplete?.(data);
       setShowUploadDialog(false);
       resetForm();
-      const fileCount = Array.isArray(data) ? data.length : 1;
       toast({
         title: "Upload successful",
-        description: `${fileCount} file${fileCount > 1 ? 's' : ''} uploaded successfully.`,
+        description: "External link added successfully.",
       });
     },
     onError: (error: any) => {
@@ -366,6 +400,9 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
 
     if (uploadType === 'file' && fileMetadata.length > 0) {
       // Upload files individually with their metadata
+      let successfulUploads = 0;
+      let failedUploads = 0;
+      
       for (const meta of fileMetadata) {
         if (!meta.title.trim()) {
           toast({
@@ -378,16 +415,40 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
 
         const formData = new FormData();
         formData.append('title', meta.title);
-        formData.append('description', mediaFormData.description);
+        formData.append('description', mediaFormData.description || '');
         formData.append('category', meta.category);
         formData.append('file', meta.file);
 
         try {
           await uploadMutation.mutateAsync(formData);
+          successfulUploads++;
         } catch (error) {
           console.error('Upload failed for file:', meta.file.name, error);
-          return; // Stop uploading if one fails
+          failedUploads++;
         }
+      }
+      
+      // Show success/failure message
+      if (successfulUploads > 0) {
+        toast({
+          title: "Upload Complete",
+          description: `${successfulUploads} file${successfulUploads > 1 ? 's' : ''} ${successfulUploads > 1 ? 'were' : 'was'} successfully uploaded${failedUploads > 0 ? ` (${failedUploads} failed)` : ''}`,
+        });
+        
+        // Close dialog and reset form
+        setShowUploadDialog(false);
+        resetForm();
+        
+        // Call onUploadComplete callback
+        if (onUploadComplete) {
+          onUploadComplete(fileMetadata);
+        }
+      } else if (failedUploads > 0) {
+        toast({
+          title: "Upload Failed",
+          description: `All ${failedUploads} file${failedUploads > 1 ? 's' : ''} failed to upload`,
+          variant: "destructive",
+        });
       }
     } else if (uploadType === 'external' && mediaFormData.externalUrl) {
       // Handle external URL upload
@@ -397,9 +458,9 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
       formData.append('category', mediaFormData.category);
       formData.append('externalUrl', mediaFormData.externalUrl);
 
-      uploadMutation.mutate(formData);
+      externalUploadMutation.mutate(formData);
     }
-  }, [mediaFormData, uploadType, uploadMutation, toast, selectedFiles, fileMetadata]);
+  }, [mediaFormData, uploadType, uploadMutation, externalUploadMutation, toast, selectedFiles, fileMetadata, onUploadComplete, resetForm]);
 
   const getMediaIcon = (mediaType: string) => {
     switch (mediaType) {
@@ -749,66 +810,70 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
                   </TabsContent>
                 </Tabs>
                 
-                {/* Media Information Form */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="title">Title *</Label>
-                    <Input
-                      id="title"
-                      value={mediaFormData.title}
-                      onChange={(e) => setMediaFormData(prev => ({ ...prev, title: e.target.value }))}
-                      placeholder="Enter media title"
-                      className="mt-1"
-                    />
+                {/* External link form fields only shown for external uploads */}
+                {uploadType === 'external' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="external-title">Title *</Label>
+                        <Input
+                          id="external-title"
+                          value={mediaFormData.title}
+                          onChange={(e) => setMediaFormData(prev => ({ ...prev, title: e.target.value }))}
+                          placeholder="Enter media title"
+                          className="mt-1"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="external-category">Category</Label>
+                        <Select 
+                          value={mediaFormData.category} 
+                          onValueChange={(value) => setMediaFormData(prev => ({ ...prev, category: value }))}
+                        >
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map(cat => (
+                              <SelectItem key={cat.value} value={cat.value}>
+                                {cat.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="external-description">Description</Label>
+                      <Textarea
+                        id="external-description"
+                        value={mediaFormData.description}
+                        onChange={(e) => setMediaFormData(prev => ({ ...prev, description: e.target.value }))}
+                        placeholder="Enter media description..."
+                        rows={3}
+                        className="mt-1"
+                      />
+                    </div>
                   </div>
-                  
-                  <div>
-                    <Label htmlFor="category">Category</Label>
-                    <Select 
-                      value={mediaFormData.category} 
-                      onValueChange={(value) => setMediaFormData(prev => ({ ...prev, category: value }))}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map(cat => (
-                          <SelectItem key={cat.value} value={cat.value}>
-                            {cat.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={mediaFormData.description}
-                    onChange={(e) => setMediaFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Enter media description..."
-                    rows={3}
-                    className="mt-1"
-                  />
-                </div>
+                )}
                 
                 {/* Action Buttons */}
                 <div className="flex justify-end space-x-3 pt-4 border-t">
                   <Button
                     variant="outline"
                     onClick={() => setShowUploadDialog(false)}
-                    disabled={uploadMutation.isPending}
+                    disabled={uploadMutation.isPending || externalUploadMutation.isPending}
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handleFormSubmit}
-                    disabled={uploadMutation.isPending}
+                    disabled={uploadMutation.isPending || externalUploadMutation.isPending}
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
                   >
-                    {uploadMutation.isPending ? 'Uploading...' : 'Upload Media'}
+                    {(uploadMutation.isPending || externalUploadMutation.isPending) ? 'Uploading...' : 'Upload Media'}
                   </Button>
                 </div>
               </div>
