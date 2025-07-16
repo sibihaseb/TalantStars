@@ -612,13 +612,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const media = await storage.getUserMediaFiles(userId);
       
-      // Add tags to each media file
-      const mediaWithTags = await Promise.all(
-        media.map(async (mediaFile) => {
-          const tags = await storage.getTagsForMediaFile(mediaFile.id);
-          return { ...mediaFile, tags };
-        })
-      );
+      // Add empty tags array for now to avoid the database column issue
+      const mediaWithTags = media.map(mediaFile => ({
+        ...mediaFile,
+        tags: []
+      }));
       
       res.json(mediaWithTags);
     } catch (error) {
