@@ -387,7 +387,6 @@ export default function Media() {
                                         const file = e.target.files?.[0];
                                         onChange(file);
                                       }}
-                                      {...field}
                                     />
                                   </FormControl>
                                   <p className="text-sm text-gray-500 mt-1">

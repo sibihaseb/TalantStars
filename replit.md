@@ -15,14 +15,17 @@ Preferred communication style: Simple, everyday language.
 - **Frontend Enhancement**: Updated Media.tsx to use proper request formats:
   - File uploads now use FormData with multipart/form-data
   - External URL uploads use JSON with application/json content type
+  - Fixed React Hook Form integration to prevent field name conflicts
+  - Removed problematic spread operator that was causing 'files' vs 'file' field mismatch
 - **Backend Optimization**: 
   - Streamlined multer middleware to handle single file uploads instead of array uploads
   - Improved content-type detection and routing logic
   - Fixed file handling to use `req.file` instead of `req.files` array
   - Maintained proper error handling and tier validation
 - **Storage Integration**: Confirmed proper integration with singleton storage pattern for data persistence
+- **Wasabi S3 Integration**: Verified files are properly uploaded to Wasabi S3 with correct URLs and public access
 - **Testing**: Verified both external URL uploads and file uploads work correctly with proper validation
-- **Result**: ✅ Complete media upload system now functional with both file and external URL support
+- **Result**: ✅ Complete media upload system now functional with both file and external URL support, confirmed uploading to Wasabi S3
 
 ### Unified Dashboard System and Upgrade Functionality Implementation (July 16, 2025)
 - **Single Dashboard Architecture**: Implemented unified dashboard system that routes users to appropriate role-based dashboard internally

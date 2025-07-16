@@ -1,0 +1,17 @@
+Partitioned cookie or storage access was provided to “https://js.stripe.com/v3/controller-with-preconnect-b1af44bede70208aed49163849c3e0e2.html#__shared_params__[version]=basil&apiKey=pk_test_51NwxezAhOiHhM1yQX94ydY61tL8LaN6K1HeVYkAzhAaV36YpuWt9pdJ1XCYLjoxOWn4fsNzENnfeFzC0lFoB7Z3100t4ZBV3JL&apiVersion=2025-03-31.basil&stripeJsId=b510ae24-bd7f-41c5-a5f1-692389a842c2&stripeObjId=sobj-86e52cd8-8032-43e7-9a0c-8674f2c56451&firstStripeInstanceCreatedLatency=3&controllerCount=1&isCheckout=false&stripeJsLoadTime=1752679181389&manualBrowserDeprecationRollout=false&mids[guid]=NA&mids[muid]=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&mids[sid]=725d458d-17dc-4914-8cbd-6667b632e3faa60851&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&controllerId=__privateStripeController3501” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+controller-with-preconnect-8cb7c302622e12350c470072c969d836.js:1:22427
+Partitioned cookie or storage access was provided to “https://m.stripe.network/inner.html#url=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&title=&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&muid=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&sid=725d458d-17dc-4914-8cbd-6667b632e3faa60851&version=6&preview=false&__shared_params__[version]=basil” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+out-4.5.44.js:1:39660
+Cookie warnings 3
+XHRPOST
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/media
+[HTTP/1.1 500 Internal Server Error 255ms]
+
+XHRPOST
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/media
+[HTTP/1.1 500 Internal Server Error 383ms]
+
+XHRPOST
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/media
+[HTTP/1.1 500 Internal Server Error 208ms]
+
