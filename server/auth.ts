@@ -107,12 +107,28 @@ export async function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
+        console.log("LocalStrategy attempt for username:", username);
         const user = await storage.getUserByUsername(username);
-        if (!user || !(await comparePasswords(password, user.password))) {
+        console.log("User found:", user ? "YES" : "NO");
+        
+        if (!user) {
+          console.log("User not found in database");
           return done(null, false);
         }
+        
+        console.log("Comparing passwords...");
+        const passwordMatch = await comparePasswords(password, user.password);
+        console.log("Password match:", passwordMatch);
+        
+        if (!passwordMatch) {
+          console.log("Password mismatch");
+          return done(null, false);
+        }
+        
+        console.log("Authentication successful for user:", user.username);
         return done(null, user);
       } catch (error) {
+        console.error("LocalStrategy error:", error);
         return done(error);
       }
     }),
@@ -178,24 +194,44 @@ export async function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", passport.authenticate("local"), (req, res) => {
-    const user = req.user as any;
+  app.post("/api/login", (req, res, next) => {
+    console.log("Login attempt with:", req.body);
     
-    // Force session to be saved properly
-    req.session.save((err) => {
+    passport.authenticate("local", (err, user, info) => {
       if (err) {
-        console.error("Session save error:", err);
-        return res.status(500).json({ message: "Login failed" });
+        console.error("Authentication error:", err);
+        return res.status(500).json({ message: "Authentication error" });
       }
       
-      // Force secure to false after login
-      if (req.session && req.session.cookie) {
-        req.session.cookie.secure = false;
-        req.session.cookie.httpOnly = false;
+      if (!user) {
+        console.log("Authentication failed:", info);
+        return res.status(401).json({ message: "Invalid username or password" });
       }
       
-      res.status(200).json({ ...user, password: undefined });
-    });
+      req.login(user, (err) => {
+        if (err) {
+          console.error("Login error:", err);
+          return res.status(500).json({ message: "Login failed" });
+        }
+        
+        // Force session to be saved properly
+        req.session.save((err) => {
+          if (err) {
+            console.error("Session save error:", err);
+            return res.status(500).json({ message: "Login failed" });
+          }
+          
+          // Force secure to false after login
+          if (req.session && req.session.cookie) {
+            req.session.cookie.secure = false;
+            req.session.cookie.httpOnly = false;
+          }
+          
+          console.log("Login successful for user:", user.username);
+          res.status(200).json({ ...user, password: undefined });
+        });
+      });
+    })(req, res, next);
   });
 
   // Add admin login endpoint that matches the scratchpad
