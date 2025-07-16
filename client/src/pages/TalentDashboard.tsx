@@ -18,7 +18,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ProgressMascot } from "@/components/mascot/ProgressMascot";
 import { EnhancedMediaUpload } from "@/components/media/EnhancedMediaUpload";
-import { TagManager } from "@/components/media/TagManager";
+
 import UsageDashboard from "@/components/usage/UsageDashboard";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
 import { 
@@ -75,14 +75,7 @@ export default function TalentDashboard() {
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
-  // Fetch media files for tag management
-  const { data: mediaFiles = [] } = useQuery({
-    queryKey: ['/api/media'],
-    queryFn: async () => {
-      const res = await apiRequest('GET', '/api/media');
-      return await res.json();
-    },
-  });
+
   const { toast } = useToast();
 
   // Fetch user profile and stats
@@ -505,12 +498,13 @@ export default function TalentDashboard() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-7 mb-8">
+          <TabsList className="grid w-full grid-cols-8 mb-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+            <TabsTrigger value="experience">Experience</TabsTrigger>
             <TabsTrigger value="usage">Usage</TabsTrigger>
             <TabsTrigger value="calendar">Calendar</TabsTrigger>
           </TabsList>
@@ -903,13 +897,13 @@ export default function TalentDashboard() {
 
           <TabsContent value="portfolio">
             <div className="space-y-6">
-              {/* Media Portfolio with Tags */}
+              {/* Media Portfolio */}
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle>Media Portfolio</CardTitle>
-                      <CardDescription>Showcase your work and organize with tags</CardDescription>
+                      <CardDescription>Showcase your work with images, videos, and audio</CardDescription>
                     </div>
                     <div className="flex space-x-2">
                       <Button 
@@ -924,55 +918,41 @@ export default function TalentDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <Tabs defaultValue="gallery" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="gallery">Gallery</TabsTrigger>
-                      <TabsTrigger value="tags">Tag Manager</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="gallery" className="space-y-4">
-                      <EnhancedMediaUpload 
-                        showGallery={true}
-                        onUploadComplete={(media) => {
-                          toast({
-                            title: "Media Uploaded",
-                            description: "Your media has been added to your portfolio",
-                          });
-                          queryClient.invalidateQueries({ queryKey: ['/api/media'] });
-                        }}
-                      />
-                    </TabsContent>
-                    
-                    <TabsContent value="tags" className="space-y-4">
-                      <TagManager 
-                        mediaFiles={mediaFiles}
-                        onMediaFilesUpdate={() => {
-                          queryClient.invalidateQueries({ queryKey: ['/api/media'] });
-                        }}
-                      />
-                    </TabsContent>
-                  </Tabs>
+                  <EnhancedMediaUpload 
+                    showGallery={true}
+                    onUploadComplete={(media) => {
+                      toast({
+                        title: "Media Uploaded",
+                        description: "Your media has been added to your portfolio",
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['/api/media'] });
+                    }}
+                  />
                 </CardContent>
               </Card>
-              
+            </div>
+          </TabsContent>
+
+          <TabsContent value="experience">
+            <div className="space-y-6">
               {/* Achievements Section */}
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle>Achievements & Experience</CardTitle>
-                      <CardDescription>Add your work history and achievements</CardDescription>
+                      <CardTitle>Work Experience & Achievements</CardTitle>
+                      <CardDescription>Add your professional work history and achievements</CardDescription>
                     </div>
                     <Dialog open={isJobHistoryDialogOpen} onOpenChange={setIsJobHistoryDialogOpen}>
                       <DialogTrigger asChild>
                         <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
                           <Plus className="w-4 h-4 mr-2" />
-                          Add Achievement
+                          Add Experience
                         </Button>
                       </DialogTrigger>
                       <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>Add Job History</DialogTitle>
+                            <DialogTitle>Add Work Experience</DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4">
                             <div>
@@ -1058,11 +1038,35 @@ export default function TalentDashboard() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-center py-8">
-                      <Award className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 dark:text-gray-400">
-                        Add your work history and achievements to showcase your experience
-                      </p>
+                    <div className="space-y-4">
+                      {jobHistory?.map((job: any, index: number) => (
+                        <div key={index} className="flex items-start space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <Award className="w-6 h-6 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <p className="font-medium text-lg">{job.title}</p>
+                              {job.verified && <CheckCircle className="w-5 h-5 text-green-500" />}
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{job.company}</p>
+                            <p className="text-sm text-gray-500 mb-2">
+                              {new Date(job.startDate).getFullYear()} - {job.endDate ? new Date(job.endDate).getFullYear() : 'Present'}
+                            </p>
+                            {job.description && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300">{job.description}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      {(!jobHistory || jobHistory.length === 0) && (
+                        <div className="text-center py-8">
+                          <Award className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-600 dark:text-gray-400">
+                            Add your work history and achievements to showcase your experience
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

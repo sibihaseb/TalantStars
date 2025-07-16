@@ -10,34 +10,32 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Enhanced Media Upload System with Individual File Metadata (July 16, 2025)
-- **Individual File Metadata**: Implemented comprehensive per-file metadata editing system:
-  - Each uploaded file now has individual title and category selection
-  - Streamlined metadata editing interface with file preview thumbnails
-  - Default title generation from filename with extension removal
-  - Category dropdown for each file (Portfolio, Headshots, Demo Reel, etc.)
-  - Individual file management with crop and remove buttons per file
-- **Automatic Image Resizing**: Added intelligent image processing:
-  - Automatic resizing for images over 2MB to improve performance
-  - Maintains aspect ratio while reducing file size
-  - Canvas-based resizing with 85% quality compression
-  - Supports all image formats with proper error handling
-- **Enhanced Upload Flow**: Improved file handling and validation:
-  - Sequential file upload with individual metadata
-  - Comprehensive error handling with detailed feedback
-  - File size tracking and display
-  - Preview generation for all file types
-- **UI Layout Improvements**: Fixed gallery layout and spacing issues:
-  - Increased spacing between upload and gallery sections
-  - Improved media card typography and spacing
-  - Better visual hierarchy with larger headings
-  - Enhanced grid layout with proper gaps
-- **Upload Dialog Enhancement**: Modernized upload interface:
-  - Scrollable metadata editing area for multiple files
-  - Clean file preview cards with individual controls
-  - Better spacing and typography throughout
-  - Professional gradient buttons and styling
-- **Result**: ✅ Complete enhanced upload system with individual file metadata, automatic image resizing, improved UI layout, and professional user experience
+### Media System Fixes and Experience Section Reorganization (July 16, 2025)
+- **Critical Database Schema Fix**: Resolved persistent /api/media 500 errors:
+  - Fixed database column mismatch issues (hls_url, metadata columns)
+  - Aligned schema with actual database structure
+  - Removed problematic columns causing API failures
+  - Media endpoint now returns user files successfully
+- **Tag System Removal**: Completely removed tag functionality as requested:
+  - Removed TagManager component from Media page and TalentDashboard
+  - Simplified Media page to focus on core upload and gallery functionality
+  - Removed tag-related imports and dependencies
+  - Commented out tags column in database schema
+- **Experience Section Reorganization**: Moved achievements and experience out of portfolio:
+  - Created dedicated "Experience" tab in TalentDashboard
+  - Moved work experience and achievements section from Portfolio tab
+  - Enhanced experience display with better formatting and visual hierarchy
+  - Improved job history form and management
+- **Portfolio Section Simplification**: Cleaned up portfolio tab:
+  - Removed tag management functionality
+  - Simplified to focus on media upload and gallery
+  - Streamlined interface for better user experience
+  - Maintained all core media upload functionality
+- **Dashboard Layout Improvements**: Updated tab structure:
+  - Added new "Experience" tab to main dashboard navigation
+  - Adjusted tab grid to accommodate new experience section
+  - Better organization of content across tabs
+- **Result**: ✅ Fixed media loading errors, removed tag system, reorganized experience section, and simplified portfolio interface
 
 ### Notification System Dashboard Integration (July 16, 2025)
 - **User Request**: Moved notification functionality from header menu to dashboard and removed from menu
