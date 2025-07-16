@@ -298,26 +298,26 @@ export const promoCodes = pgTable("promo_codes", {
   value: decimal("value", { precision: 10, scale: 2 }).notNull(), // Amount or percentage
   
   // Plan restrictions
-  planRestriction: promoCodePlanEnum("plan_restriction").default("all"),
-  specificTierId: integer("specific_tier_id").references(() => pricingTiers.id),
-  categoryRestriction: categoryEnum("category_restriction"), // null = all categories
+  planRestriction: promoCodePlanEnum("planRestriction").default("all"),
+  specificTierId: integer("specificTierId").references(() => pricingTiers.id),
+  categoryRestriction: categoryEnum("categoryRestriction"), // null = all categories
   
   // Usage limits
-  maxUses: integer("max_uses"), // null = unlimited
-  usedCount: integer("used_count").default(0),
-  maxUsesPerUser: integer("max_uses_per_user").default(1),
+  maxUses: integer("maxUses"), // null = unlimited
+  usedCount: integer("usedCount").default(0),
+  maxUsesPerUser: integer("maxUsesPerUser").default(1),
   
   // Time restrictions
-  startsAt: timestamp("starts_at"),
-  expiresAt: timestamp("expires_at"),
+  startsAt: timestamp("startsAt"),
+  expiresAt: timestamp("expiresAt"),
   
   // Status
   active: boolean("active").default(true),
   
   // Metadata
-  createdBy: integer("created_by").references(() => users.id).notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdBy: integer("createdBy").references(() => users.id).notNull(),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
 });
 
 // Track promo code usage
