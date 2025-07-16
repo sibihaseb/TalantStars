@@ -404,15 +404,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Media routes
-  app.post('/api/media', isAuthenticated, upload.single('file'), async (req: any, res) => {
+  // Media routes - support multiple files
+  app.post('/api/media', isAuthenticated, upload.array('files', 10), async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const file = req.file;
+      const files = req.files as Express.Multer.File[];
       const { title, description, category, externalUrl, processVideo } = req.body;
       
-      if (!file && !externalUrl) {
-        return res.status(400).json({ message: "Either file or external URL is required" });
+      if ((!files || files.length === 0) && !externalUrl) {
+        return res.status(400).json({ message: "Either files or external URL is required" });
       }
 
       // Check user's pricing tier limits
@@ -429,23 +429,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const audioCount = 0; // TODO: Implement actual media counting
       const externalLinkCount = 0; // TODO: Implement actual media counting
 
-      // Check limits if user has a tier
-      if (tierLimits) {
-        const fileType = file ? getFileTypeFromMimeType(file.mimetype) : 'external';
+      // Handle external URL uploads
+      if (externalUrl) {
+        // Check limits if user has a tier
+        if (tierLimits && tierLimits.maxExternalLinks > 0 && externalLinkCount >= tierLimits.maxExternalLinks) {
+          return res.status(400).json({ 
+            message: `External link limit reached. Your plan allows ${tierLimits.maxExternalLinks} external links. Upgrade your plan to add more.`,
+            limitType: 'external_links',
+            currentCount: externalLinkCount,
+            maxAllowed: tierLimits.maxExternalLinks
+          });
+        }
         
-        if (externalUrl) {
-          if (tierLimits.maxExternalLinks > 0 && externalLinkCount >= tierLimits.maxExternalLinks) {
-            return res.status(400).json({ 
-              message: `External link limit reached. Your plan allows ${tierLimits.maxExternalLinks} external links. Upgrade your plan to add more.`,
-              limitType: 'external_links',
-              currentCount: externalLinkCount,
-              maxAllowed: tierLimits.maxExternalLinks
-            });
-          }
-        } else if (file) {
+        // Create media record for external URL
+        const mediaData = {
+          userId,
+          filename: null,
+          originalName: null,
+          mimeType: null,
+          size: 0,
+          url: externalUrl,
+          thumbnailUrl: null,
+          mediaType: 'external',
+          tags: [],
+          title: title || '',
+          description: description || '',
+          isPublic: true,
+          category: category || 'portfolio',
+          hlsUrl: null,
+          metadata: { isExternalUrl: true }
+        };
+        
+        // For simple storage, we'll return mock data
+        const mockMedia = {
+          id: Date.now(),
+          ...mediaData,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        
+        return res.json(mockMedia);
+      }
+
+      // Handle multiple file uploads
+      const uploadedMedia = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileType = getFileTypeFromMimeType(file.mimetype);
+        
+        // Check individual file limits
+        if (tierLimits) {
           if (fileType === 'image' && tierLimits.maxPhotos > 0 && photoCount >= tierLimits.maxPhotos) {
             return res.status(400).json({ 
-              message: `Photo limit reached. Your plan allows ${tierLimits.maxPhotos} photos. Upgrade your plan to add more.`,
+              message: `Photo limit reached. Your plan allows ${tierLimits.maxPhotos} photos.`,
               limitType: 'photos',
               currentCount: photoCount,
               maxAllowed: tierLimits.maxPhotos
@@ -454,7 +491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           if (fileType === 'video' && tierLimits.maxVideos > 0 && videoCount >= tierLimits.maxVideos) {
             return res.status(400).json({ 
-              message: `Video limit reached. Your plan allows ${tierLimits.maxVideos} videos. Upgrade your plan to add more.`,
+              message: `Video limit reached. Your plan allows ${tierLimits.maxVideos} videos.`,
               limitType: 'videos',
               currentCount: videoCount,
               maxAllowed: tierLimits.maxVideos
@@ -463,100 +500,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           if (fileType === 'audio' && tierLimits.maxAudio > 0 && audioCount >= tierLimits.maxAudio) {
             return res.status(400).json({ 
-              message: `Audio limit reached. Your plan allows ${tierLimits.maxAudio} audio files. Upgrade your plan to add more.`,
+              message: `Audio limit reached. Your plan allows ${tierLimits.maxAudio} audio files.`,
               limitType: 'audio',
               currentCount: audioCount,
               maxAllowed: tierLimits.maxAudio
             });
           }
         }
-      }
-
-      let mediaData;
-
-      if (file) {
-        // Upload file to Wasabi
-        const uploadResult = await uploadFileToWasabi(file, `user-${userId}/media`);
         
-        const fileType = getFileTypeFromMimeType(uploadResult.type);
-        let thumbnailUrl = null;
-        let hlsUrl = null;
-        
-        // Process video for HLS streaming if requested and it's a video file
-        if (processVideo === 'true' && fileType === 'video') {
-          try {
-            const VideoProcessor = (await import('./video-processing')).default;
-            const tempDir = `/tmp/video-processing-${userId}-${Date.now()}`;
-            
-            const processingResult = await VideoProcessor.processVideo({
-              inputPath: file.path,
-              outputDir: tempDir,
-              resolution: '720p',
-              quality: 'medium'
-            });
-            
-            thumbnailUrl = processingResult.thumbnailUrl;
-            hlsUrl = processingResult.hlsUrl;
-          } catch (error) {
-            console.error("Error processing video:", error);
-            // Continue with regular upload if video processing fails
+        try {
+          // Upload file to Wasabi
+          const uploadResult = await uploadFileToWasabi(file, `user-${userId}/media`);
+          
+          let thumbnailUrl = null;
+          let hlsUrl = null;
+          
+          // Process video for HLS streaming if requested and it's a video file
+          if (processVideo === 'true' && fileType === 'video') {
+            try {
+              const VideoProcessor = (await import('./video-processing')).default;
+              const tempDir = `/tmp/video-processing-${userId}-${Date.now()}`;
+              
+              const processingResult = await VideoProcessor.processVideo({
+                inputPath: file.path,
+                outputDir: tempDir,
+                resolution: '720p',
+                quality: 'medium'
+              });
+              
+              thumbnailUrl = processingResult.thumbnailUrl;
+              hlsUrl = processingResult.hlsUrl;
+            } catch (error) {
+              console.error("Error processing video:", error);
+              // Continue with regular upload if video processing fails
+            }
           }
+          
+          // Create media record - for simple storage, we'll return mock data
+          const mediaData = {
+            id: Date.now() + i,
+            userId,
+            filename: uploadResult.key,
+            originalName: uploadResult.originalName,
+            mimeType: uploadResult.type,
+            size: uploadResult.size,
+            url: uploadResult.url,
+            thumbnailUrl,
+            mediaType: fileType,
+            tags: [],
+            title: (Array.isArray(title) ? title[i] : title) || uploadResult.originalName,
+            description: (Array.isArray(description) ? description[i] : description) || '',
+            isPublic: true,
+            category: category || 'portfolio',
+            hlsUrl,
+            metadata: {
+              processedForHLS: !!hlsUrl,
+              originalFileSize: uploadResult.size,
+              processingDate: hlsUrl ? new Date().toISOString() : null
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          
+          uploadedMedia.push(mediaData);
+        } catch (error) {
+          console.error(`Error uploading file ${file.originalname}:`, error);
+          // Continue with other files even if one fails
         }
-        
-        // Create media record in database
-        mediaData = {
-          userId,
-          filename: uploadResult.key,
-          originalName: uploadResult.originalName,
-          mimeType: uploadResult.type,
-          size: uploadResult.size,
-          url: uploadResult.url,
-          thumbnailUrl,
-          mediaType: fileType,
-          tags: [],
-          title: title || '',
-          description: description || '',
-          isPublic: true,
-          category: category || 'portfolio',
-          hlsUrl, // Store HLS URL for streaming
-          metadata: {
-            processedForHLS: !!hlsUrl,
-            originalFileSize: uploadResult.size,
-            processingDate: hlsUrl ? new Date().toISOString() : null
-          }
-        };
-      } else if (externalUrl) {
-        // Handle external URL
-        let mediaType = 'video';
-        if (externalUrl.includes('youtube.com') || externalUrl.includes('youtu.be')) {
-          mediaType = 'video';
-        } else if (externalUrl.includes('vimeo.com')) {
-          mediaType = 'video';
-        } else if (externalUrl.includes('soundcloud.com') || externalUrl.includes('spotify.com')) {
-          mediaType = 'audio';
-        }
-        
-        mediaData = {
-          userId,
-          filename: `external_${Date.now()}`,
-          originalName: title || 'External Media',
-          mimeType: `${mediaType}/external`,
-          size: 0,
-          url: null,
-          thumbnailUrl: null,
-          mediaType,
-          tags: [],
-          title: title || '',
-          description: description || '',
-          isPublic: true,
-          category: category || 'portfolio',
-          externalUrl: externalUrl,
-          isExternal: true
-        };
       }
       
-      const media = await storage.createMediaFile(mediaData);
-      res.json(media);
+      // Return array of uploaded media or single item if only one file
+      res.json(uploadedMedia.length === 1 ? uploadedMedia[0] : uploadedMedia);
     } catch (error) {
       console.error("Error creating media:", error);
       res.status(500).json({ message: "Failed to create media" });
@@ -2118,10 +2132,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Get tier information
+      // Get tier information - use try-catch to handle potential errors
       let tier = null;
-      if (user.pricingTierId) {
-        tier = await simpleStorage.getPricingTier(user.pricingTierId);
+      try {
+        if (user.pricingTierId) {
+          tier = await simpleStorage.getPricingTier(user.pricingTierId);
+        }
+      } catch (error) {
+        console.log("Error fetching pricing tier:", error);
+        // Continue without tier info
       }
 
       // Mock usage data - in production, this would come from actual database

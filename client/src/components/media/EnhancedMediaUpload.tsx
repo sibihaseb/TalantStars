@@ -42,7 +42,7 @@ interface MediaFormData {
   title: string;
   description: string;
   category: string;
-  file?: File | null;
+  files?: File[];
   externalUrl?: string;
 }
 
@@ -66,8 +66,8 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploadType, setUploadType] = useState<'file' | 'external'>('file');
   const [dragActive, setDragActive] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryStartIndex, setGalleryStartIndex] = useState(0);
   
@@ -75,7 +75,7 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
     title: '',
     description: '',
     category: 'portfolio',
-    file: null,
+    files: [],
     externalUrl: ''
   });
 
@@ -100,9 +100,10 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
       onUploadComplete?.(data);
       setShowUploadDialog(false);
       resetForm();
+      const fileCount = Array.isArray(data) ? data.length : 1;
       toast({
         title: "Upload successful",
-        description: "Your media has been uploaded successfully.",
+        description: `${fileCount} file${fileCount > 1 ? 's' : ''} uploaded successfully.`,
       });
     },
     onError: (error) => {
@@ -140,12 +141,15 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
       title: '',
       description: '',
       category: 'portfolio',
-      file: null,
+      files: [],
       externalUrl: ''
     });
-    setSelectedFile(null);
-    setFilePreview(null);
+    setSelectedFiles([]);
+    setFilePreviews([]);
     setUploadType('file');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -163,32 +167,42 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
     e.stopPropagation();
     setDragActive(false);
     
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      handleFileSelection(file);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const fileList = Array.from(e.dataTransfer.files);
+      handleFileSelection(fileList);
     }
   }, []);
 
-  const handleFileSelection = (file: File) => {
-    setSelectedFile(file);
-    setMediaFormData(prev => ({ ...prev, file }));
+  const handleFileSelection = (files: File[]) => {
+    setSelectedFiles(files);
+    setMediaFormData(prev => ({ ...prev, files }));
     
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setFilePreview(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+    // Create previews
+    const previews: string[] = [];
+    files.forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previews[index] = e.target?.result as string;
+        if (previews.length === files.length) {
+          setFilePreviews([...previews]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
     
-    // Auto-fill title if empty
-    if (!mediaFormData.title) {
-      setMediaFormData(prev => ({ ...prev, title: file.name.replace(/\.[^/.]+$/, "") }));
+    // Auto-fill title if empty - use first file name
+    if (!mediaFormData.title && files.length > 0) {
+      setMediaFormData(prev => ({ 
+        ...prev, 
+        title: files.length === 1 ? files[0].name.replace(/\.[^/.]+$/, "") : `${files.length} files selected`
+      }));
     }
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFileSelection(e.target.files[0]);
+    if (e.target.files && e.target.files.length > 0) {
+      const fileList = Array.from(e.target.files);
+      handleFileSelection(fileList);
     }
   };
 
@@ -202,10 +216,10 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
       return;
     }
 
-    if (uploadType === 'file' && !mediaFormData.file) {
+    if (uploadType === 'file' && (!mediaFormData.files || mediaFormData.files.length === 0)) {
       toast({
-        title: "File required",
-        description: "Please select a file to upload",
+        title: "Files required",
+        description: "Please select one or more files to upload",
         variant: "destructive",
       });
       return;
@@ -225,8 +239,11 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
     formData.append('description', mediaFormData.description);
     formData.append('category', mediaFormData.category);
     
-    if (uploadType === 'file' && mediaFormData.file) {
-      formData.append('file', mediaFormData.file);
+    if (uploadType === 'file' && mediaFormData.files) {
+      // Append multiple files
+      mediaFormData.files.forEach((file) => {
+        formData.append('files', file);
+      });
     } else if (uploadType === 'external' && mediaFormData.externalUrl) {
       formData.append('externalUrl', mediaFormData.externalUrl);
     }
@@ -405,39 +422,48 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
                       onDragOver={handleDrag}
                       onDrop={handleDrop}
                     >
-                      {selectedFile ? (
+                      {selectedFiles.length > 0 ? (
                         <div className="space-y-4">
-                          <div className="relative inline-block">
-                            {filePreview && (
-                              <div className="w-32 h-32 mx-auto rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
-                                {selectedFile.type.startsWith('image/') ? (
-                                  <img src={filePreview} alt="Preview" className="w-full h-full object-cover" />
-                                ) : (
-                                  <div className="w-full h-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center">
-                                    {getMediaIcon(selectedFile.type.split('/')[0])}
-                                  </div>
-                                )}
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {selectedFiles.map((file, index) => (
+                              <div key={index} className="relative">
+                                <div className="w-24 h-24 mx-auto rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+                                  {file.type.startsWith('image/') && filePreviews[index] ? (
+                                    <img src={filePreviews[index]} alt="Preview" className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center">
+                                      {getMediaIcon(file.type.split('/')[0])}
+                                    </div>
+                                  )}
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newFiles = selectedFiles.filter((_, i) => i !== index);
+                                    const newPreviews = filePreviews.filter((_, i) => i !== index);
+                                    setSelectedFiles(newFiles);
+                                    setFilePreviews(newPreviews);
+                                    setMediaFormData(prev => ({ ...prev, files: newFiles }));
+                                  }}
+                                  className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                                <p className="text-xs text-center mt-2 text-gray-600 dark:text-gray-400 truncate">
+                                  {file.name}
+                                </p>
                               </div>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedFile(null);
-                                setFilePreview(null);
-                                setMediaFormData(prev => ({ ...prev, file: null }));
-                              }}
-                              className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
+                            ))}
                           </div>
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {selectedFile.name}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                          </p>
+                          <div className="text-center">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                              {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''} selected
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Total size: {(selectedFiles.reduce((acc, file) => acc + file.size, 0) / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
                         </div>
                       ) : (
                         <>
@@ -464,6 +490,7 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
                         accept="image/*,video/*,audio/*"
                         onChange={handleFileInputChange}
                         className="hidden"
+                        multiple
                       />
                     </div>
                   </TabsContent>
