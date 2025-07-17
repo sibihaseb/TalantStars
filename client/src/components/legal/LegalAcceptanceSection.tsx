@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { LegalDocumentModal } from './LegalDocumentModal';
-import { FileText, Shield, AlertCircle, CheckCircle } from 'lucide-react';
+import DataManagementModal from './DataManagementModal';
+import { FileText, Shield, AlertCircle, CheckCircle, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface LegalAcceptanceSectionProps {
@@ -181,11 +182,44 @@ export const LegalAcceptanceSection: React.FC<LegalAcceptanceSectionProps> = ({
         </motion.div>
       </div>
 
-      {/* Important Notice */}
+      {/* GDPR Data Management */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.4 }}
+        className="bg-blue-50 border border-blue-200 rounded-lg p-4"
+      >
+        <div className="flex items-start gap-3">
+          <Shield className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-blue-800 mb-1">
+              Your Data Rights
+            </p>
+            <p className="text-sm text-blue-700 mb-3">
+              You have full control over your personal data. Access, correct, or delete your information at any time.
+            </p>
+            <DataManagementModal
+              trigger={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Manage Data Rights
+                </Button>
+              }
+            />
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Important Notice */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
         className="bg-amber-50 border border-amber-200 rounded-lg p-4"
       >
         <div className="flex items-start gap-3">

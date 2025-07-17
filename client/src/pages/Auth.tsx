@@ -511,15 +511,67 @@ export default function Auth() {
                       </div>
                       
                       <LegalAcceptanceSection 
-                        form={registerForm}
-                        termsFieldName="termsAccepted"
-                        privacyFieldName="privacyAccepted"
+                        termsAccepted={registerForm.watch("termsAccepted")}
+                        privacyAccepted={registerForm.watch("privacyAccepted")}
+                        onTermsChange={(accepted) => registerForm.setValue("termsAccepted", accepted)}
+                        onPrivacyChange={(accepted) => registerForm.setValue("privacyAccepted", accepted)}
                       />
+                      
+                      {/* Form validation errors */}
+                      {registerForm.formState.errors.termsAccepted && (
+                        <p className="text-sm text-red-500">
+                          {registerForm.formState.errors.termsAccepted.message}
+                        </p>
+                      )}
+                      {registerForm.formState.errors.privacyAccepted && (
+                        <p className="text-sm text-red-500">
+                          {registerForm.formState.errors.privacyAccepted.message}
+                        </p>
+                      )}
+                      
+                      {/* Form validation summary */}
+                      {(() => {
+                        const formValues = registerForm.watch();
+                        const missingFields = [];
+                        
+                        if (!formValues.firstName) missingFields.push("First Name");
+                        if (!formValues.lastName) missingFields.push("Last Name");
+                        if (!formValues.username) missingFields.push("Username");
+                        if (!formValues.email) missingFields.push("Email");
+                        if (!formValues.password) missingFields.push("Password");
+                        if (!formValues.role) missingFields.push("Role");
+                        if (!formValues.termsAccepted) missingFields.push("Terms of Service acceptance");
+                        if (!formValues.privacyAccepted) missingFields.push("Privacy Policy acceptance");
+                        
+                        const isFormValid = missingFields.length === 0 && !Object.keys(registerForm.formState.errors).length;
+                        
+                        if (!isFormValid && missingFields.length > 0) {
+                          return (
+                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                              <div className="flex items-start gap-3">
+                                <Settings className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                <div>
+                                  <p className="text-sm font-medium text-amber-800 mb-1">
+                                    Please complete the following to continue:
+                                  </p>
+                                  <ul className="text-sm text-amber-700 list-disc list-inside space-y-1">
+                                    {missingFields.map((field, index) => (
+                                      <li key={index}>{field}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        }
+                        
+                        return null;
+                      })()}
                       
                       <Button
                         type="submit"
                         className="w-full"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !registerForm.formState.isValid || !registerForm.watch("termsAccepted") || !registerForm.watch("privacyAccepted")}
                       >
                         {isSubmitting ? "Creating Account..." : "Create Account"}
                       </Button>

@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { PlanProtectedRoute } from "@/components/PlanProtectedRoute";
+import CookieConsentBanner from "@/components/legal/CookieConsentBanner";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/Landing";
 import Home from "@/pages/Home";
@@ -181,6 +182,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
+        <CookieConsentBanner />
       </TooltipProvider>
     </QueryClientProvider>
   );
