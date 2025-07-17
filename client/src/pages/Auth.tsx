@@ -233,10 +233,10 @@ export default function Auth() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
         <Header />
         
-        <div className="pt-20 flex items-center justify-center min-h-screen">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl w-full px-4">
+        <div className="pt-20 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl w-full px-4 mx-auto">
             {/* Hero Section */}
-            <div className="flex flex-col justify-center space-y-6">
+            <div className="flex flex-col justify-start space-y-6 lg:sticky lg:top-24 lg:self-start">
               <div className="space-y-4">
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
                   Join the Entertainment Revolution
