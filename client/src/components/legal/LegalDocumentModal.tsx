@@ -108,4 +108,5 @@ const LegalDocumentModal: React.FC<LegalDocumentModalProps> = ({
   );
 };
 
+export { LegalDocumentModal };
 export default LegalDocumentModal;

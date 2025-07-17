@@ -30,6 +30,7 @@ import {
   Settings,
   Crown
 } from "lucide-react";
+import { LegalAcceptanceSection } from '@/components/legal/LegalAcceptanceSection';
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -43,6 +44,12 @@ const registerSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   role: z.enum(["talent", "manager", "agent", "producer", "admin"]),
+  termsAccepted: z.boolean().refine((val) => val === true, {
+    message: "You must accept the Terms of Service to proceed",
+  }),
+  privacyAccepted: z.boolean().refine((val) => val === true, {
+    message: "You must accept the Privacy Policy to proceed",
+  }),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -72,6 +79,8 @@ export default function Auth() {
       firstName: "",
       lastName: "",
       role: "talent",
+      termsAccepted: false,
+      privacyAccepted: false,
     },
   });
 
@@ -500,6 +509,12 @@ export default function Auth() {
                           </p>
                         )}
                       </div>
+                      
+                      <LegalAcceptanceSection 
+                        form={registerForm}
+                        termsFieldName="termsAccepted"
+                        privacyFieldName="privacyAccepted"
+                      />
                       
                       <Button
                         type="submit"

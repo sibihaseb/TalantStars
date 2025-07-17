@@ -38,6 +38,14 @@ export interface IStorage {
   // Admin settings operations
   getAdminSettings(): Promise<any[]>;
   updateAdminSetting(key: string, value: string, updatedBy: string): Promise<any>;
+  
+  // Legal acceptance operations
+  recordLegalAcceptance(userId: number, acceptanceData: {
+    termsAccepted?: boolean;
+    privacyAccepted?: boolean;
+    termsVersion?: number;
+    privacyVersion?: number;
+  }): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -278,6 +286,46 @@ export class DatabaseStorage implements IStorage {
     
     this.adminSettings.set(key, setting);
     return setting;
+  }
+
+  async recordLegalAcceptance(userId: number, acceptanceData: {
+    termsAccepted?: boolean;
+    privacyAccepted?: boolean;
+    termsVersion?: number;
+    privacyVersion?: number;
+  }): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const updateData: any = {};
+    
+    if (acceptanceData.termsAccepted !== undefined) {
+      updateData.termsAccepted = acceptanceData.termsAccepted;
+      updateData.termsAcceptedAt = new Date().toISOString();
+    }
+    
+    if (acceptanceData.privacyAccepted !== undefined) {
+      updateData.privacyAccepted = acceptanceData.privacyAccepted;
+      updateData.privacyAcceptedAt = new Date().toISOString();
+    }
+    
+    if (acceptanceData.termsVersion !== undefined) {
+      updateData.termsVersion = acceptanceData.termsVersion;
+    }
+    
+    if (acceptanceData.privacyVersion !== undefined) {
+      updateData.privacyVersion = acceptanceData.privacyVersion;
+    }
+
+    const updatedUser = {
+      ...user,
+      ...updateData
+    };
+
+    this.users.set(userId, updatedUser);
+    return updatedUser;
   }
 }
 

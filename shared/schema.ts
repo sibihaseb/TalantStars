@@ -48,6 +48,13 @@ export const users = pgTable("users", {
   role: userRoleEnum("role").default("talent"),
   pricingTierId: integer("pricing_tier_id"),
   language: varchar("language").default("en"), // User's preferred language
+  // Legal document acceptance tracking
+  termsAccepted: boolean("terms_accepted").default(false),
+  privacyAccepted: boolean("privacy_accepted").default(false),
+  termsAcceptedAt: timestamp("terms_accepted_at"),
+  privacyAcceptedAt: timestamp("privacy_accepted_at"),
+  termsVersion: integer("terms_version"), // Track which version was accepted
+  privacyVersion: integer("privacy_version"), // Track which version was accepted
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

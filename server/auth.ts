@@ -153,7 +153,14 @@ export async function setupAuth(app: Express) {
   // Auth routes
   app.post("/api/register", async (req, res, next) => {
     try {
-      const { username, password, email, firstName, lastName, role } = req.body;
+      const { username, password, email, firstName, lastName, role, termsAccepted, privacyAccepted } = req.body;
+      
+      // Validate legal acceptance fields
+      if (!termsAccepted || !privacyAccepted) {
+        return res.status(400).json({ 
+          message: "You must accept both the Terms of Service and Privacy Policy to register" 
+        });
+      }
       
       // Check if username already exists
       const existingUser = await storage.getUserByUsername(username);
@@ -175,6 +182,19 @@ export async function setupAuth(app: Express) {
         lastName,
         role: role || 'talent'
       });
+
+      // Record legal document acceptance
+      try {
+        await storage.recordLegalAcceptance(user.id, {
+          termsAccepted: termsAccepted,
+          privacyAccepted: privacyAccepted,
+          termsVersion: 1, // Default version
+          privacyVersion: 1 // Default version
+        });
+      } catch (legalError) {
+        console.error("Error recording legal acceptance:", legalError);
+        // Don't fail registration for legal acceptance errors, just log
+      }
 
       req.login(user, (err) => {
         if (err) return next(err);
