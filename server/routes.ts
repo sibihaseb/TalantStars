@@ -4545,5 +4545,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== AI TRANSLATION ENDPOINT =====
+  app.post('/api/translate', async (req, res) => {
+    try {
+      const { text, targetLanguage, sourceLanguage = 'en' } = req.body;
+      
+      console.log('=== TRANSLATION REQUEST ===');
+      console.log('Text:', text);
+      console.log('Target Language:', targetLanguage);
+      console.log('Source Language:', sourceLanguage);
+      
+      if (!text || !targetLanguage) {
+        return res.status(400).json({ error: 'Text and target language are required' });
+      }
+
+      if (targetLanguage === sourceLanguage) {
+        console.log('Same language - returning original text');
+        return res.json({ translatedText: text });
+      }
+
+      // Import OpenAI module
+      const OpenAI = require('openai');
+      
+      if (!process.env.OPENAI_API_KEY) {
+        throw new Error('OpenAI API key not configured');
+      }
+      
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+      
+      console.log('Calling OpenAI for translation...');
+      
+      // Use OpenAI for translation
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are a professional translator. Translate the following text from ${sourceLanguage} to ${targetLanguage}. Maintain the original tone, context, and formatting. Only return the translated text, no explanations.`
+          },
+          {
+            role: "user",
+            content: text
+          }
+        ],
+        temperature: 0.1,
+        max_tokens: 2000
+      });
+
+      const translatedText = response.choices[0].message.content?.trim() || text;
+
+      console.log('=== TRANSLATION COMPLETE ===');
+      console.log('Original:', text);
+      console.log('Translated:', translatedText);
+      console.log('Language:', targetLanguage);
+      
+      res.json({ translatedText });
+    } catch (error) {
+      console.error('=== TRANSLATION ERROR ===');
+      console.error('Error:', error);
+      console.error('Message:', error.message);
+      res.status(500).json({ error: 'Translation failed', details: error.message });
+    }
+  });
+
   return httpServer;
 }
