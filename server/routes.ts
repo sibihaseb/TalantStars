@@ -22,8 +22,11 @@ import {
   insertSocialInteractionSchema,
   insertUserTagSchema,
   insertMediaFileTagSchema,
-  jobCommunications
+  jobCommunications,
+  profileQuestions
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, asc } from "drizzle-orm";
 import { z } from "zod";
 import { requestPasswordReset, validatePasswordResetToken, resetPassword } from "./passwordUtils";
 import { sendMeetingInvitation, sendWelcomeEmail, sendEmail, sendTestEmail, sendPasswordResetEmail } from "./email";
