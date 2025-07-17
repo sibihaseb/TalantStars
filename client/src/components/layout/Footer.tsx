@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, Shield } from "lucide-react";
 import { Link } from "wouter";
 import logoPath from "@assets/PNG FILE 9_1752757531948.png";
 import LegalDocumentModal from "../legal/LegalDocumentModal";
+import DataManagementModal from "../legal/DataManagementModal";
 
 export function Footer() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -122,6 +123,16 @@ export function Footer() {
                 >
                   Terms of Service
                 </button>
+              </li>
+              <li>
+                <DataManagementModal
+                  trigger={
+                    <button className="hover:text-white transition-colors text-left flex items-center gap-2">
+                      <Shield className="h-4 w-4" />
+                      Your Data Rights
+                    </button>
+                  }
+                />
               </li>
             </ul>
           </div>
