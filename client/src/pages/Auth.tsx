@@ -571,7 +571,21 @@ export default function Auth() {
                       <Button
                         type="submit"
                         className="w-full"
-                        disabled={isSubmitting || !registerForm.formState.isValid || !registerForm.watch("termsAccepted") || !registerForm.watch("privacyAccepted")}
+                        disabled={(() => {
+                          const formValues = registerForm.watch();
+                          const hasErrors = Object.keys(registerForm.formState.errors).length > 0;
+                          const isFormComplete = 
+                            formValues.firstName &&
+                            formValues.lastName &&
+                            formValues.username && formValues.username.length >= 3 &&
+                            formValues.email &&
+                            formValues.password && formValues.password.length >= 6 &&
+                            formValues.role &&
+                            formValues.termsAccepted &&
+                            formValues.privacyAccepted;
+                          
+                          return isSubmitting || hasErrors || !isFormComplete;
+                        })()}
                       >
                         {isSubmitting ? "Creating Account..." : "Create Account"}
                       </Button>
