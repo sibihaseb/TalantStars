@@ -1557,32 +1557,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Featured talents routes - temporarily returning mock data until tables are created
-  app.get('/api/featured-talents', async (req, res) => {
-    try {
-      // Temporary mock data
-      const featuredTalents = [
-        {
-          id: "1",
-          username: "emma_star",
-          profileImage: "/mock-profile.jpg",
-          fullName: "Emma Star",
-          talentType: "actor",
-          location: "Los Angeles, CA",
-          verificationStatus: "verified",
-          featuredReason: "Outstanding performance in recent productions",
-          skills: ["Acting", "Voice Acting", "Singing"],
-          bio: "Professional actress with 10+ years experience in film and television.",
-          rating: 4.8,
-          category: "Featured Performer"
-        }
-      ];
-      res.json(featuredTalents);
-    } catch (error) {
-      console.error("Error fetching featured talents:", error);
-      res.status(500).json({ message: "Failed to fetch featured talents" });
-    }
-  });
+
 
   // Talent categories routes - temporarily returning mock data until tables are created
   app.get('/api/talent-categories', async (req, res) => {
@@ -4562,8 +4537,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get featured talents for landing page
   app.get('/api/featured-talents', async (req, res) => {
     try {
+      console.log('Fetching featured talents from database...');
+      
       // Get all users with profiles marked as featured
       const featuredUsers = await storage.getUsersWithProfiles({ isFeatured: true });
+      
+      console.log('Featured users from database:', featuredUsers);
       
       // Transform to match frontend expectations
       const featuredTalents = featuredUsers.map(user => ({
@@ -4579,6 +4558,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         specialty: user.profile?.bio?.substring(0, 50) || 'Professional talent',
         role: user.role
       }));
+      
+      console.log('Transformed featured talents:', featuredTalents);
       
       res.json(featuredTalents);
     } catch (error) {

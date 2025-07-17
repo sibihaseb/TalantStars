@@ -518,7 +518,7 @@ export class DatabaseStorage implements IStorage {
         profile: userProfiles
       })
       .from(users)
-      .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
+      .innerJoin(userProfiles, eq(sql`${users.id}::text`, userProfiles.userId))
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(userProfiles.featuredAt));
     
