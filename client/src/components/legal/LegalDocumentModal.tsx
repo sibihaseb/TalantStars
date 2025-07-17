@@ -31,7 +31,10 @@ const LegalDocumentModal: React.FC<LegalDocumentModalProps> = ({
 }) => {
   const { data: document, isLoading, error } = useQuery<LegalDocument>({
     queryKey: ['/api/legal-documents', documentType],
-    queryFn: () => apiRequest(`/api/legal-documents/${documentType}`),
+    queryFn: async () => {
+      const response = await apiRequest('GET', `/api/legal-documents/${documentType}`);
+      return response.json();
+    },
     enabled: isOpen && !!documentType,
   });
 
@@ -91,10 +94,9 @@ const LegalDocumentModal: React.FC<LegalDocumentModalProps> = ({
         </DialogHeader>
         
         <div className="mt-4">
-          <div 
-            className="prose prose-sm max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{ __html: document?.content || '' }}
-          />
+          <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
+            {document?.content || ''}
+          </div>
         </div>
 
         <div className="flex justify-end mt-6 pt-4 border-t">

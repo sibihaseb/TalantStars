@@ -5,10 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { FileText, Save, Plus, Edit, Calendar } from 'lucide-react';
+import { FileText, Save, Plus, Edit, Calendar, Shield, Eye, History, CheckCircle, AlertCircle, Scroll, Book, Clock, User } from 'lucide-react';
 
 interface LegalDocument {
   id: number;
@@ -16,11 +18,11 @@ interface LegalDocument {
   title: string;
   content: string;
   effectiveDate: string;
-  version: number;
+  version: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  createdBy: number;
-  updatedBy: number;
+  updatedBy?: number;
 }
 
 interface LegalDocumentEditorProps {
@@ -30,7 +32,7 @@ interface LegalDocumentEditorProps {
 const LegalDocumentEditor: React.FC<LegalDocumentEditorProps> = ({ onClose }) => {
   const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
   const [formData, setFormData] = useState({
     type: '',
     title: '',
@@ -44,86 +46,40 @@ const LegalDocumentEditor: React.FC<LegalDocumentEditorProps> = ({ onClose }) =>
   // Fetch all legal documents
   const { data: documents = [], isLoading } = useQuery<LegalDocument[]>({
     queryKey: ['/api/legal-documents'],
-    queryFn: () => apiRequest('/api/legal-documents')
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/legal-documents');
+      return response.json();
+    }
   });
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: ({ id, ...data }: { id: number } & Partial<LegalDocument>) =>
-      apiRequest(`/api/admin/legal-documents/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    mutationFn: async ({ id, ...data }: { id: number } & Partial<LegalDocument>) => {
+      const response = await apiRequest('PUT', `/api/admin/legal-documents/${id}`, data);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/legal-documents'] });
       toast({
-        title: "Success",
-        description: "Legal document updated successfully",
+        title: "✅ Document Updated",
+        description: "Legal document has been successfully updated",
       });
       setIsEditing(false);
       setSelectedDocumentId(null);
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: "❌ Update Failed",
         description: error.message || "Failed to update legal document",
         variant: "destructive",
       });
     }
   });
 
-  // Create mutation
-  const createMutation = useMutation({
-    mutationFn: (data: Omit<LegalDocument, 'id' | 'version' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>) =>
-      apiRequest('/api/admin/legal-documents', { method: 'POST', body: JSON.stringify(data) }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/legal-documents'] });
-      toast({
-        title: "Success",
-        description: "Legal document created successfully",
-      });
-      setIsCreating(false);
-      resetForm();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create legal document",
-        variant: "destructive",
-      });
-    }
-  });
-
-  const resetForm = () => {
-    setFormData({
-      type: '',
-      title: '',
-      content: '',
-      effectiveDate: ''
-    });
-  };
-
-  const handleEdit = (document: LegalDocument) => {
-    setSelectedDocumentId(document.id);
-    setFormData({
-      type: document.type,
-      title: document.title,
-      content: document.content,
-      effectiveDate: document.effectiveDate.split('T')[0] // Format for date input
-    });
-    setIsEditing(true);
-  };
-
-  const handleSave = () => {
-    if (!formData.title || !formData.content) {
-      toast({
-        title: "Error",
-        description: "Title and content are required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (isCreating) {
-      createMutation.mutate(formData);
-    } else if (selectedDocumentId) {
+  // Handle form submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedDocumentId) {
       updateMutation.mutate({
         id: selectedDocumentId,
         ...formData
@@ -131,168 +87,297 @@ const LegalDocumentEditor: React.FC<LegalDocumentEditorProps> = ({ onClose }) =>
     }
   };
 
-  const handleCancel = () => {
-    setIsEditing(false);
-    setIsCreating(false);
-    setSelectedDocumentId(null);
-    resetForm();
+  // Load document data into form
+  const loadDocumentData = (doc: LegalDocument) => {
+    setFormData({
+      type: doc.type,
+      title: doc.title,
+      content: doc.content,
+      effectiveDate: doc.effectiveDate.split('T')[0]
+    });
+    setSelectedDocumentId(doc.id);
+    setIsEditing(true);
+    setActiveTab('edit');
   };
 
-  const handleCreateNew = () => {
-    setIsCreating(true);
-    setIsEditing(false);
-    setSelectedDocumentId(null);
-    resetForm();
+  // Get document type display info
+  const getDocumentTypeInfo = (type: string) => {
+    switch (type) {
+      case 'terms':
+      case 'terms_of_service':
+        return {
+          icon: <Scroll className="h-5 w-5" />,
+          label: 'Terms of Service',
+          color: 'bg-blue-500',
+          description: 'Legal terms governing platform usage'
+        };
+      case 'privacy':
+      case 'privacy_policy':
+        return {
+          icon: <Shield className="h-5 w-5" />,
+          label: 'Privacy Policy',
+          color: 'bg-green-500',
+          description: 'Data protection and privacy guidelines'
+        };
+      default:
+        return {
+          icon: <FileText className="h-5 w-5" />,
+          label: 'Legal Document',
+          color: 'bg-gray-500',
+          description: 'Legal document'
+        };
+    }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          <h2 className="text-xl font-semibold">Legal Documents Management</h2>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={handleCreateNew} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Create New Document
-          </Button>
+    <div className="max-w-7xl mx-auto p-6">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+                <Book className="h-8 w-8 text-white" />
+              </div>
+              Legal Document Management
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Manage Terms of Service, Privacy Policy, and other legal documents
+            </p>
+          </div>
           {onClose && (
-            <Button variant="outline" onClick={onClose} size="sm">
-              Close
+            <Button 
+              variant="outline" 
+              onClick={onClose}
+              className="flex items-center gap-2"
+            >
+              <Eye className="h-4 w-4" />
+              Close Editor
             </Button>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Document List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Existing Documents</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {documents.map((doc) => (
-                <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <h3 className="font-medium">{doc.title}</h3>
-                    <p className="text-sm text-muted-foreground capitalize">{doc.type}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Calendar className="h-3 w-3" />
-                      <span className="text-xs text-muted-foreground">
-                        Effective: {new Date(doc.effectiveDate).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(doc)}
-                    disabled={isEditing && selectedDocumentId === doc.id}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="edit" className="flex items-center gap-2">
+            <Edit className="h-4 w-4" />
+            Edit Documents
+          </TabsTrigger>
+          <TabsTrigger value="history" className="flex items-center gap-2">
+            <History className="h-4 w-4" />
+            History
+          </TabsTrigger>
+        </TabsList>
 
-        {/* Editor */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {isCreating ? 'Create New Document' : isEditing ? 'Edit Document' : 'Document Editor'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {(isEditing || isCreating) ? (
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="type">Document Type</Label>
-                  <Select
-                    value={formData.type}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select document type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="terms_of_service">Terms of Service</SelectItem>
-                      <SelectItem value="privacy_policy">Privacy Policy</SelectItem>
-                      <SelectItem value="cookie_policy">Cookie Policy</SelectItem>
-                      <SelectItem value="user_agreement">User Agreement</SelectItem>
-                      <SelectItem value="dmca_policy">DMCA Policy</SelectItem>
-                      <SelectItem value="community_guidelines">Community Guidelines</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Enter document title"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="effectiveDate">Effective Date</Label>
-                  <Input
-                    id="effectiveDate"
-                    type="date"
-                    value={formData.effectiveDate}
-                    onChange={(e) => setFormData(prev => ({ ...prev, effectiveDate: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="content">Content</Label>
-                  <Textarea
-                    id="content"
-                    value={formData.content}
-                    onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                    placeholder="Enter document content (supports HTML)"
-                    rows={12}
-                    className="font-mono text-sm"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleSave}
-                    disabled={updateMutation.isPending || createMutation.isPending}
-                  >
-                    <Save className="h-4 w-4 mr-2" />
-                    {updateMutation.isPending || createMutation.isPending ? 'Saving...' : 'Save'}
-                  </Button>
-                  <Button variant="outline" onClick={handleCancel}>
-                    Cancel
-                  </Button>
-                </div>
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {isLoading ? (
+              <div className="col-span-full flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : documents.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">No legal documents found</p>
               </div>
             ) : (
+              documents.map((doc) => {
+                const typeInfo = getDocumentTypeInfo(doc.type);
+                return (
+                  <Card key={doc.id} className="relative overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    <div className={`absolute top-0 left-0 w-full h-1 ${typeInfo.color}`} />
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${typeInfo.color} text-white`}>
+                            {typeInfo.icon}
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg">{doc.title}</CardTitle>
+                            <p className="text-sm text-gray-500 mt-1">{typeInfo.description}</p>
+                          </div>
+                        </div>
+                        <Badge variant={doc.isActive ? "default" : "secondary"}>
+                          {doc.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-600">
+                            {new Date(doc.effectiveDate).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-600">
+                            v{doc.version}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 max-h-20 overflow-hidden">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                          {doc.content.substring(0, 150)}...
+                        </p>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => loadDocumentData(doc)}
+                          className="flex items-center gap-2"
+                        >
+                          <Edit className="h-4 w-4" />
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedDocumentId(doc.id);
+                            setActiveTab('history');
+                          }}
+                          className="flex items-center gap-2"
+                        >
+                          <History className="h-4 w-4" />
+                          History
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
+          </div>
+        </TabsContent>
+
+        {/* Edit Tab */}
+        <TabsContent value="edit" className="space-y-6">
+          {isEditing ? (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Edit className="h-5 w-5" />
+                    Edit Legal Document
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Document Title</Label>
+                      <Input
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                        className="focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="effectiveDate">Effective Date</Label>
+                      <Input
+                        id="effectiveDate"
+                        type="date"
+                        value={formData.effectiveDate}
+                        onChange={(e) => setFormData(prev => ({ ...prev, effectiveDate: e.target.value }))}
+                        className="focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="content">Document Content</Label>
+                    <Textarea
+                      id="content"
+                      value={formData.content}
+                      onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                      className="min-h-[400px] focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                      placeholder="Enter legal document content in Markdown format..."
+                      required
+                    />
+                    <p className="text-sm text-gray-500">
+                      💡 Tip: Use Markdown formatting for better document structure
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="flex gap-3">
+                <Button
+                  type="submit"
+                  disabled={updateMutation.isPending}
+                  className="flex items-center gap-2"
+                >
+                  {updateMutation.isPending ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setSelectedDocumentId(null);
+                    setActiveTab('overview');
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 mb-4">Select a document from the overview to edit</p>
+                <Button onClick={() => setActiveTab('overview')}>
+                  Go to Overview
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* History Tab */}
+        <TabsContent value="history" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <History className="h-5 w-5" />
+                Document History
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="text-center py-8">
-                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">
-                  Select a document to edit or create a new one
+                <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">Document history feature coming soon</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Track changes, versions, and revision history
                 </p>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

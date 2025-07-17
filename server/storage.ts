@@ -295,6 +295,11 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
+  async getLegalDocumentByType(type: string): Promise<LegalDocument | undefined> {
+    const result = await db.select().from(legalDocuments).where(eq(legalDocuments.type, type));
+    return result[0];
+  }
+
   async createLegalDocument(document: InsertLegalDocument): Promise<LegalDocument> {
     const result = await db.insert(legalDocuments).values(document).returning();
     return result[0];
