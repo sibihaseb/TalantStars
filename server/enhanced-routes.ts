@@ -586,11 +586,17 @@ export async function registerEnhancedRoutes(app: Express): Promise<Server> {
     try {
       const { text, targetLanguage, sourceLanguage = 'en' } = req.body;
       
+      console.log('=== TRANSLATION REQUEST ===');
+      console.log('Text:', text);
+      console.log('Target Language:', targetLanguage);
+      console.log('Source Language:', sourceLanguage);
+      
       if (!text || !targetLanguage) {
         return res.status(400).json({ error: 'Text and target language are required' });
       }
 
       if (targetLanguage === sourceLanguage) {
+        console.log('Same language - returning original text');
         return res.json({ translatedText: text });
       }
 
@@ -604,6 +610,8 @@ export async function registerEnhancedRoutes(app: Express): Promise<Server> {
       const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
       });
+      
+      console.log('Calling OpenAI for translation...');
       
       // Use OpenAI for translation
       const response = await openai.chat.completions.create({
@@ -624,10 +632,16 @@ export async function registerEnhancedRoutes(app: Express): Promise<Server> {
 
       const translatedText = response.choices[0].message.content?.trim() || text;
 
-      console.log('Translation successful:', { text, targetLanguage, translatedText });
+      console.log('=== TRANSLATION COMPLETE ===');
+      console.log('Original:', text);
+      console.log('Translated:', translatedText);
+      console.log('Language:', targetLanguage);
+      
       res.json({ translatedText });
     } catch (error) {
-      console.error('Translation error:', error);
+      console.error('=== TRANSLATION ERROR ===');
+      console.error('Error:', error);
+      console.error('Message:', error.message);
       res.status(500).json({ error: 'Translation failed', details: error.message });
     }
   });
