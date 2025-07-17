@@ -286,9 +286,7 @@ export interface IStorage {
   getUserSubscription(userId: string): Promise<any>;
   updateUserSubscriptionStatus(subscriptionId: string, status: string): Promise<any>;
   
-  // Pricing tier operations
-  getPricingTier(id: number): Promise<PricingTier | undefined>;
-  getAllPricingTiers(): Promise<PricingTier[]>;
+
   
   // Job matching operations
   createJobMatch(match: any): Promise<any>;
