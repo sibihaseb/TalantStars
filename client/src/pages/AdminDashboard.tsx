@@ -65,6 +65,7 @@ import AdminUsageAnalytics from "@/components/admin/AdminUsageAnalytics";
 import EmailTemplates from "@/components/admin/EmailTemplates";
 import DragDropEmailTemplates from "@/components/admin/DragDropEmailTemplates";
 import DragDropQuestionsManager from "@/components/admin/DragDropQuestionsManager";
+import SeoManagement from "@/components/admin/SeoManagement";
 
 interface User {
   id: string;
@@ -689,7 +690,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-12 mb-8 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-lg">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-13 mb-8 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-lg">
             <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <BarChart3 className="w-4 h-4 mr-2" />
               Overview
@@ -741,6 +742,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="analytics" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <Activity className="w-4 h-4 mr-2" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="seo" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
+              <Globe className="w-4 h-4 mr-2" />
+              SEO
             </TabsTrigger>
           </TabsList>
 
@@ -3105,6 +3110,10 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="seo" className="space-y-6">
+            <SeoManagement />
           </TabsContent>
 
           <TabsContent value="limits" className="space-y-6">

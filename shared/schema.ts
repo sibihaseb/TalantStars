@@ -925,6 +925,91 @@ export const meetingRequests = pgTable("meeting_requests", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// SEO settings for global site configuration
+export const seoSettings = pgTable("seo_settings", {
+  id: serial("id").primaryKey(),
+  siteName: varchar("site_name").default("Talents & Stars").notNull(),
+  siteDescription: text("site_description").default("AI-powered platform connecting entertainment professionals with their next big break").notNull(),
+  siteKeywords: text("site_keywords").array().default([]),
+  siteUrl: varchar("site_url").default("https://talentsandstars.com").notNull(),
+  defaultSeoImageUrl: varchar("default_seo_image_url"),
+  twitterHandle: varchar("twitter_handle"),
+  facebookAppId: varchar("facebook_app_id"),
+  googleAnalyticsId: varchar("google_analytics_id"),
+  googleTagManagerId: varchar("google_tag_manager_id"),
+  verificationCodes: jsonb("verification_codes").default({}), // Google, Bing, etc.
+  structuredDataEnabled: boolean("structured_data_enabled").default(true),
+  openGraphEnabled: boolean("open_graph_enabled").default(true),
+  twitterCardEnabled: boolean("twitter_card_enabled").default(true),
+  robotsConfig: jsonb("robots_config").default({}),
+  sitemapEnabled: boolean("sitemap_enabled").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// SEO page configurations for specific pages/routes
+export const seoPages = pgTable("seo_pages", {
+  id: serial("id").primaryKey(),
+  route: varchar("route").notNull().unique(), // /about, /pricing, /talent/[id], etc.
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  keywords: text("keywords").array().default([]),
+  seoImageUrl: varchar("seo_image_url"),
+  ogTitle: varchar("og_title"),
+  ogDescription: text("og_description"),
+  ogImageUrl: varchar("og_image_url"),
+  twitterTitle: varchar("twitter_title"),
+  twitterDescription: text("twitter_description"),
+  twitterImageUrl: varchar("twitter_image_url"),
+  canonicalUrl: varchar("canonical_url"),
+  noIndex: boolean("no_index").default(false),
+  noFollow: boolean("no_follow").default(false),
+  structuredData: jsonb("structured_data").default({}),
+  priority: decimal("priority", { precision: 2, scale: 1 }).default("0.5"), // Sitemap priority
+  changeFreq: varchar("change_freq").default("monthly"), // daily, weekly, monthly, yearly
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// SEO images management
+export const seoImages = pgTable("seo_images", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  imageUrl: varchar("image_url").notNull(),
+  alt: varchar("alt").notNull(),
+  width: integer("width"),
+  height: integer("height"),
+  fileSize: integer("file_size"),
+  format: varchar("format"), // jpg, png, webp
+  isDefault: boolean("is_default").default(false),
+  usageCount: integer("usage_count").default(0),
+  tags: text("tags").array().default([]),
+  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Profile sharing configuration for social media
+export const profileSharing = pgTable("profile_sharing", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  shareTitle: varchar("share_title"),
+  shareDescription: text("share_description"),
+  shareImageUrl: varchar("share_image_url"),
+  showContact: boolean("show_contact").default(true),
+  showSkills: boolean("show_skills").default(true),
+  showExperience: boolean("show_experience").default(true),
+  showMedia: boolean("show_media").default(true),
+  customMessage: text("custom_message"),
+  shareCount: integer("share_count").default(0),
+  lastSharedAt: timestamp("last_shared_at"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Admin settings for OpenAI keys and other configurations
 export const adminSettings = pgTable("admin_settings", {
   id: serial("id").primaryKey(),
@@ -1228,6 +1313,20 @@ export const meetingRequestsRelations = relations(meetingRequests, ({ one }) => 
   }),
 }));
 
+export const seoImagesRelations = relations(seoImages, ({ one }) => ({
+  creator: one(users, {
+    fields: [seoImages.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const profileSharingRelations = relations(profileSharing, ({ one }) => ({
+  user: one(users, {
+    fields: [profileSharing.userId],
+    references: [users.id],
+  }),
+}));
+
 export const adminSettingsRelations = relations(adminSettings, ({ one }) => ({
   updatedBy: one(users, {
     fields: [adminSettings.updatedBy],
@@ -1428,6 +1527,31 @@ export const insertMeetingRequestSchema = createInsertSchema(meetingRequests).om
   updatedAt: true,
 });
 
+// SEO related insert schemas
+export const insertSeoSettingsSchema = createInsertSchema(seoSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSeoPageSchema = createInsertSchema(seoPages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSeoImageSchema = createInsertSchema(seoImages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProfileSharingSchema = createInsertSchema(profileSharing).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertAdminSettingSchema = createInsertSchema(adminSettings).omit({
   id: true,
   createdAt: true,
@@ -1456,6 +1580,16 @@ export type PromoCode = typeof promoCodes.$inferSelect;
 export type InsertPromoCode = z.infer<typeof insertPromoCodeSchema>;
 export type PromoCodeUsage = typeof promoCodeUsage.$inferSelect;
 export type InsertPromoCodeUsage = z.infer<typeof insertPromoCodeUsageSchema>;
+
+// SEO related type definitions
+export type SeoSettings = typeof seoSettings.$inferSelect;
+export type InsertSeoSettings = z.infer<typeof insertSeoSettingsSchema>;
+export type SeoPage = typeof seoPages.$inferSelect;
+export type InsertSeoPage = z.infer<typeof insertSeoPageSchema>;
+export type SeoImage = typeof seoImages.$inferSelect;
+export type InsertSeoImage = z.infer<typeof insertSeoImageSchema>;
+export type ProfileSharing = typeof profileSharing.$inferSelect;
+export type InsertProfileSharing = z.infer<typeof insertProfileSharingSchema>;
 
 // Email campaign tables
 export const emailCampaigns = pgTable('email_campaigns', {

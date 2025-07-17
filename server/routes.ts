@@ -2825,6 +2825,254 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // SEO Management API Routes
+  // SEO Settings
+  app.get('/api/admin/seo/settings', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const settings = await simpleStorage.getSeoSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching SEO settings:", error);
+      res.status(500).json({ message: "Failed to fetch SEO settings" });
+    }
+  });
+
+  app.put('/api/admin/seo/settings', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const settings = await simpleStorage.updateSeoSettings(req.body);
+      res.json(settings);
+    } catch (error) {
+      console.error("Error updating SEO settings:", error);
+      res.status(500).json({ message: "Failed to update SEO settings" });
+    }
+  });
+
+  // SEO Pages
+  app.get('/api/admin/seo/pages', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const pages = await simpleStorage.getAllSeoPages();
+      res.json(pages);
+    } catch (error) {
+      console.error("Error fetching SEO pages:", error);
+      res.status(500).json({ message: "Failed to fetch SEO pages" });
+    }
+  });
+
+  app.post('/api/admin/seo/pages', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const page = await simpleStorage.createSeoPage(req.body);
+      res.json(page);
+    } catch (error) {
+      console.error("Error creating SEO page:", error);
+      res.status(500).json({ message: "Failed to create SEO page" });
+    }
+  });
+
+  app.put('/api/admin/seo/pages/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const pageId = parseInt(req.params.id);
+      const page = await simpleStorage.updateSeoPage(pageId, req.body);
+      res.json(page);
+    } catch (error) {
+      console.error("Error updating SEO page:", error);
+      res.status(500).json({ message: "Failed to update SEO page" });
+    }
+  });
+
+  app.delete('/api/admin/seo/pages/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const pageId = parseInt(req.params.id);
+      await simpleStorage.deleteSeoPage(pageId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting SEO page:", error);
+      res.status(500).json({ message: "Failed to delete SEO page" });
+    }
+  });
+
+  // SEO Images
+  app.get('/api/admin/seo/images', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const images = await simpleStorage.getAllSeoImages();
+      res.json(images);
+    } catch (error) {
+      console.error("Error fetching SEO images:", error);
+      res.status(500).json({ message: "Failed to fetch SEO images" });
+    }
+  });
+
+  app.post('/api/admin/seo/images', isAuthenticated, isAdmin, upload.single('image'), async (req: any, res) => {
+    try {
+      let imageUrl = '';
+      
+      if (req.file) {
+        // Upload to Wasabi S3
+        const fileName = `seo-images/${Date.now()}-${req.file.originalname}`;
+        const uploadResult = await uploadFileToWasabi(req.file.buffer, fileName, req.file.mimetype);
+        imageUrl = uploadResult.url;
+      }
+
+      const imageData = {
+        ...req.body,
+        imageUrl,
+        width: req.body.width ? parseInt(req.body.width) : null,
+        height: req.body.height ? parseInt(req.body.height) : null,
+        fileSize: req.file ? req.file.size : null,
+        format: req.file ? req.file.mimetype.split('/')[1] : null,
+        createdBy: req.user.id
+      };
+
+      const image = await simpleStorage.createSeoImage(imageData);
+      res.json(image);
+    } catch (error) {
+      console.error("Error creating SEO image:", error);
+      res.status(500).json({ message: "Failed to create SEO image" });
+    }
+  });
+
+  app.put('/api/admin/seo/images/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const imageId = parseInt(req.params.id);
+      const image = await simpleStorage.updateSeoImage(imageId, req.body);
+      res.json(image);
+    } catch (error) {
+      console.error("Error updating SEO image:", error);
+      res.status(500).json({ message: "Failed to update SEO image" });
+    }
+  });
+
+  app.delete('/api/admin/seo/images/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const imageId = parseInt(req.params.id);
+      await simpleStorage.deleteSeoImage(imageId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting SEO image:", error);
+      res.status(500).json({ message: "Failed to delete SEO image" });
+    }
+  });
+
+  // SEO Image Upload endpoint for SeoManagement component
+  app.post('/api/admin/seo/images/upload', isAuthenticated, isAdmin, upload.single('file'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      // Upload to Wasabi S3
+      const fileName = `seo-images/${Date.now()}-${req.file.originalname}`;
+      const uploadResult = await uploadFileToWasabi(req.file.buffer, fileName, req.file.mimetype);
+      
+      res.json({ 
+        url: uploadResult.url,
+        filename: fileName,
+        size: req.file.size,
+        type: req.file.mimetype 
+      });
+    } catch (error) {
+      console.error("Error uploading SEO image:", error);
+      res.status(500).json({ error: "Failed to upload image" });
+    }
+  });
+
+  // Profile SEO Data Generation
+  app.post('/api/admin/seo/profiles/generate', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const users = await simpleStorage.getUsers();
+      const generatedProfiles = [];
+      
+      for (const user of users) {
+        if (user.profile) {
+          const seoData = {
+            userId: user.id,
+            title: `${user.profile.displayName || user.firstName + ' ' + user.lastName} - ${user.profile.talentType || 'Professional'} | Talents & Stars`,
+            description: user.profile.bio || `Professional ${user.profile.talentType || 'talent'} available for hire through Talents & Stars platform.`,
+            keywords: `${user.profile.talentType || 'talent'}, ${user.profile.location || 'professional'}, entertainment, casting, hire`,
+            ogTitle: `${user.profile.displayName || user.firstName + ' ' + user.lastName} - Professional ${user.profile.talentType || 'Talent'}`,
+            ogDescription: user.profile.bio || `Connect with ${user.profile.displayName || user.firstName + ' ' + user.lastName} on Talents & Stars`,
+            ogImage: user.profile.profileImageUrl || '',
+            twitterCard: 'summary_large_image',
+            twitterTitle: `${user.profile.displayName || user.firstName + ' ' + user.lastName} - ${user.profile.talentType || 'Professional'}`,
+            twitterDescription: user.profile.bio || `Professional ${user.profile.talentType || 'talent'} on Talents & Stars`,
+            twitterImage: user.profile.profileImageUrl || '',
+            customMeta: {
+              profile: {
+                role: user.profile.role,
+                talentType: user.profile.talentType,
+                location: user.profile.location,
+                verified: user.profile.isVerified
+              }
+            },
+            isActive: true
+          };
+          
+          const existingProfile = await simpleStorage.getProfileSeoData(user.id);
+          if (existingProfile) {
+            await simpleStorage.updateProfileSeoData(user.id, seoData);
+          } else {
+            await simpleStorage.createProfileSeoData(seoData);
+          }
+          
+          generatedProfiles.push(seoData);
+        }
+      }
+      
+      res.json({ 
+        message: `Generated SEO data for ${generatedProfiles.length} profiles`,
+        count: generatedProfiles.length 
+      });
+    } catch (error) {
+      console.error("Error generating profile SEO data:", error);
+      res.status(500).json({ message: "Failed to generate profile SEO data" });
+    }
+  });
+
+  // Profile Sharing
+  app.get('/api/profile-sharing/:userId', async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const sharing = await simpleStorage.getProfileSharing(userId);
+      res.json(sharing);
+    } catch (error) {
+      console.error("Error fetching profile sharing:", error);
+      res.status(500).json({ message: "Failed to fetch profile sharing" });
+    }
+  });
+
+  app.put('/api/profile-sharing/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      
+      // Only allow users to update their own profile sharing or admins to update any
+      if (req.user.id !== userId && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      const sharing = await simpleStorage.updateProfileSharing(userId, req.body);
+      res.json(sharing);
+    } catch (error) {
+      console.error("Error updating profile sharing:", error);
+      res.status(500).json({ message: "Failed to update profile sharing" });
+    }
+  });
+
+  // Public route for getting SEO data for a specific page
+  app.get('/api/seo/:route', async (req: any, res) => {
+    try {
+      const route = req.params.route;
+      const page = await simpleStorage.getSeoPageByRoute(route);
+      const settings = await simpleStorage.getSeoSettings();
+      
+      res.json({
+        page,
+        settings
+      });
+    } catch (error) {
+      console.error("Error fetching SEO data:", error);
+      res.status(500).json({ message: "Failed to fetch SEO data" });
+    }
+  });
+
   // User Representation routes
   app.get('/api/user/representations', isAuthenticated, async (req: any, res) => {
     try {

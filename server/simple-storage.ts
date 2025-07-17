@@ -3,6 +3,10 @@ import {
   userProfiles,
   pricingTiers,
   emailTemplates,
+  seoSettings,
+  seoPages,
+  seoImages,
+  profileSharing,
   type User,
   type InsertUser,
   type UserProfile,
@@ -10,6 +14,14 @@ import {
   type PricingTier,
   type EmailTemplate,
   type InsertEmailTemplate,
+  type SeoSettings,
+  type InsertSeoSettings,
+  type SeoPage,
+  type InsertSeoPage,
+  type SeoImage,
+  type InsertSeoImage,
+  type ProfileSharing,
+  type InsertProfileSharing,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc } from "drizzle-orm";
@@ -57,6 +69,24 @@ export interface IStorage {
   createEmailTemplate(template: InsertEmailTemplate): Promise<EmailTemplate>;
   updateEmailTemplate(id: number, template: Partial<InsertEmailTemplate>): Promise<EmailTemplate>;
   deleteEmailTemplate(id: number): Promise<void>;
+
+  // SEO operations
+  getSeoSettings(): Promise<SeoSettings | undefined>;
+  updateSeoSettings(settings: Partial<InsertSeoSettings>): Promise<SeoSettings>;
+  getAllSeoPages(): Promise<SeoPage[]>;
+  getSeoPage(id: number): Promise<SeoPage | undefined>;
+  getSeoPageByRoute(route: string): Promise<SeoPage | undefined>;
+  createSeoPage(page: InsertSeoPage): Promise<SeoPage>;
+  updateSeoPage(id: number, page: Partial<InsertSeoPage>): Promise<SeoPage>;
+  deleteSeoPage(id: number): Promise<void>;
+  getAllSeoImages(): Promise<SeoImage[]>;
+  getSeoImage(id: number): Promise<SeoImage | undefined>;
+  createSeoImage(image: InsertSeoImage): Promise<SeoImage>;
+  updateSeoImage(id: number, image: Partial<InsertSeoImage>): Promise<SeoImage>;
+  deleteSeoImage(id: number): Promise<void>;
+  getProfileSharing(userId: string): Promise<ProfileSharing | undefined>;
+  createProfileSharing(sharing: InsertProfileSharing): Promise<ProfileSharing>;
+  updateProfileSharing(userId: string, sharing: Partial<InsertProfileSharing>): Promise<ProfileSharing>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -384,6 +414,118 @@ export class DatabaseStorage implements IStorage {
 
   async deleteEmailTemplate(id: number): Promise<void> {
     await db.delete(emailTemplates).where(eq(emailTemplates.id, id));
+  }
+
+  // SEO operations
+  async getSeoSettings(): Promise<SeoSettings | undefined> {
+    const [settings] = await db.select().from(seoSettings).limit(1);
+    return settings || undefined;
+  }
+
+  async updateSeoSettings(settings: Partial<InsertSeoSettings>): Promise<SeoSettings> {
+    const existingSettings = await this.getSeoSettings();
+    
+    if (existingSettings) {
+      const [updatedSettings] = await db
+        .update(seoSettings)
+        .set(settings)
+        .where(eq(seoSettings.id, existingSettings.id))
+        .returning();
+      return updatedSettings;
+    } else {
+      const [newSettings] = await db
+        .insert(seoSettings)
+        .values(settings)
+        .returning();
+      return newSettings;
+    }
+  }
+
+  async getAllSeoPages(): Promise<SeoPage[]> {
+    return await db.select().from(seoPages).orderBy(asc(seoPages.route));
+  }
+
+  async getSeoPage(id: number): Promise<SeoPage | undefined> {
+    const [page] = await db.select().from(seoPages).where(eq(seoPages.id, id));
+    return page || undefined;
+  }
+
+  async getSeoPageByRoute(route: string): Promise<SeoPage | undefined> {
+    const [page] = await db.select().from(seoPages).where(eq(seoPages.route, route));
+    return page || undefined;
+  }
+
+  async createSeoPage(page: InsertSeoPage): Promise<SeoPage> {
+    const [newPage] = await db
+      .insert(seoPages)
+      .values(page)
+      .returning();
+    return newPage;
+  }
+
+  async updateSeoPage(id: number, page: Partial<InsertSeoPage>): Promise<SeoPage> {
+    const [updatedPage] = await db
+      .update(seoPages)
+      .set(page)
+      .where(eq(seoPages.id, id))
+      .returning();
+    return updatedPage;
+  }
+
+  async deleteSeoPage(id: number): Promise<void> {
+    await db.delete(seoPages).where(eq(seoPages.id, id));
+  }
+
+  async getAllSeoImages(): Promise<SeoImage[]> {
+    return await db.select().from(seoImages).orderBy(asc(seoImages.createdAt));
+  }
+
+  async getSeoImage(id: number): Promise<SeoImage | undefined> {
+    const [image] = await db.select().from(seoImages).where(eq(seoImages.id, id));
+    return image || undefined;
+  }
+
+  async createSeoImage(image: InsertSeoImage): Promise<SeoImage> {
+    const [newImage] = await db
+      .insert(seoImages)
+      .values(image)
+      .returning();
+    return newImage;
+  }
+
+  async updateSeoImage(id: number, image: Partial<InsertSeoImage>): Promise<SeoImage> {
+    const [updatedImage] = await db
+      .update(seoImages)
+      .set(image)
+      .where(eq(seoImages.id, id))
+      .returning();
+    return updatedImage;
+  }
+
+  async deleteSeoImage(id: number): Promise<void> {
+    await db.delete(seoImages).where(eq(seoImages.id, id));
+  }
+
+  async getProfileSharing(userId: string): Promise<ProfileSharing | undefined> {
+    const [sharing] = await db.select().from(profileSharing).where(eq(profileSharing.userId, userId));
+    return sharing || undefined;
+  }
+
+  async createProfileSharing(sharing: InsertProfileSharing): Promise<ProfileSharing> {
+    const [newSharing] = await db
+      .insert(profileSharing)
+      .values(sharing)
+      .returning();
+    return newSharing;
+  }
+
+  async updateProfileSharing(userId: string, sharing: Partial<InsertProfileSharing>): Promise<ProfileSharing> {
+    const [updatedSharing] = await db
+      .update(profileSharing)
+      .set(sharing)
+      .where(eq(profileSharing.userId, userId))
+      .returning();
+    return updatedSharing;
   }
 }
 
