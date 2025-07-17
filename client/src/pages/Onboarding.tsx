@@ -266,9 +266,10 @@ const requiredFieldsByStep = {
   1: ['role'], // Role selection
   2: ['talentType'], // Talent Type (for talent role)
   3: ['displayName', 'bio', 'location'], // Basic Info
-  4: [], // Experience & Skills (role-specific questions - optional)
-  5: [], // Media & Portfolio (optional)
-  6: [], // Preferences & Availability (optional)
+  4: [], // Profile Image (optional)
+  5: [], // Experience & Skills (role-specific questions - optional)
+  6: [], // Media & Portfolio (optional)
+  7: [], // Preferences & Availability (optional)
 };
 
 // Helper function to check if field is required
@@ -917,9 +918,9 @@ function Onboarding() {
     const isAuthenticated = !!user?.role;
     // For authenticated users, we skip role selection step
     if (isAuthenticated) {
-      return watchedRole === "talent" ? 6 : 4; // Remove hardcoded profile image step
+      return watchedRole === "talent" ? 7 : 5; // Include profile image step
     } else {
-      return watchedRole === "talent" ? 7 : 5; // Remove hardcoded profile image step
+      return watchedRole === "talent" ? 8 : 6; // Include profile image step
     }
   };
 
@@ -1005,6 +1006,7 @@ function Onboarding() {
       talent: [
         { title: "Talent Type", description: "Choose your talent type", icon: Star },
         { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Profile Image", description: "Upload your photo", icon: Camera },
         { title: "Physical Details", description: "Appearance & stats", icon: Star },
         { title: "Skills & Experience", description: "What you can do", icon: Medal },
         { title: "Location & Contact", description: "Where you work", icon: Crown },
@@ -1012,16 +1014,19 @@ function Onboarding() {
       ],
       manager: [
         { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Profile Image", description: "Upload your photo", icon: Camera },
         { title: "Management Details", description: "Your experience & services", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ],
       agent: [
         { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Profile Image", description: "Upload your photo", icon: Camera },
         { title: "Agent Details", description: "Your agency & experience", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ],
       producer: [
         { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Profile Image", description: "Upload your photo", icon: Camera },
         { title: "Production Details", description: "Your projects & experience", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ],
@@ -1615,8 +1620,32 @@ function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 4: Role-Specific Details */}
+              {/* Step 4: Profile Image */}
               {currentStep === 4 && (
+                <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-2xl flex items-center justify-center gap-2">
+                      <Camera className="h-8 w-8 text-blue-600" />
+                      Profile Image
+                    </CardTitle>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Add a professional photo to your profile (optional but recommended)
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="max-w-md mx-auto">
+                      <ProfileImageUpload
+                        currentImage={form.getValues('profileImageUrl') || ''}
+                        onImageUpdate={(imageUrl) => form.setValue('profileImageUrl', imageUrl)}
+                        mandatory={false}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Step 5: Role-specific questions */}
+              {currentStep === 5 && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">
@@ -1648,8 +1677,8 @@ function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 5: Additional Information */}
-              {currentStep === 5 && watchedRole === "talent" && (
+              {/* Step 6: Additional Information */}
+              {currentStep === 6 && watchedRole === "talent" && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">Additional Information</CardTitle>
@@ -1705,8 +1734,8 @@ function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 6 (or 5 for non-talent): Rates and Availability */}
-              {((currentStep === 6 && watchedRole === "talent") || (currentStep === 5 && watchedRole !== "talent")) && (
+              {/* Step 7 (or 6 for non-talent): Rates and Availability */}
+              {((currentStep === 7 && watchedRole === "talent") || (currentStep === 6 && watchedRole !== "talent")) && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">Rates & Availability</CardTitle>

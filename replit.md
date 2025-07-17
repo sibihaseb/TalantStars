@@ -10,16 +10,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Admin Questions Database Fix and Profile Image Upload Fix (July 17, 2025)
-- **CRITICAL SUCCESS**: Resolved admin questions disappearing issue and profile image upload failure
-- **Database Import Fix**: Added missing database imports (db, profileQuestions, eq, asc) to routes.ts
-- **Questions Status**: Confirmed 180 questions exist in database across all talent types (actor, musician, voice artist, model, manager, producer, agent)
-- **Profile Image Upload Fix**: Added missing `updateUserProfileImage` method to storage interface and implementation
-- **Personal Questions Added**: Added 5 basic personal questions to "profile" category for admin editing:
-  - Display name, Location, Bio, Website (optional), Phone number (optional)
-- **Storage Method Updates**: Enhanced DatabaseStorage with proper profile image update functionality
-- **API Endpoint Fixed**: Profile image upload endpoint now properly updates user profile image URL in database
-- **Result**: ✅ Admin questions now display properly and profile image upload functionality restored
+### Profile Image Step Implementation and API Fix (July 17, 2025)
+- **CRITICAL SUCCESS**: Fixed profile image API endpoint and implemented dedicated profile image step in onboarding
+- **API Endpoint Fix**: Fixed broken `/api/profile-questions` endpoint that was calling non-existent `storage.getProfileQuestions()` method
+- **Database Integration**: Updated API to directly query database using `db.select().from(profileQuestions).orderBy(asc(profileQuestions.order))`
+- **Profile Image Optional**: Confirmed profile image question correctly marked as optional (`required: false`) in database
+- **Dedicated Profile Image Step**: Created separate step 4 for profile image upload in onboarding flow
+- **Step Flow Updates**: Updated onboarding flow to include dedicated profile image step:
+  - Step 1: Role selection (non-authenticated users)
+  - Step 2: Talent type selection (talent users)
+  - Step 3: Basic information (name, bio, location)
+  - Step 4: Profile image upload (optional, dedicated step)
+  - Step 5: Role-specific questions
+  - Step 6: Additional information (talent users)
+  - Step 7: Rates and availability
+- **UI Improvements**: Profile image now has its own clean interface with Camera icon and clear optional messaging
+- **Step Number Updates**: Updated all subsequent steps to accommodate new profile image step
+- **Max Steps Fix**: Updated getMaxSteps function to account for additional profile image step
+- **Result**: ✅ Profile image now has dedicated step in onboarding flow and API endpoint fully functional
 
 ### Complete SEO Management System Implementation (July 17, 2025)
 - **COMPLETE SUCCESS**: Comprehensive SEO management system fully implemented and operational
