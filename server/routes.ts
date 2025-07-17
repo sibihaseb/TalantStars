@@ -1949,7 +1949,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin routes (for user management, pricing, etc.)
   app.get('/api/admin/users', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const users = await simpleStorage.getAllUsers();
+      const users = await storage.getAllUsers();
       res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify(users));
     } catch (error) {
@@ -1963,7 +1963,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Creating user:", req.body);
       
       // Validate required fields
-      const { email, firstName, lastName, role } = req.body;
+      const { email, firstName, lastName, role, password } = req.body;
       if (!email || !firstName || !lastName || !role) {
         res.status(400).setHeader('Content-Type', 'application/json').send(JSON.stringify({ 
           message: "Missing required fields", 
@@ -1973,18 +1973,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create user data with proper schema mapping
-      const hashedPassword = await hashPassword("defaultPassword123");
+      const passwordToHash = password || "defaultPassword123";
+      const hashedPassword = await hashPassword(passwordToHash);
       const userData = {
         email,
         firstName,
         lastName,
         role,
         username: email, // Use email as username
-        password: hashedPassword // Hashed default password for admin-created users
+        password: hashedPassword // Hashed password from form or default
       };
       
       console.log("Mapped user data:", userData);
-      const user = await simpleStorage.createUser(userData);
+      const user = await storage.createUser(userData);
       console.log("Created user successfully:", user);
       res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify(user));

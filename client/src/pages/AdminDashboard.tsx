@@ -636,6 +636,7 @@ export default function AdminDashboard() {
       firstName: formData.get("firstName") as string,
       lastName: formData.get("lastName") as string,
       role: formData.get("role") as string,
+      ...(formData.get("password") && { password: formData.get("password") as string }),
     };
     console.log("Saving user:", userData);
     if (editingUser?.id) {
@@ -690,7 +691,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-13 mb-8 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-lg">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 mb-8 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-lg gap-1">
             <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <BarChart3 className="w-4 h-4 mr-2" />
               Overview
@@ -1175,6 +1176,17 @@ export default function AdminDashboard() {
                         required
                       />
                     </div>
+                    {!editingUser && (
+                      <div>
+                        <Label htmlFor="password">Password</Label>
+                        <Input
+                          name="password"
+                          type="password"
+                          placeholder="Enter password for new user"
+                          required
+                        />
+                      </div>
+                    )}
                     <div>
                       <Label htmlFor="role">Role</Label>
                       <select 

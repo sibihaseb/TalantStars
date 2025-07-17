@@ -87,6 +87,31 @@ export interface IStorage {
   getProfileSharing(userId: string): Promise<ProfileSharing | undefined>;
   createProfileSharing(sharing: InsertProfileSharing): Promise<ProfileSharing>;
   updateProfileSharing(userId: string, sharing: Partial<InsertProfileSharing>): Promise<ProfileSharing>;
+
+  // Payment analytics methods
+  getPaymentAnalyticsSummary(): Promise<any>;
+  getPaymentAnalyticsRevenue(): Promise<any>;
+
+  // Profile questions methods
+  getProfileQuestions(): Promise<any[]>;
+
+  // Admin logs methods
+  getAdminLogs(): Promise<any[]>;
+
+  // Analytics methods
+  getAnalytics(): Promise<any>;
+  getAnalyticsSummary(): Promise<any>;
+
+  // Users method for admin operations
+  getUsers(): Promise<User[]>;
+
+  // Profile SEO data methods
+  getProfileSeoData(userId: string): Promise<any>;
+  createProfileSeoData(data: any): Promise<any>;
+  updateProfileSeoData(userId: string, data: any): Promise<any>;
+
+  // Pricing tiers
+  getPricingTiers(): Promise<PricingTier[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -526,6 +551,124 @@ export class DatabaseStorage implements IStorage {
       .where(eq(profileSharing.userId, userId))
       .returning();
     return updatedSharing;
+  }
+
+  // Payment analytics methods (mock implementations)
+  async getPaymentAnalyticsSummary(): Promise<any> {
+    return {
+      totalRevenue: 25000,
+      totalTransactions: 150,
+      successRate: 95.5,
+      avgTransactionValue: 166.67,
+      monthlyGrowth: 12.5
+    };
+  }
+
+  async getPaymentAnalyticsRevenue(): Promise<any> {
+    return {
+      daily: [
+        { date: '2025-07-10', revenue: 1200 },
+        { date: '2025-07-11', revenue: 1500 },
+        { date: '2025-07-12', revenue: 1800 },
+        { date: '2025-07-13', revenue: 2100 },
+        { date: '2025-07-14', revenue: 1900 },
+        { date: '2025-07-15', revenue: 2300 },
+        { date: '2025-07-16', revenue: 2000 }
+      ],
+      weekly: [
+        { week: 'Week 1', revenue: 8500 },
+        { week: 'Week 2', revenue: 9200 },
+        { week: 'Week 3', revenue: 10800 }
+      ],
+      monthly: [
+        { month: 'May', revenue: 20000 },
+        { month: 'June', revenue: 22000 },
+        { month: 'July', revenue: 25000 }
+      ]
+    };
+  }
+
+  // Profile questions methods (mock implementations)
+  async getProfileQuestions(): Promise<any[]> {
+    return [
+      {
+        id: 1,
+        question: "What is your primary talent type?",
+        fieldType: "select",
+        options: ["Actor", "Musician", "Voice Artist", "Model"],
+        category: "profile",
+        order: 1,
+        isActive: true
+      },
+      {
+        id: 2,
+        question: "Describe your experience",
+        fieldType: "textarea",
+        category: "profile",
+        order: 2,
+        isActive: true
+      }
+    ];
+  }
+
+  // Admin logs methods (mock implementations)
+  async getAdminLogs(): Promise<any[]> {
+    return [
+      {
+        id: 1,
+        timestamp: new Date().toISOString(),
+        level: 'INFO',
+        message: 'User created successfully',
+        category: 'USER_MANAGEMENT'
+      },
+      {
+        id: 2,
+        timestamp: new Date().toISOString(),
+        level: 'ERROR',
+        message: 'Failed to process payment',
+        category: 'PAYMENT'
+      }
+    ];
+  }
+
+  // Analytics methods (mock implementations) 
+  async getAnalytics(): Promise<any> {
+    return {
+      totalUsers: 1250,
+      activeUsers: 890,
+      totalJobs: 45,
+      totalRevenue: 25000
+    };
+  }
+
+  async getAnalyticsSummary(): Promise<any> {
+    return {
+      userGrowth: 15.2,
+      revenueGrowth: 12.5,
+      jobsPosted: 45,
+      applicationsReceived: 230
+    };
+  }
+
+  // Users method for admin operations
+  async getUsers(): Promise<User[]> {
+    return await this.getAllUsers();
+  }
+
+  // Profile SEO data methods
+  async getProfileSeoData(userId: string): Promise<any> {
+    // Mock implementation - return undefined for now
+    return undefined;
+  }
+
+  async createProfileSeoData(data: any): Promise<any> {
+    // Mock implementation - return the data with an ID
+    return { id: Date.now(), ...data };
+  }
+
+  async updateProfileSeoData(userId: string, data: any): Promise<any> {
+    // Mock implementation - return the updated data
+    return { userId, ...data };
   }
 }
 

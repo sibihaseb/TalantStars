@@ -1,0 +1,35 @@
+[Debug] [vite] connecting... (client, line 495)
+[Info] Successfully preconnected to https://api.stripe.com/
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (profile-questions, line 0)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to fetch profile questions"} (main.tsx, line 27)
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (logs, line 0)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to fetch admin logs"} (main.tsx, line 27)
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (analytics, line 0)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to fetch analytics"} (main.tsx, line 27)
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (summary, line 0)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to fetch analytics summary"} (main.tsx, line 27)
+[Warning] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. (main.tsx, line 20)
+[Log] Saving user: – Object (main.tsx, line 27)
+Object
+[Error] Failed to load resource: the server responded with a status of 401 (Unauthorized) (users, line 0)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 401, URL: /api/admin/users (main.tsx, line 27)
+[Log] 🚨 API ERROR: 401 - {"message":"Unauthorized"} (main.tsx, line 27)
+[Error] Error creating user: – Error: 401: {"message":"Unauthorized"}
+Error: 401: {"message":"Unauthorized"}
+	(anonymous function) (main.tsx:13)
+	onError (AdminDashboard.tsx:139)
+	(anonymous function) (@tanstack_react-query.js:1254)
+[Log] Saving user: – Object (main.tsx, line 27)
+Object
+[Error] Failed to load resource: the server responded with a status of 401 (Unauthorized) (users, line 0)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 401, URL: /api/admin/users (main.tsx, line 27)
+[Log] 🚨 API ERROR: 401 - {"message":"Unauthorized"} (main.tsx, line 27)
+[Error] Error creating user: – Error: 401: {"message":"Unauthorized"}
+Error: 401: {"message":"Unauthorized"}
+	(anonymous function) (main.tsx:13)
+	onError (AdminDashboard.tsx:139)
+	(anonymous function) (@tanstack_react-query.js:1254)
+> Selected Element
+< <div data-state="open" data-replit-metadata="client/src/components/ui/dialog.tsx:37:4" data-component-name="DialogOverlay" class="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" style="pointer-events: auto;" data-aria-hidden="true" aria-hidden="true"></div>
