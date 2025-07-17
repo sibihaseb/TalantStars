@@ -1,5 +1,6 @@
-import { Star, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { Link } from "wouter";
+import logoPath from "@assets/PNG FILE 9_1752757531948.png";
 
 export function Footer() {
   return (
@@ -8,8 +9,7 @@ export function Footer() {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2 mb-6">
-              <Star className="h-8 w-8 text-yellow-500 fill-current" />
-              <h3 className="text-xl font-bold">Talents & Stars</h3>
+              <img src={logoPath} alt="Talents & Stars" className="h-8 w-auto" />
             </div>
             <p className="text-gray-300 mb-6">
               The AI-powered platform connecting entertainment professionals with their next opportunity.
