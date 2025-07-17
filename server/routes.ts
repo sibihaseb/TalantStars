@@ -4563,7 +4563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/featured-talents', async (req, res) => {
     try {
       // Get all users with profiles marked as featured
-      const featuredUsers = await storage.getUsersWithProfiles({ featured: true });
+      const featuredUsers = await storage.getUsersWithProfiles({ isFeatured: true });
       
       // Transform to match frontend expectations
       const featuredTalents = featuredUsers.map(user => ({
@@ -4575,8 +4575,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         reviews: Math.floor(Math.random() * 200) + 50, // Random reviews 50-250
         image: user.profileImageUrl || 'https://images.unsplash.com/photo-1494790108755-2616b86e2390?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
         verified: user.profile?.isVerified || false,
-        available: user.profile?.isAvailable !== false,
-        specialty: user.profile?.specialties?.[0] || user.profile?.bio?.substring(0, 50) || 'Professional talent',
+        available: user.profile?.availabilityStatus === 'available',
+        specialty: user.profile?.bio?.substring(0, 50) || 'Professional talent',
         role: user.role
       }));
       

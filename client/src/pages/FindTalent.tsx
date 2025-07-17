@@ -74,15 +74,15 @@ export default function FindTalent() {
 
   // Show public talent discovery - no authentication required
 
-  // Filter talents (featured functionality temporarily disabled)
+  // Filter talents
   const filteredTalents = talents.filter((talent: any) => {
     const matchesQuery = !searchFilters.query || 
       talent.displayName?.toLowerCase().includes(searchFilters.query.toLowerCase()) ||
       (talent.skills && talent.skills.some((skill: string) => skill.toLowerCase().includes(searchFilters.query.toLowerCase())));
     
-    const matchesType = !searchFilters.talentType || talent.talentType?.toLowerCase() === searchFilters.talentType.toLowerCase();
+    const matchesType = !searchFilters.talentType || searchFilters.talentType === 'all' || talent.talentType?.toLowerCase() === searchFilters.talentType.toLowerCase();
     const matchesLocation = !searchFilters.location || talent.location?.toLowerCase().includes(searchFilters.location.toLowerCase());
-    const matchesAvailability = !searchFilters.availability || talent.availability?.toLowerCase() === searchFilters.availability.toLowerCase();
+    const matchesAvailability = !searchFilters.availability || searchFilters.availability === 'all' || talent.availabilityStatus?.toLowerCase() === searchFilters.availability.toLowerCase();
     
     return matchesQuery && matchesType && matchesLocation && matchesAvailability;
   });
@@ -177,7 +177,7 @@ export default function FindTalent() {
                       <SelectValue placeholder="All types" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Types</SelectItem>
+                      <SelectItem value="all">All Types</SelectItem>
                       <SelectItem value="actor">Actor</SelectItem>
                       <SelectItem value="musician">Musician</SelectItem>
                       <SelectItem value="voice artist">Voice Artist</SelectItem>
@@ -207,7 +207,7 @@ export default function FindTalent() {
                       <SelectValue placeholder="All" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All</SelectItem>
+                      <SelectItem value="all">All</SelectItem>
                       <SelectItem value="available">Available</SelectItem>
                       <SelectItem value="busy">Busy</SelectItem>
                     </SelectContent>

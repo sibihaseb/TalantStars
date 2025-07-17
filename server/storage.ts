@@ -150,6 +150,7 @@ export interface IStorage {
   getUserProfile(userId: string): Promise<UserProfile | undefined>;
   createUserProfile(profile: InsertUserProfile): Promise<UserProfile>;
   updateUserProfile(userId: string, profile: Partial<InsertUserProfile>): Promise<UserProfile>;
+  getUsersWithProfiles(filters?: { isFeatured?: boolean; role?: string }): Promise<Array<{ id: number; firstName: string; lastName: string; profileImageUrl: string; role: string; profile: UserProfile }>>;
   
   // Media operations
   createMediaFile(media: InsertMediaFile): Promise<MediaFile>;
@@ -494,6 +495,34 @@ export class DatabaseStorage implements IStorage {
       .where(eq(userProfiles.userId, userId))
       .returning();
     return updatedProfile;
+  }
+
+  async getUsersWithProfiles(filters?: { isFeatured?: boolean; role?: string }): Promise<Array<{ id: number; firstName: string; lastName: string; profileImageUrl: string; role: string; profile: UserProfile }>> {
+    const conditions = [];
+    
+    if (filters?.isFeatured !== undefined) {
+      conditions.push(eq(userProfiles.isFeatured, filters.isFeatured));
+    }
+    
+    if (filters?.role) {
+      conditions.push(eq(users.role, filters.role));
+    }
+    
+    const results = await db
+      .select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        role: users.role,
+        profile: userProfiles
+      })
+      .from(users)
+      .innerJoin(userProfiles, eq(users.id, userProfiles.userId))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(userProfiles.featuredAt));
+    
+    return results;
   }
 
   // Media operations

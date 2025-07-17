@@ -790,21 +790,14 @@ export async function seedTalentDatabase() {
         profileImageUrl: talent.profileImageUrl
       });
       
-      // Create profile
+      // Create profile with featured status
       const profile = await storage.createUserProfile({
         userId: user.id,
-        ...talent.profile
+        ...talent.profile,
+        isFeatured: talent.featured || false,
+        featuredAt: talent.featured ? new Date() : null,
+        featuredTier: talent.featured ? 'premium' : null
       });
-      
-      // If featured, add to featured talents
-      if (talent.featured) {
-        await storage.createFeaturedTalent({
-          userId: user.id,
-          featuredReason: talent.specialties?.join(', ') || 'Outstanding talent',
-          displayOrder: seedTalents.indexOf(talent),
-          isActive: true
-        });
-      }
       
       console.log(`Created talent: ${talent.firstName} ${talent.lastName}`);
     }
