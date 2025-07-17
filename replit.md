@@ -10,6 +10,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Admin Questions Database Fix and Profile Image Upload Fix (July 17, 2025)
+- **CRITICAL SUCCESS**: Resolved admin questions disappearing issue and profile image upload failure
+- **Database Import Fix**: Added missing database imports (db, profileQuestions, eq, asc) to routes.ts
+- **Questions Status**: Confirmed 180 questions exist in database across all talent types (actor, musician, voice artist, model, manager, producer, agent)
+- **Profile Image Upload Fix**: Added missing `updateUserProfileImage` method to storage interface and implementation
+- **Personal Questions Added**: Added 5 basic personal questions to "profile" category for admin editing:
+  - Display name, Location, Bio, Website (optional), Phone number (optional)
+- **Storage Method Updates**: Enhanced DatabaseStorage with proper profile image update functionality
+- **API Endpoint Fixed**: Profile image upload endpoint now properly updates user profile image URL in database
+- **Result**: ✅ Admin questions now display properly and profile image upload functionality restored
+
 ### Complete SEO Management System Implementation (July 17, 2025)
 - **COMPLETE SUCCESS**: Comprehensive SEO management system fully implemented and operational
 - **SEO Management Component**: Created complete SeoManagement.tsx with settings, images, and profile tabs

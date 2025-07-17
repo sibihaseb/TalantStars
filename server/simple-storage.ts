@@ -112,6 +112,9 @@ export interface IStorage {
 
   // Pricing tiers
   getPricingTiers(): Promise<PricingTier[]>;
+
+  // Profile image update method
+  updateUserProfileImage(userId: number, imageUrl: string): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -669,6 +672,20 @@ export class DatabaseStorage implements IStorage {
   async updateProfileSeoData(userId: string, data: any): Promise<any> {
     // Mock implementation - return the updated data
     return { userId, ...data };
+  }
+
+  async getPricingTiers(): Promise<PricingTier[]> {
+    const tiers = await db.select().from(pricingTiers).orderBy(asc(pricingTiers.price));
+    return tiers;
+  }
+
+  async updateUserProfileImage(userId: number, imageUrl: string): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ profileImageUrl: imageUrl })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser;
   }
 }
 
