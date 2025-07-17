@@ -3777,7 +3777,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { tierId } = req.body;
       
       // Get tier information
-      const tiers = await storage.getPricingTiers();
+      const tiers = await simpleStorage.getPricingTiers();
       const tier = tiers.find(t => t.id === tierId);
       
       if (!tier) {
@@ -3787,7 +3787,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if it's a free tier
       if (parseFloat(tier.price) === 0) {
         // For free tiers, directly update the user
-        const updatedUser = await storage.updateUserTier(userId, tierId);
+        const updatedUser = await simpleStorage.updateUserTier(userId, tierId);
         res.json(updatedUser);
       } else {
         // For paid tiers, require payment processing
