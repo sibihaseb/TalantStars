@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { TranslatedText } from "@/components/ui/TranslatedText";
+import { useQuery } from "@tanstack/react-query";
 import starBg from '@assets/PNG FILE 9_1752709598561.png';
 import { 
   Star, 
@@ -33,52 +34,16 @@ import {
 } from "lucide-react";
 
 export default function Landing() {
-  const featuredTalents = [
-    {
-      id: 1,
-      name: "Sarah Chen",
-      type: "Actor",
-      location: "Los Angeles, CA",
-      rating: 4.9,
-      reviews: 127,
-      image: "https://images.unsplash.com/photo-1494790108755-2616b86e2390?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400",
-      verified: true,
-      specialty: "Broadway & Film Actor"
-    },
-    {
-      id: 2,
-      name: "Marcus Rodriguez",
-      type: "Musician",
-      location: "Nashville, TN",
-      rating: 4.8,
-      reviews: 89,
-      image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400",
-      verified: true,
-      specialty: "Singer-Songwriter"
-    },
-    {
-      id: 3,
-      name: "Elena Volkov",
-      type: "Model",
-      location: "New York, NY",
-      rating: 5.0,
-      reviews: 156,
-      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400",
-      verified: true,
-      specialty: "Fashion & Editorial Model"
-    },
-    {
-      id: 4,
-      name: "David Kim",
-      type: "Voice Artist",
-      location: "Chicago, IL",
-      rating: 4.9,
-      reviews: 203,
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400",
-      verified: true,
-      specialty: "Voice Over Artist"
+  const { data: featuredTalents = [], isLoading } = useQuery({
+    queryKey: ['/api/featured-talents'],
+    queryFn: async () => {
+      const response = await fetch('/api/featured-talents');
+      if (!response.ok) {
+        throw new Error('Failed to fetch featured talents');
+      }
+      return response.json();
     }
-  ];
+  });
 
   const getTalentIcon = (type: string) => {
     switch (type) {
@@ -273,7 +238,22 @@ export default function Landing() {
             </div>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredTalents.map((talent) => (
+              {isLoading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <Card key={i} className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+                    <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+                    <CardContent className="p-6">
+                      <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4"></div>
+                      <div className="flex items-center justify-between">
+                        <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                        <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                featuredTalents.map((talent) => (
                 <Card key={talent.id} className="group bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
                   <div className="relative">
                     <img 
@@ -314,7 +294,8 @@ export default function Landing() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              ))
+              )}
             </div>
             
             <div className="text-center mt-12">

@@ -4545,6 +4545,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== TALENT SEEDING ENDPOINTS =====
+  
+  // Talent seeding endpoint (admin only)
+  app.post('/api/admin/seed-talents', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { seedTalentDatabase } = await import('./seed-talents');
+      const result = await seedTalentDatabase();
+      res.json(result);
+    } catch (error) {
+      console.error('Error seeding talents:', error);
+      res.status(500).json({ error: 'Failed to seed talents', details: error.message });
+    }
+  });
+
+  // Get featured talents for landing page
+  app.get('/api/featured-talents', async (req, res) => {
+    try {
+      // Create sample featured talents with proper photos
+      const featuredTalents = [
+        {
+          id: 1,
+          name: "Sarah Chen",
+          type: "Actor",
+          location: "Los Angeles, CA",
+          rating: 4.9,
+          reviews: 127,
+          image: "https://images.unsplash.com/photo-1494790108755-2616b86e2390?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+          verified: true,
+          specialty: "Broadway & Film Actor"
+        },
+        {
+          id: 2,
+          name: "Marcus Rodriguez",
+          type: "Musician",
+          location: "Nashville, TN",
+          rating: 4.8,
+          reviews: 89,
+          image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+          verified: true,
+          specialty: "Singer-Songwriter"
+        },
+        {
+          id: 3,
+          name: "Elena Volkov",
+          type: "Model",
+          location: "New York, NY",
+          rating: 5.0,
+          reviews: 156,
+          image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+          verified: true,
+          specialty: "Fashion & Editorial Model"
+        },
+        {
+          id: 4,
+          name: "David Kim",
+          type: "Voice Artist",
+          location: "Chicago, IL",
+          rating: 4.9,
+          reviews: 73,
+          image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+          verified: true,
+          specialty: "Animation & Gaming Voice"
+        },
+        {
+          id: 5,
+          name: "Jessica Martinez",
+          type: "Actor",
+          location: "Atlanta, GA",
+          rating: 4.7,
+          reviews: 92,
+          image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+          verified: true,
+          specialty: "Television & Film"
+        },
+        {
+          id: 6,
+          name: "Alex Thompson",
+          type: "Musician",
+          location: "Miami, FL",
+          rating: 4.6,
+          reviews: 64,
+          image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400",
+          verified: true,
+          specialty: "Electronic Music Producer"
+        }
+      ];
+      
+      res.json(featuredTalents);
+    } catch (error) {
+      console.error('Error fetching featured talents:', error);
+      res.status(500).json({ error: 'Failed to fetch featured talents', details: error.message });
+    }
+  });
+
   // ===== AI TRANSLATION ENDPOINT =====
   app.post('/api/translate', async (req, res) => {
     try {

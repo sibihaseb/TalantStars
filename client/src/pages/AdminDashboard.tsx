@@ -959,13 +959,37 @@ export default function AdminDashboard() {
                     <Users className="w-5 h-5" />
                     User Management
                   </span>
-                  <Button onClick={() => {
-                    setEditingUser(null);
-                    setIsEditingUser(true);
-                  }}>
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Add User
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button onClick={() => {
+                      setEditingUser(null);
+                      setIsEditingUser(true);
+                    }}>
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Add User
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={async () => {
+                        try {
+                          await apiRequest("POST", "/api/admin/seed-talents");
+                          toast({
+                            title: "Success",
+                            description: "Talent database seeded successfully",
+                          });
+                          queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+                        } catch (error) {
+                          toast({
+                            title: "Error",
+                            description: "Failed to seed talent database",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                    >
+                      <Database className="w-4 h-4 mr-2" />
+                      Seed Talents
+                    </Button>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
