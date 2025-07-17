@@ -110,7 +110,7 @@ export default function FindTalent() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
         <Header />
         
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 pt-24 pb-8">
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
