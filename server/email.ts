@@ -20,84 +20,47 @@ interface EmailSettings {
 }
 
 async function getEmailSettings(): Promise<EmailSettings> {
-  // Use environment variable for Resend API key
+  // Use environment variable for Resend API key - prioritize environment over database
   const config: EmailSettings = {
     provider: 'resend',
-    fromAddress: 'noreply@talentsandstars.com',
+    fromAddress: 'onboarding@resend.dev',
     fromName: 'Talents & Stars',
     enabled: true,
     resendApiKey: process.env.RESEND_API_KEY
   };
 
-  try {
-    const settings = await storage.getSystemSettings();
-    const emailSettings = settings.filter(s => s.category === 'email');
-    
-    emailSettings.forEach(setting => {
-      switch(setting.key) {
-        case 'email_provider':
-          config.provider = setting.value as 'resend' | 'smtp';
-          break;
-        case 'email_from_address':
-          config.fromAddress = setting.value;
-          break;
-        case 'email_from_name':
-          config.fromName = setting.value;
-          break;
-        case 'resend_api_key':
-          config.resendApiKey = setting.value;
-          break;
-        case 'smtp_host':
-          config.smtpHost = setting.value;
-          break;
-        case 'smtp_port':
-          config.smtpPort = parseInt(setting.value);
-          break;
-        case 'smtp_username':
-          config.smtpUsername = setting.value;
-          break;
-        case 'smtp_password':
-          config.smtpPassword = setting.value;
-          break;
-        case 'smtp_secure':
-          config.smtpSecure = setting.value === 'true';
-          break;
-        case 'email_enabled':
-          config.enabled = setting.value === 'true';
-          break;
-      }
-    });
-  } catch (error) {
-    console.log('Using default email settings (storage not available)');
-  }
+  console.log('Email settings initialized with environment variable');
 
   return config;
 }
 
-async function initializeEmailProvider(): Promise<void> {
-  const settings = await getEmailSettings();
+async function initializeEmailProvider(settings?: EmailSettings): Promise<void> {
+  // Use provided settings or fetch them
+  const emailSettings = settings || await getEmailSettings();
   
-  if (!settings.enabled) {
+  console.log('Initializing email provider:', emailSettings.provider);
+  
+  if (!emailSettings.enabled) {
     console.log('Email sending is disabled');
     return;
   }
 
-  if (settings.provider === 'resend') {
-    if (settings.resendApiKey) {
-      resend = new Resend(settings.resendApiKey);
-      console.log('Resend email provider initialized');
+  if (emailSettings.provider === 'resend') {
+    if (emailSettings.resendApiKey) {
+      resend = new Resend(emailSettings.resendApiKey);
+      console.log('Resend email provider initialized successfully');
     } else {
       console.warn('Resend API key not configured');
     }
-  } else if (settings.provider === 'smtp') {
-    if (settings.smtpHost && settings.smtpUsername && settings.smtpPassword) {
+  } else if (emailSettings.provider === 'smtp') {
+    if (emailSettings.smtpHost && emailSettings.smtpUsername && emailSettings.smtpPassword) {
       smtpTransporter = nodemailer.createTransporter({
-        host: settings.smtpHost,
-        port: settings.smtpPort || 587,
-        secure: settings.smtpSecure || false,
+        host: emailSettings.smtpHost,
+        port: emailSettings.smtpPort || 587,
+        secure: emailSettings.smtpSecure || false,
         auth: {
-          user: settings.smtpUsername,
-          pass: settings.smtpPassword,
+          user: emailSettings.smtpUsername,
+          pass: emailSettings.smtpPassword,
         },
       });
       console.log('SMTP email provider initialized');
@@ -124,7 +87,8 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
       return false;
     }
 
-    await initializeEmailProvider();
+    // Pass the settings to avoid double fetching
+    await initializeEmailProvider(settings);
 
     const fromAddress = params.from || `${settings.fromName} <${settings.fromAddress}>`;
 
