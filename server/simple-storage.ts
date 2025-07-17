@@ -9,7 +9,7 @@ import {
   type PricingTier,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (for traditional auth)
@@ -132,6 +132,16 @@ export class DatabaseStorage implements IStorage {
       return tier || undefined;
     } catch (error) {
       console.error('Error getting pricing tier:', error);
+      throw error;
+    }
+  }
+
+  async getPricingTiers(): Promise<PricingTier[]> {
+    try {
+      const tiers = await db.select().from(pricingTiers).orderBy(asc(pricingTiers.price));
+      return tiers;
+    } catch (error) {
+      console.error('Error getting pricing tiers:', error);
       throw error;
     }
   }
