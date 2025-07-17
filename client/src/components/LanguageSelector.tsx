@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { supportedLanguages, getCurrentLanguage, setLanguage } from '@/lib/dynamicTranslation';
-import starLogo from '@assets/PNG FILE 9_1752709598561.png';
+import { Globe } from 'lucide-react';
 
 export function LanguageSelector() {
   const [language, setCurrentLanguage] = useState(getCurrentLanguage());
@@ -39,11 +39,7 @@ export function LanguageSelector() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="gap-2">
-          <img 
-            src={starLogo} 
-            alt="Languages" 
-            className="h-4 w-4 object-contain filter brightness-0 invert" 
-          />
+          <Globe className="h-4 w-4 text-white" />
           {supportedLanguages[language].flag}
         </Button>
       </DropdownMenuTrigger>

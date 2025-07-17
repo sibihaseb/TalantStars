@@ -4565,7 +4565,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Import OpenAI module
-      const OpenAI = require('openai');
+      const { default: OpenAI } = await import('openai');
       
       if (!process.env.OPENAI_API_KEY) {
         throw new Error('OpenAI API key not configured');
