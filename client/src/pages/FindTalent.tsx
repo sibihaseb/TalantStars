@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -23,7 +23,9 @@ import {
   Theater,
   Music,
   Camera,
-  Mic
+  Mic,
+  CheckCircle,
+  Crown
 } from "lucide-react";
 
 export default function FindTalent() {
@@ -36,6 +38,15 @@ export default function FindTalent() {
     availability: "",
     featured: false,
   });
+
+  // Check for featured parameter in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const featuredParam = urlParams.get('featured');
+    if (featuredParam === 'true') {
+      setSearchFilters(prev => ({ ...prev, featured: true }));
+    }
+  }, []);
 
   // Fetch real talent data from API - public access for discovery
   const { data: talents = [], isLoading: isTalentsLoading } = useQuery({
@@ -101,12 +112,38 @@ export default function FindTalent() {
         
         <main className="container mx-auto px-4 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Find Talent
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              Discover amazing talent for your next project
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  {searchFilters.featured ? 'Featured Talents' : 'Find Talent'}
+                </h1>
+                <p className="text-gray-600 dark:text-gray-300">
+                  {searchFilters.featured ? 'Discover our curated featured professionals' : 'Discover amazing talent for your next project'}
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button 
+                  variant={searchFilters.featured ? "default" : "outline"}
+                  onClick={() => setSearchFilters(prev => ({ ...prev, featured: !prev.featured }))}
+                  className={`${searchFilters.featured ? 
+                    'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600' : 
+                    'border-purple-300 text-purple-600 hover:bg-purple-50'}`}
+                >
+                  <Crown className="w-4 h-4 mr-2" />
+                  Featured
+                </Button>
+                <Button 
+                  variant={!searchFilters.featured ? "default" : "outline"}
+                  onClick={() => setSearchFilters(prev => ({ ...prev, featured: false }))}
+                  className={`${!searchFilters.featured ? 
+                    'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600' : 
+                    'border-blue-300 text-blue-600 hover:bg-blue-50'}`}
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  All Talents
+                </Button>
+              </div>
+            </div>
           </div>
 
           {/* Search Filters */}
@@ -221,11 +258,10 @@ export default function FindTalent() {
                       <div>
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold text-gray-900 dark:text-white">{talent.displayName}</h3>
-                          {/* Featured badge temporarily disabled */}
                           {talent.isVerified && (
-                            <Badge variant="secondary" className="text-xs">
-                              ✓ Verified
-                            </Badge>
+                            <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                              <CheckCircle className="h-4 w-4 text-white fill-current" />
+                            </div>
                           )}
                         </div>
                         <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
@@ -234,9 +270,18 @@ export default function FindTalent() {
                         </div>
                       </div>
                     </div>
-                    <Badge className={getAvailabilityColor(talent.availability || 'unavailable')}>
-                      {talent.availability || 'Unavailable'}
-                    </Badge>
+                    <div className="flex items-center gap-1">
+                      <div className={`w-3 h-3 rounded-full ${
+                        talent.availabilityStatus === 'available' ? 'bg-green-500' :
+                        talent.availabilityStatus === 'busy' ? 'bg-yellow-500' :
+                        'bg-gray-400'
+                      }`}></div>
+                      <Badge className={getAvailabilityColor(talent.availabilityStatus || 'unavailable')}>
+                        {talent.availabilityStatus === 'available' ? 'Available' :
+                         talent.availabilityStatus === 'busy' ? 'Busy' :
+                         'Unavailable'}
+                      </Badge>
+                    </div>
                   </div>
                 </CardHeader>
                 

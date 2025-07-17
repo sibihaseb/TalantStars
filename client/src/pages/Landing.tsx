@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { TranslatedText } from "@/components/ui/TranslatedText";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import starBg from '@assets/PNG FILE 9_1752709598561.png';
 import { 
   Star, 
@@ -263,11 +264,22 @@ export default function Landing() {
                     />
                     {talent.verified && (
                       <div className="absolute top-4 right-4">
-                        <div className="w-8 h-8 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center">
-                          <CheckCircle className="h-5 w-5 text-emerald-500" />
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                          <CheckCircle className="h-5 w-5 text-white fill-current" />
                         </div>
                       </div>
                     )}
+                    
+                    {/* Availability Status */}
+                    <div className="absolute top-4 left-4">
+                      <div className={`px-3 py-1 rounded-full text-xs font-semibold shadow-lg ${
+                        talent.available 
+                          ? 'bg-gradient-to-r from-green-400 to-green-500 text-white' 
+                          : 'bg-gradient-to-r from-red-400 to-red-500 text-white'
+                      }`}>
+                        {talent.available ? 'Available' : 'Busy'}
+                      </div>
+                    </div>
                     <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm flex items-center space-x-1">
                       {getTalentIcon(talent.type)}
                       <span>{talent.type}</span>
@@ -298,14 +310,19 @@ export default function Landing() {
               )}
             </div>
             
-            <div className="text-center mt-12">
-              <Button 
-                size="lg"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
-                onClick={() => window.location.href = "/auth"}
+            <div className="flex justify-center gap-4 mt-12">
+              <Link 
+                to="/find-talents?featured=true" 
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
               >
-                View All Talents
-              </Button>
+                <TranslatedText text="View Featured Talents" />
+              </Link>
+              <Link 
+                to="/find-talents" 
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              >
+                <TranslatedText text="View All Talents" />
+              </Link>
             </div>
           </div>
         </section>

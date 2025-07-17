@@ -132,6 +132,9 @@ function Router() {
       <Route path="/find-talent">
         {isAuthenticated ? <PlanProtectedRoute><FindTalent /></PlanProtectedRoute> : <Auth />}
       </Route>
+      <Route path="/find-talents">
+        <FindTalent />
+      </Route>
       <Route path="/talent/:id">
         {isAuthenticated ? <PlanProtectedRoute><TalentProfile /></PlanProtectedRoute> : <Auth />}
       </Route>
