@@ -62,6 +62,7 @@ import UserLimitsManagement from '@/components/admin/UserLimitsManagement';
 import EmailCampaigns from "./admin/email-campaigns";
 import AdminPayments from "./AdminPayments";
 import AdminUsageAnalytics from "@/components/admin/AdminUsageAnalytics";
+import EmailTemplates from "@/components/admin/EmailTemplates";
 
 interface User {
   id: string;
@@ -686,7 +687,7 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-11 mb-8 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-lg">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-12 mb-8 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-lg">
             <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <BarChart3 className="w-4 h-4 mr-2" />
               Overview
@@ -706,6 +707,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="emails" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <Mail className="w-4 h-4 mr-2" />
               Emails
+            </TabsTrigger>
+            <TabsTrigger value="templates" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
+              <FileText className="w-4 h-4 mr-2" />
+              Templates
             </TabsTrigger>
             <TabsTrigger value="campaigns" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <Zap className="w-4 h-4 mr-2" />
@@ -1554,6 +1559,10 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="templates" className="space-y-6">
+            <EmailTemplates />
           </TabsContent>
 
           <TabsContent value="emails" className="space-y-6">

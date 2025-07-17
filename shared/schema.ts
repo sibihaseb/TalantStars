@@ -35,6 +35,8 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
+
+
 // User storage table for username/password auth
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -857,6 +859,9 @@ export const emailTemplates = pgTable("email_templates", {
   elements: jsonb("elements").array(),
   previewText: text("preview_text"),
   isDefault: boolean("is_default").default(false),
+  variables: jsonb("variables").default('[]'), // Available variables for this template like {{userName}}, {{companyName}}, etc.
+  fromName: varchar("from_name").default("Talents & Stars"), // Sender name
+  fromEmail: varchar("from_email").default("noreply@talentsandstars.com"), // Sender email
   createdBy: integer("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1395,6 +1400,10 @@ export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit
   createdAt: true,
   updatedAt: true,
 });
+
+// Email template types
+export type EmailTemplate = typeof emailTemplates.$inferSelect;
+export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
 
 export const insertAiGeneratedContentSchema = createInsertSchema(aiGeneratedContent).omit({
   id: true,

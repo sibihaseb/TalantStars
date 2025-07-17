@@ -2319,6 +2319,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email template management routes
+  app.get('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const templates = await simpleStorage.getAllEmailTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching email templates:", error);
+      res.status(500).json({ message: "Failed to fetch email templates" });
+    }
+  });
+
+  app.get('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const template = await simpleStorage.getEmailTemplate(id);
+      if (!template) {
+        return res.status(404).json({ message: "Email template not found" });
+      }
+      res.json(template);
+    } catch (error) {
+      console.error("Error fetching email template:", error);
+      res.status(500).json({ message: "Failed to fetch email template" });
+    }
+  });
+
+  app.post('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const template = await simpleStorage.createEmailTemplate(req.body);
+      res.json(template);
+    } catch (error) {
+      console.error("Error creating email template:", error);
+      res.status(500).json({ message: "Failed to create email template", error: error.message });
+    }
+  });
+
+  app.put('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const template = await simpleStorage.updateEmailTemplate(id, req.body);
+      res.json(template);
+    } catch (error) {
+      console.error("Error updating email template:", error);
+      res.status(500).json({ message: "Failed to update email template", error: error.message });
+    }
+  });
+
+  app.delete('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await simpleStorage.deleteEmailTemplate(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting email template:", error);
+      res.status(500).json({ message: "Failed to delete email template", error: error.message });
+    }
+  });
+
+  // Enhanced email template management routes
+  app.get('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const templates = await simpleStorage.getEmailTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error('Error fetching email templates:', error);
+      res.status(500).json({ error: 'Failed to fetch email templates' });
+    }
+  });
+
+  app.post('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { name, subject, html_content, text_content, variables, description } = req.body;
+      
+      if (!name || !subject || !html_content || !text_content) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      const template = await simpleStorage.createEmailTemplate({
+        name,
+        subject,
+        html_content,
+        text_content,
+        variables: variables || [],
+        description
+      });
+
+      res.json(template);
+    } catch (error) {
+      console.error('Error creating email template:', error);
+      res.status(500).json({ error: 'Failed to create email template' });
+    }
+  });
+
+  app.put('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { name, subject, html_content, text_content, variables, description } = req.body;
+      
+      const template = await simpleStorage.updateEmailTemplate(parseInt(id), {
+        name,
+        subject,
+        html_content,
+        text_content,
+        variables: variables || [],
+        description
+      });
+
+      if (!template) {
+        return res.status(404).json({ error: 'Email template not found' });
+      }
+
+      res.json(template);
+    } catch (error) {
+      console.error('Error updating email template:', error);
+      res.status(500).json({ error: 'Failed to update email template' });
+    }
+  });
+
+  app.post('/api/admin/email-templates/:id/test', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { email, variables } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: 'Email address is required' });
+      }
+
+      const template = await simpleStorage.getEmailTemplate(parseInt(id));
+      if (!template) {
+        return res.status(404).json({ error: 'Email template not found' });
+      }
+
+      // Use the email template system to send test email
+      const { sendEmailWithTemplate } = await import('./email');
+      const success = await sendEmailWithTemplate(template.name, email, variables || {});
+      
+      res.json({ success });
+    } catch (error) {
+      console.error('Error sending test email:', error);
+      res.status(500).json({ error: 'Failed to send test email' });
+    }
+  });
+
   // Promo code management routes
   app.get('/api/admin/promo-codes', isAuthenticated, isAdmin, async (req: any, res) => {
     try {

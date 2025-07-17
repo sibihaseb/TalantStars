@@ -2,11 +2,14 @@ import {
   users,
   userProfiles,
   pricingTiers,
+  emailTemplates,
   type User,
   type InsertUser,
   type UserProfile,
   type InsertUserProfile,
   type PricingTier,
+  type EmailTemplate,
+  type InsertEmailTemplate,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc } from "drizzle-orm";
@@ -46,6 +49,14 @@ export interface IStorage {
     termsVersion?: number;
     privacyVersion?: number;
   }): Promise<User>;
+
+  // Email template operations
+  getAllEmailTemplates(): Promise<EmailTemplate[]>;
+  getEmailTemplate(id: number): Promise<EmailTemplate | undefined>;
+  getEmailTemplateByName(name: string): Promise<EmailTemplate | undefined>;
+  createEmailTemplate(template: InsertEmailTemplate): Promise<EmailTemplate>;
+  updateEmailTemplate(id: number, template: Partial<InsertEmailTemplate>): Promise<EmailTemplate>;
+  deleteEmailTemplate(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -336,6 +347,43 @@ export class DatabaseStorage implements IStorage {
 
     this.users.set(userId, updatedUser);
     return updatedUser;
+  }
+
+  // Email template operations
+  async getAllEmailTemplates(): Promise<EmailTemplate[]> {
+    const templates = await db.select().from(emailTemplates);
+    return templates;
+  }
+
+  async getEmailTemplate(id: number): Promise<EmailTemplate | undefined> {
+    const [template] = await db.select().from(emailTemplates).where(eq(emailTemplates.id, id));
+    return template || undefined;
+  }
+
+  async getEmailTemplateByName(name: string): Promise<EmailTemplate | undefined> {
+    const [template] = await db.select().from(emailTemplates).where(eq(emailTemplates.name, name));
+    return template || undefined;
+  }
+
+  async createEmailTemplate(template: InsertEmailTemplate): Promise<EmailTemplate> {
+    const [newTemplate] = await db
+      .insert(emailTemplates)
+      .values(template)
+      .returning();
+    return newTemplate;
+  }
+
+  async updateEmailTemplate(id: number, template: Partial<InsertEmailTemplate>): Promise<EmailTemplate> {
+    const [updatedTemplate] = await db
+      .update(emailTemplates)
+      .set(template)
+      .where(eq(emailTemplates.id, id))
+      .returning();
+    return updatedTemplate;
+  }
+
+  async deleteEmailTemplate(id: number): Promise<void> {
+    await db.delete(emailTemplates).where(eq(emailTemplates.id, id));
   }
 }
 

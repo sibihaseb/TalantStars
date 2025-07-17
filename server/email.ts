@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
 import { storage } from './storage';
+import { storage as simpleStorage } from './simple-storage';
 import { User } from '@shared/schema';
 
 let resend: Resend | null = null;
@@ -23,7 +24,7 @@ async function getEmailSettings(): Promise<EmailSettings> {
   // Use environment variable for Resend API key - prioritize environment over database
   const config: EmailSettings = {
     provider: 'resend',
-    fromAddress: 'onboarding@resend.dev',
+    fromAddress: 'noreply@talentsandstars.com',
     fromName: 'Talents & Stars',
     enabled: true,
     resendApiKey: process.env.RESEND_API_KEY
@@ -32,6 +33,66 @@ async function getEmailSettings(): Promise<EmailSettings> {
   console.log('Email settings initialized with environment variable');
 
   return config;
+}
+
+// Template variable replacement function
+function replaceTemplateVariables(content: string, variables: Record<string, string>): string {
+  let result = content;
+  for (const [key, value] of Object.entries(variables)) {
+    const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+    result = result.replace(regex, value);
+  }
+  return result;
+}
+
+// Load email template from database
+async function loadEmailTemplate(templateName: string): Promise<any> {
+  try {
+    const template = await simpleStorage.getEmailTemplateByName(templateName);
+    if (!template) {
+      console.warn(`Email template '${templateName}' not found in database`);
+      return null;
+    }
+    return template;
+  } catch (error) {
+    console.error(`Error loading email template '${templateName}':`, error);
+    return null;
+  }
+}
+
+// Send email using database template
+export async function sendEmailWithTemplate(templateName: string, to: string, variables: Record<string, string> = {}): Promise<boolean> {
+  try {
+    const template = await loadEmailTemplate(templateName);
+    if (!template) {
+      console.error(`Template '${templateName}' not found`);
+      return false;
+    }
+
+    const emailSettings = await getEmailSettings();
+    if (!emailSettings.enabled) {
+      console.log('Email sending is disabled');
+      return false;
+    }
+
+    // Replace variables in template content
+    const subject = replaceTemplateVariables(template.subject, variables);
+    const htmlContent = replaceTemplateVariables(template.html_content, variables);
+    const textContent = replaceTemplateVariables(template.text_content, variables);
+
+    const fromAddress = `${emailSettings.fromName} <${emailSettings.fromAddress}>`;
+
+    return await sendEmail({
+      to,
+      subject,
+      html: htmlContent,
+      text: textContent,
+      from: fromAddress
+    });
+  } catch (error) {
+    console.error(`Error sending email with template '${templateName}':`, error);
+    return false;
+  }
 }
 
 async function initializeEmailProvider(settings?: EmailSettings): Promise<void> {
@@ -132,23 +193,11 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
 export async function sendPasswordResetEmail(email: string, resetToken: string): Promise<boolean> {
   const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
   
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #333;">Password Reset Request</h2>
-      <p>You requested a password reset for your Talents & Stars account.</p>
-      <p>Click the link below to reset your password:</p>
-      <a href="${resetUrl}" style="display: inline-block; background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 16px 0;">Reset Password</a>
-      <p>If you didn't request this, please ignore this email.</p>
-      <p>This link will expire in 1 hour.</p>
-    </div>
-  `;
+  const variables = {
+    resetUrl
+  };
 
-  return await sendEmail({
-    to: email,
-    subject: 'Password Reset Request - Talents & Stars',
-    html,
-    text: `Password reset requested. Visit: ${resetUrl}`,
-  });
+  return await sendEmailWithTemplate('password_reset', email, variables);
 }
 
 export async function sendMeetingInvitation(
