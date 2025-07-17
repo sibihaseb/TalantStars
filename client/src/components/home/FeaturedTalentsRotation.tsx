@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, MapPin, Award, Crown, Sparkles, ChevronLeft, ChevronRight, Eye, Users, Trophy } from 'lucide-react';
+import { Star, MapPin, ShieldCheck, Crown, Sparkles, ChevronLeft, ChevronRight, Eye, Users, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'wouter';
 
@@ -122,7 +122,7 @@ export default function FeaturedTalentsRotation() {
                     </Badge>
                     {currentTalent.verificationStatus === 'verified' && (
                       <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-lg block">
-                        <Award className="h-3 w-3 mr-1" />
+                        <ShieldCheck className="h-3 w-3 mr-1" />
                         Verified
                       </Badge>
                     )}

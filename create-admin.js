@@ -1,7 +1,11 @@
-import { Pool } from '@neondatabase/serverless';
+import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import { scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
+import ws from 'ws';
+
+// Configure WebSocket for Neon
+neonConfig.webSocketConstructor = ws;
 
 const scryptAsync = promisify(scrypt);
 
@@ -15,11 +19,11 @@ async function createAdminUser() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   const db = drizzle({ client: pool });
   
-  const hashedPassword = await hashPassword('admin123');
+  const hashedPassword = await hashPassword('TalentStars2024!');
   
   try {
     // Create the admin user
-    await db.execute(`
+    await pool.query(`
       INSERT INTO users (username, password, email, first_name, last_name, role) 
       VALUES ('admin', $1, 'admin@talents-stars.com', 'Admin', 'User', 'admin')
       ON CONFLICT (username) DO UPDATE SET 
@@ -33,7 +37,7 @@ async function createAdminUser() {
     console.log('Admin user created successfully!');
     console.log('Login credentials:');
     console.log('Username: admin');
-    console.log('Password: admin123');
+    console.log('Password: TalentStars2024!');
     
   } catch (error) {
     console.error('Error creating admin user:', error);
