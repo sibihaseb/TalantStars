@@ -46,7 +46,9 @@ export function TranslatedText({
 
         const data = await response.json();
         console.log('Translation response:', data);
-        setTranslatedText(data.translatedText || text);
+        const translated = data.translatedText || text;
+        console.log('Setting translated text:', translated);
+        setTranslatedText(translated);
       } catch (error) {
         console.error('Translation error:', error);
         setTranslatedText(text);
@@ -69,6 +71,8 @@ export function TranslatedText({
     };
   }, [text]);
 
+  console.log('TranslatedText render:', { text, translatedText, isLoading });
+  
   return (
     <Component className={className} {...props}>
       {isLoading ? (

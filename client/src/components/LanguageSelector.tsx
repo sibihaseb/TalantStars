@@ -39,7 +39,7 @@ export function LanguageSelector() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="gap-2">
           <img 
-            src="/attached_assets/PNG%20FILE%209_1752709598561.png" 
+            src="/attached_assets/PNG%20FILE%209_1752709459651.png" 
             alt="Languages" 
             className="h-4 w-4 object-contain filter brightness-0 invert" 
           />
