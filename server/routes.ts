@@ -3776,21 +3776,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const { tierId } = req.body;
       
+      console.log('Select tier request:', { userId, tierId });
+      
       // Get tier information
       const tiers = await simpleStorage.getPricingTiers();
       const tier = tiers.find(t => t.id === tierId);
       
+      console.log('Found tier:', tier);
+      
       if (!tier) {
+        console.log('Invalid tier ID:', tierId);
         return res.status(400).json({ message: "Invalid tier ID" });
       }
       
       // Check if it's a free tier
       if (parseFloat(tier.price) === 0) {
+        console.log('Processing free tier selection for user:', userId);
         // For free tiers, directly update the user
         const updatedUser = await simpleStorage.updateUserTier(userId, tierId);
+        console.log('Updated user:', updatedUser);
         res.json(updatedUser);
       } else {
         // For paid tiers, require payment processing
+        console.log('Paid tier requires payment flow');
         res.status(400).json({ 
           message: "This tier requires payment. Please use the payment flow.",
           requiresPayment: true
