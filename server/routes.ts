@@ -26,7 +26,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { requestPasswordReset, validatePasswordResetToken, resetPassword } from "./passwordUtils";
-import { sendMeetingInvitation, sendWelcomeEmail, sendEmail } from "./email";
+import { sendMeetingInvitation, sendWelcomeEmail, sendEmail, sendTestEmail, sendPasswordResetEmail } from "./email";
 import { scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
 import { uploadFileToWasabi, deleteFileFromWasabi, getFileTypeFromMimeType } from "./wasabi-config";
@@ -3021,6 +3021,147 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating system setting:", error);
       res.status(500).json({ message: "Failed to create system setting", error: error.message });
+    }
+  });
+
+  // Email Testing Endpoints
+  app.post('/api/admin/test-email-system', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { email, testType } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email address is required" });
+      }
+
+      console.log(`Sending test email to: ${email}, type: ${testType}`);
+      
+      const emailSent = await sendTestEmail(email, testType);
+      
+      if (emailSent) {
+        res.json({ success: true, message: `Test email sent successfully to ${email}` });
+      } else {
+        res.status(500).json({ success: false, message: "Failed to send test email" });
+      }
+    } catch (error) {
+      console.error("Error sending test email:", error);
+      res.status(500).json({ success: false, message: "Failed to send test email", error: error.message });
+    }
+  });
+
+  // Send welcome emails for testing
+  app.post('/api/admin/test-welcome-emails', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email address is required" });
+      }
+
+      const roles = ['talent', 'manager', 'producer', 'agent'];
+      const results = [];
+      
+      for (const role of roles) {
+        const testUser = {
+          email,
+          firstName: 'Test',
+          lastName: 'User',
+          role,
+          username: `test_${role}`,
+          id: 999
+        };
+        
+        console.log(`Sending welcome email for ${role} to: ${email}`);
+        const emailSent = await sendWelcomeEmail(testUser as any);
+        
+        results.push({
+          role,
+          success: emailSent,
+          message: emailSent ? `Welcome email sent for ${role}` : `Failed to send welcome email for ${role}`
+        });
+      }
+      
+      const allSuccess = results.every(r => r.success);
+      
+      res.json({
+        success: allSuccess,
+        message: allSuccess ? "All welcome emails sent successfully" : "Some emails failed to send",
+        results
+      });
+    } catch (error) {
+      console.error("Error sending welcome emails:", error);
+      res.status(500).json({ success: false, message: "Failed to send welcome emails", error: error.message });
+    }
+  });
+
+  // Password reset email test
+  app.post('/api/admin/test-password-reset', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email address is required" });
+      }
+
+      // Generate a test reset token
+      const testToken = 'test-' + Math.random().toString(36).substr(2, 9);
+      
+      console.log(`Sending password reset email to: ${email}`);
+      const emailSent = await sendPasswordResetEmail(email, testToken);
+      
+      if (emailSent) {
+        res.json({ success: true, message: `Password reset email sent successfully to ${email}` });
+      } else {
+        res.status(500).json({ success: false, message: "Failed to send password reset email" });
+      }
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
+      res.status(500).json({ success: false, message: "Failed to send password reset email", error: error.message });
+    }
+  });
+
+  // Send notification email test
+  app.post('/api/admin/test-notification-email', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email address is required" });
+      }
+
+      console.log(`Sending notification email to: ${email}`);
+      const emailSent = await sendTestEmail(email, 'notification');
+      
+      if (emailSent) {
+        res.json({ success: true, message: `Notification email sent successfully to ${email}` });
+      } else {
+        res.status(500).json({ success: false, message: "Failed to send notification email" });
+      }
+    } catch (error) {
+      console.error("Error sending notification email:", error);
+      res.status(500).json({ success: false, message: "Failed to send notification email", error: error.message });
+    }
+  });
+
+  // Send admin email test
+  app.post('/api/admin/test-admin-email', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email address is required" });
+      }
+
+      console.log(`Sending admin email to: ${email}`);
+      const emailSent = await sendTestEmail(email, 'admin');
+      
+      if (emailSent) {
+        res.json({ success: true, message: `Admin email sent successfully to ${email}` });
+      } else {
+        res.status(500).json({ success: false, message: "Failed to send admin email" });
+      }
+    } catch (error) {
+      console.error("Error sending admin email:", error);
+      res.status(500).json({ success: false, message: "Failed to send admin email", error: error.message });
     }
   });
 

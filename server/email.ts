@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
 import { storage } from './storage';
+import { User } from '@shared/schema';
 
 let resend: Resend | null = null;
 let smtpTransporter: nodemailer.Transporter | null = null;
@@ -19,50 +20,56 @@ interface EmailSettings {
 }
 
 async function getEmailSettings(): Promise<EmailSettings> {
-  const settings = await storage.getSystemSettings();
-  const emailSettings = settings.filter(s => s.category === 'email');
-  
+  // Use environment variable for Resend API key
   const config: EmailSettings = {
     provider: 'resend',
     fromAddress: 'noreply@talentsandstars.com',
     fromName: 'Talents & Stars',
-    enabled: true
+    enabled: true,
+    resendApiKey: process.env.RESEND_API_KEY
   };
 
-  emailSettings.forEach(setting => {
-    switch(setting.key) {
-      case 'email_provider':
-        config.provider = setting.value as 'resend' | 'smtp';
-        break;
-      case 'email_from_address':
-        config.fromAddress = setting.value;
-        break;
-      case 'email_from_name':
-        config.fromName = setting.value;
-        break;
-      case 'resend_api_key':
-        config.resendApiKey = setting.value;
-        break;
-      case 'smtp_host':
-        config.smtpHost = setting.value;
-        break;
-      case 'smtp_port':
-        config.smtpPort = parseInt(setting.value);
-        break;
-      case 'smtp_username':
-        config.smtpUsername = setting.value;
-        break;
-      case 'smtp_password':
-        config.smtpPassword = setting.value;
-        break;
-      case 'smtp_secure':
-        config.smtpSecure = setting.value === 'true';
-        break;
-      case 'email_enabled':
-        config.enabled = setting.value === 'true';
-        break;
-    }
-  });
+  try {
+    const settings = await storage.getSystemSettings();
+    const emailSettings = settings.filter(s => s.category === 'email');
+    
+    emailSettings.forEach(setting => {
+      switch(setting.key) {
+        case 'email_provider':
+          config.provider = setting.value as 'resend' | 'smtp';
+          break;
+        case 'email_from_address':
+          config.fromAddress = setting.value;
+          break;
+        case 'email_from_name':
+          config.fromName = setting.value;
+          break;
+        case 'resend_api_key':
+          config.resendApiKey = setting.value;
+          break;
+        case 'smtp_host':
+          config.smtpHost = setting.value;
+          break;
+        case 'smtp_port':
+          config.smtpPort = parseInt(setting.value);
+          break;
+        case 'smtp_username':
+          config.smtpUsername = setting.value;
+          break;
+        case 'smtp_password':
+          config.smtpPassword = setting.value;
+          break;
+        case 'smtp_secure':
+          config.smtpSecure = setting.value === 'true';
+          break;
+        case 'email_enabled':
+          config.enabled = setting.value === 'true';
+          break;
+      }
+    });
+  } catch (error) {
+    console.log('Using default email settings (storage not available)');
+  }
 
   return config;
 }
@@ -218,29 +225,366 @@ export async function sendMeetingInvitation(
   });
 }
 
-export async function sendWelcomeEmail(email: string, firstName: string): Promise<boolean> {
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #333;">Welcome to Talents & Stars!</h2>
-      <p>Hi ${firstName},</p>
-      <p>Welcome to Talents & Stars, the premier platform connecting talent with opportunities in the entertainment industry.</p>
-      <p>Your account has been created successfully. You can now:</p>
-      <ul>
-        <li>Create and optimize your profile</li>
-        <li>Browse and apply for opportunities</li>
-        <li>Connect with industry professionals</li>
-        <li>Showcase your work and talent</li>
-      </ul>
-      <p>Get started by completing your profile and uploading your portfolio.</p>
-      <p>If you have any questions, don't hesitate to reach out to our support team.</p>
-      <p>Best regards,<br>The Talents & Stars Team</p>
-    </div>
+function getEmailTemplate(content: string): string {
+  const logoBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="; // Placeholder
+  
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Talents & Stars</title>
+    </head>
+    <body style="margin: 0; padding: 0; font-family: 'Arial', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+      <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden;">
+        <!-- Header with gradient -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+          <div style="background: white; border-radius: 10px; padding: 20px; display: inline-block; margin-bottom: 20px;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: bold; color: #2d3748; letter-spacing: 1px;">
+              ⭐ TALENTS & STARS ⭐
+            </h1>
+          </div>
+        </div>
+        
+        <!-- Main content -->
+        <div style="padding: 40px 30px;">
+          ${content}
+        </div>
+        
+        <!-- Footer -->
+        <div style="background: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
+          <div style="margin-bottom: 20px;">
+            <a href="${process.env.FRONTEND_URL || 'https://talentsandstars.com'}/login" 
+               style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+              🚀 Login to Your Account
+            </a>
+          </div>
+          <p style="color: #6c757d; font-size: 14px; margin: 10px 0;">
+            © 2025 Talents & Stars. All rights reserved.
+          </p>
+          <p style="color: #6c757d; font-size: 12px; margin: 5px 0;">
+            Connecting talent with opportunity in the entertainment industry.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
   `;
+}
 
+export async function sendWelcomeEmail(user: User): Promise<boolean> {
+  const { email, firstName, role } = user;
+  
+  let roleSpecificContent = '';
+  let subject = '';
+  
+  switch (role) {
+    case 'talent':
+      subject = '🎭 Welcome to Your Talent Journey!';
+      roleSpecificContent = `
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #667eea; font-size: 32px; margin: 0;">🎭 Welcome, ${firstName}!</h2>
+          <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">Your talent journey begins now</p>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #667eea10 0%, #764ba220 100%); padding: 25px; border-radius: 15px; margin: 20px 0;">
+          <h3 style="color: #2d3748; margin-top: 0;">🌟 You're now part of something special!</h3>
+          <p style="color: #4a5568; line-height: 1.6;">
+            Welcome to Talents & Stars, where your unique talents shine brighter than ever. 
+            You've just joined a community of passionate artists, performers, and creators who are 
+            ready to take their careers to the next level.
+          </p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; margin-bottom: 10px;">🎨</div>
+            <h4 style="color: #2d3748; margin: 0 0 10px 0;">Showcase Your Work</h4>
+            <p style="color: #6c757d; font-size: 14px; margin: 0;">Upload your portfolio and let your talent speak for itself</p>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; margin-bottom: 10px;">🎯</div>
+            <h4 style="color: #2d3748; margin: 0 0 10px 0;">Find Perfect Roles</h4>
+            <p style="color: #6c757d; font-size: 14px; margin: 0;">Discover opportunities that match your skills and aspirations</p>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; margin-bottom: 10px;">🤝</div>
+            <h4 style="color: #2d3748; margin: 0 0 10px 0;">Connect & Network</h4>
+            <p style="color: #6c757d; font-size: 14px; margin: 0;">Build relationships with industry professionals</p>
+          </div>
+        </div>
+        
+        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin: 20px 0;">
+          <h4 style="color: #856404; margin: 0 0 10px 0;">🚀 Ready to get started?</h4>
+          <p style="color: #856404; margin: 0; line-height: 1.6;">
+            Complete your profile setup and start connecting with amazing opportunities. 
+            Your next big break is just a click away!
+          </p>
+        </div>
+      `;
+      break;
+      
+    case 'manager':
+      subject = '👔 Welcome to Talent Management Excellence!';
+      roleSpecificContent = `
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #28a745; font-size: 32px; margin: 0;">👔 Welcome, ${firstName}!</h2>
+          <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">Your management empire starts here</p>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #28a74510 0%, #20c99720 100%); padding: 25px; border-radius: 15px; margin: 20px 0;">
+          <h3 style="color: #2d3748; margin-top: 0;">🏆 Welcome to the Manager's Circle!</h3>
+          <p style="color: #4a5568; line-height: 1.6;">
+            As a talent manager on Talents & Stars, you have access to the most comprehensive 
+            tools and the most talented individuals in the entertainment industry. 
+            Your expertise in nurturing careers will help shape the future of entertainment.
+          </p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; margin-bottom: 10px;">👥</div>
+            <h4 style="color: #2d3748; margin: 0 0 10px 0;">Build Your Roster</h4>
+            <p style="color: #6c757d; font-size: 14px; margin: 0;">Discover and sign the next generation of stars</p>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; margin-bottom: 10px;">📊</div>
+            <h4 style="color: #2d3748; margin: 0 0 10px 0;">Track Success</h4>
+            <p style="color: #6c757d; font-size: 14px; margin: 0;">Monitor your clients' progress and achievements</p>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; margin-bottom: 10px;">🎯</div>
+            <h4 style="color: #2d3748; margin: 0 0 10px 0;">Strategic Opportunities</h4>
+            <p style="color: #6c757d; font-size: 14px; margin: 0;">Connect talent with perfect career moves</p>
+          </div>
+        </div>
+        
+        <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 20px; margin: 20px 0;">
+          <h4 style="color: #155724; margin: 0 0 10px 0;">💼 Your management journey awaits!</h4>
+          <p style="color: #155724; margin: 0; line-height: 1.6;">
+            Set up your management profile and start building relationships with the industry's most promising talent. 
+            Success stories begin here!
+          </p>
+        </div>
+      `;
+      break;
+      
+    case 'producer':
+      subject = '🎬 Welcome to Production Excellence!';
+      roleSpecificContent = `
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #dc3545; font-size: 32px; margin: 0;">🎬 Welcome, ${firstName}!</h2>
+          <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">Your next blockbuster starts here</p>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #dc354510 0%, #fd7e1420 100%); padding: 25px; border-radius: 15px; margin: 20px 0;">
+          <h3 style="color: #2d3748; margin-top: 0;">🎭 Welcome to the Producer's Studio!</h3>
+          <p style="color: #4a5568; line-height: 1.6;">
+            As a producer on Talents & Stars, you have access to the most comprehensive talent database 
+            and production tools in the industry. Your vision will bring stories to life with the 
+            perfect cast and crew.
+          </p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; margin-bottom: 10px;">🎯</div>
+            <h4 style="color: #2d3748; margin: 0 0 10px 0;">Find Perfect Talent</h4>
+            <p style="color: #6c757d; font-size: 14px; margin: 0;">Search and discover exactly the right fit for your project</p>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; margin-bottom: 10px;">📋</div>
+            <h4 style="color: #2d3748; margin: 0 0 10px 0;">Manage Projects</h4>
+            <p style="color: #6c757d; font-size: 14px; margin: 0;">Organize casting calls and production workflows</p>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; margin-bottom: 10px;">🤝</div>
+            <h4 style="color: #2d3748; margin: 0 0 10px 0;">Build Teams</h4>
+            <p style="color: #6c757d; font-size: 14px; margin: 0;">Collaborate with the best talent in the industry</p>
+          </div>
+        </div>
+        
+        <div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 20px; margin: 20px 0;">
+          <h4 style="color: #721c24; margin: 0 0 10px 0;">🎬 Ready to create magic?</h4>
+          <p style="color: #721c24; margin: 0; line-height: 1.6;">
+            Complete your producer profile and start posting your projects. 
+            The entertainment industry's best talent is waiting to bring your vision to life!
+          </p>
+        </div>
+      `;
+      break;
+      
+    case 'agent':
+      subject = '🤝 Welcome to the Agent Network!';
+      roleSpecificContent = `
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #6f42c1; font-size: 32px; margin: 0;">🤝 Welcome, ${firstName}!</h2>
+          <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">Your dealmaking empire begins now</p>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #6f42c110 0%, #e83e8c20 100%); padding: 25px; border-radius: 15px; margin: 20px 0;">
+          <h3 style="color: #2d3748; margin-top: 0;">💼 Welcome to the Agent's Office!</h3>
+          <p style="color: #4a5568; line-height: 1.6;">
+            As an agent on Talents & Stars, you're at the heart of the entertainment industry's 
+            most important connections. Your expertise in negotiation and relationship building 
+            will help shape careers and create opportunities.
+          </p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; margin-bottom: 10px;">🎭</div>
+            <h4 style="color: #2d3748; margin: 0 0 10px 0;">Represent Talent</h4>
+            <p style="color: #6c757d; font-size: 14px; margin: 0;">Build and manage your client roster</p>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; margin-bottom: 10px;">💰</div>
+            <h4 style="color: #2d3748; margin: 0 0 10px 0;">Negotiate Deals</h4>
+            <p style="color: #6c757d; font-size: 14px; margin: 0;">Secure the best opportunities for your clients</p>
+          </div>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; margin-bottom: 10px;">📈</div>
+            <h4 style="color: #2d3748; margin: 0 0 10px 0;">Track Success</h4>
+            <p style="color: #6c757d; font-size: 14px; margin: 0;">Monitor deals and client achievements</p>
+          </div>
+        </div>
+        
+        <div style="background: #e2e3ff; border-left: 4px solid #6f42c1; padding: 20px; margin: 20px 0;">
+          <h4 style="color: #4c1d95; margin: 0 0 10px 0;">🚀 Ready to make deals?</h4>
+          <p style="color: #4c1d95; margin: 0; line-height: 1.6;">
+            Set up your agent profile and start connecting with talent and opportunities. 
+            Your next big deal is waiting!
+          </p>
+        </div>
+      `;
+      break;
+      
+    default:
+      subject = '🌟 Welcome to Talents & Stars!';
+      roleSpecificContent = `
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #667eea; font-size: 32px; margin: 0;">🌟 Welcome, ${firstName}!</h2>
+          <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">Your entertainment journey starts here</p>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #667eea10 0%, #764ba220 100%); padding: 25px; border-radius: 15px; margin: 20px 0;">
+          <h3 style="color: #2d3748; margin-top: 0;">🎉 You're now part of something amazing!</h3>
+          <p style="color: #4a5568; line-height: 1.6;">
+            Welcome to Talents & Stars, the premier platform connecting talent with opportunities 
+            in the entertainment industry. Your journey in this exciting world begins now!
+          </p>
+        </div>
+        
+        <div style="background: #d1ecf1; border-left: 4px solid #0dcaf0; padding: 20px; margin: 20px 0;">
+          <h4 style="color: #055160; margin: 0 0 10px 0;">🚀 Ready to explore?</h4>
+          <p style="color: #055160; margin: 0; line-height: 1.6;">
+            Complete your profile setup and start discovering all the amazing features waiting for you!
+          </p>
+        </div>
+      `;
+      break;
+  }
+  
+  const htmlContent = getEmailTemplate(roleSpecificContent);
+  
   return await sendEmail({
     to: email,
-    subject: 'Welcome to Talents & Stars!',
-    html,
-    text: `Welcome to Talents & Stars, ${firstName}! Your account has been created successfully.`,
+    subject,
+    html: htmlContent,
+    text: `Welcome to Talents & Stars, ${firstName}! Your ${role} account has been created successfully.`,
+  });
+}
+
+export async function sendTestEmail(email: string, testType: string = 'basic'): Promise<boolean> {
+  let subject = '';
+  let content = '';
+  
+  switch (testType) {
+    case 'notification':
+      subject = '🔔 Test Notification - Talents & Stars';
+      content = `
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #667eea; font-size: 32px; margin: 0;">🔔 Test Notification</h2>
+          <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">This is a test notification email</p>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #667eea10 0%, #764ba220 100%); padding: 25px; border-radius: 15px; margin: 20px 0;">
+          <h3 style="color: #2d3748; margin-top: 0;">📧 Email System Working!</h3>
+          <p style="color: #4a5568; line-height: 1.6;">
+            Great news! The email notification system is working perfectly. 
+            You'll receive important updates about your account, new opportunities, 
+            and platform features right here in your inbox.
+          </p>
+        </div>
+        
+        <div style="background: #d1ecf1; border-left: 4px solid #0dcaf0; padding: 20px; margin: 20px 0;">
+          <h4 style="color: #055160; margin: 0 0 10px 0;">✅ Test Completed Successfully</h4>
+          <p style="color: #055160; margin: 0; line-height: 1.6;">
+            All notification systems are operational and ready to keep you informed!
+          </p>
+        </div>
+      `;
+      break;
+      
+    case 'admin':
+      subject = '⚡ Admin Test Email - Talents & Stars';
+      content = `
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #dc3545; font-size: 32px; margin: 0;">⚡ Admin Test Email</h2>
+          <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">Administrator email system test</p>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #dc354510 0%, #fd7e1420 100%); padding: 25px; border-radius: 15px; margin: 20px 0;">
+          <h3 style="color: #2d3748; margin-top: 0;">🛠️ Admin Email System Active!</h3>
+          <p style="color: #4a5568; line-height: 1.6;">
+            The administrator email system is functioning correctly. You'll receive 
+            important system alerts, user notifications, and platform updates through 
+            this secure channel.
+          </p>
+        </div>
+        
+        <div style="background: #f8d7da; border-left: 4px solid #dc3545; padding: 20px; margin: 20px 0;">
+          <h4 style="color: #721c24; margin: 0 0 10px 0;">🚨 Admin Features Active</h4>
+          <p style="color: #721c24; margin: 0; line-height: 1.6;">
+            System monitoring, user management alerts, and security notifications are all operational.
+          </p>
+        </div>
+      `;
+      break;
+      
+    default:
+      subject = '✨ Test Email - Talents & Stars';
+      content = `
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #667eea; font-size: 32px; margin: 0;">✨ Test Email</h2>
+          <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">Email system test successful</p>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #667eea10 0%, #764ba220 100%); padding: 25px; border-radius: 15px; margin: 20px 0;">
+          <h3 style="color: #2d3748; margin-top: 0;">📧 Email System Working!</h3>
+          <p style="color: #4a5568; line-height: 1.6;">
+            Congratulations! The email system is working perfectly. 
+            This test confirms that all email functionality is operational and ready to use.
+          </p>
+        </div>
+        
+        <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 20px; margin: 20px 0;">
+          <h4 style="color: #155724; margin: 0 0 10px 0;">✅ System Status: All Green!</h4>
+          <p style="color: #155724; margin: 0; line-height: 1.6;">
+            All email services are functioning correctly and ready for production use.
+          </p>
+        </div>
+      `;
+      break;
+  }
+  
+  const htmlContent = getEmailTemplate(content);
+  
+  return await sendEmail({
+    to: email,
+    subject,
+    html: htmlContent,
+    text: `Test email sent successfully to ${email}`,
   });
 }

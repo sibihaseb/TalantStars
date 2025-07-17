@@ -196,6 +196,16 @@ export async function setupAuth(app: Express) {
         // Don't fail registration for legal acceptance errors, just log
       }
 
+      // Send welcome email
+      try {
+        const { sendWelcomeEmail } = await import('./email');
+        await sendWelcomeEmail(user);
+        console.log(`Welcome email sent to ${user.email}`);
+      } catch (emailError) {
+        console.error("Error sending welcome email:", emailError);
+        // Don't fail registration for email errors, just log
+      }
+
       req.login(user, (err) => {
         if (err) return next(err);
         res.status(201).json({ ...user, password: undefined });
