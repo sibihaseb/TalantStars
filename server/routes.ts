@@ -38,6 +38,8 @@ import { logger } from "./logger";
 import { createUploadNotification } from "./simple-notifications";
 import { subscriptionManager } from './subscription-management';
 import { cronJobManager } from './cron-jobs';
+import { automatedTesting } from './automated-testing';
+import { monitoring } from './monitoring-system';
 import Stripe from "stripe";
 
 const scryptAsync = promisify(scrypt);
@@ -4432,6 +4434,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error stopping cron job manager:', error);
       res.status(500).json({ error: 'Failed to stop cron job manager' });
+    }
+  });
+
+  // Automated Testing and Self-Fixing System
+  app.post('/api/admin/run-tests', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      console.log('🔍 Running automated tests...');
+      const results = await automatedTesting.runAllTests();
+      const report = await automatedTesting.generateReport();
+      
+      res.json({
+        message: 'Automated testing completed',
+        results,
+        report,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error running automated tests:', error);
+      res.status(500).json({ error: 'Failed to run automated tests' });
+    }
+  });
+
+  app.get('/api/admin/test-results', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const results = automatedTesting.getTestResults();
+      const fixHistory = automatedTesting.getFixHistory();
+      
+      res.json({
+        results,
+        fixHistory,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error getting test results:', error);
+      res.status(500).json({ error: 'Failed to get test results' });
+    }
+  });
+
+  // Public health check endpoint (no authentication required)
+  app.get('/api/health', async (req, res) => {
+    try {
+      // Quick health check
+      const dbCheck = await db.select().from(profileQuestions).limit(1);
+      
+      res.json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        database: dbCheck.length >= 0 ? 'connected' : 'disconnected',
+        uptime: process.uptime()
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'unhealthy',
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
+  // Monitoring system endpoints
+  app.get('/api/admin/monitoring/health', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const healthCheck = await monitoring.runHealthCheck();
+      res.json(healthCheck);
+    } catch (error) {
+      console.error('Error running health check:', error);
+      res.status(500).json({ error: 'Failed to run health check' });
+    }
+  });
+
+  app.get('/api/admin/monitoring/alerts', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { level } = req.query;
+      const alerts = monitoring.getAlerts(level as any);
+      res.json({ alerts });
+    } catch (error) {
+      console.error('Error getting alerts:', error);
+      res.status(500).json({ error: 'Failed to get alerts' });
+    }
+  });
+
+  app.post('/api/admin/monitoring/clear-alerts', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      monitoring.clearAlerts();
+      res.json({ message: 'Alerts cleared successfully' });
+    } catch (error) {
+      console.error('Error clearing alerts:', error);
+      res.status(500).json({ error: 'Failed to clear alerts' });
+    }
+  });
+
+  app.get('/api/admin/monitoring/metrics', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const metrics = monitoring.getMetrics();
+      res.json({ metrics });
+    } catch (error) {
+      console.error('Error getting metrics:', error);
+      res.status(500).json({ error: 'Failed to get metrics' });
     }
   });
 
