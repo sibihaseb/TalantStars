@@ -1192,6 +1192,18 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(pricingTiers).orderBy(asc(pricingTiers.price));
   }
 
+  async getPricingTiersByRole(role: string): Promise<PricingTier[]> {
+    return await db.select().from(pricingTiers)
+      .where(and(eq(pricingTiers.active, true), eq(pricingTiers.category, role)))
+      .orderBy(asc(pricingTiers.price));
+  }
+
+  async getPricingTier(id: number): Promise<PricingTier | undefined> {
+    const [result] = await db.select().from(pricingTiers)
+      .where(eq(pricingTiers.id, id));
+    return result;
+  }
+
   async updatePricingTier(id: number, tier: Partial<InsertPricingTier>): Promise<PricingTier> {
     const [pricingTier] = await db
       .update(pricingTiers)
@@ -1668,10 +1680,7 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async getPricingTier(id: number): Promise<PricingTier | undefined> {
-    const [result] = await db.select().from(pricingTiers).where(eq(pricingTiers.id, id));
-    return result;
-  }
+
 
   async getAllPricingTiers(): Promise<PricingTier[]> {
     return await db.select().from(pricingTiers).orderBy(asc(pricingTiers.price));
@@ -1878,18 +1887,7 @@ export class DatabaseStorage implements IStorage {
     await db.delete(availabilityCalendar).where(eq(availabilityCalendar.id, id));
   }
 
-  // Job History operations
-  async createJobHistory(jobHistoryData: any): Promise<any> {
-    // For now, we'll just return the data as job history isn't in our schema
-    // In a real implementation, we'd add job history to the schema
-    return { id: Date.now(), ...jobHistoryData, createdAt: new Date() };
-  }
 
-  async getJobHistory(userId: string): Promise<any[]> {
-    // For now, return empty array since job history isn't in our schema
-    // In a real implementation, we'd query the job history table
-    return [];
-  }
 
   // User Representation operations
   async createUserRepresentation(representation: InsertUserRepresentation): Promise<UserRepresentation> {
@@ -1923,24 +1921,7 @@ export class DatabaseStorage implements IStorage {
     await db.delete(userRepresentation).where(eq(userRepresentation.id, id));
   }
 
-  // Pricing Tier operations
-  async getPricingTiers(): Promise<PricingTier[]> {
-    return await db.select().from(pricingTiers)
-      .where(eq(pricingTiers.active, true))
-      .orderBy(asc(pricingTiers.price));
-  }
 
-  async getPricingTiersByRole(role: string): Promise<PricingTier[]> {
-    return await db.select().from(pricingTiers)
-      .where(and(eq(pricingTiers.active, true), eq(pricingTiers.category, role)))
-      .orderBy(asc(pricingTiers.price));
-  }
-
-  async getPricingTier(id: number): Promise<PricingTier | undefined> {
-    const [result] = await db.select().from(pricingTiers)
-      .where(eq(pricingTiers.id, id));
-    return result;
-  }
 
   // Promo code operations
   async getPromoCodes(): Promise<PromoCode[]> {
