@@ -2655,6 +2655,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reorder email templates
+  app.post('/api/admin/email-templates/reorder', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const updates = req.body;
+      if (!Array.isArray(updates)) {
+        return res.status(400).json({ message: "Invalid request format" });
+      }
+      
+      // Update sort order for each template
+      for (const update of updates) {
+        if (update.id && update.sort_order !== undefined) {
+          await storage.updateEmailTemplate(update.id, { sort_order: update.sort_order });
+        }
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error reordering email templates:", error);
+      res.status(500).json({ message: "Failed to reorder email templates" });
+    }
+  });
+
   // Public promo code validation and usage
   app.post('/api/validate-promo-code', isAuthenticated, async (req: any, res) => {
     try {

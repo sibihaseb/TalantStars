@@ -63,6 +63,7 @@ import EmailCampaigns from "./admin/email-campaigns";
 import AdminPayments from "./AdminPayments";
 import AdminUsageAnalytics from "@/components/admin/AdminUsageAnalytics";
 import EmailTemplates from "@/components/admin/EmailTemplates";
+import DragDropEmailTemplates from "@/components/admin/DragDropEmailTemplates";
 
 interface User {
   id: string;
@@ -1562,7 +1563,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-6">
-            <EmailTemplates />
+            <DragDropEmailTemplates />
           </TabsContent>
 
           <TabsContent value="emails" className="space-y-6">
