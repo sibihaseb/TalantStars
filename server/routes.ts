@@ -2810,7 +2810,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public endpoint for profile questions (used in onboarding)
   app.get('/api/profile-questions', isAuthenticated, async (req: any, res) => {
     try {
-      const questions = await storage.getProfileQuestions();
+      const questions = await db.select().from(profileQuestions).orderBy(asc(profileQuestions.order));
       res.json(questions);
     } catch (error) {
       console.error("Error fetching profile questions:", error);
@@ -2821,7 +2821,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin endpoint for profile questions management
   app.get('/api/admin/profile-questions', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const questions = await storage.getProfileQuestions();
+      const questions = await db.select().from(profileQuestions).orderBy(asc(profileQuestions.order));
       res.json(questions);
     } catch (error) {
       console.error("Error fetching profile questions:", error);
