@@ -2778,6 +2778,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reorder questions endpoint
+  app.post('/api/admin/questions/reorder', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { questions } = req.body;
+      
+      if (!Array.isArray(questions)) {
+        return res.status(400).json({ error: "Questions must be an array" });
+      }
+      
+      // Update each question's order
+      for (const question of questions) {
+        await db
+          .update(profileQuestions)
+          .set({ order: question.order })
+          .where(eq(profileQuestions.id, question.id));
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error reordering questions:", error);
+      res.status(500).json({ error: "Failed to reorder questions" });
+    }
+  });
+
   // Keep the old endpoints for backward compatibility
   // Public endpoint for profile questions (used in onboarding)
   app.get('/api/profile-questions', isAuthenticated, async (req: any, res) => {

@@ -64,6 +64,7 @@ import AdminPayments from "./AdminPayments";
 import AdminUsageAnalytics from "@/components/admin/AdminUsageAnalytics";
 import EmailTemplates from "@/components/admin/EmailTemplates";
 import DragDropEmailTemplates from "@/components/admin/DragDropEmailTemplates";
+import DragDropQuestionsManager from "@/components/admin/DragDropQuestionsManager";
 
 interface User {
   id: string;
@@ -2366,7 +2367,8 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="questions" className="space-y-6">
-            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl">
+            <DragDropQuestionsManager />
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl" style={{ display: 'none' }}>
               <CardHeader className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white rounded-t-lg">
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
