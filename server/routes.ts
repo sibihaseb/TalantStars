@@ -4651,6 +4651,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== LEGAL DOCUMENTS ENDPOINTS =====
+  app.get('/api/legal-documents', async (req, res) => {
+    try {
+      const documents = await storage.getLegalDocuments();
+      res.json(documents);
+    } catch (error) {
+      console.error("Error fetching legal documents:", error);
+      res.status(500).json({ message: "Failed to fetch legal documents" });
+    }
+  });
+
+  app.get('/api/legal-documents/:type', async (req, res) => {
+    try {
+      const { type } = req.params;
+      const document = await storage.getLegalDocumentByType(type);
+      if (!document) {
+        return res.status(404).json({ message: "Legal document not found" });
+      }
+      res.json(document);
+    } catch (error) {
+      console.error("Error fetching legal document:", error);
+      res.status(500).json({ message: "Failed to fetch legal document" });
+    }
+  });
+
+  app.put('/api/admin/legal-documents/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { title, content, effectiveDate } = req.body;
+      const updatedBy = req.user.id;
+      
+      const document = await storage.updateLegalDocument(id, {
+        title,
+        content,
+        effectiveDate: effectiveDate ? new Date(effectiveDate) : undefined,
+        updatedBy
+      });
+      
+      res.json(document);
+    } catch (error) {
+      console.error("Error updating legal document:", error);
+      res.status(500).json({ message: "Failed to update legal document" });
+    }
+  });
+
+  app.post('/api/admin/legal-documents', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { type, title, content, effectiveDate } = req.body;
+      const createdBy = req.user.id;
+      
+      const document = await storage.createLegalDocument({
+        type,
+        title,
+        content,
+        effectiveDate: effectiveDate ? new Date(effectiveDate) : new Date(),
+        createdBy,
+        updatedBy: createdBy
+      });
+      
+      res.json(document);
+    } catch (error) {
+      console.error("Error creating legal document:", error);
+      res.status(500).json({ message: "Failed to create legal document" });
+    }
+  });
+
   // ===== AI TRANSLATION ENDPOINT =====
   app.post('/api/translate', async (req, res) => {
     try {

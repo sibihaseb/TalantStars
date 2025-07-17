@@ -40,6 +40,7 @@ import {
   jobCommunications,
   userTags,
   mediaFileTags,
+  legalDocuments,
   // talentCategories,
   // featuredTalents,
   // seoSettings,
@@ -128,6 +129,8 @@ import {
   type InsertUserTag,
   type MediaFileTag,
   type InsertMediaFileTag,
+  type LegalDocument,
+  type InsertLegalDocument,
   // type TalentCategory,
   // type InsertTalentCategory,
   // type FeaturedTalent,
@@ -408,6 +411,14 @@ export interface IStorage {
     revenue: number;
     transactions: number;
   }[]>;
+
+  // Legal Document operations
+  createLegalDocument(document: InsertLegalDocument): Promise<LegalDocument>;
+  getAllLegalDocuments(): Promise<LegalDocument[]>;
+  getLegalDocument(id: number): Promise<LegalDocument | undefined>;
+  getLegalDocumentByType(type: 'terms' | 'privacy'): Promise<LegalDocument | undefined>;
+  updateLegalDocument(id: number, document: Partial<InsertLegalDocument>): Promise<LegalDocument>;
+  deleteLegalDocument(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2349,6 +2360,44 @@ export class DatabaseStorage implements IStorage {
       revenue: Number(row.revenue),
       transactions: row.transactions,
     }));
+  }
+
+  // Legal Document operations
+  async createLegalDocument(document: InsertLegalDocument): Promise<LegalDocument> {
+    const [result] = await db.insert(legalDocuments)
+      .values({
+        ...document,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return result;
+  }
+
+  async getAllLegalDocuments(): Promise<LegalDocument[]> {
+    return await db.select().from(legalDocuments).orderBy(legalDocuments.createdAt);
+  }
+
+  async getLegalDocument(id: number): Promise<LegalDocument | undefined> {
+    const [result] = await db.select().from(legalDocuments).where(eq(legalDocuments.id, id));
+    return result;
+  }
+
+  async getLegalDocumentByType(type: 'terms' | 'privacy'): Promise<LegalDocument | undefined> {
+    const [result] = await db.select().from(legalDocuments).where(eq(legalDocuments.type, type));
+    return result;
+  }
+
+  async updateLegalDocument(id: number, document: Partial<InsertLegalDocument>): Promise<LegalDocument> {
+    const [result] = await db.update(legalDocuments)
+      .set({ ...document, updatedAt: new Date() })
+      .where(eq(legalDocuments.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteLegalDocument(id: number): Promise<void> {
+    await db.delete(legalDocuments).where(eq(legalDocuments.id, id));
   }
 
   // Featured Talents methods - temporarily commented out until tables are created

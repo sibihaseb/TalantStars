@@ -1,15 +1,27 @@
+import React, { useState } from "react";
 import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { Link } from "wouter";
 import logoPath from "@assets/PNG FILE 9_1752757531948.png";
+import LegalDocumentModal from "../legal/LegalDocumentModal";
 
 export function Footer() {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<string>('');
+  const [modalTitle, setModalTitle] = useState<string>('');
+
+  const handleLegalDocumentClick = (type: string, title: string) => {
+    setModalType(type);
+    setModalTitle(title);
+    setModalOpen(true);
+  };
+
   return (
     <footer className="bg-gray-900 dark:bg-gray-950 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2 mb-6">
-              <img src={logoPath} alt="Talents & Stars" className="h-8 w-auto" />
+              <img src={logoPath} alt="Talents & Stars" className="h-12 w-auto" />
             </div>
             <p className="text-gray-300 mb-6">
               The AI-powered platform connecting entertainment professionals with their next opportunity.
@@ -96,14 +108,20 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="hover:text-white transition-colors">
+                <button 
+                  onClick={() => handleLegalDocumentClick('privacy_policy', 'Privacy Policy')}
+                  className="hover:text-white transition-colors text-left"
+                >
                   Privacy Policy
-                </Link>
+                </button>
               </li>
               <li>
-                <Link href="/terms" className="hover:text-white transition-colors">
+                <button 
+                  onClick={() => handleLegalDocumentClick('terms_of_service', 'Terms of Service')}
+                  className="hover:text-white transition-colors text-left"
+                >
                   Terms of Service
-                </Link>
+                </button>
               </li>
             </ul>
           </div>
@@ -113,6 +131,13 @@ export function Footer() {
           <p>&copy; 2024 Talents & Stars. All rights reserved. Built with AI-powered technology.</p>
         </div>
       </div>
+
+      <LegalDocumentModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        documentType={modalType}
+        title={modalTitle}
+      />
     </footer>
   );
 }

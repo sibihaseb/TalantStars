@@ -925,6 +925,20 @@ export const adminSettings = pgTable("admin_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Legal documents table for Terms of Service and Privacy Policy
+export const legalDocuments = pgTable("legal_documents", {
+  id: serial("id").primaryKey(),
+  type: varchar("type", { length: 50 }).notNull(), // 'terms_of_service' or 'privacy_policy'
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  version: varchar("version", { length: 20 }).notNull(),
+  isActive: boolean("is_active").default(true),
+  effectiveDate: timestamp("effective_date").notNull(),
+  updatedBy: integer("updated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(userProfiles, {
@@ -1558,6 +1572,12 @@ export const insertSocialInteractionSchema = createInsertSchema(socialInteractio
   createdAt: true,
 });
 
+export const insertLegalDocumentSchema = createInsertSchema(legalDocuments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -1656,3 +1676,7 @@ export type SocialConnection = typeof socialConnections.$inferSelect;
 export type InsertSocialConnection = z.infer<typeof insertSocialConnectionSchema>;
 export type SocialInteraction = typeof socialInteractions.$inferSelect;
 export type InsertSocialInteraction = z.infer<typeof insertSocialInteractionSchema>;
+
+// Legal documents types
+export type LegalDocument = typeof legalDocuments.$inferSelect;
+export type InsertLegalDocument = z.infer<typeof insertLegalDocumentSchema>;
