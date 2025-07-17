@@ -266,10 +266,9 @@ const requiredFieldsByStep = {
   1: ['role'], // Role selection
   2: ['talentType'], // Talent Type (for talent role)
   3: ['displayName', 'bio', 'location'], // Basic Info
-  4: ['profileImageUrl'], // Profile Image (mandatory)
-  5: [], // Experience & Skills (role-specific questions - optional)
-  6: [], // Media & Portfolio (optional)
-  7: [], // Preferences & Availability (optional)
+  4: [], // Experience & Skills (role-specific questions - optional)
+  5: [], // Media & Portfolio (optional)
+  6: [], // Preferences & Availability (optional)
 };
 
 // Helper function to check if field is required
@@ -767,8 +766,8 @@ function Onboarding() {
     // Filter questions based on role
     let questionTypes = [];
     if (watchedRole === 'talent' && watchedTalentType) {
-      // For talent users, only show questions for their specific talent type
-      questionTypes = [watchedTalentType];
+      // For talent users, show both profile questions and their specific talent type questions
+      questionTypes = ['profile', watchedTalentType];
     } else {
       // For non-talent users (manager, producer, agent), show 'profile' questions
       questionTypes = ['profile'];
@@ -894,6 +893,15 @@ function Onboarding() {
           </Select>
         );
       
+      case 'file':
+        return (
+          <ProfileImageUpload
+            currentImage={typeof currentValue === 'string' ? currentValue : ''}
+            onImageUpdate={handleChange}
+            mandatory={question.required}
+          />
+        );
+      
       default:
         return (
           <Input
@@ -909,9 +917,9 @@ function Onboarding() {
     const isAuthenticated = !!user?.role;
     // For authenticated users, we skip role selection step
     if (isAuthenticated) {
-      return watchedRole === "talent" ? 7 : 5; // Added 1 for profile image step
+      return watchedRole === "talent" ? 6 : 4; // Remove hardcoded profile image step
     } else {
-      return watchedRole === "talent" ? 8 : 6; // Add 1 for role selection + 1 for profile image
+      return watchedRole === "talent" ? 7 : 5; // Remove hardcoded profile image step
     }
   };
 
@@ -997,7 +1005,6 @@ function Onboarding() {
       talent: [
         { title: "Talent Type", description: "Choose your talent type", icon: Star },
         { title: "Basic Information", description: "Personal details", icon: User },
-        { title: "Profile Image", description: "Upload your photo", icon: Camera },
         { title: "Physical Details", description: "Appearance & stats", icon: Star },
         { title: "Skills & Experience", description: "What you can do", icon: Medal },
         { title: "Location & Contact", description: "Where you work", icon: Crown },
@@ -1005,19 +1012,16 @@ function Onboarding() {
       ],
       manager: [
         { title: "Basic Information", description: "Personal details", icon: User },
-        { title: "Profile Image", description: "Upload your photo", icon: Camera },
         { title: "Management Details", description: "Your experience & services", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ],
       agent: [
         { title: "Basic Information", description: "Personal details", icon: User },
-        { title: "Profile Image", description: "Upload your photo", icon: Camera },
         { title: "Agent Details", description: "Your agency & experience", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ],
       producer: [
         { title: "Basic Information", description: "Personal details", icon: User },
-        { title: "Profile Image", description: "Upload your photo", icon: Camera },
         { title: "Production Details", description: "Your projects & experience", icon: Star },
         { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
       ],
@@ -1611,57 +1615,8 @@ function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 4: Profile Image Upload (mandatory for all roles) */}
+              {/* Step 4: Role-Specific Details */}
               {currentStep === 4 && (
-                <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
-                  <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">
-                      <RequiredFieldLabel required={true}>
-                        Profile Image
-                      </RequiredFieldLabel>
-                    </CardTitle>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Upload a professional profile photo. This is required for all users.
-                    </p>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="max-w-md mx-auto">
-                      <ProfileImageUpload
-                        currentImage={form.watch("profileImageUrl")}
-                        onImageUpdate={(url) => {
-
-                          form.setValue("profileImageUrl", url);
-                          form.trigger("profileImageUrl");
-                          
-                          // Force form validation to update
-                          setTimeout(() => {
-                            const formData = form.getValues();
-
-                            
-                            // Auto-advance to next step after successful upload
-                            nextStep();
-                          }, 500);
-                        }}
-                        mandatory={true}
-                      />
-                    </div>
-                    <div className="text-center text-sm text-gray-500">
-                      <p>
-                        <strong>Image Guidelines:</strong>
-                      </p>
-                      <ul className="mt-2 space-y-1">
-                        <li>• Professional headshot or portrait recommended</li>
-                        <li>• Clear, well-lit photo showing your face</li>
-                        <li>• Image will be cropped to 16:9 aspect ratio</li>
-                        <li>• Supported formats: JPG, PNG, WebP</li>
-                      </ul>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Step 5: Role-Specific Details */}
-              {currentStep === 5 && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">
@@ -1693,8 +1648,8 @@ function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 6: Additional Information */}
-              {currentStep === 6 && watchedRole === "talent" && (
+              {/* Step 5: Additional Information */}
+              {currentStep === 5 && watchedRole === "talent" && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">Additional Information</CardTitle>
@@ -1750,8 +1705,8 @@ function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 7 (or 6 for non-talent): Rates and Availability */}
-              {((currentStep === 7 && watchedRole === "talent") || (currentStep === 6 && watchedRole !== "talent")) && (
+              {/* Step 6 (or 5 for non-talent): Rates and Availability */}
+              {((currentStep === 6 && watchedRole === "talent") || (currentStep === 5 && watchedRole !== "talent")) && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">Rates & Availability</CardTitle>
