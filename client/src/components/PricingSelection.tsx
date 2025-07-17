@@ -84,7 +84,7 @@ export function PricingSelection({ userRole, onComplete }: PricingSelectionProps
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
       toast({
         title: "Tier Selected",
-        description: `Successfully selected ${selectedTier?.name} tier!`,
+        description: `Successfully selected ${selectedTier?.name} tier! Let's complete your profile.`,
       });
       onComplete();
     },

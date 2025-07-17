@@ -67,10 +67,10 @@ export default function Checkout() {
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
       toast({
         title: "Payment Successful!",
-        description: "Your tier has been activated. Welcome to your new plan!",
+        description: "Your tier has been activated. Let's complete your profile.",
       });
-      // Redirect to dashboard after successful payment
-      setTimeout(() => setLocation("/dashboard"), 1000);
+      // Redirect to onboarding for profile questions after successful payment
+      setTimeout(() => setLocation("/onboarding"), 1000);
     },
     onError: (error: Error) => {
       toast({
@@ -89,10 +89,11 @@ export default function Checkout() {
     onSuccess: (data) => {
       toast({
         title: "Payment Successful!",
-        description: "Your tier has been activated. Welcome to your new plan!",
+        description: "Your tier has been activated. Let's complete your profile.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-      setLocation("/");
+      // Redirect to onboarding for profile questions after successful payment
+      setLocation("/onboarding");
     },
     onError: (error: Error) => {
       toast({

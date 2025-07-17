@@ -33,11 +33,12 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
     onSuccess: () => {
       toast({
         title: "Plan Selected",
-        description: "Your free plan has been activated successfully.",
+        description: "Your free plan has been activated successfully. Let's complete your profile.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       onClose();
-      window.location.reload(); // Force refresh to update user data
+      // Redirect to onboarding for profile questions
+      setTimeout(() => setLocation("/onboarding"), 500);
     },
     onError: (error: any) => {
       // If it's a paid tier, don't show error, just proceed to payment

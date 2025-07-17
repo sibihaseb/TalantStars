@@ -1958,7 +1958,8 @@ function Onboarding() {
                 userRole={user?.role || 'talent'}
                 onComplete={() => {
                   setShowPricingSelection(false);
-                  setLocation("/");
+                  // Continue with profile completion instead of going to home
+                  // The user is already in onboarding, so we'll continue here
                 }}
               />
             </div>
