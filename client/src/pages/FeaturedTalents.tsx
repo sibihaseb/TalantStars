@@ -31,18 +31,17 @@ import {
 import { motion } from 'framer-motion';
 
 interface FeaturedTalent {
-  id: string;
-  username: string;
-  profileImage: string;
-  fullName: string;
-  talentType: string;
+  id: number;
+  name: string;
+  type: string;
   location: string;
-  verificationStatus: string;
-  featuredReason: string;
-  skills: string[];
-  bio: string;
   rating: number;
-  category: string;
+  reviews: number;
+  image: string;
+  verified: boolean;
+  available: boolean;
+  specialty: string;
+  role: string;
 }
 
 interface TalentCategory {
@@ -81,10 +80,10 @@ export default function FeaturedTalents() {
   });
 
   const filteredTalents = featuredTalents.filter(talent => {
-    const matchesSearch = talent.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         talent.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = selectedCategory === 'all' || talent.category === selectedCategory;
-    const matchesType = selectedTalentType === 'all' || talent.talentType === selectedTalentType;
+    const matchesSearch = talent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         talent.specialty.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || talent.type === selectedCategory;
+    const matchesType = selectedTalentType === 'all' || talent.type === selectedTalentType;
     
     return matchesSearch && matchesCategory && matchesType;
   });
@@ -94,9 +93,9 @@ export default function FeaturedTalents() {
       case 'rating':
         return b.rating - a.rating;
       case 'name':
-        return a.fullName.localeCompare(b.fullName);
-      case 'featured':
-        return a.featuredReason.localeCompare(b.featuredReason);
+        return a.name.localeCompare(b.name);
+      case 'reviews':
+        return b.reviews - a.reviews;
       default:
         return 0;
     }
@@ -224,7 +223,7 @@ export default function FeaturedTalents() {
                 <SelectContent className="bg-slate-800 border-slate-700">
                   <SelectItem value="rating" className="text-white">Rating</SelectItem>
                   <SelectItem value="name" className="text-white">Name</SelectItem>
-                  <SelectItem value="featured" className="text-white">Featured Reason</SelectItem>
+                  <SelectItem value="reviews" className="text-white">Reviews</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -272,24 +271,24 @@ export default function FeaturedTalents() {
               <Card className="bg-white/10 backdrop-blur-md border-0 shadow-2xl hover:shadow-purple-500/25 transition-all duration-500 transform hover:scale-105 overflow-hidden">
                 <div className="relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-t from-purple-900/60 via-transparent to-transparent z-10"></div>
-                  {talent.profileImage ? (
+                  {talent.image ? (
                     <img
-                      src={talent.profileImage}
-                      alt={talent.fullName}
+                      src={talent.image}
+                      alt={talent.name}
                       className="w-full h-56 object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   ) : (
                     <div className="w-full h-56 bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                       <Avatar className="w-32 h-32 border-4 border-white/30">
                         <AvatarFallback className="bg-white/20 text-white text-3xl font-bold">
-                          {talent.fullName.split(' ').map(n => n[0]).join('')}
+                          {talent.name.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>
                       </Avatar>
                     </div>
                   )}
                   
                   {/* Verification Badge */}
-                  {talent.verificationStatus === 'verified' && (
+                  {talent.verified && (
                     <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 z-20">
                       <ShieldCheck className="h-3 w-3" />
                       Verified
@@ -317,17 +316,17 @@ export default function FeaturedTalents() {
                 
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg font-bold text-white">{talent.fullName}</CardTitle>
+                    <CardTitle className="text-lg font-bold text-white">{talent.name}</CardTitle>
                     <div className="flex items-center gap-1 text-yellow-400">
                       <Star className="h-4 w-4 fill-current" />
-                      <span className="text-sm font-bold">{talent.rating}</span>
+                      <span className="text-sm font-bold">{talent.rating.toFixed(1)}</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm text-purple-300">
                     <div className="flex items-center gap-1">
-                      {getTalentIcon(talent.talentType)}
-                      <span>{talent.talentType}</span>
+                      {getTalentIcon(talent.type)}
+                      <span>{talent.type}</span>
                     </div>
                   </div>
                   
@@ -339,17 +338,15 @@ export default function FeaturedTalents() {
                 
                 <CardContent>
                   <div className="space-y-4">
-                    <p className="text-sm text-purple-200 line-clamp-2">{talent.bio}</p>
+                    <p className="text-sm text-purple-200 line-clamp-2">{talent.specialty}</p>
                     
                     <div className="flex flex-wrap gap-2">
-                      {talent.skills.slice(0, 3).map(skill => (
-                        <Badge key={skill} variant="outline" className="text-xs border-purple-400 text-purple-300">
-                          {skill}
-                        </Badge>
-                      ))}
-                      {talent.skills.length > 3 && (
-                        <Badge variant="outline" className="text-xs border-purple-400 text-purple-300">
-                          +{talent.skills.length - 3} more
+                      <Badge variant="outline" className="text-xs border-purple-400 text-purple-300">
+                        {talent.type}
+                      </Badge>
+                      {talent.available && (
+                        <Badge variant="outline" className="text-xs border-green-400 text-green-300">
+                          Available
                         </Badge>
                       )}
                     </div>
@@ -357,7 +354,7 @@ export default function FeaturedTalents() {
                     <div className="pt-3 border-t border-purple-500/30">
                       <div className="flex items-center gap-2 text-xs text-yellow-400 font-medium">
                         <Crown className="h-3 w-3" />
-                        Featured for: {talent.featuredReason}
+                        {talent.reviews} reviews
                       </div>
                     </div>
                   </div>
