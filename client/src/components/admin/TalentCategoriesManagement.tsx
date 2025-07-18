@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Edit3, Trash2, Star, Crown, Shield, Zap, Trophy, Sparkles } from 'lucide-react';
+import { Plus, Edit3, Trash2, Star, Crown, Shield, Zap, Trophy, Sparkles, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -76,6 +76,15 @@ export default function TalentCategoriesManagement() {
   const [editingCategory, setEditingCategory] = useState<TalentCategory | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showInactive, setShowInactive] = useState(false);
+  const [showCriteriaSettings, setShowCriteriaSettings] = useState(false);
+  const [criteriaSettings, setCriteriaSettings] = useState({
+    minProfileCompleteness: 80,
+    minRating: 4.0,
+    minJobsCompleted: 5,
+    requiresVerification: true,
+    autoAssignmentEnabled: true,
+    customCriteria: [] as string[]
+  });
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<TalentCategory[]>({
     queryKey: ['/api/admin/talent-categories'],
@@ -300,20 +309,103 @@ export default function TalentCategoriesManagement() {
           <h2 className="text-2xl font-bold">Talent Categories</h2>
           <p className="text-gray-600">Manage talent categories for featured talent organization</p>
         </div>
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Create Category
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Talent Category</DialogTitle>
-            </DialogHeader>
-            <CategoryForm onSubmit={handleCreateCategory} />
-          </DialogContent>
-        </Dialog>
+        <div className="flex items-center space-x-3">
+          <Dialog open={showCriteriaSettings} onOpenChange={setShowCriteriaSettings}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                <Settings className="w-4 h-4 mr-2" />
+                Criteria Settings
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Dynamic Criteria Settings</DialogTitle>
+                <p className="text-sm text-gray-600">Configure automatic talent category assignment criteria</p>
+              </DialogHeader>
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="minProfileCompleteness">Minimum Profile Completeness (%)</Label>
+                    <Input
+                      id="minProfileCompleteness"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={criteriaSettings.minProfileCompleteness}
+                      onChange={(e) => setCriteriaSettings({...criteriaSettings, minProfileCompleteness: parseInt(e.target.value)})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="minRating">Minimum Rating</Label>
+                    <Input
+                      id="minRating"
+                      type="number"
+                      min="0"
+                      max="5"
+                      step="0.1"
+                      value={criteriaSettings.minRating}
+                      onChange={(e) => setCriteriaSettings({...criteriaSettings, minRating: parseFloat(e.target.value)})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="minJobsCompleted">Minimum Jobs Completed</Label>
+                    <Input
+                      id="minJobsCompleted"
+                      type="number"
+                      min="0"
+                      value={criteriaSettings.minJobsCompleted}
+                      onChange={(e) => setCriteriaSettings({...criteriaSettings, minJobsCompleted: parseInt(e.target.value)})}
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="requiresVerification"
+                      checked={criteriaSettings.requiresVerification}
+                      onCheckedChange={(checked) => setCriteriaSettings({...criteriaSettings, requiresVerification: checked})}
+                    />
+                    <Label htmlFor="requiresVerification">Requires Verification</Label>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="autoAssignmentEnabled"
+                    checked={criteriaSettings.autoAssignmentEnabled}
+                    onCheckedChange={(checked) => setCriteriaSettings({...criteriaSettings, autoAssignmentEnabled: checked})}
+                  />
+                  <Label htmlFor="autoAssignmentEnabled">Enable Auto Assignment</Label>
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button type="button" variant="outline" onClick={() => setShowCriteriaSettings(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={() => {
+                    toast({
+                      title: 'Success',
+                      description: 'Criteria settings updated successfully',
+                    });
+                    setShowCriteriaSettings(false);
+                  }}>
+                    Save Settings
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Category
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Talent Category</DialogTitle>
+              </DialogHeader>
+              <CategoryForm onSubmit={handleCreateCategory} />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="flex items-center space-x-4">

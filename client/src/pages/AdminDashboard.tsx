@@ -1453,6 +1453,197 @@ export default function AdminDashboard() {
                         required
                       />
                     </div>
+                    
+                    {/* Entertainment Industry Specific Fields */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="projectType">Project Type</Label>
+                        <select 
+                          name="projectType" 
+                          defaultValue={editingJob?.projectType || ""}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <option value="">Select project type</option>
+                          <option value="feature-film">Feature Film</option>
+                          <option value="short-film">Short Film</option>
+                          <option value="tv-series">TV Series</option>
+                          <option value="commercial">Commercial</option>
+                          <option value="music-video">Music Video</option>
+                          <option value="documentary">Documentary</option>
+                          <option value="theater">Theater</option>
+                          <option value="web-series">Web Series</option>
+                          <option value="animation">Animation/Voice Over</option>
+                          <option value="live-event">Live Event</option>
+                          <option value="photo-shoot">Photo Shoot</option>
+                          <option value="modeling">Modeling</option>
+                          <option value="recording">Recording Session</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="genre">Genre</Label>
+                        <select 
+                          name="genre" 
+                          defaultValue={editingJob?.genre || ""}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <option value="">Select genre</option>
+                          <option value="drama">Drama</option>
+                          <option value="comedy">Comedy</option>
+                          <option value="action">Action</option>
+                          <option value="thriller">Thriller</option>
+                          <option value="horror">Horror</option>
+                          <option value="romance">Romance</option>
+                          <option value="sci-fi">Sci-Fi</option>
+                          <option value="fantasy">Fantasy</option>
+                          <option value="documentary">Documentary</option>
+                          <option value="musical">Musical</option>
+                          <option value="animation">Animation</option>
+                          <option value="reality">Reality TV</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="ageRange">Age Range</Label>
+                        <Input
+                          name="ageRange"
+                          defaultValue={editingJob?.ageRange || ""}
+                          placeholder="e.g., 25-35"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="gender">Gender</Label>
+                        <select 
+                          name="gender" 
+                          defaultValue={editingJob?.gender || ""}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <option value="">Any</option>
+                          <option value="male">Male</option>
+                          <option value="female">Female</option>
+                          <option value="non-binary">Non-Binary</option>
+                          <option value="any">Any</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="payRate">Pay Rate</Label>
+                        <select 
+                          name="payRate" 
+                          defaultValue={editingJob?.payRate || ""}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <option value="">Select pay rate</option>
+                          <option value="hourly">Hourly</option>
+                          <option value="daily">Daily</option>
+                          <option value="weekly">Weekly</option>
+                          <option value="project">Project Rate</option>
+                          <option value="deferred">Deferred</option>
+                          <option value="copy-credit">Copy, Credit & Meals</option>
+                          <option value="stipend">Stipend</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="experienceLevel">Experience Level</Label>
+                        <select 
+                          name="experienceLevel" 
+                          defaultValue={editingJob?.experienceLevel || ""}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <option value="">Any level</option>
+                          <option value="beginner">Beginner</option>
+                          <option value="intermediate">Intermediate</option>
+                          <option value="advanced">Advanced</option>
+                          <option value="professional">Professional</option>
+                          <option value="expert">Expert/Celebrity</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="shootingDays">Shooting Days</Label>
+                        <Input
+                          type="number"
+                          name="shootingDays"
+                          defaultValue={editingJob?.shootingDays || ""}
+                          placeholder="Number of days"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="applicationDeadline">Application Deadline</Label>
+                        <Input
+                          type="date"
+                          name="applicationDeadline"
+                          defaultValue={editingJob?.applicationDeadline || ""}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="specialSkills">Special Skills/Requirements</Label>
+                      <Textarea
+                        name="specialSkills"
+                        defaultValue={editingJob?.specialSkills || ""}
+                        placeholder="e.g., Martial arts, singing, dancing, accents, specific looks, etc."
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="wardrobe">Wardrobe/Costume Notes</Label>
+                      <Textarea
+                        name="wardrobe"
+                        defaultValue={editingJob?.wardrobe || ""}
+                        placeholder="What should talent bring or expect for wardrobe?"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          name="isUnion"
+                          defaultChecked={editingJob?.isUnion}
+                          className="h-4 w-4 rounded border-gray-300"
+                        />
+                        <Label htmlFor="isUnion">Union Project (SAG-AFTRA)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          name="providesTransport"
+                          defaultChecked={editingJob?.providesTransport}
+                          className="h-4 w-4 rounded border-gray-300"
+                        />
+                        <Label htmlFor="providesTransport">Transportation Provided</Label>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          name="providesMeals"
+                          defaultChecked={editingJob?.providesMeals}
+                          className="h-4 w-4 rounded border-gray-300"
+                        />
+                        <Label htmlFor="providesMeals">Meals Provided</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          name="providesAccommodation"
+                          defaultChecked={editingJob?.providesAccommodation}
+                          className="h-4 w-4 rounded border-gray-300"
+                        />
+                        <Label htmlFor="providesAccommodation">Accommodation Provided</Label>
+                      </div>
+                    </div>
                     <div>
                       <Label htmlFor="status">Status</Label>
                       <select 

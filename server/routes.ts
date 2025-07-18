@@ -2740,7 +2740,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/featured-talents', async (req: any, res) => {
     try {
       const featuredTalents = await simpleStorage.getFeaturedTalents();
-      res.json(featuredTalents);
+      // Limit to 6 featured talents for homepage display
+      const limitedTalents = featuredTalents.slice(0, 6);
+      res.json(limitedTalents);
     } catch (error) {
       console.error("Error fetching featured talents:", error);
       res.status(500).json({ message: "Failed to fetch featured talents" });

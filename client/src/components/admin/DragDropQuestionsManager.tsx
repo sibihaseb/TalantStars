@@ -80,7 +80,29 @@ interface SortableQuestionCardProps {
   isDragging?: boolean;
 }
 
-const SortableQuestionCard = ({ question, onEdit, onDelete, isDragging }: SortableQuestionCardProps) => {
+interface SortableQuestionCardProps {
+  question: ProfileQuestion;
+  onEdit: (question: ProfileQuestion) => void;
+  onDelete: (questionId: number) => void;
+  isDragging?: boolean;
+  isEditing?: boolean;
+  editingData?: any;
+  onSaveEdit?: (questionId: number, data: any) => void;
+  onCancelEdit?: () => void;
+  onUpdateEditData?: (data: any) => void;
+}
+
+const SortableQuestionCard = ({ 
+  question, 
+  onEdit, 
+  onDelete, 
+  isDragging, 
+  isEditing, 
+  editingData, 
+  onSaveEdit, 
+  onCancelEdit, 
+  onUpdateEditData 
+}: SortableQuestionCardProps) => {
   const {
     attributes,
     listeners,
@@ -95,6 +117,109 @@ const SortableQuestionCard = ({ question, onEdit, onDelete, isDragging }: Sortab
     transition,
     opacity: isSortableDragging ? 0.3 : 1,
   };
+
+  if (isEditing) {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className="group relative bg-blue-50 dark:bg-blue-900/20 rounded-lg border-2 border-blue-500 shadow-lg"
+      >
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300">
+              Editing Question #{question.order}
+            </h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onCancelEdit}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-question">Question Text</Label>
+              <Textarea
+                id="edit-question"
+                value={editingData?.question || ''}
+                onChange={(e) => onUpdateEditData?.({ ...editingData, question: e.target.value })}
+                placeholder="Enter the question text..."
+                className="min-h-[80px]"
+                required
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-field-name">Field Name</Label>
+                <Input
+                  id="edit-field-name"
+                  value={editingData?.field_name || ''}
+                  onChange={(e) => onUpdateEditData?.({ ...editingData, field_name: e.target.value })}
+                  placeholder="Enter field name"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-field-type">Field Type</Label>
+                <Select 
+                  value={editingData?.field_type || 'text'} 
+                  onValueChange={(value) => onUpdateEditData?.({ ...editingData, field_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select field type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FIELD_TYPES.map(type => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="edit-required"
+                  checked={editingData?.required || false}
+                  onCheckedChange={(checked) => onUpdateEditData?.({ ...editingData, required: checked })}
+                />
+                <Label htmlFor="edit-required">Required</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="edit-active"
+                  checked={editingData?.active || false}
+                  onCheckedChange={(checked) => onUpdateEditData?.({ ...editingData, active: checked })}
+                />
+                <Label htmlFor="edit-active">Active</Label>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={onCancelEdit}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => onSaveEdit?.(question.id, editingData)}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -207,6 +332,8 @@ export default function DragDropQuestionsManager() {
     active: true
   });
   const [newOption, setNewOption] = useState('');
+  const [inlineEditingId, setInlineEditingId] = useState<number | null>(null);
+  const [inlineEditData, setInlineEditData] = useState<any>(null);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -383,8 +510,8 @@ export default function DragDropQuestionsManager() {
   };
 
   const startEdit = (question: ProfileQuestion) => {
-    setEditingQuestion(question);
-    setFormData({
+    setInlineEditingId(question.id);
+    setInlineEditData({
       talent_type: question.talent_type,
       question: question.question,
       field_name: question.field_name,
@@ -394,7 +521,20 @@ export default function DragDropQuestionsManager() {
       order: question.order,
       active: question.active
     });
-    setShowAddForm(true);
+  };
+
+  const handleInlineEdit = (questionId: number, data: any) => {
+    updateQuestionMutation.mutate({
+      id: questionId,
+      ...data
+    });
+    setInlineEditingId(null);
+    setInlineEditData(null);
+  };
+
+  const cancelInlineEdit = () => {
+    setInlineEditingId(null);
+    setInlineEditData(null);
   };
 
   const handleDelete = (questionId: number) => {
@@ -659,6 +799,11 @@ export default function DragDropQuestionsManager() {
                       onEdit={startEdit}
                       onDelete={handleDelete}
                       isDragging={activeId === question.id}
+                      isEditing={inlineEditingId === question.id}
+                      editingData={inlineEditingId === question.id ? inlineEditData : null}
+                      onSaveEdit={handleInlineEdit}
+                      onCancelEdit={cancelInlineEdit}
+                      onUpdateEditData={setInlineEditData}
                     />
                   ))}
                 </div>
