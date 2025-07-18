@@ -785,7 +785,13 @@ function Onboarding() {
         // Exclude profile image question since it has its own dedicated step
         const isProfileImageQuestion = q.fieldName === 'profileImageUrl' || q.field_name === 'profileImageUrl';
         
-        return isRelevant && !isProfileImageQuestion;
+        // Exclude basic profile questions that are handled in earlier steps
+        const fieldName = q.fieldName || q.field_name;
+        const isBasicProfileQuestion = [
+          'displayName', 'bio', 'location', 'website', 'phoneNumber'
+        ].includes(fieldName);
+        
+        return isRelevant && !isProfileImageQuestion && !isBasicProfileQuestion;
       })
       .sort((a, b) => a.order - b.order);
   }, [watchedRole, watchedTalentType, profileQuestions]);
@@ -806,17 +812,6 @@ function Onboarding() {
           {relevantQuestions.map((question) => (
             <div key={`q-${question.id}`} className="space-y-3">
               <Label className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                <span className="text-blue-600 dark:text-blue-400">
-                  {question.fieldType === 'select' && '📋'}
-                  {question.fieldType === 'multiselect' && '☑️'}
-                  {question.fieldType === 'checkbox' && '☑️'}
-                  {question.fieldType === 'text' && '✏️'}
-                  {question.fieldType === 'number' && '🔢'}
-                  {question.fieldType === 'textarea' && '📝'}
-                  {question.fieldType === 'yesno' && '❓'}
-                  {question.fieldType === 'boolean' && '❓'}
-                  {!question.fieldType && '📋'}
-                </span>
                 {question.question}
                 {question.required && <span className="text-red-500 text-xs">*</span>}
               </Label>

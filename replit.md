@@ -34,6 +34,15 @@ Preferred communication style: Simple, everyday language.
 - **User Experience**: Acting details page now has clean, professional appearance without duplicate profile image section
 - **Result**: ✅ Acting details page UI completely fixed with improved visual design and proper question filtering
 
+### Acting Details Display Name/Bio Duplication Fix (July 18, 2025)
+- **ISSUE**: Acting details page was showing basic profile questions (display name, bio, location, website, phone) again
+- **ROOT CAUSE**: 'profile' type questions were being included in role-specific questions step due to filtering logic
+- **SOLUTION**: Enhanced filtering to exclude basic profile questions that are handled in earlier steps
+- **EXCLUDED FIELDS**: displayName, bio, location, website, phoneNumber from role-specific questions
+- **EMOJI REMOVAL**: Removed emoji icons from question labels as requested
+- **CLEAN UI**: Acting details now only shows acting-specific questions without duplication
+- **RESULT**: ✅ Acting details page now shows only relevant acting questions without basic profile duplicates
+
 ### Comprehensive Automated Testing and Self-Fixing System Implementation (July 17, 2025)
 - **REVOLUTIONARY SUCCESS**: Implemented comprehensive automated testing system with self-fixing capabilities that continuously monitors and auto-repairs platform issues
 - **Automated Testing Engine**: Created AutomatedTestingSystem class with 8 core test suites:
