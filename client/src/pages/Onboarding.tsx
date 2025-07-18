@@ -996,6 +996,33 @@ function Onboarding() {
           { field: 'drivingLicenses', label: 'Driving Licenses', type: 'multiSelect', options: DRIVING_LICENSES },
         ];
       
+      case 'writer':
+        return [
+          ...baseQuestions,
+          { field: 'genres', label: 'Writing Genres', type: 'multiSelect', options: GENRE_OPTIONS },
+          { field: 'specializations', label: 'Writing Specializations', type: 'custom' },
+          { field: 'publications', label: 'Publications', type: 'custom' },
+          { field: 'writingTools', label: 'Writing Tools', type: 'custom' },
+        ];
+      
+      case 'director':
+        return [
+          ...baseQuestions,
+          { field: 'genres', label: 'Directing Genres', type: 'multiSelect', options: GENRE_OPTIONS },
+          { field: 'projectTypes', label: 'Project Types', type: 'custom' },
+          { field: 'crewExperience', label: 'Crew Experience', type: 'custom' },
+          { field: 'equipmentExperience', label: 'Equipment Experience', type: 'custom' },
+        ];
+      
+      case 'cinematographer':
+        return [
+          ...baseQuestions,
+          { field: 'cameraEquipment', label: 'Camera Equipment', type: 'custom' },
+          { field: 'lightingEquipment', label: 'Lighting Equipment', type: 'custom' },
+          { field: 'shootingFormats', label: 'Shooting Formats', type: 'custom' },
+          { field: 'postProduction', label: 'Post-Production Skills', type: 'custom' },
+        ];
+      
       default:
         return baseQuestions;
     }
@@ -1316,6 +1343,24 @@ function Onboarding() {
                             title: "Voice Artist",
                             description: "Voice Over, Narration, Animation",
                             icon: <Mic className="h-8 w-8" />
+                          },
+                          {
+                            value: "writer",
+                            title: "Writer",
+                            description: "Screenwriter, Author, Journalist",
+                            icon: <Zap className="h-8 w-8" />
+                          },
+                          {
+                            value: "director",
+                            title: "Director",
+                            description: "Film, TV, Commercial, Documentary",
+                            icon: <Video className="h-8 w-8" />
+                          },
+                          {
+                            value: "cinematographer",
+                            title: "Cinematographer",
+                            description: "Director of Photography, Camera Operator",
+                            icon: <Camera className="h-8 w-8" />
                           }
                         ].map((type) => (
                           <div

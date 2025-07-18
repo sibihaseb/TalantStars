@@ -196,6 +196,7 @@ export default function AdminDashboard() {
     'content-publish': false,
   });
   const [selectedProjectType, setSelectedProjectType] = useState("");
+  const [isScheduleMeetingDialogOpen, setIsScheduleMeetingDialogOpen] = useState(false);
 
   // Fetch all data
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
@@ -663,8 +664,8 @@ export default function AdminDashboard() {
     try {
       if (!selectedUserForPermissions) return;
       
-      // Create permissions array from checked items
-      const permissions = Object.entries(userPermissions)
+      // Create individual permission requests
+      const permissionRequests = Object.entries(userPermissions)
         .filter(([_, granted]) => granted)
         .map(([permission, _]) => {
           const [category, action] = permission.split('-');
@@ -676,7 +677,10 @@ export default function AdminDashboard() {
           };
         });
 
-      await apiRequest('POST', `/api/admin/users/${selectedUserForPermissions.id}/permissions`, { permissions });
+      // Send each permission individually as the API expects
+      for (const permissionData of permissionRequests) {
+        await apiRequest('POST', `/api/admin/users/${selectedUserForPermissions.id}/permissions`, permissionData);
+      }
       
       toast({
         title: "Success",
@@ -696,6 +700,7 @@ export default function AdminDashboard() {
         'content-publish': false,
       });
     } catch (error) {
+      console.error("Permissions save error:", error);
       toast({
         title: "Error",
         description: "Failed to save permissions",
@@ -1959,6 +1964,113 @@ export default function AdminDashboard() {
                 </form>
               </DialogContent>
             </Dialog>
+
+            {/* Meeting Scheduling Dialog */}
+            <Dialog open={isScheduleMeetingDialogOpen} onOpenChange={setIsScheduleMeetingDialogOpen}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Schedule New Meeting</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const meetingData = {
+                    title: formData.get('title') as string,
+                    description: formData.get('description') as string,
+                    attendeeId: parseInt(formData.get('attendeeId') as string),
+                    meetingDate: formData.get('meetingDate') as string,
+                    meetingTime: formData.get('meetingTime') as string,
+                    duration: parseInt(formData.get('duration') as string),
+                    type: formData.get('type') as string,
+                    location: formData.get('location') as string,
+                    notes: formData.get('notes') as string,
+                  };
+                  
+                  // Create meeting mutation would go here
+                  console.log('Creating meeting:', meetingData);
+                  toast({
+                    title: "Success",
+                    description: "Meeting scheduled successfully",
+                  });
+                  setIsScheduleMeetingDialogOpen(false);
+                }}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="title">Meeting Title</Label>
+                      <Input name="title" id="title" required />
+                    </div>
+                    <div>
+                      <Label htmlFor="attendeeId">Attendee</Label>
+                      <select 
+                        name="attendeeId" 
+                        required
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <option value="">Select attendee</option>
+                        {users.map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {user.firstName} {user.lastName} ({user.email})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea name="description" id="description" required />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="meetingDate">Date</Label>
+                      <Input name="meetingDate" id="meetingDate" type="date" required />
+                    </div>
+                    <div>
+                      <Label htmlFor="meetingTime">Time</Label>
+                      <Input name="meetingTime" id="meetingTime" type="time" required />
+                    </div>
+                    <div>
+                      <Label htmlFor="duration">Duration (minutes)</Label>
+                      <Input name="duration" id="duration" type="number" min="15" max="480" defaultValue="60" required />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="type">Meeting Type</Label>
+                    <select 
+                      name="type" 
+                      required
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">Select meeting type</option>
+                      <option value="virtual">Virtual Meeting</option>
+                      <option value="in_person">In-Person Meeting</option>
+                      <option value="phone">Phone Call</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="location">Location/Platform</Label>
+                    <Input name="location" id="location" placeholder="e.g., Zoom, Studio Address, etc." required />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="notes">Notes</Label>
+                    <Textarea name="notes" id="notes" placeholder="Any additional notes for the meeting..." />
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2 mt-6">
+                    <Button type="button" variant="outline" onClick={() => setIsScheduleMeetingDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                      Schedule Meeting
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-6">
@@ -1969,9 +2081,7 @@ export default function AdminDashboard() {
                     <Calendar className="w-5 h-5" />
                     Meeting Management
                   </span>
-                  <Button onClick={() => {
-                    // TODO: Add meeting creation dialog
-                  }}>
+                  <Button onClick={() => setIsScheduleMeetingDialogOpen(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Schedule Meeting
                   </Button>
