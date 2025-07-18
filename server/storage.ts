@@ -46,6 +46,7 @@ export interface IStorage {
   updateUserTier(userId: number, tierId: number): Promise<User>;
   deleteUser(id: string): Promise<void>;
   getUsers(filters?: { role?: string; isActive?: boolean }): Promise<User[]>;
+  getAllUsers(): Promise<User[]>;
   
   // User profile operations
   getUserProfile(userId: string): Promise<UserProfile | undefined>;
@@ -101,7 +102,8 @@ export interface IStorage {
   // System settings operations
   getSystemSettings(): Promise<SystemSetting[]>;
   getSystemSetting(key: string): Promise<SystemSetting | undefined>;
-  updateSystemSetting(key: string, value: string): Promise<SystemSetting>;
+  updateSystemSetting(key: string, value: string, updatedBy?: any): Promise<SystemSetting>;
+  deleteSystemSetting(key: string): Promise<void>;
   
   // Search operations
   searchUsers(query: string, currentUserId: number): Promise<User[]>;
@@ -111,6 +113,11 @@ export interface IStorage {
   
   // Analytics operations
   getAnalyticsSummary(): Promise<{ totalUsers: number; totalJobs: number; totalApplications: number; totalPayments: number; }>;
+  getAnalytics(startDate?: Date, endDate?: Date): Promise<any>;
+  
+  // Admin logs operations
+  getAdminLogs(limit?: number): Promise<any[]>;
+  createAdminLog(logData: any): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -148,6 +155,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUsers(filters?: { role?: string; isActive?: boolean }): Promise<User[]> {
+    return await db.select().from(users);
+  }
+
+  async getAllUsers(): Promise<User[]> {
     return await db.select().from(users);
   }
 
@@ -342,7 +353,7 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async updateSystemSetting(key: string, value: string): Promise<SystemSetting> {
+  async updateSystemSetting(key: string, value: string, updatedBy?: any): Promise<SystemSetting> {
     const existing = await this.getSystemSetting(key);
     
     if (existing) {
@@ -362,6 +373,10 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return result[0];
     }
+  }
+
+  async deleteSystemSetting(key: string): Promise<void> {
+    await db.delete(systemSettings).where(eq(systemSettings.key, key));
   }
 
   // Search operations
@@ -390,6 +405,27 @@ export class DatabaseStorage implements IStorage {
       totalApplications: applicationsResult.length,
       totalPayments: paymentsResult.length
     };
+  }
+
+  async getAnalytics(startDate?: Date, endDate?: Date): Promise<any> {
+    // Return basic analytics data
+    return {
+      userGrowth: [],
+      jobActivity: [],
+      applicationTrends: [],
+      paymentVolume: []
+    };
+  }
+
+  // Admin logs operations
+  async getAdminLogs(limit: number = 100): Promise<any[]> {
+    // Return empty array for now - can be implemented later with proper admin_logs table
+    return [];
+  }
+
+  async createAdminLog(logData: any): Promise<any> {
+    // Return the log data for now - can be implemented later with proper admin_logs table
+    return { id: Date.now(), ...logData, createdAt: new Date() };
   }
 }
 

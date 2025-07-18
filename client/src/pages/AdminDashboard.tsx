@@ -1046,12 +1046,17 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="space-y-4">
-                    {analyticsSummary.slice(0, 5).map((event, index) => (
+                    {analyticsSummary && [
+                      { event: "Total Users", count: analyticsSummary.totalUsers },
+                      { event: "Total Jobs", count: analyticsSummary.totalJobs },
+                      { event: "Total Applications", count: analyticsSummary.totalApplications },
+                      { event: "Total Payments", count: analyticsSummary.totalPayments }
+                    ].map((activity, index) => (
                       <div key={index} className="flex items-center space-x-3">
                         <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium">{event.event}</p>
-                          <p className="text-xs text-gray-500">{event.count} times</p>
+                          <p className="text-sm font-medium">{activity.event}</p>
+                          <p className="text-xs text-gray-500">{activity.count} total</p>
                         </div>
                       </div>
                     ))}
