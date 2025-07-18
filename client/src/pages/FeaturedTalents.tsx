@@ -133,7 +133,7 @@ export default function FeaturedTalents() {
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-blue-600/20"></div>
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -157,31 +157,18 @@ export default function FeaturedTalents() {
               Discover the extraordinary artists who are redefining entertainment excellence
             </motion.p>
             
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="mt-8 flex justify-center"
-            >
-              <div className="bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 border border-white/20">
-                <div className="flex items-center gap-3 text-purple-200">
-                  <Sparkles className="h-5 w-5 text-yellow-400" />
-                  <span className="text-sm font-medium">Curated by Industry Experts</span>
-                  <Sparkles className="h-5 w-5 text-yellow-400" />
-                </div>
-              </div>
-            </motion.div>
+
           </motion.div>
         </div>
       </div>
 
       {/* Filters Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl p-6 mb-8 border border-white/20"
+          className="bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl p-6 mb-4 border border-white/20"
         >
           <div className="flex flex-wrap gap-4 items-center justify-between">
             <div className="flex items-center gap-2">
@@ -242,7 +229,7 @@ export default function FeaturedTalents() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
+          <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-4">
             <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-white/10 backdrop-blur-md rounded-xl shadow-lg p-1 border border-white/20">
               <TabsTrigger 
                 value="all" 
