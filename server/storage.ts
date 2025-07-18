@@ -12,6 +12,7 @@ import {
   legalDocuments,
   systemSettings,
   profileQuestions,
+  paymentTransactions,
   type User,
   type InsertUser,
   type UserProfile,
@@ -32,6 +33,8 @@ import {
   type InsertLegalDocument,
   type SystemSetting,
   type InsertSystemSetting,
+  type PaymentTransaction,
+  type InsertPaymentTransaction,
 } from '../shared/schema';
 
 export interface IStorage {
@@ -102,6 +105,9 @@ export interface IStorage {
   
   // Search operations
   searchUsers(query: string, currentUserId: number): Promise<User[]>;
+  
+  // Payment operations
+  createPaymentTransaction(transaction: InsertPaymentTransaction): Promise<PaymentTransaction>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -358,6 +364,12 @@ export class DatabaseStorage implements IStorage {
   // Search operations
   async searchUsers(query: string, currentUserId: number): Promise<User[]> {
     return await db.select().from(users).limit(20);
+  }
+
+  // Payment operations
+  async createPaymentTransaction(transaction: InsertPaymentTransaction): Promise<PaymentTransaction> {
+    const result = await db.insert(paymentTransactions).values(transaction).returning();
+    return result[0];
   }
 }
 

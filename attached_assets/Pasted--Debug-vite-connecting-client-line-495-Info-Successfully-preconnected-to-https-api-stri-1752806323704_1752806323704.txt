@@ -1,0 +1,30 @@
+[Debug] [vite] connecting... (client, line 495)
+[Info] Successfully preconnected to https://api.stripe.com/
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (select-tier, line 0)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 500, URL: /api/user/select-tier (main.tsx, line 27)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to select tier"} (main.tsx, line 27)
+> Selected Element
+< <div data-state="open" data-replit-metadata="client/src/components/ui/dialog.tsx:37:4" data-component-name="DialogOverlay" class="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" style="pointer-events: auto;" data-aria-hidden="true" aria-hidden="true"></div>
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/create-payment-intent (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/pricing-tiers (main.tsx, line 27)
+[Warning] [Stripe.js] – "You have not registered or verified the domain, so the following payment methods are not enabled in the Payment Element: ↵↵- apple_pay…" (controller-with-preconnect-0d1ab56245210e05d8f4cc5a3468c9b1.js, line 1)
+"You have not registered or verified the domain, so the following payment methods are not enabled in the Payment Element: 
+
+- apple_pay
+
+Please follow https://stripe.com/docs/payments/payment-methods/pmd-registration to register and verify the domain."
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (record-transaction, line 0)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 500, URL: /api/payments/record-transaction (main.tsx, line 27)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to record payment transaction"} (main.tsx, line 27)
+[Error] Failed to record payment transaction: – Error: 500: {"message":"Failed to record payment transaction"} — https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2u…18tgduse.picard.replit.dev/src/lib/queryClient.ts:5
+Error: 500: {"message":"Failed to record payment transaction"} — https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2u…18tgduse.picard.replit.dev/src/lib/queryClient.ts:5
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (StripeCheckout.tsx:87)
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (confirm-payment, line 0)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 500, URL: /api/confirm-payment (main.tsx, line 27)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to confirm payment"} (main.tsx, line 27)
