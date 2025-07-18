@@ -2724,6 +2724,48 @@ export default function AdminDashboard() {
                             />
                             <Label htmlFor="models" className="text-sm">Models</Label>
                           </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="writers"
+                              checked={selectedUserGroups.includes("writer")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "writer"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "writer"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="writers" className="text-sm">Writers</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="directors"
+                              checked={selectedUserGroups.includes("director")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "director"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "director"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="directors" className="text-sm">Directors</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="cinematographers"
+                              checked={selectedUserGroups.includes("cinematographer")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "cinematographer"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "cinematographer"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="cinematographers" className="text-sm">Cinematographers</Label>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -3021,6 +3063,9 @@ export default function AdminDashboard() {
                                 <option value="musician">Musician</option>
                                 <option value="voice_artist">Voice Artist</option>
                                 <option value="model">Model</option>
+                                <option value="writer">Writer</option>
+                                <option value="director">Director</option>
+                                <option value="cinematographer">Cinematographer</option>
                               </optgroup>
                               <optgroup label="Professional Roles">
                                 <option value="manager">Manager</option>
