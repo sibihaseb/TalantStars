@@ -781,7 +781,11 @@ function Onboarding() {
       .filter(q => {
         const questionType = q.talentType;
         const isRelevant = questionTypes.includes(questionType) && q.active;
-        return isRelevant;
+        
+        // Exclude profile image question since it has its own dedicated step
+        const isProfileImageQuestion = q.fieldName === 'profileImageUrl' || q.field_name === 'profileImageUrl';
+        
+        return isRelevant && !isProfileImageQuestion;
       })
       .sort((a, b) => a.order - b.order);
   }, [watchedRole, watchedTalentType, profileQuestions]);
@@ -797,16 +801,45 @@ function Onboarding() {
     }
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {relevantQuestions.map((question) => (
-          <div key={`q-${question.id}`} className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {question.question}
-              {question.required && <span className="text-red-500 ml-1">*</span>}
-            </Label>
-            {renderDynamicFormField(question)}
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {relevantQuestions.map((question) => (
+            <div key={`q-${question.id}`} className="space-y-3">
+              <Label className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                <span className="text-blue-600 dark:text-blue-400">
+                  {question.fieldType === 'select' && '📋'}
+                  {question.fieldType === 'multiselect' && '☑️'}
+                  {question.fieldType === 'checkbox' && '☑️'}
+                  {question.fieldType === 'text' && '✏️'}
+                  {question.fieldType === 'number' && '🔢'}
+                  {question.fieldType === 'textarea' && '📝'}
+                  {question.fieldType === 'yesno' && '❓'}
+                  {question.fieldType === 'boolean' && '❓'}
+                  {!question.fieldType && '📋'}
+                </span>
+                {question.question}
+                {question.required && <span className="text-red-500 text-xs">*</span>}
+              </Label>
+              <div className="relative">
+                {renderDynamicFormField(question)}
+                {question.required && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {relevantQuestions.length > 0 && (
+          <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
+              <Info className="h-4 w-4" />
+              <span>
+                <strong>Tip:</strong> Complete as many fields as possible to improve your profile visibility and match with better opportunities.
+              </span>
+            </div>
           </div>
-        ))}
+        )}
       </div>
     );
   };
@@ -898,12 +931,13 @@ function Onboarding() {
         );
       
       case 'file':
+        // File uploads are handled in dedicated steps, not in role-specific questions
         return (
-          <ProfileImageUpload
-            currentImage={typeof currentValue === 'string' ? currentValue : ''}
-            onImageUpdate={handleChange}
-            mandatory={question.required}
-          />
+          <div className="p-4 border border-gray-300 rounded-md bg-gray-50 dark:bg-gray-800">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              File upload is handled in a dedicated step.
+            </p>
+          </div>
         );
       
       default:
