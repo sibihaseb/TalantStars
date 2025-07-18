@@ -114,31 +114,29 @@ const onboardingSchema = insertUserProfileSchema.extend({
   sportingActivities: z.array(z.string()).optional(),
   drivingLicenses: z.array(z.string()).optional(),
   
-  // Acting-specific fields from database
-  acting_specialty: z.array(z.string()).optional(),
-  acting_experience_years: z.string().optional(),
-  acting_method: z.array(z.string()).optional(),
-  improvisation_comfort: z.string().optional(),
-  stage_combat: z.string().optional(),
-  intimate_scenes: z.string().optional(),
-  preferred_roles: z.array(z.string()).optional(),
-  motion_capture: z.string().optional(),
-  animals_comfort: z.string().optional(),
-  crying_on_cue: z.string().optional(),
-  period_pieces: z.string().optional(),
-  physical_comedy: z.string().optional(),
-  accent_experience: z.string().optional(),
-  green_screen: z.string().optional(),
-  stunt_comfort: z.string().optional(),
-  shakespeare_experience: z.string().optional(),
-  musical_theater: z.string().optional(),
-  children_experience: z.string().optional(),
-  horror_experience: z.string().optional(),
+  // Acting-specific fields from database (using actual DB field names)
+  primarySpecialty: z.array(z.string()).optional(),
+  yearsExperience: z.string().optional(),
+  actingMethod: z.array(z.string()).optional(),
+  improvisationComfort: z.string().optional(),
+  stageCombat: z.string().optional(),
+  intimateScenesComfort: z.string().optional(),
+  roleTypes: z.array(z.string()).optional(),
+  motionCapture: z.string().optional(),
+  animalWork: z.string().optional(),
+  cryingOnCue: z.string().optional(),
+  periodPieces: z.string().optional(),
+  physicalComedy: z.string().optional(),
+  accentExperience: z.string().optional(),
+  greenScreen: z.string().optional(),
+  stuntComfort: z.string().optional(),
+  shakespeareExperience: z.string().optional(),
+  musicalTheater: z.string().optional(),
+  horrorThriller: z.array(z.string()).optional(),
   // Representation fields
-  current_manager: z.string().optional(),
-  current_agent: z.string().optional(),
-  current_publicist: z.string().optional(),
-  representation_status: z.string().optional(),
+  currentAgent: z.string().optional(),
+  currentPublicist: z.string().optional(),
+  representationStatus: z.string().optional(),
   
   // Musician-specific fields
   primary_instrument: z.string().optional(),
@@ -558,6 +556,28 @@ function Onboarding() {
       dailyRate: "",
       weeklyRate: "",
       projectRate: "",
+      // Acting-specific fields
+      primarySpecialty: [],
+      yearsExperience: "",
+      actingMethod: [],
+      improvisationComfort: "",
+      stageCombat: "",
+      intimateScenesComfort: "",
+      roleTypes: [],
+      motionCapture: "",
+      animalWork: "",
+      cryingOnCue: "",
+      periodPieces: "",
+      physicalComedy: "",
+      accentExperience: "",
+      greenScreen: "",
+      stuntComfort: "",
+      shakespeareExperience: "",
+      musicalTheater: "",
+      horrorThriller: [],
+      currentAgent: "",
+      currentPublicist: "",
+      representationStatus: "",
     },
   });
 
@@ -841,10 +861,14 @@ function Onboarding() {
     const fieldName = question.fieldName || question.field_name;
     const currentValue = form.getValues(fieldName) || '';
     
-
+    // Debug logging
+    console.log('Field:', fieldName, 'Current value:', currentValue, 'Question:', question.question);
     
     const handleChange = (value: any) => {
+      console.log('Setting field:', fieldName, 'to value:', value);
       form.setValue(fieldName, value);
+      // Force trigger to update form state
+      form.trigger(fieldName);
     };
     
     switch (question.fieldType || question.field_type) {
