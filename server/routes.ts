@@ -288,7 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const uploadResult = await uploadFileToWasabi(file, `user-${userId}/profile`);
       
       // Update user profile image URL in database
-      const updatedUser = await storage.updateUserProfileImage(userId, uploadResult.url);
+      const updatedUser = await simpleStorage.updateUserProfileImage(userId, uploadResult.url);
       
       res.json({
         profileImageUrl: uploadResult.url,

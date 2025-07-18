@@ -1,0 +1,58 @@
+[Info] Successfully preconnected to https://api.stripe.com/
+[Log] === FRONTEND API RESPONSE === (index-DlGGw-c3.js, line 793)
+[Log] Status: 200, URL: /api/user/select-tier (index-DlGGw-c3.js, line 793)
+[Error] Failed to load resource: the server responded with a status of 500 () (67, line 0)
+[Log] === FRONTEND API RESPONSE === (index-DlGGw-c3.js, line 793)
+[Log] Status: 200, URL: /api/applications (index-DlGGw-c3.js, line 793)
+[Log] === FRONTEND API RESPONSE === (index-DlGGw-c3.js, line 793)
+[Log] Status: 500, URL: /api/job-history/67 (index-DlGGw-c3.js, line 793)
+[Log] 🚨 API ERROR: 500 - {"error":"Failed to get job history"} (index-DlGGw-c3.js, line 793)
+[Error] Failed to load resource: the server responded with a status of 500 () (stats, line 0)
+[Log] === FRONTEND API RESPONSE === (index-DlGGw-c3.js, line 793)
+[Log] Status: 500, URL: /api/social/stats (index-DlGGw-c3.js, line 793)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to fetch social stats"} (index-DlGGw-c3.js, line 793)
+[Log] === FRONTEND API RESPONSE === (index-DlGGw-c3.js, line 793)
+[Log] Status: 200, URL: /api/opportunities (index-DlGGw-c3.js, line 793)
+[Log] === FRONTEND API RESPONSE === (index-DlGGw-c3.js, line 793)
+[Log] Status: 200, URL: /api/user/profile (index-DlGGw-c3.js, line 793)
+[Log] Choose Image button clicked (index-DlGGw-c3.js, line 793)
+[Log] File input ref: –  (index-DlGGw-c3.js, line 793)
+<input type="file" accept="image/*" class="hidden" data-testid="file-input">
+
+<input type="file" accept="image/*" class="hidden" data-testid="file-input">
+[Log] File input ref value: – "" (index-DlGGw-c3.js, line 793)
+[Log] File input changed - event fired (index-DlGGw-c3.js, line 793)
+[Log] Event target: –  (index-DlGGw-c3.js, line 793)
+<input type="file" accept="image/*" class="hidden" data-testid="file-input">
+
+<input type="file" accept="image/*" class="hidden" data-testid="file-input">
+[Log] Files length: – 1 (index-DlGGw-c3.js, line 793)
+[Log] File list: – FileList (index-DlGGw-c3.js, line 793)
+FileList
+[Log] Selected file: – File (index-DlGGw-c3.js, line 793)
+File
+[Log] File details: – Object (index-DlGGw-c3.js, line 793)
+Object
+[Log] File selected: – "pastorJay.png" – "image/png" – 212479 (index-DlGGw-c3.js, line 793)
+[Log] Setting selected file and preview URL (index-DlGGw-c3.js, line 793)
+[Log] Cropper should now be visible (index-DlGGw-c3.js, line 793)
+[Log] Canvas blob created: – Blob (index-DlGGw-c3.js, line 793)
+Blob
+[Log] Blob size: – 238515 (index-DlGGw-c3.js, line 793)
+[Log] Blob type: – "image/jpeg" (index-DlGGw-c3.js, line 793)
+[Log] FormData contents: (index-DlGGw-c3.js, line 793)
+[Log] image: – File (index-DlGGw-c3.js, line 793)
+File
+[Log] Uploading file to server... (index-DlGGw-c3.js, line 793)
+[Log] FormData entries: – Array (1) (index-DlGGw-c3.js, line 793)
+Array (1)
+[Log] === FRONTEND API REQUEST === (index-DlGGw-c3.js, line 793)
+[Log] Method: POST, URL: /api/user/profile-image (index-DlGGw-c3.js, line 793)
+[Log] FormData entries: – Array (1) (index-DlGGw-c3.js, line 793)
+Array (1)
+[Error] Failed to load resource: the server responded with a status of 500 () (profile-image, line 0)
+[Log] === FRONTEND API RESPONSE === (index-DlGGw-c3.js, line 793)
+[Log] Status: 500, URL: /api/user/profile-image (index-DlGGw-c3.js, line 793)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to upload profile image"} (index-DlGGw-c3.js, line 793)
+> Selected Element
+< <main class="pb-12">…</main>
