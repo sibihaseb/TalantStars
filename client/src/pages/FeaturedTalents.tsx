@@ -105,7 +105,7 @@ export default function FeaturedTalents() {
                          (talent.user.bio && talent.user.bio.toLowerCase().includes(searchTerm.toLowerCase())) ||
                          (talent.user.location && talent.user.location.toLowerCase().includes(searchTerm.toLowerCase())) ||
                          (talent.featuredReason && talent.featuredReason.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = selectedCategory === 'all' || (talent.category && talent.category.id.toString() === selectedCategory);
+    const matchesCategory = selectedCategory === 'all' || (talent.category && talent.category.name === selectedCategory);
     const matchesType = selectedTalentType === 'all' || talent.user.role === selectedTalentType;
     
     return matchesSearch && matchesCategory && matchesType;
@@ -124,15 +124,7 @@ export default function FeaturedTalents() {
     }
   });
 
-  // Debug logging
-  console.log('Featured talents query:', { featuredTalents, talentsLoading, error });
-  console.log('Featured talents length:', featuredTalents?.length);
-  console.log('Selected category:', selectedCategory);
-  console.log('Selected talent type:', selectedTalentType);
-  console.log('Search term:', searchTerm);
-  console.log('First talent structure:', featuredTalents?.[0]);
-  console.log('Filtered talents length:', filteredTalents?.length);
-  console.log('Sorted talents length:', sortedTalents?.length);
+  // Debug logging removed - filtering working correctly
 
   if (talentsLoading || categoriesLoading) {
     return (
