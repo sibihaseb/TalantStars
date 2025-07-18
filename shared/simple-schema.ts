@@ -143,6 +143,10 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     fields: [users.pricingTierId],
     references: [pricingTiers.id],
   }),
+  featuredTalent: one(featuredTalents, {
+    fields: [users.id],
+    references: [featuredTalents.userId],
+  }),
 }));
 
 export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
@@ -155,6 +159,8 @@ export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
 export const pricingTiersRelations = relations(pricingTiers, ({ many }) => ({
   users: many(users),
 }));
+
+
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
@@ -200,6 +206,34 @@ export const featuredTalents = pgTable("featured_talents", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Relations for talent categories
+export const talentCategoriesRelations = relations(talentCategories, ({ many }) => ({
+  featuredTalents: many(featuredTalents),
+}));
+
+export const featuredTalentsRelations = relations(featuredTalents, ({ one }) => ({
+  user: one(users, {
+    fields: [featuredTalents.userId],
+    references: [users.id],
+  }),
+  category: one(talentCategories, {
+    fields: [featuredTalents.categoryId],
+    references: [talentCategories.id],
+  }),
+}));
+
+export const insertTalentCategorySchema = createInsertSchema(talentCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFeaturedTalentSchema = createInsertSchema(featuredTalents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // SEO settings table
 export const seoSettings = pgTable("seo_settings", {
   id: serial("id").primaryKey(),
@@ -224,35 +258,7 @@ export const seoSettings = pgTable("seo_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Relations
-export const talentCategoriesRelations = relations(talentCategories, ({ many }) => ({
-  featuredTalents: many(featuredTalents),
-}));
-
-export const featuredTalentsRelations = relations(featuredTalents, ({ one }) => ({
-  user: one(users, {
-    fields: [featuredTalents.userId],
-    references: [users.id],
-  }),
-  category: one(talentCategories, {
-    fields: [featuredTalents.categoryId],
-    references: [talentCategories.id],
-  }),
-}));
-
 // Insert schemas
-export const insertTalentCategorySchema = createInsertSchema(talentCategories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertFeaturedTalentSchema = createInsertSchema(featuredTalents).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
 export const insertSeoSettingsSchema = createInsertSchema(seoSettings).omit({
   id: true,
   createdAt: true,

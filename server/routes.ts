@@ -2624,6 +2624,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Talent categories management routes
+  app.get('/api/admin/talent-categories', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const categories = await simpleStorage.getTalentCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching talent categories:", error);
+      res.status(500).json({ message: "Failed to fetch talent categories" });
+    }
+  });
+
+  app.post('/api/admin/talent-categories', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const categoryData = {
+        name: req.body.name,
+        description: req.body.description,
+        icon: req.body.icon || 'star',
+        color: req.body.color || 'blue',
+        isActive: req.body.isActive !== undefined ? req.body.isActive : true
+      };
+      const category = await simpleStorage.createTalentCategory(categoryData);
+      res.json(category);
+    } catch (error) {
+      console.error("Error creating talent category:", error);
+      res.status(500).json({ message: "Failed to create talent category", error: error.message });
+    }
+  });
+
+  app.put('/api/admin/talent-categories/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      const category = await simpleStorage.updateTalentCategory(categoryId, req.body);
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating talent category:", error);
+      res.status(500).json({ message: "Failed to update talent category" });
+    }
+  });
+
+  app.delete('/api/admin/talent-categories/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      await simpleStorage.deleteTalentCategory(categoryId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting talent category:", error);
+      res.status(500).json({ message: "Failed to delete talent category" });
+    }
+  });
+
+  // Featured talents management routes
+  app.get('/api/admin/featured-talents', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const featuredTalents = await simpleStorage.getFeaturedTalents();
+      res.json(featuredTalents);
+    } catch (error) {
+      console.error("Error fetching featured talents:", error);
+      res.status(500).json({ message: "Failed to fetch featured talents" });
+    }
+  });
+
+  app.post('/api/admin/featured-talents', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const featuredData = {
+        userId: req.body.userId,
+        categoryId: req.body.categoryId,
+        featuredReason: req.body.featuredReason,
+        displayOrder: req.body.displayOrder || 0,
+        isActive: req.body.isActive !== undefined ? req.body.isActive : true,
+        featuredUntil: req.body.featuredUntil ? new Date(req.body.featuredUntil) : undefined
+      };
+      const featured = await simpleStorage.createFeaturedTalent(featuredData);
+      res.json(featured);
+    } catch (error) {
+      console.error("Error creating featured talent:", error);
+      res.status(500).json({ message: "Failed to create featured talent", error: error.message });
+    }
+  });
+
+  app.put('/api/admin/featured-talents/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const featuredId = parseInt(req.params.id);
+      const featured = await simpleStorage.updateFeaturedTalent(featuredId, req.body);
+      res.json(featured);
+    } catch (error) {
+      console.error("Error updating featured talent:", error);
+      res.status(500).json({ message: "Failed to update featured talent" });
+    }
+  });
+
+  app.delete('/api/admin/featured-talents/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const featuredId = parseInt(req.params.id);
+      await simpleStorage.deleteFeaturedTalent(featuredId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting featured talent:", error);
+      res.status(500).json({ message: "Failed to delete featured talent" });
+    }
+  });
+
+  app.put('/api/admin/featured-talents/order', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const updates = req.body.updates;
+      await simpleStorage.updateFeaturedTalentOrder(updates);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating featured talent order:", error);
+      res.status(500).json({ message: "Failed to update featured talent order" });
+    }
+  });
+
+  // Public API endpoints for featured talents (no authentication required)
+  app.get('/api/featured-talents', async (req: any, res) => {
+    try {
+      const featuredTalents = await simpleStorage.getFeaturedTalents();
+      res.json(featuredTalents);
+    } catch (error) {
+      console.error("Error fetching featured talents:", error);
+      res.status(500).json({ message: "Failed to fetch featured talents" });
+    }
+  });
+
+  app.get('/api/talent-categories', async (req: any, res) => {
+    try {
+      const categories = await simpleStorage.getTalentCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching talent categories:", error);
+      res.status(500).json({ message: "Failed to fetch talent categories" });
+    }
+  });
+
   app.post('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Creating email template:", req.body);

@@ -67,6 +67,7 @@ import DragDropEmailTemplates from "@/components/admin/DragDropEmailTemplates";
 import DragDropQuestionsManager from "@/components/admin/DragDropQuestionsManager";
 import SeoManagement from "@/components/admin/SeoManagement";
 import AutomatedTesting from "@/components/admin/AutomatedTesting";
+import TalentCategoriesManagement from "@/components/admin/TalentCategoriesManagement";
 
 interface User {
   id: string;
@@ -752,6 +753,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="testing" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
               <Activity className="w-4 h-4 mr-2" />
               Testing
+            </TabsTrigger>
+            <TabsTrigger value="talent-categories" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
+              <Star className="w-4 h-4 mr-2" />
+              Talent Categories
             </TabsTrigger>
           </TabsList>
 
@@ -3135,6 +3140,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="testing" className="space-y-6">
             <AutomatedTesting />
+          </TabsContent>
+
+          <TabsContent value="talent-categories" className="space-y-6">
+            <TalentCategoriesManagement />
           </TabsContent>
 
           <TabsContent value="limits" className="space-y-6">

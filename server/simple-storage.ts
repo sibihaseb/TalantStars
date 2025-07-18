@@ -3,6 +3,8 @@ import {
   userProfiles,
   pricingTiers,
   seoSettings,
+  talentCategories,
+  featuredTalents,
   type User,
   type InsertUser,
   type UserProfile,
@@ -10,6 +12,10 @@ import {
   type PricingTier,
   type SeoSettings,
   type InsertSeoSettings,
+  type TalentCategory,
+  type InsertTalentCategory,
+  type FeaturedTalent,
+  type InsertFeaturedTalent,
 } from "@shared/simple-schema";
 import { db } from "./db";
 import { eq, asc } from "drizzle-orm";
@@ -58,6 +64,19 @@ export interface IStorage {
 
   // Profile image update method
   updateUserProfileImage(userId: number, imageUrl: string): Promise<User>;
+
+  // Talent categories operations
+  getTalentCategories(): Promise<TalentCategory[]>;
+  createTalentCategory(category: InsertTalentCategory): Promise<TalentCategory>;
+  updateTalentCategory(id: number, category: Partial<InsertTalentCategory>): Promise<TalentCategory>;
+  deleteTalentCategory(id: number): Promise<void>;
+
+  // Featured talents operations
+  getFeaturedTalents(): Promise<Array<FeaturedTalent & { user: User; category?: TalentCategory }>>;
+  createFeaturedTalent(featured: InsertFeaturedTalent): Promise<FeaturedTalent>;
+  updateFeaturedTalent(id: number, featured: Partial<InsertFeaturedTalent>): Promise<FeaturedTalent>;
+  deleteFeaturedTalent(id: number): Promise<void>;
+  updateFeaturedTalentOrder(updates: Array<{ id: number; displayOrder: number }>): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -323,6 +342,78 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  // Talent categories operations
+  async getTalentCategories(): Promise<TalentCategory[]> {
+    return await db.select().from(talentCategories).orderBy(asc(talentCategories.name));
+  }
+
+  async createTalentCategory(category: InsertTalentCategory): Promise<TalentCategory> {
+    const [newCategory] = await db
+      .insert(talentCategories)
+      .values(category)
+      .returning();
+    return newCategory;
+  }
+
+  async updateTalentCategory(id: number, category: Partial<InsertTalentCategory>): Promise<TalentCategory> {
+    const [updatedCategory] = await db
+      .update(talentCategories)
+      .set(category)
+      .where(eq(talentCategories.id, id))
+      .returning();
+    return updatedCategory;
+  }
+
+  async deleteTalentCategory(id: number): Promise<void> {
+    await db.delete(talentCategories).where(eq(talentCategories.id, id));
+  }
+
+  // Featured talents operations
+  async getFeaturedTalents(): Promise<Array<FeaturedTalent & { user: User; category?: TalentCategory }>> {
+    const results = await db
+      .select()
+      .from(featuredTalents)
+      .leftJoin(users, eq(featuredTalents.userId, users.id))
+      .leftJoin(talentCategories, eq(featuredTalents.categoryId, talentCategories.id))
+      .orderBy(asc(featuredTalents.displayOrder));
+
+    return results.map(row => ({
+      ...row.featured_talents,
+      user: row.users!,
+      category: row.talent_categories || undefined,
+    }));
+  }
+
+  async createFeaturedTalent(featured: InsertFeaturedTalent): Promise<FeaturedTalent> {
+    const [newFeatured] = await db
+      .insert(featuredTalents)
+      .values(featured)
+      .returning();
+    return newFeatured;
+  }
+
+  async updateFeaturedTalent(id: number, featured: Partial<InsertFeaturedTalent>): Promise<FeaturedTalent> {
+    const [updatedFeatured] = await db
+      .update(featuredTalents)
+      .set(featured)
+      .where(eq(featuredTalents.id, id))
+      .returning();
+    return updatedFeatured;
+  }
+
+  async deleteFeaturedTalent(id: number): Promise<void> {
+    await db.delete(featuredTalents).where(eq(featuredTalents.id, id));
+  }
+
+  async updateFeaturedTalentOrder(updates: Array<{ id: number; displayOrder: number }>): Promise<void> {
+    for (const update of updates) {
+      await db
+        .update(featuredTalents)
+        .set({ displayOrder: update.displayOrder })
+        .where(eq(featuredTalents.id, update.id));
+    }
   }
 }
 

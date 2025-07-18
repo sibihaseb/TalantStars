@@ -32,16 +32,37 @@ import { motion } from 'framer-motion';
 
 interface FeaturedTalent {
   id: number;
-  name: string;
-  type: string;
-  location: string;
-  rating: number;
-  reviews: number;
-  image: string;
-  verified: boolean;
-  available: boolean;
-  specialty: string;
-  role: string;
+  userId: number;
+  categoryId?: number;
+  featuredReason?: string;
+  displayOrder: number;
+  isActive: boolean;
+  featuredUntil?: string;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+    role: string;
+    type: string;
+    bio?: string;
+    location?: string;
+    profileImageUrl?: string;
+    isVerified?: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+  category?: {
+    id: number;
+    name: string;
+    description?: string;
+    icon: string;
+    color: string;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
 
 interface TalentCategory {
@@ -80,10 +101,12 @@ export default function FeaturedTalents() {
   });
 
   const filteredTalents = featuredTalents.filter(talent => {
-    const matchesSearch = talent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         talent.specialty.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || talent.type === selectedCategory;
-    const matchesType = selectedTalentType === 'all' || talent.type === selectedTalentType;
+    const matchesSearch = talent.user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (talent.user.bio && talent.user.bio.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (talent.user.location && talent.user.location.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (talent.featuredReason && talent.featuredReason.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesCategory = selectedCategory === 'all' || (talent.category && talent.category.id.toString() === selectedCategory);
+    const matchesType = selectedTalentType === 'all' || talent.user.type === selectedTalentType;
     
     return matchesSearch && matchesCategory && matchesType;
   });
@@ -91,13 +114,13 @@ export default function FeaturedTalents() {
   const sortedTalents = filteredTalents.sort((a, b) => {
     switch (sortBy) {
       case 'rating':
-        return b.rating - a.rating;
+        return a.displayOrder - b.displayOrder;
       case 'name':
-        return a.name.localeCompare(b.name);
+        return a.user.username.localeCompare(b.user.username);
       case 'reviews':
-        return b.reviews - a.reviews;
+        return a.displayOrder - b.displayOrder;
       default:
-        return 0;
+        return a.displayOrder - b.displayOrder;
     }
   });
 
@@ -264,24 +287,24 @@ export default function FeaturedTalents() {
               <Card className="bg-white/10 backdrop-blur-md border-0 shadow-2xl hover:shadow-purple-500/25 transition-all duration-500 transform hover:scale-105 overflow-hidden">
                 <div className="relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-t from-purple-900/60 via-transparent to-transparent z-10"></div>
-                  {talent.image ? (
+                  {talent.user.profileImageUrl ? (
                     <img
-                      src={talent.image}
-                      alt={talent.name}
+                      src={talent.user.profileImageUrl}
+                      alt={talent.user.username}
                       className="w-full h-56 object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   ) : (
                     <div className="w-full h-56 bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                       <Avatar className="w-32 h-32 border-4 border-white/30">
                         <AvatarFallback className="bg-white/20 text-white text-3xl font-bold">
-                          {talent.name.split(' ').map(n => n[0]).join('')}
+                          {talent.user.username.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                     </div>
                   )}
                   
                   {/* Verification Badge */}
-                  {talent.verified && (
+                  {talent.user.isVerified && (
                     <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 z-20">
                       <ShieldCheck className="h-3 w-3" />
                       Verified
@@ -309,37 +332,37 @@ export default function FeaturedTalents() {
                 
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg font-bold text-white">{talent.name}</CardTitle>
+                    <CardTitle className="text-lg font-bold text-white">{talent.user.username}</CardTitle>
                     <div className="flex items-center gap-1 text-yellow-400">
                       <Star className="h-4 w-4 fill-current" />
-                      <span className="text-sm font-bold">{talent.rating.toFixed(1)}</span>
+                      <span className="text-sm font-bold">4.8</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm text-purple-300">
                     <div className="flex items-center gap-1">
-                      {getTalentIcon(talent.type)}
-                      <span>{talent.type}</span>
+                      {getTalentIcon(talent.user.role)}
+                      <span>{talent.user.role}</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm text-purple-300">
                     <MapPin className="h-4 w-4" />
-                    {talent.location}
+                    {talent.user.location || 'Location not set'}
                   </div>
                 </CardHeader>
                 
                 <CardContent>
                   <div className="space-y-4">
-                    <p className="text-sm text-purple-200 line-clamp-2">{talent.specialty}</p>
+                    <p className="text-sm text-purple-200 line-clamp-2">{talent.featuredReason || talent.user.bio || 'No description available'}</p>
                     
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="outline" className="text-xs border-purple-400 text-purple-300">
-                        {talent.type}
+                        {talent.category?.name || 'Featured'}
                       </Badge>
-                      {talent.available && (
+                      {talent.isActive && (
                         <Badge variant="outline" className="text-xs border-green-400 text-green-300">
-                          Available
+                          Active
                         </Badge>
                       )}
                     </div>
@@ -347,7 +370,7 @@ export default function FeaturedTalents() {
                     <div className="pt-3 border-t border-purple-500/30">
                       <div className="flex items-center gap-2 text-xs text-yellow-400 font-medium">
                         <Crown className="h-3 w-3" />
-                        {talent.reviews} reviews
+                        Featured talent
                       </div>
                     </div>
                   </div>
