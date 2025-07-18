@@ -108,6 +108,9 @@ export interface IStorage {
   
   // Payment operations
   createPaymentTransaction(transaction: InsertPaymentTransaction): Promise<PaymentTransaction>;
+  
+  // Analytics operations
+  getAnalyticsSummary(): Promise<{ totalUsers: number; totalJobs: number; totalApplications: number; totalPayments: number; }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -370,6 +373,23 @@ export class DatabaseStorage implements IStorage {
   async createPaymentTransaction(transaction: InsertPaymentTransaction): Promise<PaymentTransaction> {
     const result = await db.insert(paymentTransactions).values(transaction).returning();
     return result[0];
+  }
+
+  // Analytics operations
+  async getAnalyticsSummary(): Promise<{ totalUsers: number; totalJobs: number; totalApplications: number; totalPayments: number; }> {
+    const [usersResult, jobsResult, applicationsResult, paymentsResult] = await Promise.all([
+      db.select().from(users),
+      db.select().from(jobs),
+      db.select().from(jobApplications),
+      db.select().from(paymentTransactions)
+    ]);
+
+    return {
+      totalUsers: usersResult.length,
+      totalJobs: jobsResult.length,
+      totalApplications: applicationsResult.length,
+      totalPayments: paymentsResult.length
+    };
   }
 }
 

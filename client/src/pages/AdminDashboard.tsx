@@ -692,73 +692,227 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 mb-8 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-2 shadow-lg gap-1">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="users" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <Users className="w-4 h-4 mr-2" />
-              Users
-            </TabsTrigger>
-            <TabsTrigger value="jobs" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <Briefcase className="w-4 h-4 mr-2" />
-              Jobs
-            </TabsTrigger>
-            <TabsTrigger value="meetings" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <Calendar className="w-4 h-4 mr-2" />
-              Meetings
-            </TabsTrigger>
-            <TabsTrigger value="emails" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <Mail className="w-4 h-4 mr-2" />
-              Emails
-            </TabsTrigger>
-            <TabsTrigger value="templates" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <FileText className="w-4 h-4 mr-2" />
-              Templates
-            </TabsTrigger>
-            <TabsTrigger value="campaigns" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <Zap className="w-4 h-4 mr-2" />
-              Campaigns
-            </TabsTrigger>
-            <TabsTrigger value="payments" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <CreditCard className="w-4 h-4 mr-2" />
-              Payments
-            </TabsTrigger>
-            <TabsTrigger value="pricing" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <DollarSign className="w-4 h-4 mr-2" />
-              Pricing
-            </TabsTrigger>
-            <TabsTrigger value="questions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <FileText className="w-4 h-4 mr-2" />
-              Questions
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
-            </TabsTrigger>
-            <TabsTrigger value="limits" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <Shield className="w-4 h-4 mr-2" />
-              User Limits
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <Activity className="w-4 h-4 mr-2" />
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger value="seo" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <Globe className="w-4 h-4 mr-2" />
-              SEO
-            </TabsTrigger>
-            <TabsTrigger value="testing" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <Activity className="w-4 h-4 mr-2" />
-              Testing
-            </TabsTrigger>
-            <TabsTrigger value="talent-categories" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-300 data-[state=active]:shadow-md">
-              <Star className="w-4 h-4 mr-2" />
-              Talent Categories
-            </TabsTrigger>
-          </TabsList>
+        {/* Main Content Area with Sidebar */}
+        <div className="flex gap-6">
+          {/* Sidebar Navigation */}
+          <div className="w-64 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-lg h-fit sticky top-24">
+            <div className="space-y-2">
+              {/* Core Management */}
+              <div className="mb-6">
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Core Management</h3>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => setActiveTab('overview')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'overview' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    <span>Overview</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('users')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'users' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>Users</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('analytics')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'analytics' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <Activity className="w-4 h-4" />
+                    <span>Analytics</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Content Management */}
+              <div className="mb-6">
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Content Management</h3>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => setActiveTab('jobs')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'jobs' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <Briefcase className="w-4 h-4" />
+                    <span>Jobs</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('talent-categories')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'talent-categories' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <Star className="w-4 h-4" />
+                    <span>Talent Categories</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('questions')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'questions' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Questions</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Communication */}
+              <div className="mb-6">
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Communication</h3>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => setActiveTab('emails')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'emails' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <Mail className="w-4 h-4" />
+                    <span>Emails</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('templates')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'templates' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Templates</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('campaigns')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'campaigns' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <Zap className="w-4 h-4" />
+                    <span>Campaigns</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('meetings')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'meetings' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <Calendar className="w-4 h-4" />
+                    <span>Meetings</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Financial */}
+              <div className="mb-6">
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Financial</h3>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => setActiveTab('payments')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'payments' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    <span>Payments</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('pricing')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'pricing' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <DollarSign className="w-4 h-4" />
+                    <span>Pricing</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* System */}
+              <div className="mb-6">
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">System</h3>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => setActiveTab('settings')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'settings' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Settings</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('limits')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'limits' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <Shield className="w-4 h-4" />
+                    <span>User Limits</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('seo')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'seo' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <Globe className="w-4 h-4" />
+                    <span>SEO</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('testing')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'testing' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <Activity className="w-4 h-4" />
+                    <span>Testing</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
 
           <TabsContent value="overview" className="space-y-6">
             {/* Modern Stats Grid */}
@@ -3341,6 +3495,8 @@ export default function AdminDashboard() {
             <UserLimitsManagement />
           </TabsContent>
         </Tabs>
+          </div>
+        </div>
       </div>
     </div>
   );
