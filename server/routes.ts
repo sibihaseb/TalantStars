@@ -5229,7 +5229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Fetching featured talents from database...');
       
       // Get all users with profiles marked as featured
-      const featuredUsers = await storage.getUsersWithProfiles({ isFeatured: true });
+      const featuredUsers = await simpleStorage.getUsersWithProfiles({ isFeatured: true });
       
       console.log('Featured users from database:', featuredUsers);
       

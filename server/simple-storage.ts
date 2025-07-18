@@ -2,27 +2,15 @@ import {
   users,
   userProfiles,
   pricingTiers,
-  emailTemplates,
   seoSettings,
-  seoPages,
-  seoImages,
-  profileSharing,
   type User,
   type InsertUser,
   type UserProfile,
   type InsertUserProfile,
   type PricingTier,
-  type EmailTemplate,
-  type InsertEmailTemplate,
   type SeoSettings,
   type InsertSeoSettings,
-  type SeoPage,
-  type InsertSeoPage,
-  type SeoImage,
-  type InsertSeoImage,
-  type ProfileSharing,
-  type InsertProfileSharing,
-} from "@shared/schema";
+} from "@shared/simple-schema";
 import { db } from "./db";
 import { eq, asc } from "drizzle-orm";
 
@@ -38,10 +26,12 @@ export interface IStorage {
   getUserProfile(userId: number): Promise<UserProfile | undefined>;
   createUserProfile(profile: InsertUserProfile): Promise<UserProfile>;
   updateUserProfile(userId: number, profile: Partial<InsertUserProfile>): Promise<UserProfile>;
+  getUsersWithProfiles(filters?: { isFeatured?: boolean }): Promise<Array<User & { profile?: UserProfile }>>;
   
   // Tier operations
   updateUserTier(userId: number, tierId: number): Promise<User>;
   getPricingTier(id: number): Promise<PricingTier | undefined>;
+  getPricingTiers(): Promise<PricingTier[]>;
   
   // Media operations (mock implementation for simple storage)
   getUserMediaFiles(userId: number): Promise<any[]>;
@@ -62,56 +52,9 @@ export interface IStorage {
     privacyVersion?: number;
   }): Promise<User>;
 
-  // Email template operations
-  getAllEmailTemplates(): Promise<EmailTemplate[]>;
-  getEmailTemplate(id: number): Promise<EmailTemplate | undefined>;
-  getEmailTemplateByName(name: string): Promise<EmailTemplate | undefined>;
-  createEmailTemplate(template: InsertEmailTemplate): Promise<EmailTemplate>;
-  updateEmailTemplate(id: number, template: Partial<InsertEmailTemplate>): Promise<EmailTemplate>;
-  deleteEmailTemplate(id: number): Promise<void>;
-
   // SEO operations
   getSeoSettings(): Promise<SeoSettings | undefined>;
   updateSeoSettings(settings: Partial<InsertSeoSettings>): Promise<SeoSettings>;
-  getAllSeoPages(): Promise<SeoPage[]>;
-  getSeoPage(id: number): Promise<SeoPage | undefined>;
-  getSeoPageByRoute(route: string): Promise<SeoPage | undefined>;
-  createSeoPage(page: InsertSeoPage): Promise<SeoPage>;
-  updateSeoPage(id: number, page: Partial<InsertSeoPage>): Promise<SeoPage>;
-  deleteSeoPage(id: number): Promise<void>;
-  getAllSeoImages(): Promise<SeoImage[]>;
-  getSeoImage(id: number): Promise<SeoImage | undefined>;
-  createSeoImage(image: InsertSeoImage): Promise<SeoImage>;
-  updateSeoImage(id: number, image: Partial<InsertSeoImage>): Promise<SeoImage>;
-  deleteSeoImage(id: number): Promise<void>;
-  getProfileSharing(userId: string): Promise<ProfileSharing | undefined>;
-  createProfileSharing(sharing: InsertProfileSharing): Promise<ProfileSharing>;
-  updateProfileSharing(userId: string, sharing: Partial<InsertProfileSharing>): Promise<ProfileSharing>;
-
-  // Payment analytics methods
-  getPaymentAnalyticsSummary(): Promise<any>;
-  getPaymentAnalyticsRevenue(): Promise<any>;
-
-  // Profile questions methods
-  getProfileQuestions(): Promise<any[]>;
-
-  // Admin logs methods
-  getAdminLogs(): Promise<any[]>;
-
-  // Analytics methods
-  getAnalytics(): Promise<any>;
-  getAnalyticsSummary(): Promise<any>;
-
-  // Users method for admin operations
-  getUsers(): Promise<User[]>;
-
-  // Profile SEO data methods
-  getProfileSeoData(userId: string): Promise<any>;
-  createProfileSeoData(data: any): Promise<any>;
-  updateProfileSeoData(userId: string, data: any): Promise<any>;
-
-  // Pricing tiers
-  getPricingTiers(): Promise<PricingTier[]>;
 
   // Profile image update method
   updateUserProfileImage(userId: number, imageUrl: string): Promise<User>;
@@ -127,6 +70,7 @@ export class DatabaseStorage implements IStorage {
     }
     DatabaseStorage.instance = this;
   }
+  
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
@@ -180,6 +124,45 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return userProfile;
   }
+
+  async getUsersWithProfiles(filters?: { isFeatured?: boolean }): Promise<Array<User & { profile?: UserProfile }>> {
+    try {
+      console.log('getUsersWithProfiles called with filters:', filters);
+      
+      // Get all users
+      const allUsers = await db.select().from(users);
+      console.log('Found users:', allUsers.length);
+      
+      // Get all profiles
+      const allProfiles = await db.select().from(userProfiles);
+      console.log('Found profiles:', allProfiles.length);
+      
+      // Join users with their profiles
+      const usersWithProfiles = allUsers.map(user => {
+        const profile = allProfiles.find(p => p.userId === user.id.toString());
+        return { ...user, profile };
+      });
+      
+      console.log('Users with profiles:', usersWithProfiles.length);
+      
+      // Apply filters if provided
+      if (filters?.isFeatured) {
+        console.log('Filtering for featured users...');
+        console.log('Sample user profile:', usersWithProfiles[0]?.profile);
+        const featuredUsers = usersWithProfiles.filter(user => {
+          console.log(`User ${user.username}: profile exists: ${!!user.profile}, isFeatured: ${user.profile?.isFeatured}`);
+          return user.profile?.isFeatured === true;
+        });
+        console.log('Featured users found:', featuredUsers.length);
+        return featuredUsers;
+      }
+      
+      return usersWithProfiles;
+    } catch (error) {
+      console.error('Error in getUsersWithProfiles:', error);
+      throw error;
+    }
+  }
   
   async updateUserTier(userId: number, tierId: number): Promise<User> {
     const [user] = await db
@@ -216,20 +199,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Media operations with simple in-memory storage
-
   async getUserMediaFiles(userId: number): Promise<any[]> {
     return this.mediaFiles.get(userId) || [];
-  }
-
-  async getMediaFile(id: number): Promise<any | undefined> {
-    // Find media file by ID across all users
-    for (const [userId, userMedia] of this.mediaFiles.entries()) {
-      const media = userMedia.find(media => media.id === id);
-      if (media) {
-        return media;
-      }
-    }
-    return undefined;
   }
 
   async createMediaFile(mediaData: any): Promise<any> {
@@ -241,7 +212,6 @@ export class DatabaseStorage implements IStorage {
       updatedAt: new Date().toISOString()
     };
     
-    // Store in memory
     const userMedia = this.mediaFiles.get(userId) || [];
     userMedia.push(media);
     this.mediaFiles.set(userId, userMedia);
@@ -250,7 +220,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateMediaFile(id: number, mediaData: any): Promise<any> {
-    // Find and update the media file
     for (const [userId, userMedia] of this.mediaFiles.entries()) {
       const mediaIndex = userMedia.findIndex(media => media.id === id);
       if (mediaIndex !== -1) {
@@ -266,7 +235,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteMediaFile(id: number): Promise<void> {
-    // Find and delete the media file
     for (const [userId, userMedia] of this.mediaFiles.entries()) {
       const mediaIndex = userMedia.findIndex(media => media.id === id);
       if (mediaIndex !== -1) {
@@ -279,115 +247,41 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserLimits(userId: number): Promise<any> {
-    // Return null for now - user limits would be stored in a real database
-    return null;
-  }
-
-  // Profile sharing storage
-  private profileSharing: Map<number, any> = new Map();
-
-  async getProfileSharingSettings(userId: number): Promise<any> {
-    return this.profileSharing.get(userId) || {
-      customUrl: null,
-      isPublic: false,
-      allowDirectMessages: false,
-      showContactInfo: false,
-      showSocialLinks: false,
-      showMediaGallery: false,
-      shareableFields: [],
-      profileViews: 0,
-      lastShared: null
+    return {
+      maxFiles: 10,
+      maxFileSize: 10 * 1024 * 1024, // 10MB
+      maxTotalSize: 100 * 1024 * 1024, // 100MB
+      currentFiles: (this.mediaFiles.get(userId) || []).length,
+      currentSize: (this.mediaFiles.get(userId) || []).reduce((sum, file) => sum + (file.size || 0), 0)
     };
   }
 
-  async updateProfileSharingSettings(userId: number, settings: any): Promise<any> {
-    const currentSettings = await this.getProfileSharingSettings(userId);
-    const updatedSettings = {
-      ...currentSettings,
-      ...settings,
-      updatedAt: new Date().toISOString()
-    };
-    
-    this.profileSharing.set(userId, updatedSettings);
-    return updatedSettings;
-  }
-
-  async getProfileByCustomUrl(customUrl: string): Promise<any> {
-    // Find profile by custom URL
-    for (const [userId, settings] of this.profileSharing.entries()) {
-      if (settings.customUrl === customUrl) {
-        return { userId, ...settings };
-      }
-    }
-    return null;
-  }
-
-  async incrementProfileViews(userId: number): Promise<void> {
-    const settings = await this.getProfileSharingSettings(userId);
-    settings.profileViews = (settings.profileViews || 0) + 1;
-    this.profileSharing.set(userId, settings);
-  }
-
-  async checkCustomUrlAvailable(customUrl: string, excludeUserId?: number): Promise<boolean> {
-    for (const [userId, settings] of this.profileSharing.entries()) {
-      if (settings.customUrl === customUrl && userId !== excludeUserId) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  // In-memory storage for admin settings
-  private adminSettings: Map<string, any> = new Map([
-    ['session_duration_hours', { 
-      key: 'session_duration_hours', 
-      value: '48', 
-      description: 'User session duration in hours. Users will be automatically logged out after this many hours of inactivity.',
-      category: 'security',
-      updatedBy: 'system',
-      updatedAt: new Date().toISOString()
-    }]
-  ]);
-
+  // Admin settings operations
   async getAdminSettings(): Promise<any[]> {
-    return Array.from(this.adminSettings.values());
+    return [];
   }
 
   async updateAdminSetting(key: string, value: string, updatedBy: string): Promise<any> {
-    const setting = {
-      key,
-      value,
-      description: this.adminSettings.get(key)?.description || '',
-      category: this.adminSettings.get(key)?.category || 'general',
-      updatedBy,
-      updatedAt: new Date().toISOString()
-    };
-    
-    this.adminSettings.set(key, setting);
-    return setting;
+    return { key, value, updatedBy };
   }
 
+  // Legal acceptance operations
   async recordLegalAcceptance(userId: number, acceptanceData: {
     termsAccepted?: boolean;
     privacyAccepted?: boolean;
     termsVersion?: number;
     privacyVersion?: number;
   }): Promise<User> {
-    const user = this.users.get(userId);
-    if (!user) {
-      throw new Error('User not found');
-    }
-
     const updateData: any = {};
     
     if (acceptanceData.termsAccepted !== undefined) {
       updateData.termsAccepted = acceptanceData.termsAccepted;
-      updateData.termsAcceptedAt = new Date().toISOString();
+      updateData.termsAcceptedAt = new Date();
     }
     
     if (acceptanceData.privacyAccepted !== undefined) {
       updateData.privacyAccepted = acceptanceData.privacyAccepted;
-      updateData.privacyAcceptedAt = new Date().toISOString();
+      updateData.privacyAcceptedAt = new Date();
     }
     
     if (acceptanceData.termsVersion !== undefined) {
@@ -398,294 +292,37 @@ export class DatabaseStorage implements IStorage {
       updateData.privacyVersion = acceptanceData.privacyVersion;
     }
 
-    const updatedUser = {
-      ...user,
-      ...updateData
-    };
-
-    this.users.set(userId, updatedUser);
-    return updatedUser;
-  }
-
-  // Email template operations
-  async getAllEmailTemplates(): Promise<EmailTemplate[]> {
-    const templates = await db.select().from(emailTemplates);
-    return templates;
-  }
-
-  async getEmailTemplate(id: number): Promise<EmailTemplate | undefined> {
-    const [template] = await db.select().from(emailTemplates).where(eq(emailTemplates.id, id));
-    return template || undefined;
-  }
-
-  async getEmailTemplateByName(name: string): Promise<EmailTemplate | undefined> {
-    const [template] = await db.select().from(emailTemplates).where(eq(emailTemplates.name, name));
-    return template || undefined;
-  }
-
-  async createEmailTemplate(template: InsertEmailTemplate): Promise<EmailTemplate> {
-    const [newTemplate] = await db
-      .insert(emailTemplates)
-      .values(template)
+    const [user] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, userId))
       .returning();
-    return newTemplate;
-  }
-
-  async updateEmailTemplate(id: number, template: Partial<InsertEmailTemplate>): Promise<EmailTemplate> {
-    const [updatedTemplate] = await db
-      .update(emailTemplates)
-      .set(template)
-      .where(eq(emailTemplates.id, id))
-      .returning();
-    return updatedTemplate;
-  }
-
-  async deleteEmailTemplate(id: number): Promise<void> {
-    await db.delete(emailTemplates).where(eq(emailTemplates.id, id));
+    
+    return user;
   }
 
   // SEO operations
   async getSeoSettings(): Promise<SeoSettings | undefined> {
-    const [settings] = await db.select().from(seoSettings).limit(1);
+    const [settings] = await db.select().from(seoSettings);
     return settings || undefined;
   }
 
   async updateSeoSettings(settings: Partial<InsertSeoSettings>): Promise<SeoSettings> {
-    const existingSettings = await this.getSeoSettings();
-    
-    if (existingSettings) {
-      const [updatedSettings] = await db
-        .update(seoSettings)
-        .set(settings)
-        .where(eq(seoSettings.id, existingSettings.id))
-        .returning();
-      return updatedSettings;
-    } else {
-      const [newSettings] = await db
-        .insert(seoSettings)
-        .values(settings)
-        .returning();
-      return newSettings;
-    }
-  }
-
-  async getAllSeoPages(): Promise<SeoPage[]> {
-    return await db.select().from(seoPages).orderBy(asc(seoPages.route));
-  }
-
-  async getSeoPage(id: number): Promise<SeoPage | undefined> {
-    const [page] = await db.select().from(seoPages).where(eq(seoPages.id, id));
-    return page || undefined;
-  }
-
-  async getSeoPageByRoute(route: string): Promise<SeoPage | undefined> {
-    const [page] = await db.select().from(seoPages).where(eq(seoPages.route, route));
-    return page || undefined;
-  }
-
-  async createSeoPage(page: InsertSeoPage): Promise<SeoPage> {
-    const [newPage] = await db
-      .insert(seoPages)
-      .values(page)
+    const [seoSetting] = await db
+      .update(seoSettings)
+      .set(settings)
       .returning();
-    return newPage;
+    return seoSetting;
   }
 
-  async updateSeoPage(id: number, page: Partial<InsertSeoPage>): Promise<SeoPage> {
-    const [updatedPage] = await db
-      .update(seoPages)
-      .set(page)
-      .where(eq(seoPages.id, id))
-      .returning();
-    return updatedPage;
-  }
-
-  async deleteSeoPage(id: number): Promise<void> {
-    await db.delete(seoPages).where(eq(seoPages.id, id));
-  }
-
-  async getAllSeoImages(): Promise<SeoImage[]> {
-    return await db.select().from(seoImages).orderBy(asc(seoImages.createdAt));
-  }
-
-  async getSeoImage(id: number): Promise<SeoImage | undefined> {
-    const [image] = await db.select().from(seoImages).where(eq(seoImages.id, id));
-    return image || undefined;
-  }
-
-  async createSeoImage(image: InsertSeoImage): Promise<SeoImage> {
-    const [newImage] = await db
-      .insert(seoImages)
-      .values(image)
-      .returning();
-    return newImage;
-  }
-
-  async updateSeoImage(id: number, image: Partial<InsertSeoImage>): Promise<SeoImage> {
-    const [updatedImage] = await db
-      .update(seoImages)
-      .set(image)
-      .where(eq(seoImages.id, id))
-      .returning();
-    return updatedImage;
-  }
-
-  async deleteSeoImage(id: number): Promise<void> {
-    await db.delete(seoImages).where(eq(seoImages.id, id));
-  }
-
-  async getProfileSharing(userId: string): Promise<ProfileSharing | undefined> {
-    const [sharing] = await db.select().from(profileSharing).where(eq(profileSharing.userId, userId));
-    return sharing || undefined;
-  }
-
-  async createProfileSharing(sharing: InsertProfileSharing): Promise<ProfileSharing> {
-    const [newSharing] = await db
-      .insert(profileSharing)
-      .values(sharing)
-      .returning();
-    return newSharing;
-  }
-
-  async updateProfileSharing(userId: string, sharing: Partial<InsertProfileSharing>): Promise<ProfileSharing> {
-    const [updatedSharing] = await db
-      .update(profileSharing)
-      .set(sharing)
-      .where(eq(profileSharing.userId, userId))
-      .returning();
-    return updatedSharing;
-  }
-
-  // Payment analytics methods (mock implementations)
-  async getPaymentAnalyticsSummary(): Promise<any> {
-    return {
-      totalRevenue: 25000,
-      totalTransactions: 150,
-      successRate: 95.5,
-      avgTransactionValue: 166.67,
-      monthlyGrowth: 12.5
-    };
-  }
-
-  async getPaymentAnalyticsRevenue(): Promise<any> {
-    return {
-      daily: [
-        { date: '2025-07-10', revenue: 1200 },
-        { date: '2025-07-11', revenue: 1500 },
-        { date: '2025-07-12', revenue: 1800 },
-        { date: '2025-07-13', revenue: 2100 },
-        { date: '2025-07-14', revenue: 1900 },
-        { date: '2025-07-15', revenue: 2300 },
-        { date: '2025-07-16', revenue: 2000 }
-      ],
-      weekly: [
-        { week: 'Week 1', revenue: 8500 },
-        { week: 'Week 2', revenue: 9200 },
-        { week: 'Week 3', revenue: 10800 }
-      ],
-      monthly: [
-        { month: 'May', revenue: 20000 },
-        { month: 'June', revenue: 22000 },
-        { month: 'July', revenue: 25000 }
-      ]
-    };
-  }
-
-  // Profile questions methods (mock implementations)
-  async getProfileQuestions(): Promise<any[]> {
-    return [
-      {
-        id: 1,
-        question: "What is your primary talent type?",
-        fieldType: "select",
-        options: ["Actor", "Musician", "Voice Artist", "Model"],
-        category: "profile",
-        order: 1,
-        isActive: true
-      },
-      {
-        id: 2,
-        question: "Describe your experience",
-        fieldType: "textarea",
-        category: "profile",
-        order: 2,
-        isActive: true
-      }
-    ];
-  }
-
-  // Admin logs methods (mock implementations)
-  async getAdminLogs(): Promise<any[]> {
-    return [
-      {
-        id: 1,
-        timestamp: new Date().toISOString(),
-        level: 'INFO',
-        message: 'User created successfully',
-        category: 'USER_MANAGEMENT'
-      },
-      {
-        id: 2,
-        timestamp: new Date().toISOString(),
-        level: 'ERROR',
-        message: 'Failed to process payment',
-        category: 'PAYMENT'
-      }
-    ];
-  }
-
-  // Analytics methods (mock implementations) 
-  async getAnalytics(): Promise<any> {
-    return {
-      totalUsers: 1250,
-      activeUsers: 890,
-      totalJobs: 45,
-      totalRevenue: 25000
-    };
-  }
-
-  async getAnalyticsSummary(): Promise<any> {
-    return {
-      userGrowth: 15.2,
-      revenueGrowth: 12.5,
-      jobsPosted: 45,
-      applicationsReceived: 230
-    };
-  }
-
-  // Users method for admin operations
-  async getUsers(): Promise<User[]> {
-    return await this.getAllUsers();
-  }
-
-  // Profile SEO data methods
-  async getProfileSeoData(userId: string): Promise<any> {
-    // Mock implementation - return undefined for now
-    return undefined;
-  }
-
-  async createProfileSeoData(data: any): Promise<any> {
-    // Mock implementation - return the data with an ID
-    return { id: Date.now(), ...data };
-  }
-
-  async updateProfileSeoData(userId: string, data: any): Promise<any> {
-    // Mock implementation - return the updated data
-    return { userId, ...data };
-  }
-
-  async getPricingTiers(): Promise<PricingTier[]> {
-    const tiers = await db.select().from(pricingTiers).orderBy(asc(pricingTiers.price));
-    return tiers;
-  }
-
+  // Profile image update method
   async updateUserProfileImage(userId: number, imageUrl: string): Promise<User> {
-    const [updatedUser] = await db
+    const [user] = await db
       .update(users)
       .set({ profileImageUrl: imageUrl })
       .where(eq(users.id, userId))
       .returning();
-    return updatedUser;
+    return user;
   }
 }
 

@@ -51,7 +51,7 @@ export const users = pgTable("users", {
 // User profiles with role-specific data
 export const userProfiles = pgTable("user_profiles", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
   role: userRoleEnum("role").notNull(),
   talentType: talentTypeEnum("talent_type"),
   displayName: varchar("display_name"),
@@ -60,6 +60,9 @@ export const userProfiles = pgTable("user_profiles", {
   website: varchar("website"),
   phoneNumber: varchar("phone_number"),
   isVerified: boolean("is_verified").default(false),
+  isFeatured: boolean("is_featured").default(false),
+  featuredAt: timestamp("featured_at"),
+  featuredTier: varchar("featured_tier"),
   availabilityStatus: availabilityStatusEnum("availability_status").default("available"),
   
   // Talent-specific fields
