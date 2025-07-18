@@ -689,7 +689,6 @@ function Onboarding() {
     
     return (
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</Label>
         <Select onValueChange={(value) => addFromDropdown(field, value)}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder={placeholder} />
@@ -725,12 +724,11 @@ function Onboarding() {
     
     return (
       <div className="space-y-2">
-        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</Label>
         <div className="flex space-x-2">
           <Input
             value={newSkill}
             onChange={(e) => setNewSkill(e.target.value)}
-            placeholder={`Add ${label.toLowerCase()}...`}
+            placeholder="Add custom option..."
             className="flex-1"
           />
           <Button type="button" onClick={() => addSkill(field)} variant="outline" size="sm">
@@ -855,7 +853,7 @@ function Onboarding() {
           <Input
             value={typeof currentValue === 'string' ? currentValue : ''}
             onChange={(e) => handleChange(e.target.value)}
-            placeholder={`Enter ${question.question.toLowerCase()}...`}
+            placeholder="Enter your response..."
           />
         );
       
@@ -865,7 +863,7 @@ function Onboarding() {
             type="number"
             value={typeof currentValue === 'string' || typeof currentValue === 'number' ? currentValue : ''}
             onChange={(e) => handleChange(e.target.value)}
-            placeholder={`Enter ${question.question.toLowerCase()}...`}
+            placeholder="Enter a number..."
           />
         );
       
@@ -874,7 +872,7 @@ function Onboarding() {
           <Textarea
             value={typeof currentValue === 'string' ? currentValue : ''}
             onChange={(e) => handleChange(e.target.value)}
-            placeholder={`Enter ${question.question.toLowerCase()}...`}
+            placeholder="Enter your response..."
             rows={3}
           />
         );
@@ -883,7 +881,7 @@ function Onboarding() {
         return (
           <Select onValueChange={handleChange} value={typeof currentValue === 'string' ? currentValue : ''}>
             <SelectTrigger>
-              <SelectValue placeholder={`Select ${question.question.toLowerCase()}...`} />
+              <SelectValue placeholder="Select an option..." />
             </SelectTrigger>
             <SelectContent>
               {question.options?.map((option: string) => (
@@ -900,7 +898,7 @@ function Onboarding() {
           fieldName as keyof OnboardingFormData,
           question.question,
           (question.options || []).map((opt: string) => ({ value: opt, label: opt })),
-          `Select ${question.question.toLowerCase()}...`
+          "Select options..."
         );
       
       case 'multiselect':
@@ -908,7 +906,7 @@ function Onboarding() {
           fieldName as keyof OnboardingFormData,
           question.question,
           (question.options || []).map((opt: string) => ({ value: opt, label: opt })),
-          `Select ${question.question.toLowerCase()}...`
+          "Select options..."
         );
       
       case 'yesno':
@@ -940,7 +938,7 @@ function Onboarding() {
           <Input
             value={typeof currentValue === 'string' ? currentValue : ''}
             onChange={(e) => handleChange(e.target.value)}
-            placeholder={`Enter ${question.question.toLowerCase()}...`}
+            placeholder="Enter your response..."
           />
         );
     }
