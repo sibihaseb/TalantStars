@@ -211,11 +211,11 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/jobs"],
   });
 
-  const { data: analytics = [], isLoading: analyticsLoading } = useQuery<Analytics[]>({
+  const { data: analytics = { userGrowth: [], jobActivity: [], applicationTrends: [], paymentVolume: [] }, isLoading: analyticsLoading } = useQuery<{userGrowth: any[], jobActivity: any[], applicationTrends: any[], paymentVolume: any[]}>({
     queryKey: ["/api/admin/analytics"],
   });
 
-  const { data: analyticsSummary = [], isLoading: summaryLoading } = useQuery<{event: string; count: number}[]>({
+  const { data: analyticsSummary = { totalUsers: 0, totalJobs: 0, totalApplications: 0, totalPayments: 0 }, isLoading: summaryLoading } = useQuery<{totalUsers: number; totalJobs: number; totalApplications: number; totalPayments: number}>({
     queryKey: ["/api/admin/analytics/summary"],
   });
 
@@ -3368,53 +3368,52 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm">Total Events</CardTitle>
+                      <CardTitle className="text-sm">Total Users</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{analytics.length}</div>
+                      <div className="text-2xl font-bold">{analyticsSummary.totalUsers}</div>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm">Event Types</CardTitle>
+                      <CardTitle className="text-sm">Total Jobs</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{analyticsSummary.length}</div>
+                      <div className="text-2xl font-bold">{analyticsSummary.totalJobs}</div>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm">Top Event</CardTitle>
+                      <CardTitle className="text-sm">Total Applications</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-lg font-bold">
-                        {analyticsSummary[0]?.event || "N/A"}
-                      </div>
+                      <div className="text-2xl font-bold">{analyticsSummary.totalApplications}</div>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm">Today's Events</CardTitle>
+                      <CardTitle className="text-sm">Total Payments</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">
-                        {analytics.filter(a => 
-                          new Date(a.createdAt).toDateString() === new Date().toDateString()
-                        ).length}
-                      </div>
+                      <div className="text-2xl font-bold">{analyticsSummary.totalPayments}</div>
                     </CardContent>
                   </Card>
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Event Summary</h3>
+                  <h3 className="text-lg font-semibold">Platform Summary</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {analyticsSummary.map((event, index) => (
+                    {[
+                      { name: "Users", value: analyticsSummary.totalUsers },
+                      { name: "Jobs", value: analyticsSummary.totalJobs },
+                      { name: "Applications", value: analyticsSummary.totalApplications },
+                      { name: "Payments", value: analyticsSummary.totalPayments }
+                    ].map((item, index) => (
                       <Card key={index}>
                         <CardContent className="pt-4">
                           <div className="flex items-center justify-between">
-                            <span className="font-medium">{event.event}</span>
-                            <Badge variant="secondary">{event.count} events</Badge>
+                            <span className="font-medium">{item.name}</span>
+                            <Badge variant="secondary">{item.value} total</Badge>
                           </div>
                         </CardContent>
                       </Card>
