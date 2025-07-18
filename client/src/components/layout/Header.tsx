@@ -16,9 +16,9 @@ export function Header() {
 
   const navigation = [
     { name: "Find Talent", href: "/search", icon: Search },
+    { name: "Featured Talents", href: "/featured-talents", icon: Star },
     { name: "Browse Jobs", href: "/jobs", icon: Briefcase },
     { name: "Post Gig", href: "/post-gig", icon: Plus },
-    { name: "How it Works", href: "/how-it-works", icon: null },
   ];
 
   const isActive = (href: string) => location === href;

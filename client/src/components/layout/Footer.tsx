@@ -99,6 +99,11 @@ export function Footer() {
             <h4 className="text-lg font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-gray-300">
               <li>
+                <Link href="/how-it-works" className="hover:text-white transition-colors">
+                  How it Works
+                </Link>
+              </li>
+              <li>
                 <Link href="/help" className="hover:text-white transition-colors">
                   Help Center
                 </Link>

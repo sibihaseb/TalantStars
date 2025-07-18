@@ -4495,7 +4495,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Select tier request:', { userId, tierId });
       
       // Get tier information
-      const tiers = await simpleStorage.getPricingTiers();
+      const tiers = await storage.getPricingTiers();
       const tier = tiers.find(t => t.id === tierId);
       
       console.log('Found tier:', tier);
@@ -4509,7 +4509,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (parseFloat(tier.price) === 0) {
         console.log('Processing free tier selection for user:', userId);
         // For free tiers, directly update the user
-        const updatedUser = await simpleStorage.updateUserTier(userId, tierId);
+        const updatedUser = await storage.updateUserTier(userId, tierId);
         console.log('Updated user:', updatedUser);
         res.json(updatedUser);
       } else {
