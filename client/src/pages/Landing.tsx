@@ -12,7 +12,8 @@ import starBg from '@assets/PNG FILE 9_1752709598561.png';
 import { 
   Star, 
   Play, 
-  CheckCircle, 
+  CheckCircle,
+  ShieldCheck, 
   Users, 
   Video, 
   Search,
@@ -265,7 +266,7 @@ export default function Landing() {
                     {talent.verified && (
                       <div className="absolute top-4 right-4">
                         <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                          <CheckCircle className="h-5 w-5 text-white fill-current" />
+                          <ShieldCheck className="h-5 w-5 text-white fill-current" />
                         </div>
                       </div>
                     )}

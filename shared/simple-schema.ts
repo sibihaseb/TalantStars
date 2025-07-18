@@ -258,8 +258,27 @@ export const seoSettings = pgTable("seo_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Talent types table for dynamic talent type management
+export const talentTypes = pgTable("talent_types", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  displayName: varchar("display_name").notNull(),
+  description: text("description"),
+  category: varchar("category").notNull(),
+  isActive: boolean("is_active").default(true),
+  questionCount: integer("question_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertSeoSettingsSchema = createInsertSchema(seoSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTalentTypeSchema = createInsertSchema(talentTypes).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -278,3 +297,5 @@ export type FeaturedTalent = typeof featuredTalents.$inferSelect;
 export type InsertFeaturedTalent = z.infer<typeof insertFeaturedTalentSchema>;
 export type SeoSettings = typeof seoSettings.$inferSelect;
 export type InsertSeoSettings = z.infer<typeof insertSeoSettingsSchema>;
+export type TalentType = typeof talentTypes.$inferSelect;
+export type InsertTalentType = z.infer<typeof insertTalentTypeSchema>;

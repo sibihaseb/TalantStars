@@ -2527,6 +2527,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Talent type management routes
+  app.get('/api/admin/talent-types', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const talentTypes = await simpleStorage.getTalentTypes();
+      res.json(talentTypes);
+    } catch (error) {
+      console.error("Error fetching talent types:", error);
+      res.status(500).json({ message: "Failed to fetch talent types" });
+    }
+  });
+
+  app.post('/api/admin/talent-types', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      console.log("Creating talent type:", req.body);
+      const talentType = await simpleStorage.createTalentType(req.body);
+      res.json(talentType);
+    } catch (error) {
+      console.error("Error creating talent type:", error);
+      res.status(500).json({ message: "Failed to create talent type", error: error.message });
+    }
+  });
+
+  app.put('/api/admin/talent-types/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const talentTypeId = parseInt(req.params.id);
+      const talentType = await simpleStorage.updateTalentType(talentTypeId, req.body);
+      res.json(talentType);
+    } catch (error) {
+      console.error("Error updating talent type:", error);
+      res.status(500).json({ message: "Failed to update talent type" });
+    }
+  });
+
+  app.delete('/api/admin/talent-types/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const talentTypeId = parseInt(req.params.id);
+      await simpleStorage.deleteTalentType(talentTypeId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting talent type:", error);
+      res.status(500).json({ message: "Failed to delete talent type" });
+    }
+  });
+
   // Email campaigns management routes
   app.get('/api/admin/email-campaigns', isAuthenticated, isAdmin, async (req: any, res) => {
     try {

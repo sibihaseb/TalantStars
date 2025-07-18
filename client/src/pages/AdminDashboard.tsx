@@ -68,6 +68,7 @@ import DragDropQuestionsManager from "@/components/admin/DragDropQuestionsManage
 import SeoManagement from "@/components/admin/SeoManagement";
 import AutomatedTesting from "@/components/admin/AutomatedTesting";
 import TalentCategoriesManagement from "@/components/admin/TalentCategoriesManagement";
+import TalentTypeManagement from "@/components/admin/TalentTypeManagement";
 
 interface User {
   id: string;
@@ -834,6 +835,17 @@ export default function AdminDashboard() {
                   >
                     <FileText className="w-4 h-4" />
                     <span>Questions</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('talent-types')}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      activeTab === 'talent-types' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>Talent Types</span>
                   </button>
                 </div>
               </div>
@@ -3769,6 +3781,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="talent-categories" className="space-y-6">
             <TalentCategoriesManagement />
+          </TabsContent>
+
+          <TabsContent value="talent-types" className="space-y-6">
+            <TalentTypeManagement />
           </TabsContent>
 
           <TabsContent value="limits" className="space-y-6">

@@ -5,6 +5,7 @@ import {
   seoSettings,
   talentCategories,
   featuredTalents,
+  talentTypes,
   type User,
   type InsertUser,
   type UserProfile,
@@ -16,6 +17,8 @@ import {
   type InsertTalentCategory,
   type FeaturedTalent,
   type InsertFeaturedTalent,
+  type TalentType,
+  type InsertTalentType,
 } from "@shared/simple-schema";
 import { db } from "./db";
 import { eq, asc } from "drizzle-orm";
@@ -77,6 +80,12 @@ export interface IStorage {
   updateFeaturedTalent(id: number, featured: Partial<InsertFeaturedTalent>): Promise<FeaturedTalent>;
   deleteFeaturedTalent(id: number): Promise<void>;
   updateFeaturedTalentOrder(updates: Array<{ id: number; displayOrder: number }>): Promise<void>;
+
+  // Talent types operations
+  getTalentTypes(): Promise<TalentType[]>;
+  createTalentType(talentType: InsertTalentType): Promise<TalentType>;
+  updateTalentType(id: number, talentType: Partial<InsertTalentType>): Promise<TalentType>;
+  deleteTalentType(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -414,6 +423,36 @@ export class DatabaseStorage implements IStorage {
         .set({ displayOrder: update.displayOrder })
         .where(eq(featuredTalents.id, update.id));
     }
+  }
+
+  // Talent types operations
+  async getTalentTypes(): Promise<TalentType[]> {
+    const results = await db
+      .select()
+      .from(talentTypes)
+      .orderBy(asc(talentTypes.displayName));
+    return results;
+  }
+
+  async createTalentType(talentType: InsertTalentType): Promise<TalentType> {
+    const [newTalentType] = await db
+      .insert(talentTypes)
+      .values(talentType)
+      .returning();
+    return newTalentType;
+  }
+
+  async updateTalentType(id: number, talentType: Partial<InsertTalentType>): Promise<TalentType> {
+    const [updatedTalentType] = await db
+      .update(talentTypes)
+      .set(talentType)
+      .where(eq(talentTypes.id, id))
+      .returning();
+    return updatedTalentType;
+  }
+
+  async deleteTalentType(id: number): Promise<void> {
+    await db.delete(talentTypes).where(eq(talentTypes.id, id));
   }
 }
 
