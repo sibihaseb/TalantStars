@@ -593,10 +593,13 @@ function Onboarding() {
         queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
         toast({
           title: "🎉 Welcome to Talents & Stars!",
-          description: "Your profile has been created successfully. Time to choose your plan!",
+          description: "Your profile has been created successfully. You'll now be redirected to your dashboard!",
         });
-        setShowPricingSelection(true);
         setShowCelebration(false);
+        // Redirect to dashboard for verification and full platform access
+        setTimeout(() => {
+          setLocation("/dashboard");
+        }, 500);
       }, 1000);
     },
     onError: (error) => {
@@ -1942,8 +1945,8 @@ function Onboarding() {
                 userRole={user?.role || 'talent'}
                 onComplete={() => {
                   setShowPricingSelection(false);
-                  // Continue with profile completion instead of going to home
-                  // The user is already in onboarding, so we'll continue here
+                  // Redirect to dashboard after plan selection
+                  setLocation("/dashboard");
                 }}
               />
             </div>

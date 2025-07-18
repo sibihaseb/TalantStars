@@ -212,10 +212,19 @@ export default function TalentDashboard() {
         }
         break;
       case 'verification':
-        toast({
-          title: "Verification",
-          description: "Contact support to complete verification process",
-        });
+        if (!item.completed) {
+          toast({
+            title: "Verification Process",
+            description: "Your profile is complete! Admin verification is the final step to unlock all platform features.",
+          });
+          // Show verification status or guide user to verification section
+          setActiveTab('overview');
+        } else {
+          toast({
+            title: "Already Verified",
+            description: "Your profile has been successfully verified by our admin team.",
+          });
+        }
         break;
       default:
         // For any other incomplete items, navigate to onboarding
