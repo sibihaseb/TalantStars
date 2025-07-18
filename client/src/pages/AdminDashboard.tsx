@@ -185,6 +185,17 @@ export default function AdminDashboard() {
   const [emailTemplate, setEmailTemplate] = useState("");
   const [emailSubject, setEmailSubject] = useState("");
   const [selectedUserGroups, setSelectedUserGroups] = useState<string[]>([]);
+  const [userPermissions, setUserPermissions] = useState({
+    'admin-users': false,
+    'admin-jobs': false,
+    'admin-settings': false,
+    'admin-analytics': false,
+    'content-create': false,
+    'content-edit': false,
+    'content-delete': false,
+    'content-publish': false,
+  });
+  const [selectedProjectType, setSelectedProjectType] = useState("");
 
   // Fetch all data
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
@@ -562,7 +573,7 @@ export default function AdminDashboard() {
     const matchesSearch = user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.lastName?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = filterRole === "all" || user.profile?.role === filterRole;
+    const matchesRole = filterRole === "all" || user.role === filterRole;
     return matchesSearch && matchesRole;
   });
 
@@ -645,6 +656,51 @@ export default function AdminDashboard() {
       updateUserMutation.mutate({ userId: editingUser.id, userData });
     } else {
       createUserMutation.mutate(userData);
+    }
+  };
+
+  const handleSavePermissions = async () => {
+    try {
+      if (!selectedUserForPermissions) return;
+      
+      // Create permissions array from checked items
+      const permissions = Object.entries(userPermissions)
+        .filter(([_, granted]) => granted)
+        .map(([permission, _]) => {
+          const [category, action] = permission.split('-');
+          return {
+            category: category.toUpperCase(),
+            action: action.toUpperCase(),
+            resource: 'all',
+            granted: true
+          };
+        });
+
+      await apiRequest('POST', `/api/admin/users/${selectedUserForPermissions.id}/permissions`, { permissions });
+      
+      toast({
+        title: "Success",
+        description: "Permissions saved successfully",
+      });
+      
+      setIsPermissionsDialogOpen(false);
+      setSelectedUserForPermissions(null);
+      setUserPermissions({
+        'admin-users': false,
+        'admin-jobs': false,
+        'admin-settings': false,
+        'admin-analytics': false,
+        'content-create': false,
+        'content-edit': false,
+        'content-delete': false,
+        'content-publish': false,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save permissions",
+        variant: "destructive",
+      });
     }
   };
 
@@ -1221,8 +1277,8 @@ export default function AdminDashboard() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={user.profile?.role === "admin" ? "default" : "secondary"}>
-                              {user.profile?.role || "No Role"}
+                            <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                              {user.role || "No Role"}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -1398,19 +1454,31 @@ export default function AdminDashboard() {
                       <h4 className="font-medium mb-2">Admin Permissions</h4>
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="admin-users" />
+                          <input type="checkbox" id="admin-users" 
+                            checked={userPermissions['admin-users']}
+                            onChange={(e) => setUserPermissions({...userPermissions, 'admin-users': e.target.checked})}
+                          />
                           <Label htmlFor="admin-users">Manage Users</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="admin-jobs" />
+                          <input type="checkbox" id="admin-jobs" 
+                            checked={userPermissions['admin-jobs']}
+                            onChange={(e) => setUserPermissions({...userPermissions, 'admin-jobs': e.target.checked})}
+                          />
                           <Label htmlFor="admin-jobs">Manage Jobs</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="admin-settings" />
+                          <input type="checkbox" id="admin-settings" 
+                            checked={userPermissions['admin-settings']}
+                            onChange={(e) => setUserPermissions({...userPermissions, 'admin-settings': e.target.checked})}
+                          />
                           <Label htmlFor="admin-settings">System Settings</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="admin-analytics" />
+                          <input type="checkbox" id="admin-analytics" 
+                            checked={userPermissions['admin-analytics']}
+                            onChange={(e) => setUserPermissions({...userPermissions, 'admin-analytics': e.target.checked})}
+                          />
                           <Label htmlFor="admin-analytics">View Analytics</Label>
                         </div>
                       </div>
@@ -1419,19 +1487,31 @@ export default function AdminDashboard() {
                       <h4 className="font-medium mb-2">Content Permissions</h4>
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="content-create" />
+                          <input type="checkbox" id="content-create" 
+                            checked={userPermissions['content-create']}
+                            onChange={(e) => setUserPermissions({...userPermissions, 'content-create': e.target.checked})}
+                          />
                           <Label htmlFor="content-create">Create Content</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="content-edit" />
+                          <input type="checkbox" id="content-edit" 
+                            checked={userPermissions['content-edit']}
+                            onChange={(e) => setUserPermissions({...userPermissions, 'content-edit': e.target.checked})}
+                          />
                           <Label htmlFor="content-edit">Edit Content</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="content-delete" />
+                          <input type="checkbox" id="content-delete" 
+                            checked={userPermissions['content-delete']}
+                            onChange={(e) => setUserPermissions({...userPermissions, 'content-delete': e.target.checked})}
+                          />
                           <Label htmlFor="content-delete">Delete Content</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="content-publish" />
+                          <input type="checkbox" id="content-publish" 
+                            checked={userPermissions['content-publish']}
+                            onChange={(e) => setUserPermissions({...userPermissions, 'content-publish': e.target.checked})}
+                          />
                           <Label htmlFor="content-publish">Publish Content</Label>
                         </div>
                       </div>
@@ -1441,7 +1521,7 @@ export default function AdminDashboard() {
                     <Button type="button" variant="outline" onClick={() => setIsPermissionsDialogOpen(false)}>
                       Cancel
                     </Button>
-                    <Button type="button">
+                    <Button type="button" onClick={() => handleSavePermissions()}>
                       Save Permissions
                     </Button>
                   </div>
@@ -1536,7 +1616,7 @@ export default function AdminDashboard() {
 
             {/* Job Create/Edit Dialog */}
             <Dialog open={isEditingJob} onOpenChange={setIsEditingJob}>
-              <DialogContent>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingJob ? 'Edit Job' : 'Create Job'}
@@ -1546,7 +1626,7 @@ export default function AdminDashboard() {
                   e.preventDefault();
                   handleSaveJob(new FormData(e.currentTarget));
                 }}>
-                  <div className="space-y-4">
+                  <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4">
                     <div>
                       <Label htmlFor="title">Job Title</Label>
                       <Input
@@ -1620,6 +1700,7 @@ export default function AdminDashboard() {
                         <select 
                           name="projectType" 
                           defaultValue={editingJob?.projectType || ""}
+                          onChange={(e) => setSelectedProjectType(e.target.value)}
                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <option value="">Select project type</option>
@@ -1647,24 +1728,45 @@ export default function AdminDashboard() {
                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <option value="">Select genre</option>
-                          <option value="drama">Drama</option>
-                          <option value="comedy">Comedy</option>
-                          <option value="action">Action</option>
-                          <option value="thriller">Thriller</option>
-                          <option value="horror">Horror</option>
-                          <option value="romance">Romance</option>
-                          <option value="sci-fi">Sci-Fi</option>
-                          <option value="fantasy">Fantasy</option>
-                          <option value="documentary">Documentary</option>
-                          <option value="musical">Musical</option>
-                          <option value="animation">Animation</option>
-                          <option value="reality">Reality TV</option>
-                          <option value="other">Other</option>
+                          {/* Dynamic options based on project type */}
+                          {selectedProjectType === "modeling" ? (
+                            <>
+                              <option value="fashion">Fashion</option>
+                              <option value="commercial">Commercial</option>
+                              <option value="editorial">Editorial</option>
+                              <option value="runway">Runway</option>
+                              <option value="beauty">Beauty</option>
+                              <option value="lifestyle">Lifestyle</option>
+                              <option value="fitness">Fitness</option>
+                              <option value="swimwear">Swimwear</option>
+                              <option value="lingerie">Lingerie</option>
+                              <option value="catalog">Catalog</option>
+                              <option value="plus-size">Plus Size</option>
+                              <option value="mature">Mature</option>
+                              <option value="parts">Parts (Hands/Feet)</option>
+                            </>
+                          ) : (
+                            <>
+                              <option value="drama">Drama</option>
+                              <option value="comedy">Comedy</option>
+                              <option value="action">Action</option>
+                              <option value="thriller">Thriller</option>
+                              <option value="horror">Horror</option>
+                              <option value="romance">Romance</option>
+                              <option value="sci-fi">Sci-Fi</option>
+                              <option value="fantasy">Fantasy</option>
+                              <option value="documentary">Documentary</option>
+                              <option value="musical">Musical</option>
+                              <option value="animation">Animation</option>
+                              <option value="reality">Reality TV</option>
+                              <option value="other">Other</option>
+                            </>
+                          )}
                         </select>
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                       <div>
                         <Label htmlFor="ageRange">Age Range</Label>
                         <Input
@@ -1685,6 +1787,25 @@ export default function AdminDashboard() {
                           <option value="female">Female</option>
                           <option value="non-binary">Non-Binary</option>
                           <option value="any">Any</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="ethnicity">Ethnicity</Label>
+                        <select 
+                          name="ethnicity" 
+                          defaultValue={editingJob?.ethnicity || ""}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <option value="">Any</option>
+                          <option value="white">White</option>
+                          <option value="black">Black/African American</option>
+                          <option value="hispanic">Hispanic/Latino</option>
+                          <option value="asian">Asian</option>
+                          <option value="native-american">Native American</option>
+                          <option value="pacific-islander">Pacific Islander</option>
+                          <option value="middle-eastern">Middle Eastern</option>
+                          <option value="mixed">Mixed/Multi-racial</option>
+                          <option value="other">Other</option>
                         </select>
                       </div>
                     </div>
@@ -1827,11 +1948,11 @@ export default function AdminDashboard() {
                       <Label htmlFor="isPublic">Public Job</Label>
                     </div>
                   </div>
-                  <div className="flex justify-end space-x-2 mt-6">
+                  <div className="flex justify-end space-x-2 mt-6 pt-4 border-t bg-white dark:bg-gray-800 sticky bottom-0">
                     <Button type="button" variant="outline" onClick={() => setIsEditingJob(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit">
+                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
                       {editingJob ? 'Update Job' : 'Create Job'}
                     </Button>
                   </div>
