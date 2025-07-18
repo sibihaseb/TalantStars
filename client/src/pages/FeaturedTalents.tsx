@@ -71,7 +71,7 @@ export default function FeaturedTalents() {
   const [selectedTalentType, setSelectedTalentType] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('rating');
 
-  const { data: featuredTalents = [], isLoading: talentsLoading } = useQuery<FeaturedTalent[]>({
+  const { data: featuredTalents = [], isLoading: talentsLoading, error } = useQuery<FeaturedTalent[]>({
     queryKey: ['/api/featured-talents'],
   });
 
@@ -100,6 +100,12 @@ export default function FeaturedTalents() {
         return 0;
     }
   });
+
+  // Debug logging
+  console.log('Featured talents query:', { featuredTalents, talentsLoading, error });
+  console.log('Featured talents length:', featuredTalents?.length);
+  console.log('Filtered talents length:', filteredTalents?.length);
+  console.log('Sorted talents length:', sortedTalents?.length);
 
   if (talentsLoading || categoriesLoading) {
     return (
