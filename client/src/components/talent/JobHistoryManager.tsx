@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -148,6 +148,11 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
   const [items, setItems] = useState(jobHistory);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<JobHistoryItem | null>(null);
+  
+  // Update items when jobHistory prop changes to prevent excessive re-renders
+  useEffect(() => {
+    setItems(jobHistory);
+  }, [jobHistory]);
   const [formData, setFormData] = useState({
     title: '',
     company: '',

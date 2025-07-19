@@ -586,10 +586,32 @@ export class DatabaseStorage implements IStorage {
 
   async createJobHistory(jobData: any): Promise<any> {
     try {
-      // Simple query without parameters to fix the parameter issue
+      // Clean date values - convert 'undefined' strings to NULL
+      const startDate = jobData.startDate && jobData.startDate !== 'undefined' ? `'${jobData.startDate}'` : 'NULL';
+      const endDate = jobData.endDate && jobData.endDate !== 'undefined' ? `'${jobData.endDate}'` : 'NULL';
+      const description = jobData.description && jobData.description !== 'undefined' ? `'${jobData.description.replace(/'/g, "''")}'` : 'NULL';
+      const jobType = jobData.jobType && jobData.jobType !== 'undefined' ? `'${jobData.jobType}'` : "'film'";
+      const location = jobData.location && jobData.location !== 'undefined' ? `'${jobData.location.replace(/'/g, "''")}'` : 'NULL';
+      
+      console.log("🔥 DATABASE: Creating job history with cleaned data", {
+        userId: jobData.userId,
+        title: jobData.title,
+        company: jobData.company,
+        role: jobData.role,
+        startDate,
+        endDate,
+        description,
+        jobType,
+        location
+      });
+      
       const result = await db.execute(
-        `INSERT INTO job_history (user_id, title, company, role, start_date, end_date, description) VALUES (${jobData.userId}, '${jobData.title}', '${jobData.company}', '${jobData.role}', '${jobData.startDate}', '${jobData.endDate}', '${jobData.description}') RETURNING *`
+        `INSERT INTO job_history (user_id, title, company, role, start_date, end_date, description, job_type, location) 
+         VALUES (${jobData.userId}, '${jobData.title}', '${jobData.company}', '${jobData.role}', ${startDate}, ${endDate}, ${description}, ${jobType}, ${location}) 
+         RETURNING *`
       );
+      
+      console.log("🔥 DATABASE: Insert successful", result.rows?.[0]);
       return result.rows?.[0] || {};
     } catch (error) {
       console.error('Database job history creation error:', error);
@@ -598,9 +620,20 @@ export class DatabaseStorage implements IStorage {
       const jobs = this.jobHistory.get(userId) || [];
       const job = {
         id: Date.now(),
-        ...jobData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        user_id: userId,
+        title: jobData.title,
+        company: jobData.company,
+        role: jobData.role,
+        start_date: jobData.startDate && jobData.startDate !== 'undefined' ? jobData.startDate : null,
+        end_date: jobData.endDate && jobData.endDate !== 'undefined' ? jobData.endDate : null,
+        description: jobData.description || null,
+        job_type: jobData.jobType || 'film',
+        location: jobData.location || null,
+        verified: false,
+        ai_enhanced: false,
+        skill_validations: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
       jobs.push(job);
       this.jobHistory.set(userId, jobs);

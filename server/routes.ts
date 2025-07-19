@@ -4975,15 +4975,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/job-history', isAuthenticated, async (req: any, res) => {
     try {
       const userId = parseInt(req.user.id);
+      
+      // Clean and validate date fields
+      const startDate = req.body.start_date || req.body.startDate;
+      const endDate = req.body.end_date || req.body.endDate;
+      
+      console.log("🔥 CREATE ROUTE: Raw data from frontend", {
+        body: req.body,
+        startDate,
+        endDate
+      });
+      
       const jobData = {
         userId,
-        title: req.body.title,
-        company: req.body.company,
-        role: req.body.role,
-        startDate: req.body.startDate,
-        endDate: req.body.endDate,
-        description: req.body.description
+        title: req.body.title || '',
+        company: req.body.company || '',
+        role: req.body.role || '',
+        startDate: startDate && startDate !== 'undefined' ? startDate : null,
+        endDate: endDate && endDate !== 'undefined' ? endDate : null,
+        description: req.body.description || '',
+        jobType: req.body.job_type || req.body.jobType || 'film',
+        location: req.body.location || ''
       };
+      
+      console.log("🔥 CREATE ROUTE: Cleaned data for database", jobData);
       
       const jobHistory = await simpleStorage.createJobHistory(jobData);
       res.json(jobHistory);
