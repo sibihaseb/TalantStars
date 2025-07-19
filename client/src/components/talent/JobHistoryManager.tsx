@@ -110,7 +110,10 @@ function SortableJobItem({ job, onEdit, onDelete, onEnhance, onValidateSkills }:
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onEdit(job)}
+                onClick={() => {
+                  console.log("🔥 JOBHISTORYMANAGER: Edit button clicked", { jobId: job.id });
+                  onEdit(job);
+                }}
                 className="h-8 w-8 p-0"
               >
                 <Edit className="w-3 h-3" />
@@ -118,7 +121,10 @@ function SortableJobItem({ job, onEdit, onDelete, onEnhance, onValidateSkills }:
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onDelete(job.id)}
+                onClick={() => {
+                  console.log("🔥 JOBHISTORYMANAGER: Delete button clicked", { jobId: job.id });
+                  onDelete(job.id);
+                }}
                 className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
               >
                 <Trash className="w-3 h-3" />
@@ -209,28 +215,42 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
     mutationFn: async (jobData: any) => {
       const method = editingJob ? 'PUT' : 'POST';
       const url = editingJob ? `/api/job-history/${editingJob.id}` : '/api/job-history';
+      console.log("🔥 JOBHISTORYMANAGER: saveJobMutation calling API", { method, url, jobData });
       const response = await apiRequest(method, url, jobData);
+      console.log("🔥 JOBHISTORYMANAGER: API response received", { status: response.status });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("🔥 JOBHISTORYMANAGER: saveJobMutation success", { data });
       queryClient.invalidateQueries({ queryKey: [`/api/job-history/${userId}`] });
       onJobUpdated();
       resetForm();
       setIsDialogOpen(false);
       toast({ title: editingJob ? "Experience updated!" : "Experience added!" });
+    },
+    onError: (error) => {
+      console.log("🔥 JOBHISTORYMANAGER: saveJobMutation error", { error });
+      toast({ title: "Failed to save experience", variant: "destructive" });
     }
   });
 
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (jobId: number) => {
+      console.log("🔥 JOBHISTORYMANAGER: deleteMutation calling API", { jobId });
       const response = await apiRequest('DELETE', `/api/job-history/${jobId}`);
+      console.log("🔥 JOBHISTORYMANAGER: Delete API response received", { status: response.status });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("🔥 JOBHISTORYMANAGER: deleteMutation success", { data });
       queryClient.invalidateQueries({ queryKey: [`/api/job-history/${userId}`] });
       onJobUpdated();
       toast({ title: "Experience deleted!" });
+    },
+    onError: (error) => {
+      console.log("🔥 JOBHISTORYMANAGER: deleteMutation error", { error });
+      toast({ title: "Failed to delete experience", variant: "destructive" });
     }
   });
 
@@ -266,6 +286,7 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
   };
 
   const handleEdit = (job: JobHistoryItem) => {
+    console.log("🔥 JOBHISTORYMANAGER: handleEdit called", { job });
     setEditingJob(job);
     setFormData({
       title: job.title,
@@ -278,18 +299,28 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
       location: job.location || ''
     });
     setIsDialogOpen(true);
+    console.log("🔥 JOBHISTORYMANAGER: Dialog should be open now");
   };
 
   const handleSave = () => {
+    console.log("🔥 JOBHISTORYMANAGER: handleSave called", { formData, editingJob });
     if (!formData.title || !formData.company || !formData.role) {
+      console.log("🔥 JOBHISTORYMANAGER: Missing required fields", {
+        title: formData.title,
+        company: formData.company,
+        role: formData.role
+      });
       toast({ title: "Please fill in all required fields", variant: "destructive" });
       return;
     }
+    console.log("🔥 JOBHISTORYMANAGER: About to call saveJobMutation.mutate");
     saveJobMutation.mutate(formData);
   };
 
   const handleDelete = (jobId: number) => {
+    console.log("🔥 JOBHISTORYMANAGER: handleDelete called", { jobId });
     if (confirm("Are you sure you want to delete this experience?")) {
+      console.log("🔥 JOBHISTORYMANAGER: User confirmed delete, calling deleteMutation");
       deleteMutation.mutate(jobId);
     }
   };
@@ -308,7 +339,10 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
         <h3 className="font-semibold">Work Experience</h3>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" onClick={resetForm}>
+            <Button variant="outline" size="sm" onClick={() => {
+              console.log("🔥 JOBHISTORYMANAGER: Add Experience button clicked");
+              resetForm();
+            }}>
               <Plus className="w-4 h-4 mr-2" />
               Add Experience
             </Button>
