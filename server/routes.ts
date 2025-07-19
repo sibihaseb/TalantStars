@@ -5024,16 +5024,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       console.log("🔥 UPDATE ROUTE: jobId:", id, "body:", req.body);
       
-      // Parse and clean the data for database update
+      // Parse and clean the data for database update (match frontend field names)
+      const startDate = req.body.start_date || req.body.startDate;
+      const endDate = req.body.end_date || req.body.endDate;
+      
       const cleanedData = {
-        title: req.body.title,
-        company: req.body.company,
-        role: req.body.role,
-        startDate: req.body.startDate,
-        endDate: req.body.endDate,
-        description: req.body.description,
-        jobType: req.body.jobType,
-        location: req.body.location
+        title: req.body.title || '',
+        company: req.body.company || '',
+        role: req.body.role || '',
+        startDate: startDate && startDate !== 'undefined' ? startDate : null,
+        endDate: endDate && endDate !== 'undefined' ? endDate : null,
+        description: req.body.description || '',
+        jobType: req.body.job_type || req.body.jobType || 'film',
+        location: req.body.location || ''
       };
       
       console.log("🚀 Calling updateJobHistory with cleaned data:", cleanedData);

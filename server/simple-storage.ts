@@ -643,9 +643,27 @@ export class DatabaseStorage implements IStorage {
 
   async updateJobHistory(id: number, jobData: any): Promise<any> {
     try {
+      // Clean date values like in createJobHistory  
+      const startDate = jobData.startDate && jobData.startDate !== 'undefined' ? `'${jobData.startDate}'` : 'NULL';
+      const endDate = jobData.endDate && jobData.endDate !== 'undefined' ? `'${jobData.endDate}'` : 'NULL';
+      const description = jobData.description && jobData.description !== 'undefined' ? `'${jobData.description.replace(/'/g, "''")}'` : 'NULL';
+      const jobType = jobData.jobType && jobData.jobType !== 'undefined' ? `'${jobData.jobType}'` : "'film'";
+      const location = jobData.location && jobData.location !== 'undefined' ? `'${jobData.location.replace(/'/g, "''")}'` : 'NULL';
+      
+      console.log("🔥 DATABASE: Updating job history with cleaned data", {
+        id,
+        title: jobData.title,
+        company: jobData.company,
+        role: jobData.role,
+        startDate,
+        endDate,
+        description,
+        jobType,
+        location
+      });
+      
       const result = await db.execute(
-        `UPDATE job_history SET title = $2, company = $3, role = $4, start_date = $5, end_date = $6, description = $7, job_type = $8, location = $9, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *`,
-        [id, jobData.title, jobData.company, jobData.role, jobData.startDate, jobData.endDate, jobData.description, jobData.jobType, jobData.location]
+        `UPDATE job_history SET title = '${jobData.title}', company = '${jobData.company}', role = '${jobData.role}', start_date = ${startDate}, end_date = ${endDate}, description = ${description}, job_type = ${jobType}, location = ${location}, updated_at = CURRENT_TIMESTAMP WHERE id = ${id} RETURNING *`
       );
       
       if (result.rows && result.rows.length > 0) {
@@ -681,7 +699,9 @@ export class DatabaseStorage implements IStorage {
 
   async deleteJobHistory(id: number): Promise<void> {
     try {
-      await db.execute(`DELETE FROM job_history WHERE id = $1`, [id]);
+      console.log("🔥 DATABASE: Deleting job history", { id });
+      await db.execute(`DELETE FROM job_history WHERE id = ${id}`);
+      console.log("✅ Database delete successful");
     } catch (error) {
       console.error('Database job history delete error:', error);
       // Fallback to memory
@@ -692,7 +712,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async deleteJobHistory(jobId: number, userId: number): Promise<void> {
+  async deleteAvailabilityEventOld(jobId: number, userId: number): Promise<void> {
     const jobs = this.jobHistory.get(userId) || [];
     const filteredJobs = jobs.filter(j => j.id !== jobId);
     this.jobHistory.set(userId, filteredJobs);
