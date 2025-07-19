@@ -72,8 +72,26 @@ export interface IStorage {
   // Social posts operations
   getUserSocialPosts(userId: number): Promise<any[]>;
 
-  // Job history operations  
+  // Job history operations
   getJobHistory(userId: number): Promise<any[]>;
+  createJobHistory(jobHistoryData: any): Promise<any>;
+  updateJobHistory(id: number, jobHistoryData: any): Promise<any>;
+  deleteJobHistory(id: number): Promise<void>;
+  getJobHistoryById(jobId: number): Promise<any>;
+  
+  // Job communication operations
+  getJobCommunications(jobId: number): Promise<any[]>;
+  createJobCommunication(communicationData: any): Promise<any>;
+  
+  // Application operations
+  getUserApplications(userId: number): Promise<any[]>;
+  createApplication(applicationData: any): Promise<any>;
+  
+  // Social stats operations
+  getUserSocialStats(userId: number): Promise<any>;
+  
+  // Opportunities operations
+  getOpportunities(userId: number): Promise<any[]>;
 
   // Talent categories operations
   getTalentCategories(): Promise<TalentCategory[]>;
@@ -751,6 +769,58 @@ export class DatabaseStorage implements IStorage {
     return [];
   }
 
+  // Job communication operations
+  async getJobCommunications(jobId: number): Promise<any[]> {
+    // Mock implementation - return empty communications for now
+    console.log("🔥 COMMUNICATION: Getting job communications for job", { jobId });
+    return [];
+  }
+
+  async createJobCommunication(communicationData: any): Promise<any> {
+    // Mock implementation - just return the data with an ID
+    console.log("🔥 COMMUNICATION: Creating job communication", { communicationData });
+    const communication = {
+      id: Date.now(),
+      ...communicationData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    console.log("✅ COMMUNICATION: Created successfully", { communication });
+    return communication;
+  }
+
+  // Application operations  
+  async getUserApplications(userId: number): Promise<any[]> {
+    // Mock implementation - return empty applications
+    return [];
+  }
+
+  async createApplication(applicationData: any): Promise<any> {
+    // Mock implementation
+    return {
+      id: Date.now(),
+      ...applicationData,
+      createdAt: new Date().toISOString()
+    };
+  }
+
+  // Social stats operations
+  async getUserSocialStats(userId: number): Promise<any> {
+    // Mock implementation
+    return {
+      totalPosts: 0,
+      totalLikes: 0,
+      totalComments: 0,
+      followers: 0,
+      following: 0
+    };
+  }
+
+  // Opportunities operations
+  async getOpportunities(userId: number): Promise<any[]> {
+    // Mock implementation - return empty opportunities
+    return [];
+  }
 
 }
 
