@@ -1,0 +1,113 @@
+
+Cookie warnings 2
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/user/profile main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/applications main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+Partitioned cookie or storage access was provided to “https://m.stripe.network/inner.html#url=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&title=&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&muid=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&sid=22a4725f-28a0-47c4-a02f-4dfea69d524bf2b5e0&version=6&preview=false&__shared_params__[version]=basil” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+out-4.5.44.js:1:39660
+Cookie warnings 3
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+🔥 EDIT BUTTON CLICKED for job: 
+Object { id: 4, user_id: 75, title: "Voice Acting Gig", company: "Disney", job_type: null, role: "Voice Actor", start_date: "2024-01-15", end_date: "2024-03-30", location: null, description: "Voice work for animated feature film", … }
+main.tsx:54:22
+🔥🔥🔥 handleEditJob CALLED with job: 
+Object { id: 4, user_id: 75, title: "Voice Acting Gig", company: "Disney", job_type: null, role: "Voice Actor", start_date: "2024-01-15", end_date: "2024-03-30", location: null, description: "Voice work for animated feature film", … }
+main.tsx:54:22
+🔥 Setting dialog open for edit main.tsx:54:22
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. main.tsx:40:23
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+🔥 FORM SUBMIT BUTTON CLICKED main.tsx:54:22
+Form validation state: 
+Object { title: "Voice Acting Gig", company: "Disney", role: "Voice Actor", isPending: false }
+main.tsx:54:22
+🔥🔥🔥 handleCreateJobHistory CALLED main.tsx:54:22
+Form data being submitted: 
+Object { id: 4, title: "Voice Acting Gig", company: "Disney", jobType: "", role: "Voice Actor", startDate: "2024-01-15", endDate: "2024-03-30", location: "", description: "Voice work for animated feature film dfg", verified: false }
+main.tsx:54:22
+Form validation: 
+Object { title: true, company: true, role: true }
+main.tsx:54:22
+editingJobId: 4 main.tsx:54:22
+Mutation status: 
+Object { isPending: false, isError: false, error: null }
+main.tsx:54:22
+🚀 CALLING MUTATION with data: 
+Object { id: 4, title: "Voice Acting Gig", company: "Disney", jobType: "", role: "Voice Actor", startDate: "2024-01-15", endDate: "2024-03-30", location: "", description: "Voice work for animated feature film dfg", verified: false }
+main.tsx:54:22
+🔥🔥🔥 MUTATION FUNCTION CALLED main.tsx:54:22
+editingJobId: 4 main.tsx:54:22
+jobData: 
+Object { id: 4, title: "Voice Acting Gig", company: "Disney", jobType: "", role: "Voice Actor", startDate: "2024-01-15", endDate: "2024-03-30", location: "", description: "Voice work for animated feature film dfg", verified: false }
+main.tsx:54:22
+🚀 Making API request: 
+Object { method: "PUT", url: "/api/job-history/4", jobData: {…} }
+main.tsx:54:22
+XHRPUT
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/job-history/4
+[HTTP/1.1 500 Internal Server Error 119ms]
+
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 500, URL: /api/job-history/4 main.tsx:54:22
+🚨 API ERROR: 500 - {"message":"Failed to update job history"} main.tsx:54:22
+❌ API Request failed: Error: 500: {"message":"Failed to update job history"}
+    throwIfResNotOk queryClient.ts:7
+    apiRequest queryClient.ts:48
+    mutationFn TalentDashboard.tsx:305
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+    execute mutation.ts:208
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    handleCreateJobHistory TalentDashboard.tsx:407
+    onClick TalentDashboard.tsx:898
+    React 25
+main.tsx:27:24
+❌ MUTATION ERROR: Error: 500: {"message":"Failed to update job history"}
+    throwIfResNotOk queryClient.ts:7
+    apiRequest queryClient.ts:48
+    mutationFn TalentDashboard.tsx:305
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+    execute mutation.ts:208
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    handleCreateJobHistory TalentDashboard.tsx:407
+    onClick TalentDashboard.tsx:898
+    React 25
+main.tsx:27:24
+    error main.tsx:27
+    onError TalentDashboard.tsx:341
+    execute mutation.ts:243
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    handleCreateJobHistory TalentDashboard.tsx:407
+    onClick TalentDashboard.tsx:898
+    React 32
+    handleEditJob TalentDashboard.tsx:457
+    onClick TalentDashboard.tsx:715
+    React 23
+    <anonymous> main.tsx:119
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+
+​
+

@@ -697,6 +697,174 @@ export default function TalentDashboard() {
                     }}
                     userId={user?.id || 0}
                   />
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          className="w-full" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log("🔥 ADD EXPERIENCE BUTTON CLICKED");
+                            console.log("Current dialog state:", isJobHistoryDialogOpen);
+                            setEditingJobId(null);
+                            setJobHistoryForm({
+                              id: null,
+                              title: "",
+                              company: "",
+                              jobType: "",
+                              role: "",
+                              startDate: "",
+                              endDate: "",
+                              location: "",
+                              description: "",
+                              verified: false
+                            });
+                            console.log("Setting dialog open to true");
+                            setIsJobHistoryDialogOpen(true);
+                          }}
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Experience
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>{editingJobId ? 'Edit Work Experience' : 'Add Work Experience'}</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="job-title">Job Title</Label>
+                              <Input
+                                id="job-title"
+                                value={jobHistoryForm.title}
+                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, title: e.target.value})}
+                                placeholder="e.g., Lead Actor"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="company">Company/Production</Label>
+                              <Input
+                                id="company"
+                                value={jobHistoryForm.company}
+                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, company: e.target.value})}
+                                placeholder="e.g., Netflix"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="job-type">Job Type</Label>
+                              <Select value={jobHistoryForm.jobType} onValueChange={(value) => setJobHistoryForm({...jobHistoryForm, jobType: value})}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select job type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="film">Film</SelectItem>
+                                  <SelectItem value="tv">Television</SelectItem>
+                                  <SelectItem value="theater">Theater</SelectItem>
+                                  <SelectItem value="commercial">Commercial</SelectItem>
+                                  <SelectItem value="music">Music</SelectItem>
+                                  <SelectItem value="modeling">Modeling</SelectItem>
+                                  <SelectItem value="voice">Voice Acting</SelectItem>
+                                  <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor="role">Role</Label>
+                              <Input
+                                id="role"
+                                value={jobHistoryForm.role}
+                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, role: e.target.value})}
+                                placeholder="e.g., Supporting Actor"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="start-date">Start Date</Label>
+                              <Input
+                                id="start-date"
+                                type="date"
+                                value={jobHistoryForm.startDate}
+                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, startDate: e.target.value})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="end-date">End Date</Label>
+                              <Input
+                                id="end-date"
+                                type="date"
+                                value={jobHistoryForm.endDate}
+                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, endDate: e.target.value})}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="location">Location</Label>
+                            <Input
+                              id="location"
+                              value={jobHistoryForm.location}
+                              onChange={(e) => setJobHistoryForm({...jobHistoryForm, location: e.target.value})}
+                              placeholder="e.g., Los Angeles, CA"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="description">Description</Label>
+                            <Textarea
+                              id="description"
+                              value={jobHistoryForm.description}
+                              onChange={(e) => setJobHistoryForm({...jobHistoryForm, description: e.target.value})}
+                              placeholder="Describe your role and achievements..."
+                              className="min-h-24"
+                            />
+                          </div>
+                          <div className="flex justify-end space-x-2">
+                            <Button variant="outline" onClick={() => {
+                              setIsJobHistoryDialogOpen(false);
+                              setEditingJobId(null);
+                              setJobHistoryForm({
+                                id: null,
+                                title: "",
+                                company: "",
+                                jobType: "",
+                                role: "",
+                                startDate: "",
+                                endDate: "",
+                                location: "",
+                                description: "",
+                                verified: false
+                              });
+                            }}>
+                              Cancel
+                            </Button>
+                            <Button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log("🔥 FORM SUBMIT BUTTON CLICKED");
+                                console.log("Form validation state:", {
+                                  title: jobHistoryForm.title,
+                                  company: jobHistoryForm.company,
+                                  role: jobHistoryForm.role,
+                                  isPending: createJobHistoryMutation.isPending
+                                });
+                                handleCreateJobHistory();
+                              }}
+                              disabled={createJobHistoryMutation.isPending || !jobHistoryForm.title || !jobHistoryForm.company || !jobHistoryForm.role}
+                            >
+                              {createJobHistoryMutation.isPending ? 
+                                (editingJobId ? "Updating..." : "Adding...") : 
+                                (editingJobId ? "Update Experience" : "Add Experience")
+                              }
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </CardContent>
                 </Card>
               </div>

@@ -6,6 +6,7 @@ import { storage as simpleStorage } from "./simple-storage";
 import { setupAuth, isAuthenticated, isAdmin, requirePlan } from "./auth";
 import { requirePermission, requireAnyPermission, PermissionChecks } from "./permissions";
 import { enhanceProfile, generateBio } from "./openai";
+import { enhanceJobDescription, validateJobSkills, generateJobSuggestions } from './ai-enhancements';
 import { 
   insertUserProfileSchema, 
   insertMediaFileSchema, 
@@ -5006,12 +5007,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/job-history/:id', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const validatedData = insertJobHistorySchema.partial().parse(req.body);
+      console.log("🔥 UPDATE ROUTE: jobId:", id, "body:", req.body);
       
-      const jobHistory = await simpleStorage.updateJobHistory(id, validatedData);
+      // Parse and clean the data for database update
+      const cleanedData = {
+        title: req.body.title,
+        company: req.body.company,
+        role: req.body.role,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
+        description: req.body.description,
+        jobType: req.body.jobType,
+        location: req.body.location
+      };
+      
+      console.log("🚀 Calling updateJobHistory with cleaned data:", cleanedData);
+      const jobHistory = await simpleStorage.updateJobHistory(id, cleanedData);
+      console.log("✅ UPDATE SUCCESSFUL:", jobHistory);
       res.json(jobHistory);
     } catch (error) {
-      console.error("Error updating job history:", error);
+      console.error("❌ UPDATE ERROR:", error);
       res.status(500).json({ message: "Failed to update job history" });
     }
   });
@@ -5024,6 +5039,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting job history:", error);
       res.status(500).json({ message: "Failed to delete job history" });
+    }
+  });
+
+  // AI-powered job enhancement
+  app.post('/api/job-history/:id/enhance', isAuthenticated, async (req: any, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      const job = await simpleStorage.getJobHistoryById(jobId);
+      
+      if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+
+      const enhancedDescription = await enhanceJobDescription(job);
+      const updatedJob = await simpleStorage.updateJobHistory(jobId, { 
+        description: enhancedDescription,
+        ai_enhanced: true 
+      });
+      
+      res.json(updatedJob);
+    } catch (error) {
+      console.error("Error enhancing job description:", error);
+      res.status(500).json({ message: "Failed to enhance job description" });
+    }
+  });
+
+  // Skill validation system
+  app.post('/api/job-history/:id/validate-skills', isAuthenticated, async (req: any, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      const job = await simpleStorage.getJobHistoryById(jobId);
+      
+      if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+
+      const validatedSkills = await validateJobSkills(job);
+      const updatedJob = await simpleStorage.updateJobHistory(jobId, { 
+        skill_validations: validatedSkills 
+      });
+      
+      res.json({ 
+        ...updatedJob, 
+        validatedSkills: validatedSkills 
+      });
+    } catch (error) {
+      console.error("Error validating skills:", error);
+      res.status(500).json({ message: "Failed to validate skills" });
+    }
+  });
+
+  // Reorder job history
+  app.put('/api/job-history/reorder', isAuthenticated, async (req: any, res) => {
+    try {
+      const { jobIds } = req.body;
+      const results = [];
+      
+      for (const { id, order_index } of jobIds) {
+        const updatedJob = await simpleStorage.updateJobHistory(id, { order_index });
+        results.push(updatedJob);
+      }
+      
+      res.json(results);
+    } catch (error) {
+      console.error("Error reordering job history:", error);
+      res.status(500).json({ message: "Failed to reorder job history" });
     }
   });
 

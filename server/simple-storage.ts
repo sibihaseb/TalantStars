@@ -611,10 +611,27 @@ export class DatabaseStorage implements IStorage {
   async updateJobHistory(id: number, jobData: any): Promise<any> {
     try {
       const result = await db.execute(
-        `UPDATE job_history SET title = $2, company = $3, role = $4, start_date = $5, end_date = $6, description = $7, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *`,
-        [id, jobData.title, jobData.company, jobData.role, jobData.startDate, jobData.endDate, jobData.description]
+        `UPDATE job_history SET title = $2, company = $3, role = $4, start_date = $5, end_date = $6, description = $7, job_type = $8, location = $9, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *`,
+        [id, jobData.title, jobData.company, jobData.role, jobData.startDate, jobData.endDate, jobData.description, jobData.jobType, jobData.location]
       );
-      return result.rows?.[0] || {};
+      
+      if (result.rows && result.rows.length > 0) {
+        const updatedJob = result.rows[0];
+        console.log('✅ Database update successful:', updatedJob);
+        
+        // Also update memory cache
+        for (const [userId, jobs] of this.jobHistory.entries()) {
+          const jobIndex = jobs.findIndex(j => j.id === id);
+          if (jobIndex !== -1) {
+            jobs[jobIndex] = { ...jobs[jobIndex], ...jobData, updatedAt: new Date().toISOString() };
+            break;
+          }
+        }
+        
+        return updatedJob;
+      }
+      
+      throw new Error('No rows updated');
     } catch (error) {
       console.error('Database job history update error:', error);
       // Fallback to memory
@@ -642,22 +659,30 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateJobHistory(jobId: number, jobData: any): Promise<any> {
-    // Find and update across all users
-    for (const [userId, jobs] of this.jobHistory.entries()) {
-      const jobIndex = jobs.findIndex(j => j.id === jobId);
-      if (jobIndex !== -1) {
-        jobs[jobIndex] = { ...jobs[jobIndex], ...jobData, updatedAt: new Date().toISOString() };
-        return jobs[jobIndex];
-      }
-    }
-    throw new Error('Job history entry not found');
-  }
-
   async deleteJobHistory(jobId: number, userId: number): Promise<void> {
     const jobs = this.jobHistory.get(userId) || [];
     const filteredJobs = jobs.filter(j => j.id !== jobId);
     this.jobHistory.set(userId, filteredJobs);
+  }
+
+  async getJobHistoryById(jobId: number): Promise<any> {
+    try {
+      const result = await db.execute(`SELECT * FROM job_history WHERE id = $1`, [jobId]);
+      if (result.rows && result.rows.length > 0) {
+        return result.rows[0];
+      }
+    } catch (error) {
+      console.error('Database job history fetch error:', error);
+    }
+    
+    // Fallback to memory
+    for (const [userId, jobs] of this.jobHistory.entries()) {
+      const job = jobs.find(j => j.id === jobId);
+      if (job) {
+        return job;
+      }
+    }
+    return null;
   }
 
   async getFeedPosts(userId: number, limit: number, offset: number): Promise<any[]> {
