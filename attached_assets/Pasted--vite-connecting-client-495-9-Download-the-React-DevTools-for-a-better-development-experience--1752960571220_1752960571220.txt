@@ -1,0 +1,46 @@
+
+[vite] connecting... client:495:9
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools react-dom.development.js:29895:17
+Partitioned cookie or storage access was provided to “https://js.stripe.com/v3/controller-with-preconnect-5a125e125bbb24d882c0a6f33f679c89.html#__shared_params__[version]=basil&apiKey=pk_test_51NwxezAhOiHhM1yQX94ydY61tL8LaN6K1HeVYkAzhAaV36YpuWt9pdJ1XCYLjoxOWn4fsNzENnfeFzC0lFoB7Z3100t4ZBV3JL&apiVersion=2025-03-31.basil&stripeJsId=7015fe2a-5edb-4834-803e-0a04d3a759e6&stripeObjId=sobj-df74eb83-b323-409e-8188-1f582be97ec6&firstStripeInstanceCreatedLatency=3&controllerCount=1&isCheckout=false&stripeJsLoadTime=1752960522885&manualBrowserDeprecationRollout=false&mids[guid]=NA&mids[muid]=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&mids[sid]=28b9cbfe-7875-4cf9-b104-8e29a18719c8df51f8&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&controllerId=__privateStripeController4341” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+controller-with-preconnect-6c42774ced1350d667a127e6b6d290ea.js:1:22427
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/social/stats main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/opportunities main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/applications main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/user/profile main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+Partitioned cookie or storage access was provided to “https://m.stripe.network/inner.html#url=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Fjobs&title=&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Fauth&muid=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&sid=28b9cbfe-7875-4cf9-b104-8e29a18719c8df51f8&version=6&preview=false&__shared_params__[version]=basil” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+out-4.5.44.js:1:39660
+Cookie warnings 3
+XHRPOST
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/jobs/1/apply
+[HTTP/1.1 500 Internal Server Error 113ms]
+
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 500, URL: /api/jobs/1/apply main.tsx:54:22
+🚨 API ERROR: 500 - {"message":"Failed to create job application"} main.tsx:54:22
+
+​
+

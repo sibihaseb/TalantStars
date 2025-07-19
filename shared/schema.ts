@@ -206,7 +206,7 @@ export const skillEndorsements = pgTable("skill_endorsements", {
 // Job postings
 export const jobs = pgTable("jobs", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
   title: varchar("title").notNull(),
   description: text("description").notNull(),
   talentType: talentTypeEnum("talent_type").notNull(),
@@ -216,7 +216,7 @@ export const jobs = pgTable("jobs", {
   requirements: text("requirements"),
   status: jobStatusEnum("status").default("open"),
   isPublic: boolean("is_public").default(true),
-  allowCommunication: boolean("allow_communication").default(false),
+  allowCommunication: boolean("allow_communication").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -225,7 +225,7 @@ export const jobs = pgTable("jobs", {
 export const jobApplications = pgTable("job_applications", {
   id: serial("id").primaryKey(),
   jobId: integer("job_id").references(() => jobs.id).notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
   coverLetter: text("cover_letter"),
   proposedRate: decimal("proposed_rate", { precision: 10, scale: 2 }),
   status: varchar("status").default("pending"), // pending, accepted, rejected

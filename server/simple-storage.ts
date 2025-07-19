@@ -919,7 +919,7 @@ export class DatabaseStorage implements IStorage {
 
   async getJobs(filters?: any): Promise<any[]> {
     console.log("🔥 JOB: Getting jobs", { filters });
-    // Mock implementation - return sample jobs
+    // Mock implementation - return sample jobs with communication enabled
     const sampleJobs = [
       {
         id: 1,
@@ -931,6 +931,9 @@ export class DatabaseStorage implements IStorage {
         requirements: ["5+ years acting experience", "Previous film credits", "Available for 3-month shoot"],
         status: "open",
         postedBy: 2,
+        allowCommunication: true,
+        talentType: "actor",
+        userId: 2,
         createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
         updatedAt: new Date(Date.now() - 86400000).toISOString()
       },
@@ -944,6 +947,9 @@ export class DatabaseStorage implements IStorage {
         requirements: ["Voice acting experience", "Home recording setup", "Animation experience preferred"],
         status: "open",
         postedBy: 3,
+        allowCommunication: true,
+        talentType: "voice_artist",
+        userId: 3,
         createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
         updatedAt: new Date(Date.now() - 172800000).toISOString()
       }
