@@ -1325,10 +1325,33 @@ function Onboarding() {
       instruments: Array.isArray(data.instruments) && data.instruments.length > 0 ? data.instruments.filter(i => i.trim()) : null,
       genres: Array.isArray(data.genres) && data.genres.length > 0 ? data.genres.filter(g => g.trim()) : null,
       skills: Array.isArray(data.skills) && data.skills.length > 0 ? data.skills.filter(s => s.trim()) : null,
+      // Acting-specific array fields
+      primarySpecialty: Array.isArray(data.primarySpecialty) && data.primarySpecialty.length > 0 ? data.primarySpecialty.filter(p => p.trim()) : null,
+      actingMethod: Array.isArray(data.actingMethod) && data.actingMethod.length > 0 ? data.actingMethod.filter(m => m.trim()) : null,
+      roleTypes: Array.isArray(data.roleTypes) && data.roleTypes.length > 0 ? data.roleTypes.filter(r => r.trim()) : null,
+      horrorThriller: Array.isArray(data.horrorThriller) && data.horrorThriller.length > 0 ? data.horrorThriller.filter(h => h.trim()) : null,
       // Convert empty strings to null for optional fields
       website: data.website?.trim() || null,
       phoneNumber: data.phoneNumber?.trim() || null,
       profileImageUrl: data.profileImageUrl?.trim() || null,
+      // Acting experience fields
+      yearsExperience: data.yearsExperience?.toString() || null,
+      improvisationComfort: data.improvisationComfort?.trim() || null,
+      stageCombat: data.stageCombat?.toString() || null,
+      intimateScenesComfort: data.intimateScenesComfort?.trim() || null,
+      motionCapture: data.motionCapture?.trim() || null,
+      animalWork: data.animalWork?.trim() || null,
+      cryingOnCue: data.cryingOnCue?.trim() || null,
+      periodPieces: data.periodPieces?.trim() || null,
+      physicalComedy: data.physicalComedy?.trim() || null,
+      accentExperience: data.accentExperience?.trim() || null,
+      greenScreen: data.greenScreen?.trim() || null,
+      stuntComfort: data.stuntComfort?.trim() || null,
+      shakespeareExperience: data.shakespeareExperience?.trim() || null,
+      musicalTheater: data.musicalTheater?.trim() || null,
+      currentAgent: data.currentAgent?.trim() || null,
+      currentPublicist: data.currentPublicist?.trim() || null,
+      representationStatus: data.representationStatus?.trim() || null,
       // Handle numeric fields as strings (backend expects strings)
       dailyRate: data.dailyRate ? String(data.dailyRate) : null,
       weeklyRate: data.weeklyRate ? String(data.weeklyRate) : null,
@@ -2132,11 +2155,23 @@ function Onboarding() {
                       e.preventDefault();
                       
                       console.log("Submit button clicked");
-                      console.log("Current form values:", {
-                        displayName: watchedDisplayName,
-                        bio: watchedBio,
-                        location: watchedLocation,
-                        bioLength: watchedBio?.length
+                      
+                      // Get all form values including questionnaire fields
+                      const allFormValues = form.getValues();
+                      console.log("All form values:", allFormValues);
+                      
+                      // Specifically log acting fields
+                      const actingFields = [
+                        'primarySpecialty', 'yearsExperience', 'actingMethod', 'improvisationComfort',
+                        'stageCombat', 'intimateScenesComfort', 'roleTypes', 'motionCapture',
+                        'animalWork', 'cryingOnCue', 'periodPieces', 'physicalComedy',
+                        'accentExperience', 'greenScreen', 'stuntComfort', 'shakespeareExperience',
+                        'musicalTheater', 'horrorThriller', 'currentAgent', 'currentPublicist', 'representationStatus'
+                      ];
+                      
+                      console.log("Acting field values:");
+                      actingFields.forEach(field => {
+                        console.log(`${field}:`, allFormValues[field]);
                       });
                       
                       // Use form's handleSubmit to trigger validation

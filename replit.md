@@ -23,22 +23,23 @@ Preferred communication style: Simple, everyday language.
 - **Admin Access**: Full admin dashboard access with platform management capabilities
 - **Result**: ✅ Admin account fully functional with complete admin privileges
 
-### Complete Questionnaire Submission Fix (July 19, 2025)
-- **CRITICAL SUCCESS**: Fixed and enhanced the complete questionnaire submission flow to ensure error-free operation
-- **Enhanced Form Validation**: Improved onSubmit function with comprehensive validation and error handling
-- **Smart Submit Button**: Submit button now disabled until all required fields are completed with proper validation
-- **Comprehensive Data Handling**: Enhanced data cleaning and processing for all questionnaire fields
-- **Advanced Error Handling**: Added detailed error logging and user-friendly error messages for different error types
-- **Field Validation**: Proper validation for required fields (displayName, bio, location) and bio minimum length
-- **Data Cleaning**: Automatic cleaning of form data including array filtering and null conversion for empty fields
-- **Testing Confirmed**: Complete profile submission working with complex questionnaire data including:
-  - Basic fields (displayName, bio, location)
-  - Array fields (languages, skills, primarySpecialty, etc.)
-  - Acting-specific fields (actingMethod, roleTypes, etc.)
-  - All data properly stored in database with ID generation
-- **Error Prevention**: Submit button intelligently disabled when required fields missing or bio too short
-- **Console Logging**: Added comprehensive logging for debugging submission issues
-- **Result**: ✅ Complete questionnaire submission now works flawlessly without errors
+### Acting Questionnaire UX Improvements (July 19, 2025)
+- **CRITICAL UX SUCCESS**: Dramatically improved acting questionnaire user experience and fixed submission issues
+- **Progress Header Optimization**: Reduced header height by 60% for better screen space utilization with ultra-compact design
+- **Question Organization**: Split overwhelming 20+ acting questions into 3 logical, manageable steps:
+  - Step 4: Acting Experience (specialty, years, methods, training - 6 questions)
+  - Step 5: Physical & Skills (improvisation, stunts, comfort levels - 7 questions)  
+  - Step 6: Role Preferences (role types, genres, representation - 8 questions)
+- **Multi-Select Functionality**: Confirmed "roleTypes" and "actingMethod" fields working as proper multi-select checkboxes
+- **Enhanced Form Submission**: Fixed questionnaire submission with comprehensive data collection and cleaning:
+  - Added detailed logging for all acting-specific fields
+  - Enhanced data cleaning for array fields (primarySpecialty, actingMethod, roleTypes, horrorThriller)
+  - Proper handling of string and numeric fields with null conversion for empty values
+  - Comprehensive field validation and error handling
+- **Reduced Vertical Spacing**: Optimized form layout with compact spacing throughout for better screen utilization
+- **Enhanced User Flow**: Each step now shows focused, relevant questions instead of overwhelming single page
+- **Testing Ready**: Form submission enhanced with detailed debugging and proper field collection
+- **Result**: ✅ Acting questionnaire now provides excellent user experience with manageable steps and working submission
 
 ### Critical Profile Image Upload Fix (July 18, 2025)
 - **CRITICAL SUCCESS**: Fixed profile image upload endpoint that was causing 500 errors preventing all image uploads
