@@ -7,12 +7,13 @@ import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
-import { Edit, Trash, Plus, GripVertical, Sparkles, Trophy, Star } from 'lucide-react';
+import { Edit, Trash, Plus, GripVertical, Sparkles, Trophy, Star, AlertTriangle, Loader2, Wand2 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
 interface JobHistoryItem {
@@ -37,9 +38,11 @@ interface SortableJobItemProps {
   onDelete: (id: number) => void;
   onEnhance: (id: number) => void;
   onValidateSkills: (id: number) => void;
+  isEnhancing?: boolean;
+  isValidating?: boolean;
 }
 
-function SortableJobItem({ job, onEdit, onDelete, onEnhance, onValidateSkills }: SortableJobItemProps) {
+function SortableJobItem({ job, onEdit, onDelete, onEnhance, onValidateSkills, isEnhancing, isValidating }: SortableJobItemProps) {
   const {
     attributes,
     listeners,
@@ -93,19 +96,29 @@ function SortableJobItem({ job, onEdit, onDelete, onEnhance, onValidateSkills }:
                 variant="ghost"
                 size="sm"
                 onClick={() => onEnhance(job.id)}
-                className="h-8 w-8 p-0 text-blue-500 hover:text-blue-700"
+                disabled={isEnhancing}
+                className="h-8 w-8 p-0 text-blue-500 hover:text-blue-700 disabled:opacity-50"
                 title="AI Enhance Description"
               >
-                <Sparkles className="w-3 h-3" />
+                {isEnhancing ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Wand2 className="w-3 h-3" />
+                )}
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => onValidateSkills(job.id)}
-                className="h-8 w-8 p-0 text-green-500 hover:text-green-700"
+                disabled={isValidating}
+                className="h-8 w-8 p-0 text-green-500 hover:text-green-700 disabled:opacity-50"
                 title="Validate Skills"
               >
-                <Star className="w-3 h-3" />
+                {isValidating ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Star className="w-3 h-3" />
+                )}
               </Button>
               <Button
                 variant="ghost"
@@ -114,21 +127,43 @@ function SortableJobItem({ job, onEdit, onDelete, onEnhance, onValidateSkills }:
                   console.log("🔥 JOBHISTORYMANAGER: Edit button clicked", { jobId: job.id });
                   onEdit(job);
                 }}
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 <Edit className="w-3 h-3" />
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  console.log("🔥 JOBHISTORYMANAGER: Delete button clicked", { jobId: job.id });
-                  onDelete(job.id);
-                }}
-                className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-              >
-                <Trash className="w-3 h-3" />
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+                  >
+                    <Trash className="w-3 h-3" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <div className="flex items-center space-x-2">
+                      <AlertTriangle className="w-5 h-5 text-red-500" />
+                      <AlertDialogTitle>Delete Experience</AlertDialogTitle>
+                    </div>
+                    <AlertDialogDescription className="pt-2">
+                      Are you sure you want to delete "<strong>{job.title}</strong>" at <strong>{job.company}</strong>?
+                      <br />
+                      <span className="text-sm text-gray-500 mt-2 block">This action cannot be undone and will permanently remove this work experience from your profile.</span>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => onDelete(job.id)}
+                      className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                    >
+                      Delete Experience
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </CardContent>
@@ -148,6 +183,8 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
   const [items, setItems] = useState(jobHistory);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<JobHistoryItem | null>(null);
+  const [enhancingJobId, setEnhancingJobId] = useState<number | null>(null);
+  const [validatingJobId, setValidatingJobId] = useState<number | null>(null);
   
   // Update items when jobHistory prop changes to prevent excessive re-renders
   useEffect(() => {
@@ -190,28 +227,51 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
   // AI Enhancement mutation
   const enhanceMutation = useMutation({
     mutationFn: async (jobId: number) => {
+      setEnhancingJobId(jobId);
       const response = await apiRequest('POST', `/api/job-history/${jobId}/enhance`);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setEnhancingJobId(null);
       queryClient.invalidateQueries({ queryKey: [`/api/job-history/${userId}`] });
       onJobUpdated();
-      toast({ title: "Job description enhanced with AI!" });
+      toast({ 
+        title: "AI Enhancement Complete!", 
+        description: "Your experience description has been enhanced with professional language and industry keywords."
+      });
+    },
+    onError: (error) => {
+      setEnhancingJobId(null);
+      toast({ 
+        title: "Enhancement failed", 
+        description: "Unable to enhance the experience description. Please try again.",
+        variant: "destructive" 
+      });
     }
   });
 
   // Skill validation mutation
   const validateSkillsMutation = useMutation({
     mutationFn: async (jobId: number) => {
+      setValidatingJobId(jobId);
       const response = await apiRequest('POST', `/api/job-history/${jobId}/validate-skills`);
       return response.json();
     },
     onSuccess: (data) => {
+      setValidatingJobId(null);
       queryClient.invalidateQueries({ queryKey: [`/api/job-history/${userId}`] });
       onJobUpdated();
       toast({ 
-        title: "Skills validated!", 
-        description: `${data.validatedSkills.length} skills validated for this experience.`
+        title: "Skills Validated!", 
+        description: `${data.validatedSkills?.length || 0} professional skills identified and validated for this experience.`
+      });
+    },
+    onError: (error) => {
+      setValidatingJobId(null);
+      toast({ 
+        title: "Validation failed", 
+        description: "Unable to validate skills for this experience. Please try again.",
+        variant: "destructive" 
       });
     }
   });
@@ -325,19 +385,20 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
 
   const handleDelete = (jobId: number) => {
     console.log("🔥 JOBHISTORYMANAGER: handleDelete called", { jobId });
-    if (confirm("Are you sure you want to delete this experience?")) {
-      console.log("🔥 JOBHISTORYMANAGER: User confirmed delete, calling deleteMutation");
-      deleteMutation.mutate(jobId);
-    }
+    deleteMutation.mutate(jobId);
   };
 
   const handleEnhance = (jobId: number) => {
+    console.log("🔥 JOBHISTORYMANAGER: handleEnhance called", { jobId });
     enhanceMutation.mutate(jobId);
   };
 
   const handleValidateSkills = (jobId: number) => {
+    console.log("🔥 JOBHISTORYMANAGER: handleValidateSkills called", { jobId });
     validateSkillsMutation.mutate(jobId);
   };
+
+
 
   return (
     <div>
@@ -432,7 +493,53 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
               </div>
 
               <div>
-                <Label htmlFor="description">Description</Label>
+                <div className="flex items-center justify-between mb-2">
+                  <Label htmlFor="description">Description</Label>
+                  {formData.description && (
+                    <div className="flex space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // Enhance current description using AI
+                          if (editingJob) {
+                            handleEnhance(editingJob.id);
+                          }
+                        }}
+                        disabled={!editingJob || enhancingJobId === editingJob?.id}
+                        className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                      >
+                        {enhancingJobId === editingJob?.id ? (
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        ) : (
+                          <Wand2 className="w-3 h-3 mr-1" />
+                        )}
+                        Enhance with AI
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // Validate skills for current experience
+                          if (editingJob) {
+                            handleValidateSkills(editingJob.id);
+                          }
+                        }}
+                        disabled={!editingJob || validatingJobId === editingJob?.id}
+                        className="text-green-600 border-green-200 hover:bg-green-50"
+                      >
+                        {validatingJobId === editingJob?.id ? (
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        ) : (
+                          <Star className="w-3 h-3 mr-1" />
+                        )}
+                        Validate Skills
+                      </Button>
+                    </div>
+                  )}
+                </div>
                 <Textarea
                   id="description"
                   value={formData.description}
@@ -440,6 +547,11 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
                   placeholder="Describe your role and achievements..."
                   className="min-h-24"
                 />
+                {!formData.description && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    💡 Tip: Add your description first, then use AI to enhance it with professional language and validate your skills.
+                  </p>
+                )}
               </div>
 
               <div className="flex justify-end space-x-2">
@@ -469,6 +581,8 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
               onDelete={handleDelete}
               onEnhance={handleEnhance}
               onValidateSkills={handleValidateSkills}
+              isEnhancing={enhancingJobId === job.id}
+              isValidating={validatingJobId === job.id}
             />
           ))}
         </SortableContext>
