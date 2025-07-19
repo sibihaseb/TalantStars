@@ -298,7 +298,7 @@ export default function TalentDashboard() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/job-history', user?.id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/job-history/${user?.id}`] });
       setJobHistoryForm({
         id: null,
         title: "",
@@ -315,7 +315,7 @@ export default function TalentDashboard() {
       setIsJobHistoryDialogOpen(false);
       toast({
         title: "Success",
-        description: "Job history added successfully!",
+        description: editingJobId ? "Job history updated successfully!" : "Job history added successfully!",
       });
     },
     onError: (error) => {
@@ -390,7 +390,7 @@ export default function TalentDashboard() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/job-history', user?.id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/job-history/${user?.id}`] });
       toast({
         title: "Success",
         description: "Job history deleted successfully!",
