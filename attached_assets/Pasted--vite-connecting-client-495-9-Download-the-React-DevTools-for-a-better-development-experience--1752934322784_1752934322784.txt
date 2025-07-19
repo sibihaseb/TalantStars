@@ -1,0 +1,69 @@
+
+[vite] connecting... client:495:9
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools react-dom.development.js:29895:17
+Partitioned cookie or storage access was provided to “https://js.stripe.com/v3/controller-with-preconnect-5a125e125bbb24d882c0a6f33f679c89.html#__shared_params__[version]=basil&apiKey=pk_test_51NwxezAhOiHhM1yQX94ydY61tL8LaN6K1HeVYkAzhAaV36YpuWt9pdJ1XCYLjoxOWn4fsNzENnfeFzC0lFoB7Z3100t4ZBV3JL&apiVersion=2025-03-31.basil&stripeJsId=35c18a23-798d-4292-bb86-197881d3a34f&stripeObjId=sobj-87765dff-c00a-4d5c-bf45-46fc4642b1ad&firstStripeInstanceCreatedLatency=6&controllerCount=1&isCheckout=false&stripeJsLoadTime=1752934171976&manualBrowserDeprecationRollout=false&mids[guid]=NA&mids[muid]=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&mids[sid]=3eeffbbb-2b52-4116-b532-c78403a26523fd9476&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&controllerId=__privateStripeController9921” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+controller-with-preconnect-6c42774ced1350d667a127e6b6d290ea.js:1:22427
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/social/stats main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/opportunities main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/applications main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/user/profile main.tsx:54:22
+=== FETCHING MEDIA FILES === main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+=== MEDIA FILES RESPONSE === 
+Array []
+main.tsx:54:22
+Partitioned cookie or storage access was provided to “https://m.stripe.network/inner.html#url=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&title=&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Fdashboard&muid=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&sid=3eeffbbb-2b52-4116-b532-c78403a26523fd9476&version=6&preview=false&__shared_params__[version]=basil” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+out-4.5.44.js:1:39660
+Cookie warnings 3
+=== FORM SUBMIT TRIGGERED === main.tsx:54:22
+Upload type: file main.tsx:54:22
+Selected files: 
+Array [ File ]
+main.tsx:54:22
+File metadata: 
+Array [ {…} ]
+main.tsx:54:22
+Media form data: 
+Object { title: "", description: "", category: "portfolio", files: (1) […], externalUrl: "" }
+main.tsx:54:22
+=== PREPARING UPLOAD === main.tsx:54:22
+File: Screenshot 2025-07-19 at 12.31.42 AM.png (223885 bytes) main.tsx:54:22
+Title: Screenshot 2025-07-19 at 12.31.42 AM main.tsx:54:22
+Category: portfolio main.tsx:54:22
+Description: main.tsx:54:22
+=== STARTING UPLOAD MUTATION === main.tsx:54:22
+=== FRONTEND API REQUEST === main.tsx:54:22
+Method: POST, URL: /api/media main.tsx:54:22
+FormData entries: 
+Array(4) [ (2) […], (2) […], (2) […], (2) […] ]
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+=== UPLOAD SUCCESS - INVALIDATING QUERIES === main.tsx:54:22
+=== FETCHING MEDIA FILES === main.tsx:54:22
+=== STARTING VERIFICATION FOR MEDIA ID === 1752934184270 main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+=== MEDIA FILES RESPONSE === 
+Array [ {…} ]
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media/verify/1752934184270 main.tsx:54:22
+Verification attempt 1 result: 
+Object { mediaId: 1752934184270, exists: true, accessible: true, databaseConsistent: true, fileSize: 223885, mimeType: "image/png", url: "https://s3.us-east-1.wasabisys.com/talent/user-75/media/7c510f7e-f90f-4da8-92c2-cc2427c344d2.png", errors: [], verificationAttempts: 1, s3Accessible: true, … }
+main.tsx:54:22
+=== FORCING MEDIA QUERY REFRESH === main.tsx:54:22
+=== FETCHING MEDIA FILES === main.tsx:54:22
+=== FETCHING MEDIA FILES === main.tsx:54:22
+=== UPLOAD SUCCESS === main.tsx:54:22
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. main.tsx:40:23
+
+​
+

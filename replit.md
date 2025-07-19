@@ -10,6 +10,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Experience/Role Selection System Enhancement (July 19, 2025)
+- **ROLE SELECTION EXPANSION**: Added comprehensive role selection with 28+ entertainment industry roles
+- **Multi-Role Support**: Created checkbox-based role selection allowing users to select multiple roles simultaneously
+- **Complete Role Options**: Added Actor, Actress, Director, Producer, Writer, Screenwriter, Cinematographer, Editor, Music Composer, Sound Designer, Voice Artist, Singer, Musician, Model, Dancer, Choreographer, Casting Director, Talent Agent, Manager, Publicist, Production Assistant, Camera Operator, Lighting Technician, Set Designer, Costume Designer, Makeup Artist, Stunt Performer, Fight Choreographer
+- **Database Integration**: Successfully added userRoles question (ID 406) to profile_questions table with checkbox field type
+- **Job History System**: Fixed job history creation functionality - users can successfully add experience entries
+- **Storage Architecture**: Job history uses in-memory storage (resets on server restart) but creation/retrieval works within sessions
+- **User Testing**: Confirmed with test user (asdfd/123456, ID 75) that job history creation returns proper JSON with IDs and timestamps
+- **API Status**: All core systems operational including media upload (Wasabi S3), authentication, and profile management
+- **Result**: ✅ Enhanced role selection with comprehensive options and working job history creation system
+
 ### Complete Platform API Audit and Critical Storage Architecture Fix (July 19, 2025)
 - **CRITICAL SUCCESS**: Completed comprehensive platform audit and resolved all major API endpoint failures
 - **Storage Architecture Resolution**: Systematically identified and fixed dual storage architecture issues:
