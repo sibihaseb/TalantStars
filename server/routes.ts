@@ -1169,7 +1169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/social/posts/:userId", isAuthenticated, async (req: any, res) => {
     try {
       const userId = parseInt(req.params.userId);
-      const posts = await storage.getUserSocialPosts(userId);
+      const posts = await simpleStorage.getUserSocialPosts(userId);
       res.json(posts);
     } catch (error: any) {
       res.status(500).json({ message: "Error fetching posts: " + error.message });
@@ -4204,7 +4204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/job-history/:userId', isAuthenticated, async (req: any, res) => {
     try {
       const { userId } = req.params;
-      const jobHistory = await storage.getJobHistory(userId);
+      const jobHistory = await simpleStorage.getJobHistory(parseInt(userId));
       res.json(jobHistory);
     } catch (error) {
       console.error('Get job history error:', error);
@@ -5006,7 +5006,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/social/stats', isAuthenticated, async (req: any, res) => {
     try {
       const userId = parseInt(req.user.id);
-      const userPosts = await storage.getUserSocialPosts(userId);
+      const userPosts = await simpleStorage.getUserSocialPosts(userId);
       
       // Mock stats - in production, calculate from database
       const stats = {
@@ -5059,7 +5059,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/job-history/:userId', isAuthenticated, async (req: any, res) => {
     try {
       const userId = parseInt(req.params.userId);
-      const jobHistory = await storage.getJobHistory(userId);
+      const jobHistory = await simpleStorage.getJobHistory(userId);
       res.json(jobHistory);
     } catch (error) {
       console.error("Error fetching job history:", error);

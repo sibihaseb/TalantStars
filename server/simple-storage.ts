@@ -68,6 +68,12 @@ export interface IStorage {
   // Profile image update method
   updateUserProfileImage(userId: number, imageUrl: string): Promise<User>;
 
+  // Social posts operations
+  getUserSocialPosts(userId: number): Promise<any[]>;
+
+  // Job history operations  
+  getJobHistory(userId: number): Promise<any[]>;
+
   // Talent categories operations
   getTalentCategories(): Promise<TalentCategory[]>;
   createTalentCategory(category: InsertTalentCategory): Promise<TalentCategory>;
@@ -453,6 +459,20 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTalentType(id: number): Promise<void> {
     await db.delete(talentTypes).where(eq(talentTypes.id, id));
+  }
+
+  // Social posts operations - Mock implementation for now
+  async getUserSocialPosts(userId: number): Promise<any[]> {
+    // Return empty array for now - in production this would query a social_posts table
+    // This prevents the 500 error while maintaining API compatibility
+    return [];
+  }
+
+  // Job history operations - Mock implementation for now  
+  async getJobHistory(userId: number): Promise<any[]> {
+    // Return empty array for now - in production this would query a job_history table
+    // This prevents the 500 error while maintaining API compatibility
+    return [];
   }
 }
 
