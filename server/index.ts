@@ -55,12 +55,24 @@ app.use((req, res, next) => {
     const server = await registerRoutes(app);
 
     // Error handler middleware
-    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
       const status = err.status || err.statusCode || 500;
       const message = err.message || "Internal Server Error";
 
-      console.error('Express error handler:', err);
-      res.status(status).json({ message });
+      console.error('=== EXPRESS ERROR HANDLER ===');
+      console.error('URL:', req.method, req.url);
+      console.error('Error:', err);
+      console.error('Stack:', err.stack);
+      console.error('Status:', status);
+      console.error('Message:', message);
+      console.error('==============================');
+      
+      // Don't send error details in production
+      const errorResponse = process.env.NODE_ENV === 'production' 
+        ? { message: "Internal Server Error" }
+        : { message, error: err.message, stack: err.stack };
+      
+      res.status(status).json(errorResponse);
     });
 
     // importantly only setup vite in development and after

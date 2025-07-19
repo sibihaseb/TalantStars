@@ -169,6 +169,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup traditional authentication for all routes
   await setupAuth(app);
 
+  // Database health check endpoint
+  app.get('/api/health', async (req, res) => {
+    try {
+      console.log("=== HEALTH CHECK ===");
+      
+      // Test database connection
+      const testQuery = await db.select().from(users).limit(1);
+      console.log("Database connection: OK");
+      
+      // Test profile questions table
+      const questionCount = await db.select().from(profileQuestions).limit(1);
+      console.log("Profile questions table: OK");
+      
+      res.json({ 
+        status: 'healthy', 
+        database: 'connected',
+        timestamp: new Date().toISOString(),
+        checks: {
+          users_table: testQuery.length >= 0,
+          profile_questions_table: questionCount.length >= 0
+        }
+      });
+    } catch (error) {
+      console.error("=== HEALTH CHECK FAILED ===");
+      console.error("Error:", error);
+      console.error("Error message:", error instanceof Error ? error.message : "Unknown error");
+      console.error("===========================");
+      res.status(500).json({ 
+        status: 'unhealthy', 
+        error: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
   // Configure multer for file uploads
   const upload = multer({
     storage: multer.memoryStorage(),
@@ -190,20 +225,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("=== USER REQUEST ===");
       const userId = req.user.id;
+      console.log("User ID:", userId);
+      console.log("Session ID:", req.sessionID);
+      
       const user = await simpleStorage.getUser(userId);
+      console.log("User found:", !!user);
+      
+      if (!user) {
+        console.log("User not found in database for ID:", userId);
+        return res.status(404).json({ message: "User not found" });
+      }
+      
       const profile = await simpleStorage.getUserProfile(userId);
+      console.log("Profile found:", !!profile);
       
       // Get user's pricing tier limits
       let tierLimits = null;
       if (user.pricingTierId) {
+        console.log("Fetching pricing tier:", user.pricingTierId);
         tierLimits = await storage.getPricingTier(user.pricingTierId);
+        console.log("Tier limits found:", !!tierLimits);
       }
       
+      console.log("Sending user response");
       res.json({ ...user, profile, tierLimits });
     } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+      console.error("=== USER ERROR ===");
+      console.error("Error:", error);
+      console.error("Error message:", error instanceof Error ? error.message : "Unknown error");
+      console.error("User context:", req.user?.id, req.user?.username);
+      console.error("==================");
+      res.status(500).json({ message: "Failed to fetch user", error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
 
@@ -2991,11 +3045,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public endpoint for profile questions (used in onboarding)
   app.get('/api/profile-questions', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("=== PROFILE QUESTIONS REQUEST ===");
+      console.log("User:", req.user?.id, req.user?.username);
+      console.log("Request URL:", req.url);
+      
       const questions = await db.select().from(profileQuestions).orderBy(asc(profileQuestions.order));
+      console.log("Questions fetched:", questions.length);
+      console.log("First few questions:", questions.slice(0, 3).map(q => ({ id: q.id, field_name: q.field_name, question: q.question })));
+      
       res.json(questions);
     } catch (error) {
-      console.error("Error fetching profile questions:", error);
-      res.status(500).json({ message: "Failed to fetch profile questions" });
+      console.error("=== PROFILE QUESTIONS ERROR ===");
+      console.error("Error details:", error);
+      console.error("Error message:", error instanceof Error ? error.message : "Unknown error");
+      console.error("Error stack:", error instanceof Error ? error.stack : "No stack");
+      console.error("User context:", req.user?.id, req.user?.username);
+      console.error("================================");
+      res.status(500).json({ message: "Failed to fetch profile questions", error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
 
