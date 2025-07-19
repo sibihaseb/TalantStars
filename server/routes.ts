@@ -266,6 +266,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // Profile routes
+  app.get('/api/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      console.log("Getting profile for user:", userId);
+      
+      const profile = await simpleStorage.getUserProfile(userId);
+      
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      
+      res.json(profile);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
   app.post('/api/profile', isAuthenticated, requirePlan, async (req: any, res) => {
     try {
       const userId = req.user.id;
