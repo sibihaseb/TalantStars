@@ -390,7 +390,7 @@ export default function BrowseJobs() {
                             <div className="flex items-center space-x-2">
                               {getTalentIcon(job.talentType)}
                               <Badge variant="outline" className="capitalize">
-                                {job.talentType.replace('_', ' ')}
+                                {job.talentType ? job.talentType.replace('_', ' ') : 'General'}
                               </Badge>
                             </div>
                             <Badge 
@@ -467,7 +467,7 @@ export default function BrowseJobs() {
                               <div className="flex items-center space-x-2 mb-4">
                                 {getTalentIcon(job.talentType)}
                                 <Badge variant="outline" className="capitalize">
-                                  {job.talentType.replace('_', ' ')}
+                                  {job.talentType ? job.talentType.replace('_', ' ') : 'General'}
                                 </Badge>
                                 <Badge 
                                   variant={job.status === 'open' ? 'default' : 'secondary'}
