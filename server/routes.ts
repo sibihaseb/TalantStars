@@ -410,7 +410,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/calendar/events', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const events = await storage.getUserAvailabilityEvents(userId);
+      const events = await simpleStorage.getAvailabilityEvents(userId);
       res.json(events);
     } catch (error) {
       console.error("Error fetching calendar events:", error);
@@ -423,13 +423,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const eventData = {
         userId,
-        startDate: new Date(req.body.startDate),
-        endDate: new Date(req.body.endDate),
+        title: req.body.title || 'Event',
+        start: req.body.start,
+        end: req.body.end,
         status: req.body.status || 'available',
+        type: req.body.type || 'general',
         notes: req.body.notes || null,
-        allDay: req.body.allDay !== undefined ? req.body.allDay : true,
+        allDay: req.body.allDay !== undefined ? req.body.allDay : false,
       };
-      const event = await storage.createAvailabilityEvent(eventData);
+      const event = await simpleStorage.createAvailabilityEvent(eventData);
       res.json(event);
     } catch (error) {
       console.error("Error creating calendar event:", error);
@@ -446,7 +448,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         startDateTime: new Date(`${req.body.startDate} ${req.body.startTime}`),
         endDateTime: req.body.endDate && req.body.endTime ? new Date(`${req.body.endDate} ${req.body.endTime}`) : null,
       };
-      const event = await storage.updateAvailabilityEvent(eventId, userId, eventData);
+      const event = await simpleStorage.updateAvailabilityEvent(eventId, eventData);
       res.json(event);
     } catch (error) {
       console.error("Error updating calendar event:", error);
@@ -458,7 +460,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const eventId = parseInt(req.params.id);
-      await storage.deleteAvailabilityEvent(eventId, userId);
+      await simpleStorage.deleteAvailabilityEvent(eventId, userId);
       res.json({ message: "Event deleted successfully" });
     } catch (error) {
       console.error("Error deleting calendar event:", error);
@@ -1243,7 +1245,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const uploadResult = await uploadFileToWasabi(file, `user-${req.user.id}/media`);
         
         // Store media file in database
-        const mediaFile = await storage.createMediaFile({
+        const mediaFile = await simpleStorage.createMediaFile({
           userId: req.user.id,
           filename: uploadResult.originalName,
           originalName: file.originalname,

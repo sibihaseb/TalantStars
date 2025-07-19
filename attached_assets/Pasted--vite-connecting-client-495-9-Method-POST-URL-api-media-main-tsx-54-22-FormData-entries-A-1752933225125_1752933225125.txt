@@ -1,0 +1,85 @@
+
+[vite] connecting... client:495:9
+Method: POST, URL: /api/media main.tsx:54:22
+FormData entries: 
+Array(4) [ (2) […], (2) […], (2) […], (2) […] ]
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 500, URL: /api/media main.tsx:54:22
+🚨 API ERROR: 500 - {"message":"Failed to create media"} main.tsx:54:22
+=== UPLOAD FAILED === main.tsx:27:24
+Upload failed for file: Screenshot 2025-07-18 at 11.59.13 PM.png Error: 500: {"message":"Failed to create media"}
+    throwIfResNotOk queryClient.ts:7
+main.tsx:27:24
+Error details: Error: 500: {"message":"Failed to create media"}
+    throwIfResNotOk queryClient.ts:7
+main.tsx:27:24
+=== FORM SUBMIT TRIGGERED === main.tsx:54:22
+Upload type: file main.tsx:54:22
+Selected files: 
+Array [ File ]
+main.tsx:54:22
+File metadata: 
+Array [ {…} ]
+main.tsx:54:22
+Media form data: 
+Object { title: "", description: "", category: "portfolio", files: (1) […], externalUrl: "" }
+main.tsx:54:22
+=== PREPARING UPLOAD === main.tsx:54:22
+File: Screenshot 2025-07-18 at 11.59.13 PM.png (90863 bytes) main.tsx:54:22
+Title: Screenshot 2025-07-18 at 11.59.13 PM main.tsx:54:22
+Category: portfolio main.tsx:54:22
+Description: main.tsx:54:22
+=== STARTING UPLOAD MUTATION === main.tsx:54:22
+=== FRONTEND API REQUEST === main.tsx:54:22
+Method: POST, URL: /api/media main.tsx:54:22
+FormData entries: 
+Array(4) [ (2) […], (2) […], (2) […], (2) […] ]
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 500, URL: /api/media main.tsx:54:22
+🚨 API ERROR: 500 - {"message":"Failed to create media"} main.tsx:54:22
+=== UPLOAD FAILED === main.tsx:27:24
+Upload failed for file: Screenshot 2025-07-18 at 11.59.13 PM.png Error: 500: {"message":"Failed to create media"}
+    throwIfResNotOk queryClient.ts:7
+main.tsx:27:24
+Error details: Error: 500: {"message":"Failed to create media"}
+    throwIfResNotOk queryClient.ts:7
+main.tsx:27:24
+=== FORM SUBMIT TRIGGERED === main.tsx:54:22
+Upload type: file main.tsx:54:22
+Selected files: 
+Array [ File ]
+main.tsx:54:22
+File metadata: 
+Array [ {…} ]
+main.tsx:54:22
+Media form data: 
+Object { title: "", description: "", category: "portfolio", files: (1) […], externalUrl: "" }
+main.tsx:54:22
+=== PREPARING UPLOAD === main.tsx:54:22
+File: Screenshot 2025-07-18 at 11.59.13 PM.png (90863 bytes) main.tsx:54:22
+Title: Screenshot 2025-07-18 at 11.59.13 PM main.tsx:54:22
+Category: portfolio main.tsx:54:22
+Description: main.tsx:54:22
+=== STARTING UPLOAD MUTATION === main.tsx:54:22
+=== FRONTEND API REQUEST === main.tsx:54:22
+Method: POST, URL: /api/media main.tsx:54:22
+FormData entries: 
+Array(4) [ (2) […], (2) […], (2) […], (2) […] ]
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 500, URL: /api/media main.tsx:54:22
+🚨 API ERROR: 500 - {"message":"Failed to create media"} main.tsx:54:22
+=== UPLOAD FAILED === main.tsx:27:24
+    error main.tsx:27
+    handleFormSubmit EnhancedMediaUpload.tsx:541
+Upload failed for file: Screenshot 2025-07-18 at 11.59.13 PM.png Error: 500: {"message":"Failed to create media"}
+    throwIfResNotOk queryClient.ts:7
+main.tsx:27:24
+Error details: Error: 500: {"message":"Failed to create media"}
+    throwIfResNotOk queryClient.ts:7
+main.tsx:27:24
+
+​
+
