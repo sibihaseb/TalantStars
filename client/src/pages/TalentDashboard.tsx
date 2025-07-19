@@ -770,7 +770,10 @@ export default function TalentDashboard() {
                       <Filter className="w-4 h-4 mr-2" />
                       Filter
                     </Button>
-                    <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                    <Button 
+                      onClick={() => setLocation('/browse-jobs')}
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                    >
                       <Plus className="w-4 h-4 mr-2" />
                       Browse More
                     </Button>
@@ -778,8 +781,26 @@ export default function TalentDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {recentOpportunities.map((opp: any, index: number) => (
+                {!opportunities || opportunities.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                      <Search className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No Opportunities Available</h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      We're working hard to bring you the best opportunities. Check back soon or browse all available jobs.
+                    </p>
+                    <Button 
+                      onClick={() => setLocation('/browse-jobs')}
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                    >
+                      <Search className="w-4 h-4 mr-2" />
+                      Browse All Jobs
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {recentOpportunities.map((opp: any, index: number) => (
                     <Card key={index} className="hover:shadow-lg transition-shadow">
                       <CardHeader>
                         <div className="flex items-center justify-between">
@@ -843,8 +864,9 @@ export default function TalentDashboard() {
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

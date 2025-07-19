@@ -227,11 +227,24 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
   // AI Enhancement mutation
   const enhanceMutation = useMutation({
     mutationFn: async (jobId: number) => {
+      console.log("🔥 ENHANCEMENT: Starting AI enhancement for job", { jobId });
       setEnhancingJobId(jobId);
-      const response = await apiRequest('POST', `/api/job-history/${jobId}/enhance`);
-      return response.json();
+      try {
+        const response = await apiRequest('POST', `/api/job-history/${jobId}/enhance`);
+        console.log("🔥 ENHANCEMENT: API response received", { status: response.status });
+        if (!response.ok) {
+          throw new Error(`Enhancement failed with status ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("🔥 ENHANCEMENT: Success data", { data });
+        return data;
+      } catch (error) {
+        console.error("🔥 ENHANCEMENT: API error", { error });
+        throw error;
+      }
     },
     onSuccess: (data) => {
+      console.log("🔥 ENHANCEMENT: Mutation success", { data });
       setEnhancingJobId(null);
       queryClient.invalidateQueries({ queryKey: [`/api/job-history/${userId}`] });
       onJobUpdated();
@@ -241,10 +254,11 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
       });
     },
     onError: (error) => {
+      console.error("🔥 ENHANCEMENT: Mutation error", { error });
       setEnhancingJobId(null);
       toast({ 
         title: "Enhancement failed", 
-        description: "Unable to enhance the experience description. Please try again.",
+        description: `Unable to enhance the experience description: ${error.message}`,
         variant: "destructive" 
       });
     }
@@ -253,11 +267,24 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
   // Skill validation mutation
   const validateSkillsMutation = useMutation({
     mutationFn: async (jobId: number) => {
+      console.log("🔥 VALIDATION: Starting skill validation for job", { jobId });
       setValidatingJobId(jobId);
-      const response = await apiRequest('POST', `/api/job-history/${jobId}/validate-skills`);
-      return response.json();
+      try {
+        const response = await apiRequest('POST', `/api/job-history/${jobId}/validate-skills`);
+        console.log("🔥 VALIDATION: API response received", { status: response.status });
+        if (!response.ok) {
+          throw new Error(`Validation failed with status ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("🔥 VALIDATION: Success data", { data });
+        return data;
+      } catch (error) {
+        console.error("🔥 VALIDATION: API error", { error });
+        throw error;
+      }
     },
     onSuccess: (data) => {
+      console.log("🔥 VALIDATION: Mutation success", { data });
       setValidatingJobId(null);
       queryClient.invalidateQueries({ queryKey: [`/api/job-history/${userId}`] });
       onJobUpdated();
@@ -267,10 +294,11 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
       });
     },
     onError: (error) => {
+      console.error("🔥 VALIDATION: Mutation error", { error });
       setValidatingJobId(null);
       toast({ 
         title: "Validation failed", 
-        description: "Unable to validate skills for this experience. Please try again.",
+        description: `Unable to validate skills for this experience: ${error.message}`,
         variant: "destructive" 
       });
     }
