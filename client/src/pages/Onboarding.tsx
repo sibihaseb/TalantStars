@@ -1280,10 +1280,10 @@ function Onboarding() {
       website: data.website?.trim() || null,
       phoneNumber: data.phoneNumber?.trim() || null,
       profileImageUrl: data.profileImageUrl?.trim() || null,
-      // Handle numeric fields
-      dailyRate: data.dailyRate ? parseFloat(data.dailyRate) : null,
-      weeklyRate: data.weeklyRate ? parseFloat(data.weeklyRate) : null,
-      projectRate: data.projectRate ? parseFloat(data.projectRate) : null,
+      // Handle numeric fields as strings (backend expects strings)
+      dailyRate: data.dailyRate ? String(data.dailyRate) : null,
+      weeklyRate: data.weeklyRate ? String(data.weeklyRate) : null,
+      projectRate: data.projectRate ? String(data.projectRate) : null,
     };
     
     console.log("Cleaned data for submission:", cleanedData);
@@ -1313,20 +1313,29 @@ function Onboarding() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
         <Header />
         
-        {/* Emotional Progress Header */}
-        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 mt-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <EmotionalProgress
-              currentStep={currentStep}
-              totalSteps={getMaxSteps()}
-              stepTitle={getStepInfo(currentStep).title}
-              completedSteps={completedSteps}
-              showRewards={true}
-              onStepComplete={(step) => {
-                // Optional: Add additional celebration logic here
-
-              }}
-            />
+        {/* Compact Progress Header */}
+        <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 mt-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-semibold">{currentStep}</span>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{getStepInfo(currentStep).title}</h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Step {currentStep} of {getMaxSteps()}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-medium text-blue-600 dark:text-blue-400">{Math.round(progressPercentage)}% complete</div>
+                <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

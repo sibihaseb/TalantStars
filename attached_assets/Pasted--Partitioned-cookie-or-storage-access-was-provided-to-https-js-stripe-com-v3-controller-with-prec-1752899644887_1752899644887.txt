@@ -1,0 +1,82 @@
+
+Partitioned cookie or storage access was provided to “https://js.stripe.com/v3/controller-with-preconnect-5a125e125bbb24d882c0a6f33f679c89.html#__shared_params__[version]=basil&apiKey=pk_test_51NwxezAhOiHhM1yQX94ydY61tL8LaN6K1HeVYkAzhAaV36YpuWt9pdJ1XCYLjoxOWn4fsNzENnfeFzC0lFoB7Z3100t4ZBV3JL&apiVersion=2025-03-31.basil&stripeJsId=81fa0b3f-fe05-45ab-af36-4e60a95ecebb&stripeObjId=sobj-f01ebc45-4663-48b1-937d-b7780d916682&firstStripeInstanceCreatedLatency=6&controllerCount=1&isCheckout=false&stripeJsLoadTime=1752899475487&manualBrowserDeprecationRollout=false&mids[guid]=NA&mids[muid]=3edca450-0007-4f4b-9520-7e7e6607282294bef3&mids[sid]=NA&referrer=https%3A%2F%2Fwww.talentsandstars.com%2Ftalent-dashboard&controllerId=__privateStripeController0621” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+controller-with-preconnect-6c42774ced1350d667a127e6b6d290ea.js:1:22427
+Field: periodPieces Current value: <empty string> Question: Do you have experience with period pieces? index-Cy_hzgEA.js:793:60037
+Field: physicalComedy Current value: <empty string> Question: Are you comfortable with physical comedy? index-Cy_hzgEA.js:793:60037
+Field: accentExperience Current value: <empty string> Question: What is your experience with different accents? index-Cy_hzgEA.js:793:60037
+Field: greenScreen Current value: <empty string> Question: Do you have experience with green screen work? index-Cy_hzgEA.js:793:60037
+Field: stuntComfort Current value: Somewhat comfortable Question: Are you comfortable with stunts? index-Cy_hzgEA.js:793:60037
+Field: shakespeareExperience Current value: <empty string> Question: What is your experience with Shakespeare? index-Cy_hzgEA.js:793:60037
+Field: musicalTheater Current value: <empty string> Question: Do you have experience with musical theater? index-Cy_hzgEA.js:793:60037
+Field: currentAgent Current value: <empty string> Question: Who is your current agent? (Optional) index-Cy_hzgEA.js:793:60037
+Field: horrorThriller Current value: 
+Array []
+ Question: Do you have experience with horror/thriller genres? index-Cy_hzgEA.js:793:60037
+Field: currentPublicist Current value: <empty string> Question: Who is your current publicist? (Optional) index-Cy_hzgEA.js:793:60037
+Field: representationStatus Current value: <empty string> Question: Current representation status index-Cy_hzgEA.js:793:60037
+Field: primarySpecialty Current value: 
+Array [ "Theater" ]
+ Question: What is your primary acting specialty? index-Cy_hzgEA.js:793:60037
+Field: yearsExperience Current value: 23 Question: How many years of acting experience do you have? index-Cy_hzgEA.js:793:60037
+Field: actingMethod Current value: 
+Array []
+ Question: What is your preferred acting method or technique? index-Cy_hzgEA.js:793:60037
+Field: improvisationComfort Current value: Somewhat comfortable Question: Are you comfortable with improvisation? index-Cy_hzgEA.js:793:60037
+Field: stageCombat Current value: <empty string> Question: Do you have stage combat training? index-Cy_hzgEA.js:793:60037
+Field: intimateScenesComfort Current value: Not comfortable Question: Are you comfortable with intimate scenes? index-Cy_hzgEA.js:793:60037
+Field: roleTypes Current value: 
+Array [ "Comic Relief" ]
+ Question: What types of roles are you most interested in? index-Cy_hzgEA.js:793:60037
+Field: motionCapture Current value: <empty string> Question: Do you have experience with motion capture? index-Cy_hzgEA.js:793:60037
+Field: animalWork Current value: <empty string> Question: Are you comfortable working with animals? index-Cy_hzgEA.js:793:60037
+Field: cryingOnCue Current value: Somewhat comfortable Question: What is your comfort level with crying on cue? index-Cy_hzgEA.js:793:60037
+Field: periodPieces Current value: <empty string> Question: Do you have experience with period pieces? index-Cy_hzgEA.js:793:60037
+Field: physicalComedy Current value: <empty string> Question: Are you comfortable with physical comedy? index-Cy_hzgEA.js:793:60037
+Field: accentExperience Current value: <empty string> Question: What is your experience with different accents? index-Cy_hzgEA.js:793:60037
+Field: greenScreen Current value: <empty string> Question: Do you have experience with green screen work? index-Cy_hzgEA.js:793:60037
+Field: stuntComfort Current value: Somewhat comfortable Question: Are you comfortable with stunts? index-Cy_hzgEA.js:793:60037
+Field: shakespeareExperience Current value: <empty string> Question: What is your experience with Shakespeare? index-Cy_hzgEA.js:793:60037
+Field: musicalTheater Current value: <empty string> Question: Do you have experience with musical theater? index-Cy_hzgEA.js:793:60037
+Field: currentAgent Current value: <empty string> Question: Who is your current agent? (Optional) index-Cy_hzgEA.js:793:60037
+Field: horrorThriller Current value: 
+Array []
+ Question: Do you have experience with horror/thriller genres? index-Cy_hzgEA.js:793:60037
+Field: currentPublicist Current value: <empty string> Question: Who is your current publicist? (Optional) index-Cy_hzgEA.js:793:60037
+Field: representationStatus Current value: <empty string> Question: Current representation status index-Cy_hzgEA.js:793:60037
+Submit button clicked index-Cy_hzgEA.js:793:60037
+Current form values: 
+Object { displayName: "asdf fdsdf", bio: "asdfasdfasdfas", location: "sadfasdf", bioLength: 14 }
+index-Cy_hzgEA.js:793:60037
+=== FORM SUBMISSION START === index-Cy_hzgEA.js:793:60037
+Form data: 
+Object { role: "talent", talentType: "actor", displayName: "asdf fdsdf", bio: "asdfasdfasdfas", location: "sadfasdf", website: "", phoneNumber: "", availabilityStatus: "busy", height: "", weight: "", … }
+index-Cy_hzgEA.js:793:60037
+Form errors: 
+Object { profileImageUrl: {…} }
+index-Cy_hzgEA.js:793:60037
+Form is valid: true index-Cy_hzgEA.js:793:60037
+Cleaned data for submission: 
+Object { role: "talent", talentType: "actor", displayName: "asdf fdsdf", bio: "asdfasdfasdfas", location: "sadfasdf", website: null, phoneNumber: null, availabilityStatus: "busy", height: "", weight: "", … }
+index-Cy_hzgEA.js:793:60037
+=== SUBMITTING TO API === index-Cy_hzgEA.js:793:60037
+=== FRONTEND API RESPONSE === index-Cy_hzgEA.js:793:60037
+Status: 500, URL: /api/profile index-Cy_hzgEA.js:793:60037
+🚨 API ERROR: 500 - {"message":"Failed to create profile","error":"[\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"number\",\n    \"path\": [\n      \"dailyRate\"\n    ],\n    \"message\": \"Expected string, received number\"\n  }\n]"} index-Cy_hzgEA.js:793:60037
+=== PROFILE CREATION ERROR === index-Cy_hzgEA.js:793:60037
+Error: Error: 500: {"message":"Failed to create profile","error":"[\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"number\",\n    \"path\": [\n      \"dailyRate\"\n    ],\n    \"message\": \"Expected string, received number\"\n  }\n]"}
+    UA https://www.talentsandstars.com/assets/index-Cy_hzgEA.js:48
+index-Cy_hzgEA.js:793:59714
+Error type: object index-Cy_hzgEA.js:793:60037
+Error details: 
+Object { message: '500: {"message":"Failed to create profile","error":"[\\n  {\\n    \\"code\\": \\"invalid_type\\",\\n    \\"expected\\": \\"string\\",\\n    \\"received\\": \\"number\\",\\n    \\"path\\": [\\n      \\"dailyRate\\"\\n    ],\\n    \\"message\\": \\"Expected string, received number\\"\\n  }\\n]"}', stack: "UA@https://www.talentsandstars.com/assets/index-Cy_hzgEA.js:48:42938\n" }
+​
+message: '500: {"message":"Failed to create profile","error":"[\\n  {\\n    \\"code\\": \\"invalid_type\\",\\n    \\"expected\\": \\"string\\",\\n    \\"received\\": \\"number\\",\\n    \\"path\\": [\\n      \\"dailyRate\\"\\n    ],\\n    \\"message\\": \\"Expected string, received number\\"\\n  }\\n]"}'
+​
+stack: "UA@https://www.talentsandstars.com/assets/index-Cy_hzgEA.js:48:42938\n"
+​
+<prototype>: Object { … }
+index-Cy_hzgEA.js:793:60037
+Final error message: 500: {"message":"Failed to create profile","error":"[\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"number\",\n    \"path\": [\n      \"dailyRate\"\n    ],\n    \"message\": \"Expected string, received number\"\n  }\n]"} index-Cy_hzgEA.js:793:60037
+
+​
+

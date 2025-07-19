@@ -288,37 +288,24 @@ export function EmotionalProgress({
         )}
       </AnimatePresence>
 
-      {/* Rewards Collection */}
+      {/* Compact Rewards Collection */}
       {showRewards && earnedRewards.length > 0 && (
-        <Card className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Trophy className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                <h4 className="text-sm font-semibold text-purple-800 dark:text-purple-300">
-                  Rewards Earned
-                </h4>
-              </div>
-              <Badge variant="secondary" className="bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200">
-                {earnedRewards.length}
-              </Badge>
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-2 border border-purple-200 dark:border-purple-700">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Trophy className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <span className="text-xs font-medium text-purple-800 dark:text-purple-300">
+                Rewards ({earnedRewards.length})
+              </span>
             </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {earnedRewards.map((reward, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="flex items-center space-x-1 bg-white dark:bg-gray-800 px-3 py-1 rounded-full border border-purple-200 dark:border-purple-700"
-                >
-                  <Star className="w-3 h-3 text-yellow-500" />
-                  <span className="text-xs text-gray-700 dark:text-gray-300">{reward}</span>
-                </motion.div>
+            <div className="flex space-x-1">
+              {earnedRewards.slice(0, 3).map((_, index) => (
+                <Star key={index} className="w-3 h-3 text-yellow-500" />
               ))}
+              {earnedRewards.length > 3 && <span className="text-xs text-purple-600">+{earnedRewards.length - 3}</span>}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   );
