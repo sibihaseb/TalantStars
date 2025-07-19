@@ -50,7 +50,9 @@ import {
   Award,
   Target,
   BarChart3,
-  PlayCircle
+  PlayCircle,
+  Edit,
+  Trash
 } from 'lucide-react';
 
 export default function TalentDashboard() {
@@ -62,6 +64,7 @@ export default function TalentDashboard() {
   const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
   const [postContent, setPostContent] = useState("");
   const [jobHistoryForm, setJobHistoryForm] = useState({
+    id: null,
     title: "",
     company: "",
     jobType: "",
@@ -72,6 +75,7 @@ export default function TalentDashboard() {
     description: "",
     verified: false
   });
+  const [editingJobId, setEditingJobId] = useState<number | null>(null);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
@@ -285,15 +289,18 @@ export default function TalentDashboard() {
     },
   });
 
-  // Create job history mutation
+  // Create/Update job history mutation
   const createJobHistoryMutation = useMutation({
     mutationFn: async (jobData: any) => {
-      const response = await apiRequest('POST', '/api/job-history', jobData);
+      const method = editingJobId ? 'PUT' : 'POST';
+      const url = editingJobId ? `/api/job-history/${editingJobId}` : '/api/job-history';
+      const response = await apiRequest(method, url, jobData);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/job-history'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/job-history', user?.id] });
       setJobHistoryForm({
+        id: null,
         title: "",
         company: "",
         jobType: "",
@@ -304,6 +311,7 @@ export default function TalentDashboard() {
         description: "",
         verified: false
       });
+      setEditingJobId(null);
       setIsJobHistoryDialogOpen(false);
       toast({
         title: "Success",
@@ -362,6 +370,51 @@ export default function TalentDashboard() {
   const handleCreateJobHistory = () => {
     if (jobHistoryForm.title && jobHistoryForm.company && jobHistoryForm.role) {
       createJobHistoryMutation.mutate(jobHistoryForm);
+    }
+  };
+
+  // Delete job history mutation
+  const deleteJobHistoryMutation = useMutation({
+    mutationFn: async (jobId: number) => {
+      const response = await apiRequest('DELETE', `/api/job-history/${jobId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/job-history', user?.id] });
+      toast({
+        title: "Success",
+        description: "Job history deleted successfully!",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete job history. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEditJob = (job: any) => {
+    setJobHistoryForm({
+      id: job.id,
+      title: job.title,
+      company: job.company,
+      jobType: job.job_type || "",
+      role: job.role,
+      startDate: job.start_date,
+      endDate: job.end_date,
+      location: job.location || "",
+      description: job.description,
+      verified: job.verified
+    });
+    setEditingJobId(job.id);
+    setIsJobHistoryDialogOpen(true);
+  };
+
+  const handleDeleteJob = (jobId: number) => {
+    if (confirm("Are you sure you want to delete this job history entry?")) {
+      deleteJobHistoryMutation.mutate(jobId);
     }
   };
 
@@ -574,7 +627,7 @@ export default function TalentDashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     {jobHistory?.slice(0, 3).map((job: any, index: number) => (
-                      <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div key={job.id || index} className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                           <Briefcase className="w-5 h-5 text-white" />
                         </div>
@@ -585,8 +638,26 @@ export default function TalentDashboard() {
                           </div>
                           <p className="text-xs text-gray-600 dark:text-gray-400">{job.company}</p>
                           <p className="text-xs text-gray-500">
-                            {new Date(job.startDate).getFullYear()} - {job.endDate ? new Date(job.endDate).getFullYear() : 'Present'}
+                            {new Date(job.start_date || job.startDate).getFullYear()} - {job.end_date || job.endDate ? new Date(job.end_date || job.endDate).getFullYear() : 'Present'}
                           </p>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleEditJob(job)}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleDeleteJob(job.id)}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <Trash className="w-3 h-3" />
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -605,7 +676,7 @@ export default function TalentDashboard() {
                       </DialogTrigger>
                       <DialogContent className="max-w-2xl">
                         <DialogHeader>
-                          <DialogTitle>Add Work Experience</DialogTitle>
+                          <DialogTitle>{editingJobId ? 'Edit Work Experience' : 'Add Work Experience'}</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4">
                           <div className="grid grid-cols-2 gap-4">
@@ -697,14 +768,32 @@ export default function TalentDashboard() {
                             />
                           </div>
                           <div className="flex justify-end space-x-2">
-                            <Button variant="outline" onClick={() => setIsJobHistoryDialogOpen(false)}>
+                            <Button variant="outline" onClick={() => {
+                              setIsJobHistoryDialogOpen(false);
+                              setEditingJobId(null);
+                              setJobHistoryForm({
+                                id: null,
+                                title: "",
+                                company: "",
+                                jobType: "",
+                                role: "",
+                                startDate: "",
+                                endDate: "",
+                                location: "",
+                                description: "",
+                                verified: false
+                              });
+                            }}>
                               Cancel
                             </Button>
                             <Button 
                               onClick={handleCreateJobHistory}
-                              disabled={createJobHistoryMutation.isPending}
+                              disabled={createJobHistoryMutation.isPending || !jobHistoryForm.title || !jobHistoryForm.company || !jobHistoryForm.role}
                             >
-                              {createJobHistoryMutation.isPending ? "Adding..." : "Add Experience"}
+                              {createJobHistoryMutation.isPending ? 
+                                (editingJobId ? "Updating..." : "Adding...") : 
+                                (editingJobId ? "Update Experience" : "Add Experience")
+                              }
                             </Button>
                           </div>
                         </div>
