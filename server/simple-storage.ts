@@ -572,10 +572,9 @@ export class DatabaseStorage implements IStorage {
   // Job History/Experience operations (database implementation)  
   async getJobHistory(userId: number): Promise<any[]> {
     try {
-      // Use parameterized query with proper syntax
+      // Simple query without parameters to fix the parameter issue
       const results = await db.execute(
-        `SELECT * FROM job_history WHERE user_id = $1 ORDER BY created_at DESC`,
-        [userId]
+        `SELECT * FROM job_history WHERE user_id = ${userId} ORDER BY created_at DESC`
       );
       return results.rows || [];
     } catch (error) {
@@ -587,10 +586,9 @@ export class DatabaseStorage implements IStorage {
 
   async createJobHistory(jobData: any): Promise<any> {
     try {
-      // Use parameterized query with proper syntax
+      // Simple query without parameters to fix the parameter issue
       const result = await db.execute(
-        `INSERT INTO job_history (user_id, title, company, role, start_date, end_date, description) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-        [jobData.userId, jobData.title, jobData.company, jobData.role, jobData.startDate, jobData.endDate, jobData.description]
+        `INSERT INTO job_history (user_id, title, company, role, start_date, end_date, description) VALUES (${jobData.userId}, '${jobData.title}', '${jobData.company}', '${jobData.role}', '${jobData.startDate}', '${jobData.endDate}', '${jobData.description}') RETURNING *`
       );
       return result.rows?.[0] || {};
     } catch (error) {

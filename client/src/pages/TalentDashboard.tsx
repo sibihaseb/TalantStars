@@ -96,6 +96,8 @@ export default function TalentDashboard() {
       return response.json();
     },
     enabled: !!user,
+    refetchOnWindowFocus: true,
+    refetchInterval: 10000, // Refetch every 10 seconds to keep data fresh
   });
 
   // Calculate dynamic progress based on user profile
