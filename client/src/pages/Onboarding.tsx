@@ -816,17 +816,66 @@ function Onboarding() {
     cacheTime: 10 * 60 * 1000, // 10 minutes
   });
 
+  // Helper function to group acting questions by step
+  const getActingQuestionGroups = () => {
+    if (!profileQuestions) return { step4: [], step5: [], step6: [] };
+    
+    const actingQuestions = profileQuestions.filter(q => {
+      const questionType = q.talentType;
+      const fieldName = q.fieldName || q.field_name;
+      return questionType === watchedTalentType && 
+             questionType !== 'profile' &&
+             !['displayName', 'bio', 'location', 'website', 'phoneNumber'].includes(fieldName);
+    });
+
+    // Step 4: Acting Experience (experience & training related)
+    const experienceFields = ['primarySpecialty', 'yearsExperience', 'actingMethod', 'stageCombat', 'shakespeareExperience', 'musicalTheater'];
+    
+    // Step 5: Physical & Skills (physical attributes & abilities)  
+    const physicalFields = ['improvisationComfort', 'intimateScenesComfort', 'cryingOnCue', 'physicalComedy', 'stuntComfort', 'motionCapture', 'animalWork'];
+    
+    // Step 6: Role Preferences (preferred roles & representation)
+    const roleFields = ['roleTypes', 'periodPieces', 'accentExperience', 'greenScreen', 'horrorThriller', 'currentAgent', 'currentPublicist', 'representationStatus'];
+
+    return {
+      step4: actingQuestions.filter(q => {
+        const fieldName = q.fieldName || q.field_name;
+        return experienceFields.includes(fieldName);
+      }).sort((a, b) => a.order - b.order),
+      step5: actingQuestions.filter(q => {
+        const fieldName = q.fieldName || q.field_name;
+        return physicalFields.includes(fieldName);
+      }).sort((a, b) => a.order - b.order),
+      step6: actingQuestions.filter(q => {
+        const fieldName = q.fieldName || q.field_name;
+        return roleFields.includes(fieldName);
+      }).sort((a, b) => a.order - b.order)
+    };
+  };
+
   // Memoize the relevant questions to prevent re-computation
   const relevantQuestions = useMemo(() => {
     if (!watchedRole) return [];
 
-    // Filter questions based on role
+    // For acting talent, use grouped questions based on current step
+    if (watchedRole === 'talent' && watchedTalentType === 'actor') {
+      const questionGroups = getActingQuestionGroups();
+      
+      if (currentStep === 4) {
+        return questionGroups.step4;
+      } else if (currentStep === 5) {
+        return questionGroups.step5;
+      } else if (currentStep === 6) {
+        return questionGroups.step6;
+      }
+      return [];
+    }
+
+    // For other talent types or roles, use original logic
     let questionTypes = [];
     if (watchedRole === 'talent' && watchedTalentType) {
-      // For talent users, show both profile questions and their specific talent type questions
       questionTypes = ['profile', watchedTalentType];
     } else {
-      // For non-talent users (manager, producer, agent), show 'profile' questions
       questionTypes = ['profile'];
     }
 
@@ -847,7 +896,7 @@ function Onboarding() {
         return isRelevant && !isProfileImageQuestion && !isBasicProfileQuestion;
       })
       .sort((a, b) => a.order - b.order);
-  }, [watchedRole, watchedTalentType, profileQuestions]);
+  }, [watchedRole, watchedTalentType, profileQuestions, currentStep]);
 
   // Render questions directly without inline component
   const renderRoleSpecificQuestions = () => {
@@ -860,10 +909,10 @@ function Onboarding() {
     }
 
     return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {relevantQuestions.map((question) => (
-            <div key={`q-${question.id}`} className="space-y-3">
+            <div key={`q-${question.id}`} className="space-y-2">
               <Label className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
                 {question.question}
                 {question.required && <span className="text-red-500 text-xs">*</span>}
@@ -879,7 +928,7 @@ function Onboarding() {
         </div>
         
         {relevantQuestions.length > 0 && (
-          <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
             <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
               <Info className="h-4 w-4" />
               <span>
@@ -1007,9 +1056,9 @@ function Onboarding() {
     const isAuthenticated = !!user?.role;
     // For authenticated users, we skip role selection step
     if (isAuthenticated) {
-      return watchedRole === "talent" ? 7 : 5; // Include profile image step
+      return watchedRole === "talent" ? 7 : 5; // Talent now has 7 steps (including split acting questions)
     } else {
-      return watchedRole === "talent" ? 8 : 6; // Include profile image step
+      return watchedRole === "talent" ? 8 : 6; // +1 for role selection
     }
   };
 
@@ -1123,10 +1172,10 @@ function Onboarding() {
         { title: "Talent Type", description: "Choose your talent type", icon: Star },
         { title: "Basic Information", description: "Personal details", icon: User },
         { title: "Profile Image", description: "Upload your photo", icon: Camera },
-        { title: "Physical Details", description: "Appearance & stats", icon: Star },
-        { title: "Skills & Experience", description: "What you can do", icon: Medal },
-        { title: "Location & Contact", description: "Where you work", icon: Crown },
-        { title: "Rates & Availability", description: "Your pricing", icon: Trophy },
+        { title: "Acting Experience", description: "Your experience & training", icon: Star },
+        { title: "Physical & Skills", description: "Appearance & abilities", icon: Medal },
+        { title: "Role Preferences", description: "Your preferred roles & methods", icon: Crown },
+        { title: "Contact & Rates", description: "Location & pricing", icon: Trophy },
       ],
       manager: [
         { title: "Basic Information", description: "Personal details", icon: User },
@@ -1313,24 +1362,22 @@ function Onboarding() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
         <Header />
         
-        {/* Compact Progress Header */}
-        <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 mt-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">{currentStep}</span>
+        {/* Ultra Compact Progress Header */}
+        <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 mt-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1">
+            <div className="flex items-center justify-between h-10">
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-semibold">{currentStep}</span>
                 </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{getStepInfo(currentStep).title}</h2>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Step {currentStep} of {getMaxSteps()}</p>
-                </div>
+                <h2 className="text-base font-medium text-gray-900 dark:text-white">{getStepInfo(currentStep).title}</h2>
+                <span className="text-xs text-gray-500 dark:text-gray-400">({currentStep}/{getMaxSteps()})</span>
               </div>
-              <div className="text-right">
-                <div className="text-sm font-medium text-blue-600 dark:text-blue-400">{Math.round(progressPercentage)}% complete</div>
-                <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
+              <div className="flex items-center space-x-3">
+                <span className="text-xs font-medium text-blue-600 dark:text-blue-400">{Math.round(progressPercentage)}%</span>
+                <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                   <div 
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 h-1.5 rounded-full transition-all duration-300"
                     style={{ width: `${progressPercentage}%` }}
                   />
                 </div>
@@ -1339,18 +1386,18 @@ function Onboarding() {
           </div>
         </div>
 
-        <main className="pb-12">
+        <main className="pb-8">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <div className="text-center mb-6">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 Welcome to Talents & Stars
               </h1>
-              <p className="text-xl text-gray-600 dark:text-gray-300">
+              <p className="text-lg text-gray-600 dark:text-gray-300">
                 Let's set up your profile to connect you with amazing opportunities
               </p>
             </div>
 
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Content wrapper with smooth transitions */}
               <div className={`transition-all duration-300 ${
                 isStepChanging ? 'opacity-50 transform translate-x-4' : 'opacity-100 transform translate-x-0'

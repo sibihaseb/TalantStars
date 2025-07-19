@@ -1,0 +1,63 @@
+
+Partitioned cookie or storage access was provided to “https://js.stripe.com/v3/controller-with-preconnect-5a125e125bbb24d882c0a6f33f679c89.html#__shared_params__[version]=basil&apiKey=pk_test_51NwxezAhOiHhM1yQX94ydY61tL8LaN6K1HeVYkAzhAaV36YpuWt9pdJ1XCYLjoxOWn4fsNzENnfeFzC0lFoB7Z3100t4ZBV3JL&apiVersion=2025-03-31.basil&stripeJsId=7487cc05-108d-4b19-8c35-57863bbf9dc4&stripeObjId=sobj-74eb20ec-6512-4112-827a-9d611131a7b8&firstStripeInstanceCreatedLatency=4&controllerCount=1&isCheckout=false&stripeJsLoadTime=1752929371535&manualBrowserDeprecationRollout=false&mids[guid]=NA&mids[muid]=3edca450-0007-4f4b-9520-7e7e6607282294bef3&mids[sid]=8d2c921c-2dfa-41b0-8ecc-d5a3cfc089ff185ed1&referrer=https%3A%2F%2Fwww.talentsandstars.com%2Ftalent-dashboard&controllerId=__privateStripeController9401” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+controller-with-preconnect-6c42774ced1350d667a127e6b6d290ea.js:1:22427
+Partitioned cookie or storage access was provided to “https://m.stripe.network/inner.html#url=https%3A%2F%2Fwww.talentsandstars.com%2Ftalent-dashboard&title=&referrer=https%3A%2F%2Fwww.talentsandstars.com%2Fauth&muid=3edca450-0007-4f4b-9520-7e7e6607282294bef3&sid=8d2c921c-2dfa-41b0-8ecc-d5a3cfc089ff185ed1&version=6&preview=false&__shared_params__[version]=basil” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+out-4.5.44.js:1:39660
+Cookie warnings 5
+=== FRONTEND API RESPONSE === index-Cy_hzgEA.js:793:60037
+Status: 200, URL: /api/user/select-tier index-Cy_hzgEA.js:793:60037
+=== FRONTEND API RESPONSE === index-Cy_hzgEA.js:793:60037
+Status: 200, URL: /api/applications index-Cy_hzgEA.js:793:60037
+=== FRONTEND API RESPONSE === index-Cy_hzgEA.js:793:60037
+Status: 500, URL: /api/job-history/72 index-Cy_hzgEA.js:793:60037
+🚨 API ERROR: 500 - {"error":"Failed to get job history"} index-Cy_hzgEA.js:793:60037
+=== FRONTEND API RESPONSE === index-Cy_hzgEA.js:793:60037
+Status: 200, URL: /api/opportunities index-Cy_hzgEA.js:793:60037
+=== FRONTEND API RESPONSE === index-Cy_hzgEA.js:793:60037
+Status: 200, URL: /api/user/profile index-Cy_hzgEA.js:793:60037
+=== FRONTEND API RESPONSE === index-Cy_hzgEA.js:793:60037
+Status: 500, URL: /api/social/stats index-Cy_hzgEA.js:793:60037
+🚨 API ERROR: 500 - {"message":"Failed to fetch social stats"} index-Cy_hzgEA.js:793:60037
+=== FRONTEND API RESPONSE === index-Cy_hzgEA.js:793:60037
+Status: 200, URL: /api/applications index-Cy_hzgEA.js:793:60037
+=== FRONTEND API RESPONSE === index-Cy_hzgEA.js:793:60037
+Status: 200, URL: /api/opportunities index-Cy_hzgEA.js:793:60037
+=== FRONTEND API RESPONSE === index-Cy_hzgEA.js:793:60037
+Status: 500, URL: /api/social/stats index-Cy_hzgEA.js:793:60037
+=== FRONTEND API RESPONSE === index-Cy_hzgEA.js:793:60037
+Status: 500, URL: /api/job-history/72 index-Cy_hzgEA.js:793:60037
+🚨 API ERROR: 500 - {"message":"Failed to fetch social stats"} index-Cy_hzgEA.js:793:60037
+🚨 API ERROR: 500 - {"error":"Failed to get job history"} index-Cy_hzgEA.js:793:60037
+=== FRONTEND API RESPONSE === index-Cy_hzgEA.js:793:60037
+Status: 200, URL: /api/user/profile index-Cy_hzgEA.js:793:60037
+Continue Building Profile clicked - forcing navigation to onboarding index-Cy_hzgEA.js:793:60037
+Field: primarySpecialty Current value: 
+Array []
+ Question: What is your primary acting specialty? index-Cy_hzgEA.js:793:60037
+Field: yearsExperience Current value: <empty string> Question: How many years of acting experience do you have? index-Cy_hzgEA.js:793:60037
+Field: actingMethod Current value: 
+Array []
+ Question: What is your preferred acting method or technique? index-Cy_hzgEA.js:793:60037
+Field: improvisationComfort Current value: <empty string> Question: Are you comfortable with improvisation? index-Cy_hzgEA.js:793:60037
+Field: stageCombat Current value: <empty string> Question: Do you have stage combat training? index-Cy_hzgEA.js:793:60037
+Field: intimateScenesComfort Current value: <empty string> Question: Are you comfortable with intimate scenes? index-Cy_hzgEA.js:793:60037
+Field: roleTypes Current value: 
+Array []
+ Question: What types of roles are you most interested in? index-Cy_hzgEA.js:793:60037
+Field: motionCapture Current value: <empty string> Question: Do you have experience with motion capture? index-Cy_hzgEA.js:793:60037
+Field: animalWork Current value: <empty string> Question: Are you comfortable working with animals? index-Cy_hzgEA.js:793:60037
+Field: cryingOnCue Current value: <empty string> Question: What is your comfort level with crying on cue? index-Cy_hzgEA.js:793:60037
+Field: periodPieces Current value: <empty string> Question: Do you have experience with period pieces? index-Cy_hzgEA.js:793:60037
+Field: physicalComedy Current value: <empty string> Question: Are you comfortable with physical comedy? index-Cy_hzgEA.js:793:60037
+Field: accentExperience Current value: <empty string> Question: What is your experience with different accents? index-Cy_hzgEA.js:793:60037
+Field: greenScreen Current value: <empty string> Question: Do you have experience with green screen work? index-Cy_hzgEA.js:793:60037
+Field: stuntComfort Current value: <empty string> Question: Are you comfortable with stunts? index-Cy_hzgEA.js:793:60037
+Field: shakespeareExperience Current value: <empty string> Question: What is your experience with Shakespeare? index-Cy_hzgEA.js:793:60037
+Field: musicalTheater Current value: <empty string> Question: Do you have experience with musical theater? index-Cy_hzgEA.js:793:60037
+Field: currentAgent Current value: <empty string> Question: Who is your current agent? (Optional) index-Cy_hzgEA.js:793:60037
+Current form values: 
+Object { displayName: "lkajlsdfk dsfdsdf", bio: "asdfasdfasd", location: "fddsasdf", bioLength: 11 }
+index-Cy_hzgEA.js:793:60037
+
+​
+
