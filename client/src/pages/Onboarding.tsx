@@ -65,7 +65,7 @@ import {
   Lightbulb,
   Zap as ZapIcon
 } from "lucide-react";
-import { EmotionalProgress } from "@/components/ui/emotional-progress";
+
 import ProfileImageUpload from "@/components/ProfileImageUpload";
 import { PricingSelection } from "@/components/PricingSelection";
 
@@ -1385,22 +1385,22 @@ function Onboarding() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
         <Header />
         
-        {/* Ultra Compact Progress Header */}
-        <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 mt-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1">
-            <div className="flex items-center justify-between h-10">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-semibold">{currentStep}</span>
+        {/* Minimal Progress Header */}
+        <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 mt-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0.5">
+            <div className="flex items-center justify-between h-6">
+              <div className="flex items-center space-x-1.5">
+                <div className="w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-[10px] font-bold">{currentStep}</span>
                 </div>
-                <h2 className="text-base font-medium text-gray-900 dark:text-white">{getStepInfo(currentStep).title}</h2>
-                <span className="text-xs text-gray-500 dark:text-gray-400">({currentStep}/{getMaxSteps()})</span>
+                <h2 className="text-sm font-medium text-gray-900 dark:text-white">{getStepInfo(currentStep).title}</h2>
+                <span className="text-[10px] text-gray-500 dark:text-gray-400">({currentStep}/{getMaxSteps()})</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <span className="text-xs font-medium text-blue-600 dark:text-blue-400">{Math.round(progressPercentage)}%</span>
-                <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+              <div className="flex items-center space-x-2">
+                <span className="text-[10px] font-medium text-blue-600 dark:text-blue-400">{Math.round(progressPercentage)}%</span>
+                <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1">
                   <div 
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 h-1.5 rounded-full transition-all duration-300"
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 h-1 rounded-full transition-all duration-300"
                     style={{ width: `${progressPercentage}%` }}
                   />
                 </div>
@@ -1411,11 +1411,11 @@ function Onboarding() {
 
         <main className="pb-8">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            <div className="text-center mb-4">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                 Welcome to Talents & Stars
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300">
+              <p className="text-base text-gray-600 dark:text-gray-300">
                 Let's set up your profile to connect you with amazing opportunities
               </p>
             </div>
@@ -2113,24 +2113,15 @@ function Onboarding() {
                   <span>Previous</span>
                 </Button>
 
-                {/* Celebration Animation */}
-                {showCelebration && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="flex space-x-2">
-                      <Sparkles className="h-8 w-8 text-yellow-400 animate-bounce" />
-                      <Medal className="h-8 w-8 text-orange-400 animate-pulse" />
-                      <Trophy className="h-8 w-8 text-yellow-500 animate-bounce" />
-                    </div>
-                  </div>
-                )}
+
                 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1">
                   {Array.from({ length: getMaxSteps() }).map((_, index) => (
                     <div
                       key={index}
-                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
                         index + 1 <= currentStep
-                          ? "bg-gradient-to-r from-blue-500 to-purple-600 animate-pulse"
+                          ? "bg-gradient-to-r from-blue-500 to-purple-600"
                           : "bg-gray-300 dark:bg-gray-600"
                       }`}
                     />
