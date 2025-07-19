@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,6 +36,7 @@ import { LegalAcceptanceSection } from '@/components/legal/LegalAcceptanceSectio
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
+  rememberMe: z.boolean().optional(),
 });
 
 const registerSchema = z.object({
@@ -67,6 +69,7 @@ export default function Auth() {
     defaultValues: {
       username: "",
       password: "",
+      rememberMe: false,
     },
   });
 
@@ -354,6 +357,19 @@ export default function Auth() {
                             {loginForm.formState.errors.password.message}
                           </p>
                         )}
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="loginRememberMe"
+                          checked={loginForm.watch("rememberMe")}
+                          onCheckedChange={(checked) => 
+                            loginForm.setValue("rememberMe", checked as boolean)
+                          }
+                        />
+                        <Label htmlFor="loginRememberMe" className="text-sm font-normal cursor-pointer">
+                          Keep me logged in (until manual logout)
+                        </Label>
                       </div>
                       
                       <Button

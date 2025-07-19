@@ -92,6 +92,27 @@ const PREDEFINED_SETTINGS = [
     encrypted: false,
     category: 'email',
     defaultValue: 'true'
+  },
+  {
+    key: 'session_duration_hours',
+    description: 'Default user session duration in hours (default 48)',
+    encrypted: false,
+    category: 'security',
+    defaultValue: '48'
+  },
+  {
+    key: 'remember_me_enabled',
+    description: 'Allow users to stay logged in with "Remember Me" option',
+    encrypted: false,
+    category: 'security',
+    defaultValue: 'true'
+  },
+  {
+    key: 'remember_me_duration_days',
+    description: 'Remember Me session duration in days (default 30)',
+    encrypted: false,
+    category: 'security',
+    defaultValue: '30'
   }
 ];
 

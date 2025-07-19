@@ -226,6 +226,8 @@ export async function setupAuth(app: Express) {
 
   app.post("/api/login", (req, res, next) => {
     console.log("Login attempt with:", req.body);
+    const { rememberMe } = req.body;
+    console.log("🔥 LOGIN: Remember me option:", rememberMe);
     
     passport.authenticate("local", (err, user, info) => {
       if (err) {
@@ -244,6 +246,34 @@ export async function setupAuth(app: Express) {
           return res.status(500).json({ message: "Login failed" });
         }
         
+        // Handle Remember Me functionality
+        if (req.session && req.session.cookie) {
+          if (rememberMe) {
+            // Get remember me duration from admin settings or default to 30 days
+            storage.getAdminSettings().then(settings => {
+              const rememberMeDurationDays = settings.find(s => s.key === 'remember_me_duration_days')?.value || '30';
+              const durationMs = parseInt(rememberMeDurationDays) * 24 * 60 * 60 * 1000;
+              req.session.cookie.maxAge = durationMs;
+              console.log("🔥 LOGIN: Extended session duration to", rememberMeDurationDays, "days due to Remember Me");
+            }).catch(() => {
+              // Fallback to 30 days if admin settings fail
+              const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+              req.session.cookie.maxAge = thirtyDays;
+              console.log("🔥 LOGIN: Extended session duration to 30 days (fallback) due to Remember Me");
+            });
+          } else {
+            // Use default session duration from admin settings
+            getSessionDurationFromAdmin().then(duration => {
+              req.session.cookie.maxAge = duration;
+              console.log("🔥 LOGIN: Using default session duration:", duration / (60 * 60 * 1000), "hours");
+            });
+          }
+          
+          // Force secure to false after login
+          req.session.cookie.secure = false;
+          req.session.cookie.httpOnly = false;
+        }
+        
         // Force session to be saved properly
         req.session.save((err) => {
           if (err) {
@@ -251,13 +281,8 @@ export async function setupAuth(app: Express) {
             return res.status(500).json({ message: "Login failed" });
           }
           
-          // Force secure to false after login
-          if (req.session && req.session.cookie) {
-            req.session.cookie.secure = false;
-            req.session.cookie.httpOnly = false;
-          }
-          
           console.log("Login successful for user:", user.username);
+          console.log("🔥 LOGIN: Session cookie maxAge set to:", req.session.cookie.maxAge / (60 * 60 * 1000), "hours");
           res.status(200).json({ ...user, password: undefined });
         });
       });
