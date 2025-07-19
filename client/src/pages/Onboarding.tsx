@@ -605,12 +605,16 @@ function Onboarding() {
         throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      console.log("=== PROFILE CREATION SUCCESS ===");
+      console.log("Result:", result);
+      
       // Show final celebration
       setShowCelebration(true);
       
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
         toast({
           title: "🎉 Welcome to Talents & Stars!",
           description: "Your profile has been created successfully. You'll now be redirected to your dashboard!",
@@ -623,10 +627,19 @@ function Onboarding() {
       }, 1000);
     },
     onError: (error) => {
+      console.log("=== PROFILE CREATION ERROR ===");
+      console.error("Error:", error);
+      console.log("Error type:", typeof error);
+      console.log("Error details:", {
+        message: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : "No stack trace"
+      });
+      
       if (isUnauthorizedError(error)) {
+        console.log("Unauthorized error detected - redirecting to login");
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: "Session Expired",
+          description: "Your session has expired. Please log in again.",
           variant: "destructive",
         });
         setTimeout(() => {
@@ -635,10 +648,32 @@ function Onboarding() {
         return;
       }
       
+      // Handle validation errors
+      if (error instanceof Error && error.message.includes('validation')) {
+        toast({
+          title: "Validation Error",
+          description: "Please check your form data and try again. Make sure all required fields are filled correctly.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Handle network errors
+      if (error instanceof Error && error.message.includes('fetch')) {
+        toast({
+          title: "Network Error",
+          description: "Unable to connect to the server. Please check your internet connection and try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      console.log("Final error message:", errorMessage);
+      
       toast({
-        title: "Error",
-        description: errorMessage,
+        title: "Profile Creation Failed",
+        description: `Error: ${errorMessage}. Please try again or contact support if the problem persists.`,
         variant: "destructive",
       });
     },
@@ -1200,21 +1235,30 @@ function Onboarding() {
   };
 
   const onSubmit = (data: OnboardingFormData) => {
-
+    console.log("=== FORM SUBMISSION START ===");
+    console.log("Form data:", data);
+    console.log("Form errors:", form.formState.errors);
+    console.log("Form is valid:", form.formState.isValid);
     
     // Additional validation for required fields
     if (!data.displayName || !data.bio || !data.location) {
-
+      console.log("Required fields missing:", {
+        displayName: !data.displayName,
+        bio: !data.bio,
+        location: !data.location
+      });
+      
       toast({
         title: "Required Fields Missing",
-        description: "Please fill in all required fields",
+        description: "Please fill in all required fields: Display Name, Bio, and Location",
         variant: "destructive",
       });
       return;
     }
     
     if (data.bio.length < 10) {
-
+      console.log("Bio too short:", data.bio.length);
+      
       toast({
         title: "Bio Too Short",
         description: "Please write a bio with at least 10 characters",
@@ -1223,8 +1267,29 @@ function Onboarding() {
       return;
     }
     
-
-    createProfileMutation.mutate(data);
+    // Clean the data before submission - remove empty strings and convert to null
+    const cleanedData = {
+      ...data,
+      // Convert empty string arrays to null or filter out empty values
+      languages: Array.isArray(data.languages) && data.languages.length > 0 ? data.languages.filter(l => l.trim()) : null,
+      accents: Array.isArray(data.accents) && data.accents.length > 0 ? data.accents.filter(a => a.trim()) : null,
+      instruments: Array.isArray(data.instruments) && data.instruments.length > 0 ? data.instruments.filter(i => i.trim()) : null,
+      genres: Array.isArray(data.genres) && data.genres.length > 0 ? data.genres.filter(g => g.trim()) : null,
+      skills: Array.isArray(data.skills) && data.skills.length > 0 ? data.skills.filter(s => s.trim()) : null,
+      // Convert empty strings to null for optional fields
+      website: data.website?.trim() || null,
+      phoneNumber: data.phoneNumber?.trim() || null,
+      profileImageUrl: data.profileImageUrl?.trim() || null,
+      // Handle numeric fields
+      dailyRate: data.dailyRate ? parseFloat(data.dailyRate) : null,
+      weeklyRate: data.weeklyRate ? parseFloat(data.weeklyRate) : null,
+      projectRate: data.projectRate ? parseFloat(data.projectRate) : null,
+    };
+    
+    console.log("Cleaned data for submission:", cleanedData);
+    console.log("=== SUBMITTING TO API ===");
+    
+    createProfileMutation.mutate(cleanedData);
   };
 
   const progressPercentage = (currentStep / getMaxSteps()) * 100;
@@ -2005,11 +2070,18 @@ function Onboarding() {
                 ) : (
                   <Button
                     type="button"
-                    disabled={createProfileMutation.isPending}
-                    className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    disabled={createProfileMutation.isPending || !watchedDisplayName || !watchedBio || !watchedLocation || (watchedBio && watchedBio.length < 10)}
+                    className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     onClick={async (e) => {
                       e.preventDefault();
-
+                      
+                      console.log("Submit button clicked");
+                      console.log("Current form values:", {
+                        displayName: watchedDisplayName,
+                        bio: watchedBio,
+                        location: watchedLocation,
+                        bioLength: watchedBio?.length
+                      });
                       
                       // Use form's handleSubmit to trigger validation
                       form.handleSubmit(onSubmit)();
