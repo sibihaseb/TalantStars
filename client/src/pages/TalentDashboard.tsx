@@ -368,8 +368,18 @@ export default function TalentDashboard() {
   };
 
   const handleCreateJobHistory = () => {
+    console.log("Form data being submitted:", jobHistoryForm);
+    console.log("Form validation:", {
+      title: !!jobHistoryForm.title,
+      company: !!jobHistoryForm.company,
+      role: !!jobHistoryForm.role
+    });
+    
     if (jobHistoryForm.title && jobHistoryForm.company && jobHistoryForm.role) {
+      console.log("Submitting job history with editingJobId:", editingJobId);
       createJobHistoryMutation.mutate(jobHistoryForm);
+    } else {
+      console.log("Form validation failed - missing required fields");
     }
   };
 
@@ -669,7 +679,28 @@ export default function TalentDashboard() {
                     )}
                     <Dialog open={isJobHistoryDialogOpen} onOpenChange={setIsJobHistoryDialogOpen}>
                       <DialogTrigger asChild>
-                        <Button variant="outline" className="w-full" size="sm">
+                        <Button 
+                          variant="outline" 
+                          className="w-full" 
+                          size="sm"
+                          onClick={() => {
+                            console.log("Add Experience button clicked");
+                            setEditingJobId(null);
+                            setJobHistoryForm({
+                              id: null,
+                              title: "",
+                              company: "",
+                              jobType: "",
+                              role: "",
+                              startDate: "",
+                              endDate: "",
+                              location: "",
+                              description: "",
+                              verified: false
+                            });
+                            setIsJobHistoryDialogOpen(true);
+                          }}
+                        >
                           <Plus className="w-4 h-4 mr-2" />
                           Add Experience
                         </Button>
