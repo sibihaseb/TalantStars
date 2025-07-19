@@ -62,6 +62,7 @@ function Router() {
       
       {/* Public routes */}
       <Route path="/jobs" component={BrowseJobs} />
+      <Route path="/browse-jobs" component={BrowseJobs} />
       <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/mascot-demo" component={MascotDemo} />
       <Route path="/featured-talents" component={FeaturedTalents} />

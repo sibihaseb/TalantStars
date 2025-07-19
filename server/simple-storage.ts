@@ -722,11 +722,12 @@ export class DatabaseStorage implements IStorage {
   async getJobHistoryById(jobId: number): Promise<any> {
     try {
       console.log("🔥 DATABASE: Fetching job history by ID", { jobId });
-      const result = await db.select().from(jobHistory).where(eq(jobHistory.id, jobId));
-      console.log("🔥 DATABASE: Query result", { result, count: result.length });
-      if (result && result.length > 0) {
-        console.log("✅ Database fetch successful", { job: result[0] });
-        return result[0];
+      // Use raw SQL since there's a column name mismatch issue
+      const result = await db.execute(`SELECT * FROM job_history WHERE id = ${jobId}`);
+      console.log("🔥 DATABASE: Query result", { result, rowCount: result.rowCount });
+      if (result.rows && result.rows.length > 0) {
+        console.log("✅ Database fetch successful", { job: result.rows[0] });
+        return result.rows[0];
       }
     } catch (error) {
       console.error('Database job history fetch error:', error);

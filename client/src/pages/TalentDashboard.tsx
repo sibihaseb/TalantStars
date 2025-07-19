@@ -771,7 +771,7 @@ export default function TalentDashboard() {
                       Filter
                     </Button>
                     <Button 
-                      onClick={() => setLocation('/browse-jobs')}
+                      onClick={() => setLocation('/jobs')}
                       className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                     >
                       <Plus className="w-4 h-4 mr-2" />
@@ -791,7 +791,7 @@ export default function TalentDashboard() {
                       We're working hard to bring you the best opportunities. Check back soon or browse all available jobs.
                     </p>
                     <Button 
-                      onClick={() => setLocation('/browse-jobs')}
+                      onClick={() => setLocation('/jobs')}
                       className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                     >
                       <Search className="w-4 h-4 mr-2" />

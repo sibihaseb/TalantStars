@@ -1,0 +1,105 @@
+
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:27:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/user/profile main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/applications main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/opportunities main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+Partitioned cookie or storage access was provided to “https://m.stripe.network/inner.html#url=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&title=&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&muid=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&sid=22a4725f-28a0-47c4-a02f-4dfea69d524bf2b5e0&version=6&preview=false&__shared_params__[version]=basil” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+out-4.5.44.js:1:39660
+Cookie warnings 3
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Edit button clicked 
+Object { jobId: 4 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: handleEdit called 
+Object { job: {…} }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Dialog should be open now main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. main.tsx:40:23
+🔥 JOBHISTORYMANAGER: handleValidateSkills called 
+Object { jobId: 4 }
+main.tsx:54:22
+🔥 VALIDATION: Starting skill validation for job 
+Object { jobId: 4 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+XHRPOST
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/job-history/4/validate-skills
+[HTTP/1.1 404 Not Found 128ms]
+
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 404, URL: /api/job-history/4/validate-skills main.tsx:54:22
+🚨 API ERROR: 404 - {"message":"Job not found"} main.tsx:54:22
+🔥 VALIDATION: API error 
+Object { error: Error }
+main.tsx:27:24
+🔥 VALIDATION: Mutation error 
+Object { error: Error }
+main.tsx:27:24
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: handleEnhance called 
+Object { jobId: 4 }
+main.tsx:54:22
+🔥 ENHANCEMENT: Starting AI enhancement for job 
+Object { jobId: 4 }
+main.tsx:54:22
+XHRPOST
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/job-history/4/enhance
+[HTTP/1.1 404 Not Found 215ms]
+
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 404, URL: /api/job-history/4/enhance main.tsx:54:22
+🚨 API ERROR: 404 - {"message":"Job not found"} main.tsx:54:22
+🔥 ENHANCEMENT: API error 
+Object { error: Error }
+main.tsx:27:24
+🔥 ENHANCEMENT: Mutation error 
+Object { error: Error }
+main.tsx:27:24
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+
+​
+
