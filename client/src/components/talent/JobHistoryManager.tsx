@@ -144,6 +144,7 @@ interface JobHistoryManagerProps {
 }
 
 export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHistoryManagerProps) {
+  console.log("🔥 JOBHISTORYMANAGER: Component rendering", { jobHistory, userId });
   const [items, setItems] = useState(jobHistory);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<JobHistoryItem | null>(null);
