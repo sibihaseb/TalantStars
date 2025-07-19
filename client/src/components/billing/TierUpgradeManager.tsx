@@ -35,8 +35,15 @@ export function TierUpgradeManager() {
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
 
   // Fetch all pricing tiers
-  const { data: pricingTiers = [], isLoading } = useQuery({
+  const { data: allPricingTiers = [], isLoading } = useQuery({
     queryKey: ["/api/pricing-tiers"],
+  });
+
+  // Filter tiers by user's category (talent, manager, producer, agent)
+  const pricingTiers = allPricingTiers.filter((tier: any) => {
+    // If user doesn't have a role, show talent tiers as default
+    const userCategory = user?.role || 'talent';
+    return tier.category === userCategory;
   });
 
   // Update user tier mutation
@@ -123,7 +130,7 @@ export function TierUpgradeManager() {
             Manage Your Plan
           </CardTitle>
           <CardDescription>
-            Upgrade or downgrade your plan to access different features
+            Upgrade or downgrade your {user?.role || 'talent'} plan to access different features
           </CardDescription>
         </CardHeader>
         <CardContent>

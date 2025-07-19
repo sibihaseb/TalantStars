@@ -87,6 +87,8 @@ export interface IStorage {
   // Application operations
   getUserApplications(userId: number): Promise<any[]>;
   createApplication(applicationData: any): Promise<any>;
+  createJobApplication(applicationData: any): Promise<any>;
+  getJobApplications(jobId: number): Promise<any[]>;
   
   // Social stats operations
   getUserSocialStats(userId: number): Promise<any>;
@@ -831,6 +833,27 @@ export class DatabaseStorage implements IStorage {
   async markJobCommunicationAsRead(id: number): Promise<void> {
     // Mock implementation - just log it
     console.log("🔥 COMMUNICATION: Marking communication as read", { id });
+  }
+
+  // Job application operations
+  async createJobApplication(applicationData: any): Promise<any> {
+    // Mock implementation - just return the data with an ID
+    console.log("🔥 APPLICATION: Creating job application", { applicationData });
+    const application = {
+      id: Date.now(),
+      ...applicationData,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    console.log("✅ APPLICATION: Created successfully", { application });
+    return application;
+  }
+
+  async getJobApplications(jobId: number): Promise<any[]> {
+    // Mock implementation - return empty applications
+    console.log("🔥 APPLICATION: Getting job applications for job", { jobId });
+    return [];
   }
 
 }
