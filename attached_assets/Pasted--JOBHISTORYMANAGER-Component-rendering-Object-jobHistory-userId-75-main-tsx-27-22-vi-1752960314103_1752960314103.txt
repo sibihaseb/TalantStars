@@ -1,0 +1,85 @@
+
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:27:22
+[vite] connecting... client:495:9
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools react-dom.development.js:29895:17
+Partitioned cookie or storage access was provided to “https://js.stripe.com/v3/controller-with-preconnect-5a125e125bbb24d882c0a6f33f679c89.html#__shared_params__[version]=basil&apiKey=pk_test_51NwxezAhOiHhM1yQX94ydY61tL8LaN6K1HeVYkAzhAaV36YpuWt9pdJ1XCYLjoxOWn4fsNzENnfeFzC0lFoB7Z3100t4ZBV3JL&apiVersion=2025-03-31.basil&stripeJsId=2e4ef7f6-c4ef-4b3f-a5c5-2c3c9876bbc6&stripeObjId=sobj-8d78042f-7b7f-4bb0-aee8-4886777b2225&firstStripeInstanceCreatedLatency=3&controllerCount=1&isCheckout=false&stripeJsLoadTime=1752960277902&manualBrowserDeprecationRollout=false&mids[guid]=NA&mids[muid]=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&mids[sid]=28b9cbfe-7875-4cf9-b104-8e29a18719c8df51f8&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&controllerId=__privateStripeController5401” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+controller-with-preconnect-6c42774ced1350d667a127e6b6d290ea.js:1:22427
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/user/profile main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/social/stats main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/opportunities main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/applications main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+Partitioned cookie or storage access was provided to “https://m.stripe.network/inner.html#url=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&title=&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&muid=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&sid=28b9cbfe-7875-4cf9-b104-8e29a18719c8df51f8&version=6&preview=false&__shared_params__[version]=basil” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+out-4.5.44.js:1:39660
+Uncaught TypeError: can't access property "replace", job.talentType is undefined
+    children BrowseJobs.tsx:393
+    BrowseJobs BrowseJobs.tsx:384
+    React 3
+BrowseJobs.tsx:393:34
+Uncaught TypeError: can't access property "replace", job.talentType is undefined
+    children BrowseJobs.tsx:393
+    BrowseJobs BrowseJobs.tsx:384
+    React 3
+BrowseJobs.tsx:393:34
+    children BrowseJobs.tsx:393
+    map self-hosted:175
+    BrowseJobs BrowseJobs.tsx:384
+    React 18
+    batchCalls notifyManager.ts:69
+    notifyFn notifyManager.ts:17
+    flush notifyManager.ts:40
+    forEach self-hosted:157
+    flush notifyManager.ts:39
+    batchNotifyFn notifyManager.ts:20
+    flush notifyManager.ts:38
+    (Async: setTimeout handler)
+    scheduleFn notifyManager.ts:22
+    flush notifyManager.ts:37
+    batch notifyManager.ts:56
+    dispatch_fn query.ts:617
+    setData query.ts:218
+    onSuccess query.ts:507
+    resolve retryer.ts:107
+    (Async: promise callback)
+    run retryer.ts:159
+    start retryer.ts:218
+    fetch query.ts:540
+    executeFetch_fn queryObserver.ts:346
+    onSubscribe queryObserver.ts:108
+    subscribe subscribable.ts:11
+    useBaseQuery useBaseQuery.ts:92
+    React 16
+Uncaught TypeError: can't access property "replace", job.talentType is undefined
+    children BrowseJobs.tsx:393
+    BrowseJobs BrowseJobs.tsx:384
+    React 3
+BrowseJobs.tsx:393:34
+Cookie warnings 4
+
+​
+

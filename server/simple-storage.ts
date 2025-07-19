@@ -1070,6 +1070,24 @@ export class DatabaseStorage implements IStorage {
     return [];
   }
 
+  // Add the missing getPricingTiersByRole method
+  async getPricingTiersByRole(role: string): Promise<any[]> {
+    console.log("🔥 PRICING: Getting pricing tiers by role", { role });
+    const allTiers = await this.getPricingTiers();
+    
+    // Filter tiers based on role
+    const filteredTiers = allTiers.filter(tier => {
+      if (role === 'talent') {
+        return tier.category === 'talent';
+      }
+      // Add other role-based filtering logic here
+      return true;
+    });
+    
+    console.log("✅ PRICING: Filtered tiers by role", { role, count: filteredTiers.length });
+    return filteredTiers;
+  }
+
 }
 
 export const storage = new DatabaseStorage();
