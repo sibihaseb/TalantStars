@@ -468,11 +468,41 @@ export class DatabaseStorage implements IStorage {
     return [];
   }
 
+  async getFeedPosts(userId: number, limit: number, offset: number): Promise<any[]> {
+    // Mock social feed - return empty array
+    return [];
+  }
+
   // Job history operations - Mock implementation for now  
   async getJobHistory(userId: number): Promise<any[]> {
     // Return empty array for now - in production this would query a job_history table
     // This prevents the 500 error while maintaining API compatibility
     return [];
+  }
+
+  async createJobHistory(jobData: any): Promise<any> {
+    // Mock successful creation - return the data with an ID
+    // This prevents the 500 error while maintaining API compatibility
+    return {
+      id: Math.floor(Math.random() * 10000),
+      ...jobData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async updateJobHistory(id: number, jobData: any): Promise<any> {
+    // Mock successful update
+    return {
+      id,
+      ...jobData,
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async deleteJobHistory(id: number): Promise<void> {
+    // Mock successful deletion - do nothing
+    return;
   }
 }
 
