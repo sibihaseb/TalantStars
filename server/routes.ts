@@ -4090,53 +4090,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Calendar Events
-  app.get('/api/calendar/events', isAuthenticated, async (req: any, res) => {
-    try {
-      const events = await storage.getAvailabilityCalendar(req.user?.id);
-      res.json(events);
-    } catch (error) {
-      console.error('Get calendar events error:', error);
-      res.status(500).json({ error: 'Failed to get calendar events' });
-    }
-  });
 
-  app.post('/api/calendar/events', isAuthenticated, async (req: any, res) => {
-    try {
-      const eventData = {
-        ...req.body,
-        userId: req.user?.id,
-      };
-      
-      const event = await storage.createAvailabilityCalendar(eventData);
-      res.json(event);
-    } catch (error) {
-      console.error('Create calendar event error:', error);
-      res.status(500).json({ error: 'Failed to create calendar event' });
-    }
-  });
-
-  app.put('/api/calendar/events/:id', isAuthenticated, async (req: any, res) => {
-    try {
-      const eventId = parseInt(req.params.id);
-      const event = await storage.updateAvailabilityCalendar(eventId, req.body);
-      res.json(event);
-    } catch (error) {
-      console.error('Update calendar event error:', error);
-      res.status(500).json({ error: 'Failed to update calendar event' });
-    }
-  });
-
-  app.delete('/api/calendar/events/:id', isAuthenticated, async (req: any, res) => {
-    try {
-      const eventId = parseInt(req.params.id);
-      await storage.deleteAvailabilityCalendar(eventId);
-      res.json({ message: 'Calendar event deleted successfully' });
-    } catch (error) {
-      console.error('Delete calendar event error:', error);
-      res.status(500).json({ error: 'Failed to delete calendar event' });
-    }
-  });
 
   // Meeting Requests
   app.get('/api/meetings', isAuthenticated, async (req: any, res) => {
@@ -5019,24 +4973,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Job History Routes
   app.post('/api/job-history', isAuthenticated, async (req: any, res) => {
     try {
-      console.log('Job history POST endpoint hit - using PURE MOCK, no database operations');
       const userId = parseInt(req.user.id);
-      
-      // Mock successful job history creation - avoid database operations
-      const jobHistory = {
-        id: Math.floor(Math.random() * 10000),
+      const jobData = {
         userId,
-        title: req.body.title || 'Untitled Job',
-        company: req.body.company || '',
-        role: req.body.role || '',
-        startDate: req.body.startDate || new Date().toISOString().split('T')[0],
-        endDate: req.body.endDate || new Date().toISOString().split('T')[0],
-        description: req.body.description || '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        title: req.body.title,
+        company: req.body.company,
+        role: req.body.role,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
+        description: req.body.description
       };
       
-      console.log('Returning mock job history:', jobHistory);
+      const jobHistory = await simpleStorage.createJobHistory(jobData);
       res.json(jobHistory);
     } catch (error) {
       console.error("Create job history error:", error);

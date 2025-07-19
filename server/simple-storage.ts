@@ -21,7 +21,7 @@ import {
   type InsertTalentType,
 } from "@shared/simple-schema";
 import { db } from "./db";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, desc } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (for traditional auth)
@@ -488,58 +488,160 @@ export class DatabaseStorage implements IStorage {
   private calendar = new Map<number, any[]>();
 
   async getAvailabilityEvents(userId: number): Promise<any[]> {
-    return this.calendar.get(userId) || [];
+    try {
+      const results = await db.execute(
+        `SELECT * FROM availability_events WHERE user_id = $1 ORDER BY start_time ASC`,
+        [userId]
+      );
+      return results.rows || [];
+    } catch (error) {
+      console.error('Database calendar error:', error);
+      return this.calendar.get(userId) || [];
+    }
   }
 
   async createAvailabilityEvent(eventData: any): Promise<any> {
-    const userId = eventData.userId;
-    const events = this.calendar.get(userId) || [];
-    const event = {
-      id: Date.now(),
-      ...eventData,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    events.push(event);
-    this.calendar.set(userId, events);
-    return event;
+    try {
+      const result = await db.execute(
+        `INSERT INTO availability_events (user_id, title, start_time, end_time, status, event_type, notes, all_day) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+        [
+          eventData.userId,
+          eventData.title || 'Availability',
+          eventData.startDate || eventData.startTime,
+          eventData.endDate || eventData.endTime,
+          eventData.status || 'available',
+          eventData.eventType || 'general',
+          eventData.notes || '',
+          eventData.allDay || false
+        ]
+      );
+      return result.rows?.[0] || {};
+    } catch (error) {
+      console.error('Database calendar creation error:', error);
+      // Fallback to memory
+      const userId = eventData.userId;
+      const events = this.calendar.get(userId) || [];
+      const event = {
+        id: Date.now(),
+        ...eventData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      events.push(event);
+      this.calendar.set(userId, events);
+      return event;
+    }
   }
 
   async updateAvailabilityEvent(eventId: number, eventData: any): Promise<any> {
-    // Find and update across all users
-    for (const [userId, events] of this.calendar.entries()) {
-      const eventIndex = events.findIndex(e => e.id === eventId);
-      if (eventIndex !== -1) {
-        events[eventIndex] = { ...events[eventIndex], ...eventData, updatedAt: new Date().toISOString() };
-        return events[eventIndex];
+    try {
+      const result = await db.execute(
+        `UPDATE availability_events SET title = $2, start_time = $3, end_time = $4, status = $5, notes = $6, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *`,
+        [eventId, eventData.title, eventData.startDate || eventData.startTime, eventData.endDate || eventData.endTime, eventData.status, eventData.notes]
+      );
+      return result.rows?.[0] || {};
+    } catch (error) {
+      console.error('Database calendar update error:', error);
+      // Fallback to memory
+      for (const [userId, events] of this.calendar.entries()) {
+        const eventIndex = events.findIndex(e => e.id === eventId);
+        if (eventIndex !== -1) {
+          events[eventIndex] = { ...events[eventIndex], ...eventData, updatedAt: new Date().toISOString() };
+          return events[eventIndex];
+        }
       }
+      throw new Error('Event not found');
     }
-    throw new Error('Event not found');
   }
 
   async deleteAvailabilityEvent(eventId: number, userId: number): Promise<void> {
-    const events = this.calendar.get(userId) || [];
-    const filteredEvents = events.filter(e => e.id !== eventId);
-    this.calendar.set(userId, filteredEvents);
+    try {
+      await db.execute(
+        `DELETE FROM availability_events WHERE id = $1 AND user_id = $2`,
+        [eventId, userId]
+      );
+    } catch (error) {
+      console.error('Database calendar delete error:', error);
+      // Fallback to memory
+      const events = this.calendar.get(userId) || [];
+      const filteredEvents = events.filter(e => e.id !== eventId);
+      this.calendar.set(userId, filteredEvents);
+    }
   }
 
-  // Job History/Experience operations (mock implementation)  
+  // Job History/Experience operations (database implementation)  
   async getJobHistory(userId: number): Promise<any[]> {
-    return this.jobHistory.get(userId) || [];
+    try {
+      // Use parameterized query with proper syntax
+      const results = await db.execute(
+        `SELECT * FROM job_history WHERE user_id = $1 ORDER BY created_at DESC`,
+        [userId]
+      );
+      return results.rows || [];
+    } catch (error) {
+      console.error('Database job history error:', error);
+      // Fallback to in-memory for now
+      return this.jobHistory.get(userId) || [];
+    }
   }
 
   async createJobHistory(jobData: any): Promise<any> {
-    const userId = jobData.userId;
-    const jobs = this.jobHistory.get(userId) || [];
-    const job = {
-      id: Date.now(),
-      ...jobData,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    jobs.push(job);
-    this.jobHistory.set(userId, jobs);
-    return job;
+    try {
+      // Use parameterized query with proper syntax
+      const result = await db.execute(
+        `INSERT INTO job_history (user_id, title, company, role, start_date, end_date, description) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+        [jobData.userId, jobData.title, jobData.company, jobData.role, jobData.startDate, jobData.endDate, jobData.description]
+      );
+      return result.rows?.[0] || {};
+    } catch (error) {
+      console.error('Database job history creation error:', error);
+      // Fallback to in-memory
+      const userId = jobData.userId;
+      const jobs = this.jobHistory.get(userId) || [];
+      const job = {
+        id: Date.now(),
+        ...jobData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      jobs.push(job);
+      this.jobHistory.set(userId, jobs);
+      return job;
+    }
+  }
+
+  async updateJobHistory(id: number, jobData: any): Promise<any> {
+    try {
+      const result = await db.execute(
+        `UPDATE job_history SET title = $2, company = $3, role = $4, start_date = $5, end_date = $6, description = $7, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *`,
+        [id, jobData.title, jobData.company, jobData.role, jobData.startDate, jobData.endDate, jobData.description]
+      );
+      return result.rows?.[0] || {};
+    } catch (error) {
+      console.error('Database job history update error:', error);
+      // Fallback to memory
+      for (const [userId, jobs] of this.jobHistory.entries()) {
+        const jobIndex = jobs.findIndex(j => j.id === id);
+        if (jobIndex !== -1) {
+          jobs[jobIndex] = { ...jobs[jobIndex], ...jobData, updatedAt: new Date().toISOString() };
+          return jobs[jobIndex];
+        }
+      }
+      throw new Error('Job history not found');
+    }
+  }
+
+  async deleteJobHistory(id: number): Promise<void> {
+    try {
+      await db.execute(`DELETE FROM job_history WHERE id = $1`, [id]);
+    } catch (error) {
+      console.error('Database job history delete error:', error);
+      // Fallback to memory
+      for (const [userId, jobs] of this.jobHistory.entries()) {
+        const filteredJobs = jobs.filter(j => j.id !== id);
+        this.jobHistory.set(userId, filteredJobs);
+      }
+    }
   }
 
   async updateJobHistory(jobId: number, jobData: any): Promise<any> {
