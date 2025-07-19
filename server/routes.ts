@@ -246,7 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let tierLimits = null;
       if (user.pricingTierId) {
         console.log("Fetching pricing tier:", user.pricingTierId);
-        tierLimits = await storage.getPricingTier(user.pricingTierId);
+        tierLimits = await simpleStorage.getPricingTier(user.pricingTierId);
         console.log("Tier limits found:", !!tierLimits);
       }
       
@@ -394,7 +394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/profile/generate-bio', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const profile = await storage.getUserProfile(userId);
+      const profile = await simpleStorage.getUserProfile(userId);
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }
@@ -1302,7 +1302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         privacy: req.body.privacy || 'public',
       };
       
-      const post = await storage.createSocialPost(postData);
+      const post = await simpleStorage.createSocialPost(postData);
       res.json(post);
     } catch (error: any) {
       res.status(500).json({ message: "Error creating post: " + error.message });
@@ -1315,7 +1315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const postId = parseInt(req.params.postId);
       const userId = req.user.id;
       
-      await storage.likeSocialPost(postId, userId);
+      await simpleStorage.likeSocialPost(postId, userId);
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ message: "Error liking post: " + error.message });
@@ -1328,7 +1328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const postId = parseInt(req.params.postId);
       const userId = req.user.id;
       
-      await storage.unlikeSocialPost(postId, userId);
+      await simpleStorage.unlikeSocialPost(postId, userId);
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ message: "Error unliking post: " + error.message });
@@ -1345,7 +1345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content: req.body.content,
       };
       
-      const comment = await storage.commentOnPost(commentData);
+      const comment = await simpleStorage.commentOnPost(commentData);
       res.json(comment);
     } catch (error: any) {
       res.status(500).json({ message: "Error creating comment: " + error.message });
@@ -1356,7 +1356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/social/posts/:postId/comments", isAuthenticated, async (req: any, res) => {
     try {
       const postId = parseInt(req.params.postId);
-      const comments = await storage.getPostComments(postId);
+      const comments = await simpleStorage.getPostComments(postId);
       res.json(comments);
     } catch (error: any) {
       res.status(500).json({ message: "Error fetching comments: " + error.message });
@@ -1368,7 +1368,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get friends
   app.get("/api/social/friends", isAuthenticated, async (req: any, res) => {
     try {
-      const friends = await storage.getFriends(req.user.id);
+      const friends = await simpleStorage.getFriends(req.user.id);
       res.json(friends);
     } catch (error: any) {
       res.status(500).json({ message: "Error fetching friends: " + error.message });
@@ -1378,7 +1378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get friend requests
   app.get("/api/social/friend-requests", isAuthenticated, async (req: any, res) => {
     try {
-      const requests = await storage.getFriendRequests(req.user.id);
+      const requests = await simpleStorage.getFriendRequests(req.user.id);
       res.json(requests);
     } catch (error: any) {
       res.status(500).json({ message: "Error fetching friend requests: " + error.message });
@@ -1389,7 +1389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/social/friend-request/:userId", isAuthenticated, async (req: any, res) => {
     try {
       const addresseeId = parseInt(req.params.userId);
-      const friendship = await storage.sendFriendRequest(req.user.id, addresseeId);
+      const friendship = await simpleStorage.sendFriendRequest(req.user.id, addresseeId);
       res.json(friendship);
     } catch (error: any) {
       res.status(500).json({ message: "Error sending friend request: " + error.message });
@@ -1400,7 +1400,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/social/friend-request/:friendshipId/accept", isAuthenticated, async (req: any, res) => {
     try {
       const friendshipId = parseInt(req.params.friendshipId);
-      const friendship = await storage.acceptFriendRequest(friendshipId);
+      const friendship = await simpleStorage.acceptFriendRequest(friendshipId);
       res.json(friendship);
     } catch (error: any) {
       res.status(500).json({ message: "Error accepting friend request: " + error.message });
@@ -1411,7 +1411,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/social/friend-request/:friendshipId", isAuthenticated, async (req: any, res) => {
     try {
       const friendshipId = parseInt(req.params.friendshipId);
-      await storage.rejectFriendRequest(friendshipId);
+      await simpleStorage.rejectFriendRequest(friendshipId);
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ message: "Error rejecting friend request: " + error.message });
@@ -1426,7 +1426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
       
-      const users = await storage.searchUsers(query, req.user.id);
+      const users = await simpleStorage.searchUsers(query, req.user.id);
       res.json(users);
     } catch (error: any) {
       res.status(500).json({ message: "Error searching users: " + error.message });
@@ -1438,7 +1438,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get professional connections
   app.get("/api/social/professional-connections", isAuthenticated, async (req: any, res) => {
     try {
-      const connections = await storage.getProfessionalConnections(req.user.id);
+      const connections = await simpleStorage.getProfessionalConnections(req.user.id);
       res.json(connections);
     } catch (error: any) {
       res.status(500).json({ message: "Error fetching professional connections: " + error.message });
@@ -1456,7 +1456,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: req.body.notes,
       };
       
-      const connection = await storage.createProfessionalConnection(connectionData);
+      const connection = await simpleStorage.createProfessionalConnection(connectionData);
       res.json(connection);
     } catch (error: any) {
       res.status(500).json({ message: "Error creating professional connection: " + error.message });
@@ -1468,7 +1468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get privacy settings
   app.get("/api/social/privacy", isAuthenticated, async (req: any, res) => {
     try {
-      const settings = await storage.getUserPrivacySettings(req.user.id);
+      const settings = await simpleStorage.getUserPrivacySettings(req.user.id);
       res.json(settings);
     } catch (error: any) {
       res.status(500).json({ message: "Error fetching privacy settings: " + error.message });
@@ -1478,7 +1478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update privacy settings
   app.put("/api/social/privacy", isAuthenticated, async (req: any, res) => {
     try {
-      const settings = await storage.updateUserPrivacySettings(req.user.id, req.body);
+      const settings = await simpleStorage.updateUserPrivacySettings(req.user.id, req.body);
       res.json(settings);
     } catch (error: any) {
       res.status(500).json({ message: "Error updating privacy settings: " + error.message });
@@ -1490,7 +1490,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const jobData = insertJobSchema.parse({ ...req.body, userId });
-      const job = await storage.createJob(jobData);
+      const job = await simpleStorage.createJob(jobData);
       res.json(job);
     } catch (error) {
       console.error("Error creating job:", error);
@@ -1501,7 +1501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/jobs', async (req, res) => {
     try {
       const { talentType, location, status } = req.query;
-      const jobs = await storage.getJobs({
+      const jobs = await simpleStorage.getJobs({
         talentType: talentType as string,
         location: location as string,
         status: status as string,
@@ -1516,7 +1516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/jobs/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const job = await storage.getJob(id);
+      const job = await simpleStorage.getJob(id);
       if (!job) {
         return res.status(404).json({ message: "Job not found" });
       }
@@ -1537,7 +1537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         jobId,
       });
-      const application = await storage.createJobApplication(applicationData);
+      const application = await simpleStorage.createJobApplication(applicationData);
       res.json(application);
     } catch (error) {
       console.error("Error creating job application:", error);
@@ -1548,7 +1548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/jobs/:id/applications', isAuthenticated, async (req, res) => {
     try {
       const jobId = parseInt(req.params.id);
-      const applications = await storage.getJobApplications(jobId);
+      const applications = await simpleStorage.getJobApplications(jobId);
       res.json(applications);
     } catch (error) {
       console.error("Error fetching job applications:", error);
@@ -1567,7 +1567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Message and receiver ID are required" });
       }
 
-      const communication = await storage.createJobCommunication(jobId, senderId, receiverId, message);
+      const communication = await simpleStorage.createJobCommunication(jobId, senderId, receiverId, message);
       res.json(communication);
     } catch (error) {
       console.error("Error creating job communication:", error);
@@ -1578,7 +1578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/jobs/:id/communications', isAuthenticated, async (req, res) => {
     try {
       const jobId = parseInt(req.params.id);
-      const communications = await storage.getJobCommunications(jobId);
+      const communications = await simpleStorage.getJobCommunications(jobId);
       res.json(communications);
     } catch (error) {
       console.error("Error fetching job communications:", error);
@@ -1589,7 +1589,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/job-communications/:id/read', isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      await storage.markJobCommunicationAsRead(id);
+      await simpleStorage.markJobCommunicationAsRead(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error marking communication as read:", error);
@@ -1602,7 +1602,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const senderId = req.user.id;
       const messageData = insertMessageSchema.parse({ ...req.body, senderId });
-      const message = await storage.createMessage(messageData);
+      const message = await simpleStorage.createMessage(messageData);
       
       // Broadcast to WebSocket clients
       broadcastMessage(message);
@@ -1618,7 +1618,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const otherUserId = req.params.userId;
-      const messages = await storage.getMessages(userId, otherUserId);
+      const messages = await simpleStorage.getMessages(userId, otherUserId);
       res.json(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -1629,7 +1629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/conversations', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const conversations = await storage.getUserConversations(userId);
+      const conversations = await simpleStorage.getUserConversations(userId);
       res.json(conversations);
     } catch (error) {
       console.error("Error fetching conversations:", error);
@@ -1675,7 +1675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const tagData = insertUserTagSchema.parse({ ...req.body, userId });
-      const tag = await storage.createUserTag(tagData);
+      const tag = await simpleStorage.createUserTag(tagData);
       res.json(tag);
     } catch (error) {
       console.error("Error creating tag:", error);
@@ -1686,7 +1686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tags', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const tags = await storage.getUserTags(userId);
+      const tags = await simpleStorage.getUserTags(userId);
       res.json(tags);
     } catch (error) {
       console.error("Error fetching tags:", error);
@@ -1700,13 +1700,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Verify tag ownership
-      const existingTag = await storage.getUserTags(userId);
+      const existingTag = await simpleStorage.getUserTags(userId);
       const tag = existingTag.find(t => t.id === id);
       if (!tag) {
         return res.status(404).json({ message: "Tag not found" });
       }
       
-      const updatedTag = await storage.updateUserTag(id, req.body);
+      const updatedTag = await simpleStorage.updateUserTag(id, req.body);
       res.json(updatedTag);
     } catch (error) {
       console.error("Error updating tag:", error);
@@ -1720,13 +1720,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Verify tag ownership
-      const existingTag = await storage.getUserTags(userId);
+      const existingTag = await simpleStorage.getUserTags(userId);
       const tag = existingTag.find(t => t.id === id);
       if (!tag) {
         return res.status(404).json({ message: "Tag not found" });
       }
       
-      await storage.deleteUserTag(id);
+      await simpleStorage.deleteUserTag(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting tag:", error);
@@ -1742,19 +1742,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Verify media file ownership
-      const mediaFile = await storage.getMediaFile(mediaId);
+      const mediaFile = await simpleStorage.getMediaFile(mediaId);
       if (!mediaFile || mediaFile.userId !== userId) {
         return res.status(404).json({ message: "Media file not found" });
       }
       
       // Verify tag ownership
-      const userTags = await storage.getUserTags(userId);
+      const userTags = await simpleStorage.getUserTags(userId);
       const tag = userTags.find(t => t.id === tagId);
       if (!tag) {
         return res.status(404).json({ message: "Tag not found" });
       }
       
-      const mediaFileTag = await storage.addTagToMediaFile(mediaId, tagId);
+      const mediaFileTag = await simpleStorage.addTagToMediaFile(mediaId, tagId);
       res.json(mediaFileTag);
     } catch (error) {
       console.error("Error adding tag to media file:", error);
@@ -1769,12 +1769,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Verify media file ownership
-      const mediaFile = await storage.getMediaFile(mediaId);
+      const mediaFile = await simpleStorage.getMediaFile(mediaId);
       if (!mediaFile || mediaFile.userId !== userId) {
         return res.status(404).json({ message: "Media file not found" });
       }
       
-      await storage.removeTagFromMediaFile(mediaId, tagId);
+      await simpleStorage.removeTagFromMediaFile(mediaId, tagId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error removing tag from media file:", error);
@@ -1788,12 +1788,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Verify media file ownership
-      const mediaFile = await storage.getMediaFile(mediaId);
+      const mediaFile = await simpleStorage.getMediaFile(mediaId);
       if (!mediaFile || mediaFile.userId !== userId) {
         return res.status(404).json({ message: "Media file not found" });
       }
       
-      const tags = await storage.getTagsForMediaFile(mediaId);
+      const tags = await simpleStorage.getTagsForMediaFile(mediaId);
       res.json(tags);
     } catch (error) {
       console.error("Error fetching media file tags:", error);
@@ -1807,13 +1807,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Verify tag ownership
-      const userTags = await storage.getUserTags(userId);
+      const userTags = await simpleStorage.getUserTags(userId);
       const tag = userTags.find(t => t.id === tagId);
       if (!tag) {
         return res.status(404).json({ message: "Tag not found" });
       }
       
-      const mediaFiles = await storage.getMediaFilesByTag(tagId);
+      const mediaFiles = await simpleStorage.getMediaFilesByTag(tagId);
       res.json(mediaFiles);
     } catch (error) {
       console.error("Error fetching media files by tag:", error);
@@ -1834,7 +1834,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         featured: featured === 'true',
       };
       
-      const talents = await storage.searchTalentsPublic(searchParams);
+      const talents = await simpleStorage.searchTalentsPublic(searchParams);
       res.json(talents);
     } catch (error) {
       console.error("Error searching talents:", error);
@@ -1846,7 +1846,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/talent/:id', async (req, res) => {
     try {
       const userId = req.params.id;
-      const profile = await storage.getUserProfile(userId);
+      const profile = await simpleStorage.getUserProfile(userId);
       if (!profile) {
         return res.status(404).json({ message: "Talent profile not found" });
       }
@@ -1861,7 +1861,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   /*
   app.get('/api/admin/featured-talents', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const featuredTalents = await storage.getFeaturedTalents();
+      const featuredTalents = await simpleStorage.getFeaturedTalents();
       res.json(featuredTalents);
     } catch (error) {
       console.error("Error fetching featured talents:", error);
@@ -1871,7 +1871,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/featured-talents', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const featuredTalent = await storage.createFeaturedTalent(req.body);
+      const featuredTalent = await simpleStorage.createFeaturedTalent(req.body);
       res.json(featuredTalent);
     } catch (error) {
       console.error("Error creating featured talent:", error);
@@ -1882,7 +1882,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/featured-talents/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const featuredTalent = await storage.updateFeaturedTalent(id, req.body);
+      const featuredTalent = await simpleStorage.updateFeaturedTalent(id, req.body);
       res.json(featuredTalent);
     } catch (error) {
       console.error("Error updating featured talent:", error);
@@ -1893,7 +1893,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/featured-talents/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      await storage.deleteFeaturedTalent(id);
+      await simpleStorage.deleteFeaturedTalent(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting featured talent:", error);
@@ -1904,7 +1904,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin talent categories routes
   app.get('/api/admin/talent-categories', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const categories = await storage.getTalentCategories();
+      const categories = await simpleStorage.getTalentCategories();
       res.json(categories);
     } catch (error) {
       console.error("Error fetching talent categories:", error);
@@ -1915,7 +1915,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin user limits management routes
   app.get('/api/admin/users-with-limits', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const users = await storage.getUsersWithLimits();
+      const users = await simpleStorage.getUsersWithLimits();
       res.json(users);
     } catch (error) {
       console.error("Error fetching users with limits:", error);
@@ -1932,7 +1932,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User ID and limits are required" });
       }
 
-      const result = await storage.grantUserLimits(userId, limits, adminId);
+      const result = await simpleStorage.grantUserLimits(userId, limits, adminId);
       res.json(result);
     } catch (error) {
       console.error("Error granting user limits:", error);
@@ -1943,7 +1943,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/revoke-user-limits/:userId', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const userId = req.params.userId;
-      await storage.revokeUserLimits(userId);
+      await simpleStorage.revokeUserLimits(userId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error revoking user limits:", error);
@@ -1953,7 +1953,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/talent-categories', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const category = await storage.createTalentCategory(req.body);
+      const category = await simpleStorage.createTalentCategory(req.body);
       res.json(category);
     } catch (error) {
       console.error("Error creating talent category:", error);
@@ -1964,7 +1964,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/talent-categories/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const category = await storage.updateTalentCategory(id, req.body);
+      const category = await simpleStorage.updateTalentCategory(id, req.body);
       res.json(category);
     } catch (error) {
       console.error("Error updating talent category:", error);
@@ -1975,7 +1975,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/talent-categories/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      await storage.deleteTalentCategory(id);
+      await simpleStorage.deleteTalentCategory(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting talent category:", error);
@@ -1986,7 +1986,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin SEO routes
   app.get('/api/admin/seo-settings', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const seoSettings = await storage.getSEOSettings();
+      const seoSettings = await simpleStorage.getSEOSettings();
       res.json(seoSettings);
     } catch (error) {
       console.error("Error fetching SEO settings:", error);
@@ -1996,7 +1996,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/seo-settings', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const seoSetting = await storage.createOrUpdateSEOSettings(req.body);
+      const seoSetting = await simpleStorage.createOrUpdateSEOSettings(req.body);
       res.json(seoSetting);
     } catch (error) {
       console.error("Error saving SEO settings:", error);
@@ -2007,7 +2007,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/generate-seo', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { pagePath } = req.body;
-      const generatedSEO = await storage.generateSEOContent(pagePath);
+      const generatedSEO = await simpleStorage.generateSEOContent(pagePath);
       res.json(generatedSEO);
     } catch (error) {
       console.error("Error generating SEO content:", error);
@@ -2017,7 +2017,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/seo-analytics', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const analytics = await storage.getSEOAnalytics();
+      const analytics = await simpleStorage.getSEOAnalytics();
       res.json(analytics);
     } catch (error) {
       console.error("Error fetching SEO analytics:", error);
@@ -2029,7 +2029,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin routes (for user management, pricing, etc.)
   app.get('/api/admin/users', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const users = await storage.getAllUsers();
+      const users = await simpleStorage.getAllUsers();
       res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify(users));
     } catch (error) {
@@ -2065,7 +2065,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       console.log("Mapped user data:", userData);
-      const user = await storage.createUser(userData);
+      const user = await simpleStorage.createUser(userData);
       console.log("Created user successfully:", user);
       res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify(user));
@@ -2081,7 +2081,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Updating user:", userId, req.body);
       
       // Get existing user to preserve required fields
-      const existingUser = await storage.getUser(userId);
+      const existingUser = await simpleStorage.getUser(userId);
       if (!existingUser) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -2095,7 +2095,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       console.log("Merged user data:", userData);
-      const user = await storage.upsertUser(userData);
+      const user = await simpleStorage.upsertUser(userData);
       res.json(user);
     } catch (error) {
       console.error("Error updating user:", error);
@@ -2120,7 +2120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/users/:userId/reset-password', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
-      const user = await storage.getUser(userId);
+      const user = await simpleStorage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -2181,10 +2181,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const organizerId = req.user.id;
       const meetingData = { ...req.body, organizerId };
       
-      const meeting = await storage.createMeeting(meetingData);
+      const meeting = await simpleStorage.createMeeting(meetingData);
       
       // Send meeting invitation email
-      const attendee = await storage.getUser(meetingData.attendeeId);
+      const attendee = await simpleStorage.getUser(meetingData.attendeeId);
       if (attendee) {
         await sendMeetingInvitation(attendee.email, {
           title: meeting.title,
@@ -2207,7 +2207,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/meetings', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const meetings = await storage.getMeetings(userId);
+      const meetings = await simpleStorage.getMeetings(userId);
       res.json(meetings);
     } catch (error) {
       console.error("Error fetching meetings:", error);
@@ -2218,7 +2218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/meetings/:meetingId', isAuthenticated, async (req: any, res) => {
     try {
       const { meetingId } = req.params;
-      const meeting = await storage.updateMeeting(parseInt(meetingId), req.body);
+      const meeting = await simpleStorage.updateMeeting(parseInt(meetingId), req.body);
       res.json(meeting);
     } catch (error) {
       console.error("Error updating meeting:", error);
@@ -2229,7 +2229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/meetings/:meetingId', isAuthenticated, async (req: any, res) => {
     try {
       const { meetingId } = req.params;
-      await storage.deleteMeeting(parseInt(meetingId));
+      await simpleStorage.deleteMeeting(parseInt(meetingId));
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting meeting:", error);
@@ -2241,7 +2241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/users/:userId/permissions', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
-      const permissions = await storage.getUserPermissions(userId);
+      const permissions = await simpleStorage.getUserPermissions(userId);
       res.json(permissions);
     } catch (error) {
       console.error("Error fetching user permissions:", error);
@@ -2253,7 +2253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       const grantedBy = req.user.id; // Use traditional auth user ID
-      const permission = await storage.createUserPermission({
+      const permission = await simpleStorage.createUserPermission({
         userId,
         category: req.body.category,
         action: req.body.action,
@@ -2336,7 +2336,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       const { role } = req.body;
-      const updatedUser = await storage.updateUserRole(userId, role);
+      const updatedUser = await simpleStorage.updateUserRole(userId, role);
       res.json(updatedUser);
     } catch (error) {
       console.error("Error updating user role:", error);
@@ -2348,7 +2348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       const { verified } = req.body;
-      const updatedProfile = await storage.updateUserVerification(userId, verified);
+      const updatedProfile = await simpleStorage.updateUserVerification(userId, verified);
       res.json(updatedProfile);
     } catch (error) {
       console.error("Error updating user verification:", error);
@@ -2359,7 +2359,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Pricing tiers management
   app.get('/api/admin/pricing-tiers', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const tiers = await storage.getPricingTiers();
+      const tiers = await simpleStorage.getPricingTiers();
       res.json(tiers);
     } catch (error) {
       console.error("Error fetching pricing tiers:", error);
@@ -2370,7 +2370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/pricing-tiers', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Creating pricing tier:", req.body);
-      const tier = await storage.createPricingTier(req.body);
+      const tier = await simpleStorage.createPricingTier(req.body);
       res.json(tier);
     } catch (error) {
       console.error("Error creating pricing tier:", error);
@@ -2381,7 +2381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/pricing-tiers/:tierId', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const tierId = parseInt(req.params.tierId);
-      const tier = await storage.updatePricingTier(tierId, req.body);
+      const tier = await simpleStorage.updatePricingTier(tierId, req.body);
       res.json(tier);
     } catch (error) {
       console.error("Error updating pricing tier:", error);
@@ -2392,7 +2392,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/pricing-tiers/:tierId', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const tierId = parseInt(req.params.tierId);
-      await storage.deletePricingTier(tierId);
+      await simpleStorage.deletePricingTier(tierId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting pricing tier:", error);
@@ -2545,7 +2545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Promo code management routes
   app.get('/api/admin/promo-codes', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const promoCodes = await storage.getPromoCodes();
+      const promoCodes = await simpleStorage.getPromoCodes();
       res.json(promoCodes);
     } catch (error) {
       console.error("Error fetching promo codes:", error);
@@ -2561,7 +2561,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: req.user.id,
         usedCount: 0
       };
-      const promoCode = await storage.createPromoCode(promoCodeData);
+      const promoCode = await simpleStorage.createPromoCode(promoCodeData);
       res.json(promoCode);
     } catch (error) {
       console.error("Error creating promo code:", error);
@@ -2572,7 +2572,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/promo-codes/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const promoCodeId = parseInt(req.params.id);
-      const promoCode = await storage.updatePromoCode(promoCodeId, req.body);
+      const promoCode = await simpleStorage.updatePromoCode(promoCodeId, req.body);
       res.json(promoCode);
     } catch (error) {
       console.error("Error updating promo code:", error);
@@ -2583,7 +2583,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/promo-codes/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const promoCodeId = parseInt(req.params.id);
-      await storage.deletePromoCode(promoCodeId);
+      await simpleStorage.deletePromoCode(promoCodeId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting promo code:", error);
@@ -2594,7 +2594,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/promo-codes/:id/usage', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const promoCodeId = parseInt(req.params.id);
-      const usage = await storage.getPromoCodeUsage(promoCodeId);
+      const usage = await simpleStorage.getPromoCodeUsage(promoCodeId);
       res.json(usage);
     } catch (error) {
       console.error("Error fetching promo code usage:", error);
@@ -2649,7 +2649,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Email campaigns management routes
   app.get('/api/admin/email-campaigns', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const campaigns = await storage.getEmailCampaigns();
+      const campaigns = await simpleStorage.getEmailCampaigns();
       res.json(campaigns);
     } catch (error) {
       console.error("Error fetching email campaigns:", error);
@@ -2665,13 +2665,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: req.user.id,
         status: req.body.type === 'instant' ? 'sending' : 'scheduled'
       };
-      const campaign = await storage.createEmailCampaign(campaignData);
+      const campaign = await simpleStorage.createEmailCampaign(campaignData);
       
       // If it's an instant campaign, send immediately
       if (req.body.type === 'instant') {
         try {
           // Get target users based on groups
-          const targetUsers = await storage.getUsersByGroups(req.body.targetGroups);
+          const targetUsers = await simpleStorage.getUsersByGroups(req.body.targetGroups);
           
           // Send emails to all target users
           let sentCount = 0;
@@ -2693,14 +2693,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Update campaign status and stats
-          await storage.updateEmailCampaignStatus(campaign.id, 'sent', {
+          await simpleStorage.updateEmailCampaignStatus(campaign.id, 'sent', {
             sentCount,
             failedCount,
             totalTargets: targetUsers.length
           });
         } catch (sendError) {
           console.error("Error sending instant campaign:", sendError);
-          await storage.updateEmailCampaignStatus(campaign.id, 'failed');
+          await simpleStorage.updateEmailCampaignStatus(campaign.id, 'failed');
         }
       }
       
@@ -2714,7 +2714,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/email-campaigns/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const campaignId = parseInt(req.params.id);
-      const campaign = await storage.updateEmailCampaign(campaignId, req.body);
+      const campaign = await simpleStorage.updateEmailCampaign(campaignId, req.body);
       res.json(campaign);
     } catch (error) {
       console.error("Error updating email campaign:", error);
@@ -2725,7 +2725,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/email-campaigns/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const campaignId = parseInt(req.params.id);
-      await storage.deleteEmailCampaign(campaignId);
+      await simpleStorage.deleteEmailCampaign(campaignId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting email campaign:", error);
@@ -2735,7 +2735,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const templates = await storage.getEmailTemplates();
+      const templates = await simpleStorage.getEmailTemplates();
       res.json(templates);
     } catch (error) {
       console.error("Error fetching email templates:", error);
@@ -2885,7 +2885,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         createdBy: req.user.id
       };
-      const template = await storage.createEmailTemplate(templateData);
+      const template = await simpleStorage.createEmailTemplate(templateData);
       res.json(template);
     } catch (error) {
       console.error("Error creating email template:", error);
@@ -2896,7 +2896,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const templateId = parseInt(req.params.id);
-      const template = await storage.updateEmailTemplate(templateId, req.body);
+      const template = await simpleStorage.updateEmailTemplate(templateId, req.body);
       res.json(template);
     } catch (error) {
       console.error("Error updating email template:", error);
@@ -2907,7 +2907,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const templateId = parseInt(req.params.id);
-      await storage.deleteEmailTemplate(templateId);
+      await simpleStorage.deleteEmailTemplate(templateId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting email template:", error);
@@ -2926,7 +2926,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update sort order for each template
       for (const update of updates) {
         if (update.id && update.sort_order !== undefined) {
-          await storage.updateEmailTemplate(update.id, { sort_order: update.sort_order });
+          await simpleStorage.updateEmailTemplate(update.id, { sort_order: update.sort_order });
         }
       }
       
@@ -2947,20 +2947,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing required fields: code, tierId, planType" });
       }
 
-      const validation = await storage.validatePromoCode(code, userId, tierId, planType);
+      const validation = await simpleStorage.validatePromoCode(code, userId, tierId, planType);
       
       if (!validation.valid) {
         return res.status(400).json({ message: validation.error });
       }
 
       // Calculate discount
-      const tier = await storage.getPricingTier(tierId);
+      const tier = await simpleStorage.getPricingTier(tierId);
       if (!tier) {
         return res.status(404).json({ message: "Pricing tier not found" });
       }
 
       const originalAmount = planType === "annual" ? Number(tier.annualPrice) : Number(tier.price);
-      const discountAmount = await storage.calculateDiscountAmount(validation.promoCode!, originalAmount);
+      const discountAmount = await simpleStorage.calculateDiscountAmount(validation.promoCode!, originalAmount);
       const finalAmount = originalAmount - discountAmount;
 
       res.json({
@@ -3349,7 +3349,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/representations', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const representations = await storage.getUserRepresentations(userId);
+      const representations = await simpleStorage.getUserRepresentations(userId);
       res.json(representations);
     } catch (error) {
       console.error("Error fetching user representations:", error);
@@ -3372,7 +3372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isPrimary: req.body.isPrimary || false,
       };
       
-      const representation = await storage.createUserRepresentation(representationData);
+      const representation = await simpleStorage.createUserRepresentation(representationData);
       res.json(representation);
     } catch (error) {
       console.error("Error creating user representation:", error);
@@ -3385,7 +3385,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const representationId = parseInt(req.params.id);
       const representationData = req.body;
       
-      const representation = await storage.updateUserRepresentation(representationId, representationData);
+      const representation = await simpleStorage.updateUserRepresentation(representationId, representationData);
       res.json(representation);
     } catch (error) {
       console.error("Error updating user representation:", error);
@@ -3396,7 +3396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/user/representations/:id', isAuthenticated, async (req: any, res) => {
     try {
       const representationId = parseInt(req.params.id);
-      await storage.deleteUserRepresentation(representationId);
+      await simpleStorage.deleteUserRepresentation(representationId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting user representation:", error);
@@ -3411,9 +3411,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let tiers;
       
       if (role) {
-        tiers = await storage.getPricingTiersByRole(role);
+        tiers = await simpleStorage.getPricingTiersByRole(role);
       } else {
-        tiers = await storage.getPricingTiers();
+        tiers = await simpleStorage.getPricingTiers();
       }
       
       res.json(tiers);
@@ -3426,7 +3426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/pricing-tiers/:id', async (req, res) => {
     try {
       const tierId = parseInt(req.params.id);
-      const tier = await storage.getPricingTier(tierId);
+      const tier = await simpleStorage.getPricingTier(tierId);
       
       if (!tier) {
         return res.status(404).json({ message: "Pricing tier not found" });
@@ -3442,7 +3442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/profile-questions', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Creating profile question:", req.body);
-      const question = await storage.createProfileQuestion(req.body);
+      const question = await simpleStorage.createProfileQuestion(req.body);
       res.json(question);
     } catch (error) {
       console.error("Error creating profile question:", error);
@@ -3455,7 +3455,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Featured talent management endpoints
   app.get('/api/admin/featured-talent', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const featuredTalents = await storage.getFeaturedTalents();
+      const featuredTalents = await simpleStorage.getFeaturedTalents();
       res.json(featuredTalents);
     } catch (error) {
       console.error("Error fetching featured talents:", error);
@@ -3465,7 +3465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/all-talent-profiles', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const allTalents = await storage.getAllTalentProfiles();
+      const allTalents = await simpleStorage.getAllTalentProfiles();
       res.json(allTalents);
     } catch (error) {
       console.error("Error fetching talent profiles:", error);
@@ -3477,7 +3477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId, isFeatured, featuredTier } = req.body;
       
-      const updatedProfile = await storage.toggleFeaturedStatus(userId, isFeatured, featuredTier);
+      const updatedProfile = await simpleStorage.toggleFeaturedStatus(userId, isFeatured, featuredTier);
       
       res.json({
         success: true,
@@ -3493,7 +3493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/media-limits', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const limits = await storage.getUserMediaLimits(userId);
+      const limits = await simpleStorage.getUserMediaLimits(userId);
       res.json(limits);
     } catch (error) {
       console.error("Error fetching media limits:", error);
@@ -3507,7 +3507,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const { mediaType } = req.body; // 'image', 'video', 'audio'
       
-      const canUpload = await storage.checkMediaUploadPermission(userId, mediaType);
+      const canUpload = await simpleStorage.checkMediaUploadPermission(userId, mediaType);
       res.json({ canUpload });
     } catch (error) {
       console.error("Error checking media upload permission:", error);
@@ -3627,7 +3627,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
 
       // Check if tiers already exist
-      const existingTiers = await storage.getPricingTiers();
+      const existingTiers = await simpleStorage.getPricingTiers();
       if (existingTiers.length > 0) {
         return res.json({ 
           message: "Pricing tiers already exist", 
@@ -3639,7 +3639,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create the default tiers
       const createdTiers = [];
       for (const tierData of defaultTiers) {
-        const tier = await storage.createPricingTier(tierData);
+        const tier = await simpleStorage.createPricingTier(tierData);
         createdTiers.push(tier);
       }
 
@@ -3657,7 +3657,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/profile-questions/:questionId', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const questionId = parseInt(req.params.questionId);
-      const question = await storage.updateProfileQuestion(questionId, req.body);
+      const question = await simpleStorage.updateProfileQuestion(questionId, req.body);
       res.json(question);
     } catch (error) {
       console.error("Error updating profile question:", error);
@@ -3668,7 +3668,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/profile-questions/:questionId', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const questionId = parseInt(req.params.questionId);
-      await storage.deleteProfileQuestion(questionId);
+      await simpleStorage.deleteProfileQuestion(questionId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting profile question:", error);
@@ -3679,7 +3679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // System Settings management
   app.get('/api/admin/settings', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const settings = await storage.getSystemSettings();
+      const settings = await simpleStorage.getSystemSettings();
       res.json(settings);
     } catch (error) {
       console.error("Error fetching system settings:", error);
@@ -3724,7 +3724,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/settings', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Creating system setting:", req.body);
-      const setting = await storage.createSystemSetting(req.body);
+      const setting = await simpleStorage.createSystemSetting(req.body);
       res.json(setting);
     } catch (error) {
       console.error("Error creating system setting:", error);
@@ -3878,7 +3878,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const key = req.params.key;
       const { value } = req.body;
       const updatedBy = req.user.id;
-      const setting = await storage.updateSystemSetting(key, value, updatedBy);
+      const setting = await simpleStorage.updateSystemSetting(key, value, updatedBy);
       res.json(setting);
     } catch (error) {
       console.error("Error updating system setting:", error);
@@ -3889,7 +3889,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/settings/:key', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const key = req.params.key;
-      await storage.deleteSystemSetting(key);
+      await simpleStorage.deleteSystemSetting(key);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting system setting:", error);
@@ -3901,7 +3901,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/logs', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 100;
-      const logs = await storage.getAdminLogs(limit);
+      const logs = await simpleStorage.getAdminLogs(limit);
       res.json(logs);
     } catch (error) {
       console.error("Error fetching admin logs:", error);
@@ -3913,7 +3913,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const adminId = req.user.id;
       const logData = { ...req.body, adminId, ipAddress: req.ip, userAgent: req.get('User-Agent') };
-      const log = await storage.createAdminLog(logData);
+      const log = await simpleStorage.createAdminLog(logData);
       res.json(log);
     } catch (error) {
       console.error("Error creating admin log:", error);
@@ -3925,7 +3925,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/analytics', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { startDate, endDate } = req.query;
-      const analytics = await storage.getAnalytics(
+      const analytics = await simpleStorage.getAnalytics(
         startDate ? new Date(startDate as string) : undefined,
         endDate ? new Date(endDate as string) : undefined
       );
@@ -3938,7 +3938,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/analytics/summary', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const summary = await storage.getAnalyticsSummary();
+      const summary = await simpleStorage.getAnalyticsSummary();
       res.json(summary);
     } catch (error) {
       console.error("Error fetching analytics summary:", error);
@@ -3948,7 +3948,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/analytics', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const analytics = await storage.createAnalytics(req.body);
+      const analytics = await simpleStorage.createAnalytics(req.body);
       res.json(analytics);
     } catch (error) {
       console.error("Error creating analytics:", error);
@@ -4010,7 +4010,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin Job Management
   app.get('/api/admin/jobs', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const jobs = await storage.getJobs();
+      const jobs = await simpleStorage.getJobs();
       res.json(jobs);
     } catch (error) {
       console.error("Error fetching jobs:", error);
@@ -4021,7 +4021,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/jobs', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Creating job:", req.body);
-      const job = await storage.createJob(req.body);
+      const job = await simpleStorage.createJob(req.body);
       res.json(job);
     } catch (error) {
       console.error("Error creating job:", error);
@@ -4033,7 +4033,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Updating job:", req.params.jobId, req.body);
       const jobId = parseInt(req.params.jobId);
-      const job = await storage.updateJob(jobId, req.body);
+      const job = await simpleStorage.updateJob(jobId, req.body);
       res.json(job);
     } catch (error) {
       console.error("Error updating job:", error);
@@ -4045,7 +4045,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Deleting job:", req.params.jobId);
       const jobId = parseInt(req.params.jobId);
-      await storage.deleteJob(jobId);
+      await simpleStorage.deleteJob(jobId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting job:", error);
@@ -4056,7 +4056,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin - Settings Management
   app.get('/api/admin/settings', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const settings = await storage.getAdminSettings();
+      const settings = await simpleStorage.getAdminSettings();
       res.json(settings);
     } catch (error) {
       console.error('Get admin settings error:', error);
@@ -4072,7 +4072,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Key and value are required' });
       }
 
-      const setting = await storage.updateAdminSetting(key, value, req.user?.username || 'admin');
+      const setting = await simpleStorage.updateAdminSetting(key, value, req.user?.username || 'admin');
       res.json(setting);
     } catch (error) {
       console.error('Update admin setting error:', error);
@@ -4083,7 +4083,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/settings/:key', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { key } = req.params;
-      await storage.deleteAdminSetting(key);
+      await simpleStorage.deleteAdminSetting(key);
       res.json({ message: 'Setting deleted successfully' });
     } catch (error) {
       console.error('Delete admin setting error:', error);
@@ -4096,7 +4096,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Meeting Requests
   app.get('/api/meetings', isAuthenticated, async (req: any, res) => {
     try {
-      const meetings = await storage.getMeetingRequests(req.user?.id);
+      const meetings = await simpleStorage.getMeetingRequests(req.user?.id);
       res.json(meetings);
     } catch (error) {
       console.error('Get meetings error:', error);
@@ -4112,7 +4112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'pending',
       };
       
-      const meeting = await storage.createMeetingRequest(meetingData);
+      const meeting = await simpleStorage.createMeetingRequest(meetingData);
       res.json(meeting);
     } catch (error) {
       console.error('Create meeting error:', error);
@@ -4123,7 +4123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/meetings/:id', isAuthenticated, async (req: any, res) => {
     try {
       const meetingId = parseInt(req.params.id);
-      const meeting = await storage.updateMeetingRequest(meetingId, req.body);
+      const meeting = await simpleStorage.updateMeetingRequest(meetingId, req.body);
       res.json(meeting);
     } catch (error) {
       console.error('Update meeting error:', error);
@@ -4134,7 +4134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/meetings/:id', isAuthenticated, async (req: any, res) => {
     try {
       const meetingId = parseInt(req.params.id);
-      await storage.deleteMeetingRequest(meetingId);
+      await simpleStorage.deleteMeetingRequest(meetingId);
       res.json({ message: 'Meeting request deleted successfully' });
     } catch (error) {
       console.error('Delete meeting error:', error);
@@ -4151,7 +4151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allRolePermissions = {};
       
       for (const role of roles) {
-        const permissions = await storage.getRolePermissions(role);
+        const permissions = await simpleStorage.getRolePermissions(role);
         allRolePermissions[role] = permissions;
       }
       
@@ -4170,7 +4170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Missing required fields" });
       }
       
-      const permission = await storage.createRolePermission({
+      const permission = await simpleStorage.createRolePermission({
         role,
         category,
         action,
@@ -4188,14 +4188,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/permissions/users/:userId", isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
-      const user = await storage.getUser(userId);
+      const user = await simpleStorage.getUser(userId);
       
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
       
-      const userPermissions = await storage.getUserPermissions(userId);
-      const rolePermissions = await storage.getRolePermissions(user.role);
+      const userPermissions = await simpleStorage.getUserPermissions(userId);
+      const rolePermissions = await simpleStorage.getRolePermissions(user.role);
       
       res.json({
         user: {
@@ -4222,7 +4222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Missing required fields" });
       }
       
-      const permission = await storage.createUserPermission({
+      const permission = await simpleStorage.createUserPermission({
         userId,
         category,
         action,
@@ -4243,7 +4243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/admin/permissions/users/:permissionId", isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { permissionId } = req.params;
-      await storage.deleteUserPermission(parseInt(permissionId));
+      await simpleStorage.deleteUserPermission(parseInt(permissionId));
       res.sendStatus(204);
     } catch (error) {
       console.error("Error deleting user permission:", error);
@@ -4296,7 +4296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const managerId = req.user.id;
       const { talentId } = req.body;
-      const relation = await storage.createTalentManagerRelation(talentId, managerId);
+      const relation = await simpleStorage.createTalentManagerRelation(talentId, managerId);
       res.json(relation);
     } catch (error) {
       console.error("Error creating talent-manager relation:", error);
@@ -4307,7 +4307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/manager/talents', isAuthenticated, async (req: any, res) => {
     try {
       const managerId = req.user.id;
-      const talents = await storage.getTalentsByManager(managerId);
+      const talents = await simpleStorage.getTalentsByManager(managerId);
       res.json(talents);
     } catch (error) {
       console.error("Error fetching manager talents:", error);
@@ -4319,7 +4319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/availability', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const availability = await storage.getUserAvailability(userId);
+      const availability = await simpleStorage.getUserAvailability(userId);
       res.json(availability);
     } catch (error) {
       console.error("Error fetching availability:", error);
@@ -4330,7 +4330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/availability', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const availability = await storage.createAvailabilityEntry({
+      const availability = await simpleStorage.createAvailabilityEntry({
         ...req.body,
         userId
       });
@@ -4344,7 +4344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/availability/:id', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const availability = await storage.updateAvailabilityEntry(id, req.body);
+      const availability = await simpleStorage.updateAvailabilityEntry(id, req.body);
       res.json(availability);
     } catch (error) {
       console.error("Error updating availability:", error);
@@ -4355,7 +4355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/availability/:id', isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      await storage.deleteAvailabilityEntry(id);
+      await simpleStorage.deleteAvailabilityEntry(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting availability:", error);
@@ -4367,16 +4367,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/profile/ai-enhance', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      let profile = await storage.getUserProfile(userId);
+      let profile = await simpleStorage.getUserProfile(userId);
       
       // If profile doesn't exist, create a basic one first
       if (!profile) {
-        const user = await storage.getUser(userId);
+        const user = await simpleStorage.getUser(userId);
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
         
-        profile = await storage.createUserProfile({
+        profile = await simpleStorage.createUserProfile({
           userId,
           displayName: user.firstName || "User",
           bio: "",
@@ -4403,7 +4403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const enhancedProfile = await storage.enhanceProfileWithAI(userId, profile);
+      const enhancedProfile = await simpleStorage.enhanceProfileWithAI(userId, profile);
       res.json(enhancedProfile);
     } catch (error) {
       console.error("Error enhancing profile:", error);
@@ -4426,12 +4426,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Check if user has already endorsed this skill
-      const hasEndorsed = await storage.hasUserEndorsedSkill(endorserId, endorsedUserId, skill);
+      const hasEndorsed = await simpleStorage.hasUserEndorsedSkill(endorserId, endorsedUserId, skill);
       if (hasEndorsed) {
         return res.status(400).json({ message: "You have already endorsed this skill" });
       }
       
-      const endorsement = await storage.createSkillEndorsement(validatedData);
+      const endorsement = await simpleStorage.createSkillEndorsement(validatedData);
       res.json(endorsement);
     } catch (error) {
       console.error("Error creating skill endorsement:", error);
@@ -4442,7 +4442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/skill-endorsements/:userId', async (req, res) => {
     try {
       const { userId } = req.params;
-      const endorsements = await storage.getSkillEndorsements(userId);
+      const endorsements = await simpleStorage.getSkillEndorsements(userId);
       res.json(endorsements);
     } catch (error) {
       console.error("Error fetching skill endorsements:", error);
@@ -4453,7 +4453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/skill-endorsements/:userId/:skill', async (req, res) => {
     try {
       const { userId, skill } = req.params;
-      const endorsements = await storage.getSkillEndorsementsBySkill(userId, skill);
+      const endorsements = await simpleStorage.getSkillEndorsementsBySkill(userId, skill);
       res.json(endorsements);
     } catch (error) {
       console.error("Error fetching skill endorsements:", error);
@@ -4464,7 +4464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/skill-endorsements/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      await storage.deleteSkillEndorsement(Number(id));
+      await simpleStorage.deleteSkillEndorsement(Number(id));
       res.json({ message: "Skill endorsement deleted successfully" });
     } catch (error) {
       console.error("Error deleting skill endorsement:", error);
@@ -4479,7 +4479,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Get tier information
-      const tiers = await storage.getPricingTiers();
+      const tiers = await simpleStorage.getPricingTiers();
       const tier = tiers.find(t => t.id === tierId);
       
       if (!tier) {
@@ -4529,7 +4529,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const tierId = parseInt(paymentIntent.metadata.tierId);
         
         // Update user's selected tier
-        const updatedUser = await storage.updateUserTier(userId, tierId);
+        const updatedUser = await simpleStorage.updateUserTier(userId, tierId);
         
         res.json({ 
           success: true, 
@@ -4557,7 +4557,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Select tier request:', { userId, tierId });
       
       // Get tier information
-      const tiers = await storage.getPricingTiers();
+      const tiers = await simpleStorage.getPricingTiers();
       const tier = tiers.find(t => t.id === tierId);
       
       console.log('Found tier:', tier);
@@ -4571,7 +4571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (parseFloat(tier.price) === 0) {
         console.log('Processing free tier selection for user:', userId);
         // For free tiers, directly update the user
-        const updatedUser = await storage.updateUserTier(userId, tierId);
+        const updatedUser = await simpleStorage.updateUserTier(userId, tierId);
         console.log('Updated user:', updatedUser);
         res.json(updatedUser);
       } else {
@@ -4601,7 +4601,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get tier information
-      const tiers = await storage.getPricingTiers();
+      const tiers = await simpleStorage.getPricingTiers();
       const tier = tiers.find(t => t.id === tierId);
       
       if (!tier) {
@@ -4610,7 +4610,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // For now, allow direct tier updates for any tier (free or paid)
       // In production, paid tiers would require payment processing
-      const updatedUser = await storage.updateUserTier(userId, tierId);
+      const updatedUser = await simpleStorage.updateUserTier(userId, tierId);
       
       console.log('Updated user tier:', updatedUser);
       
@@ -4833,7 +4833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         conditions: { maxDailyPosts: 5 }
       };
       
-      const permission = await storage.createUserPermission(testPermission);
+      const permission = await simpleStorage.createUserPermission(testPermission);
       
       // Test permission check using the permissions module
       const context = {
@@ -4842,7 +4842,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: new Date()
       };
       
-      const hasPermissionResult = await storage.hasUserPermission(context.userId, {
+      const hasPermissionResult = await simpleStorage.hasUserPermission(context.userId, {
         category: "CONTENT",
         action: "CREATE",
         resource: "blog_posts"
@@ -4910,7 +4910,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const createdPermissions = [];
       for (const permission of defaultRolePermissions) {
         try {
-          const created = await storage.createRolePermission(permission);
+          const created = await simpleStorage.createRolePermission(permission);
           createdPermissions.push(created);
         } catch (error) {
           console.log(`Permission ${permission.role}-${permission.category}-${permission.action} may already exist`);
@@ -4938,7 +4938,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: parseInt(userId)
       });
       
-      const post = await storage.createSocialPost(validatedData);
+      const post = await simpleStorage.createSocialPost(validatedData);
       res.json(post);
     } catch (error) {
       console.error("Error creating social post:", error);
@@ -4951,7 +4951,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = parseInt(req.user.id);
       const filter = req.query.filter || 'all';
       
-      const posts = await storage.getFeedPosts(userId, 20, 0);
+      const posts = await simpleStorage.getFeedPosts(userId, 20, 0);
       res.json(posts);
     } catch (error) {
       console.error("Error fetching social feed:", error);
@@ -4964,7 +4964,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const postId = parseInt(req.params.postId);
       const userId = parseInt(req.user.id);
       
-      await storage.likeSocialPost(postId, userId);
+      await simpleStorage.likeSocialPost(postId, userId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error liking post:", error);
@@ -5171,7 +5171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { page = 1, limit = 50, status, userId } = req.query;
       const offset = (page - 1) * limit;
       
-      let transactions = await storage.getPaymentTransactions(parseInt(limit), offset);
+      let transactions = await simpleStorage.getPaymentTransactions(parseInt(limit), offset);
       
       // Filter by status if provided
       if (status && status !== 'all') {
@@ -5193,7 +5193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/payments/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const transaction = await storage.getPaymentTransaction(id);
+      const transaction = await simpleStorage.getPaymentTransaction(id);
       
       if (!transaction) {
         return res.status(404).json({ message: "Payment transaction not found" });
@@ -5213,7 +5213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const adminId = parseInt(req.user.id);
       
       // Get the original transaction
-      const transaction = await storage.getPaymentTransaction(transactionId);
+      const transaction = await simpleStorage.getPaymentTransaction(transactionId);
       if (!transaction) {
         return res.status(404).json({ message: "Payment transaction not found" });
       }
@@ -5236,7 +5236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Create refund record
-      const refundRecord = await storage.createPaymentRefund({
+      const refundRecord = await simpleStorage.createPaymentRefund({
         transactionId,
         stripeRefundId: stripeRefund.id,
         amount: refundAmount,
@@ -5250,7 +5250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const refundedAmount = parseFloat(transaction.refundedAmount.toString()) + parseFloat(refundAmount.toString());
       const newStatus = refundedAmount >= parseFloat(transaction.amount.toString()) ? 'refunded' : 'partially_refunded';
       
-      await storage.updatePaymentTransaction(transactionId, {
+      await simpleStorage.updatePaymentTransaction(transactionId, {
         status: newStatus,
         refundedAmount: refundedAmount.toString(),
         refundReason: reason,
@@ -5272,7 +5272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/payments/:id/refunds', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const transactionId = parseInt(req.params.id);
-      const refunds = await storage.getPaymentRefunds(transactionId);
+      const refunds = await simpleStorage.getPaymentRefunds(transactionId);
       res.json(refunds);
     } catch (error) {
       console.error("Error fetching refunds:", error);
@@ -5283,7 +5283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Payment Analytics Routes
   app.get('/api/admin/payments/analytics/summary', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const summary = await storage.getPaymentAnalyticsSummary();
+      const summary = await simpleStorage.getPaymentAnalyticsSummary();
       res.json(summary);
     } catch (error) {
       console.error("Error fetching payment analytics summary:", error);
@@ -5294,7 +5294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/payments/analytics/revenue', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { period = 'daily' } = req.query;
-      const revenue = await storage.getRevenueByPeriod(period as 'daily' | 'weekly' | 'monthly');
+      const revenue = await simpleStorage.getRevenueByPeriod(period as 'daily' | 'weekly' | 'monthly');
       res.json(revenue);
     } catch (error) {
       console.error("Error fetching revenue analytics:", error);
@@ -5306,7 +5306,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/payments', isAuthenticated, async (req: any, res) => {
     try {
       const userId = parseInt(req.user.id);
-      const transactions = await storage.getUserPaymentTransactions(userId);
+      const transactions = await simpleStorage.getUserPaymentTransactions(userId);
       res.json(transactions);
     } catch (error) {
       console.error("Error fetching user payments:", error);
@@ -5334,9 +5334,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const paymentIntent = event.data.object;
           
           // Update payment transaction
-          const transaction = await storage.getPaymentTransactionByStripeId(paymentIntent.id);
+          const transaction = await simpleStorage.getPaymentTransactionByStripeId(paymentIntent.id);
           if (transaction) {
-            await storage.updatePaymentTransaction(transaction.id, {
+            await simpleStorage.updatePaymentTransaction(transaction.id, {
               status: 'succeeded',
               stripeChargeId: paymentIntent.latest_charge as string,
               receiptUrl: paymentIntent.receipt_url,
@@ -5349,9 +5349,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const failedPayment = event.data.object;
           
           // Update payment transaction
-          const failedTransaction = await storage.getPaymentTransactionByStripeId(failedPayment.id);
+          const failedTransaction = await simpleStorage.getPaymentTransactionByStripeId(failedPayment.id);
           if (failedTransaction) {
-            await storage.updatePaymentTransaction(failedTransaction.id, {
+            await simpleStorage.updatePaymentTransaction(failedTransaction.id, {
               status: 'failed',
               metadata: failedPayment.metadata as any,
             });
@@ -5382,7 +5382,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { stripePaymentIntentId, tierId, amount, isAnnual } = req.body;
       const userId = parseInt(req.user.id);
       
-      const transaction = await storage.createPaymentTransaction({
+      const transaction = await simpleStorage.createPaymentTransaction({
         userId,
         stripePaymentIntentId,
         amount: amount.toString(),
@@ -5678,7 +5678,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== LEGAL DOCUMENTS ENDPOINTS =====
   app.get('/api/legal-documents', async (req, res) => {
     try {
-      const documents = await storage.getLegalDocuments();
+      const documents = await simpleStorage.getLegalDocuments();
       res.json(documents);
     } catch (error) {
       console.error("Error fetching legal documents:", error);
@@ -5689,7 +5689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/legal-documents/:type', async (req, res) => {
     try {
       const { type } = req.params;
-      const document = await storage.getLegalDocumentByType(type);
+      const document = await simpleStorage.getLegalDocumentByType(type);
       if (!document) {
         return res.status(404).json({ message: "Legal document not found" });
       }
@@ -5706,7 +5706,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { title, content, effectiveDate } = req.body;
       const updatedBy = req.user.id;
       
-      const document = await storage.updateLegalDocument(id, {
+      const document = await simpleStorage.updateLegalDocument(id, {
         title,
         content,
         effectiveDate: effectiveDate ? new Date(effectiveDate) : undefined,
@@ -5725,7 +5725,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { type, title, content, effectiveDate } = req.body;
       const createdBy = req.user.id;
       
-      const document = await storage.createLegalDocument({
+      const document = await simpleStorage.createLegalDocument({
         type,
         title,
         content,
