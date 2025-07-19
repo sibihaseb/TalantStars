@@ -2165,8 +2165,9 @@ function Onboarding() {
                         console.log(`${field}:`, allFormValues[field]);
                       });
                       
-                      // Use form's handleSubmit to trigger validation
-                      form.handleSubmit(onSubmit)();
+                      // Force submission with current form values
+                      console.log("=== TRIGGERING SUBMISSION ===");
+                      onSubmit(allFormValues);
                     }}
                   >
                     <span>

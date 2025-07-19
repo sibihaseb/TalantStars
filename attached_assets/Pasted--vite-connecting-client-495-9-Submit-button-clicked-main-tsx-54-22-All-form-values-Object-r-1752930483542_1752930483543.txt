@@ -1,0 +1,73 @@
+
+[vite] connecting... client:495:9
+Submit button clicked main.tsx:54:22
+All form values: 
+Object { role: "talent", talentType: "actor", displayName: "sdf fffdd", bio: "asdadsfasdfsad", location: "sdfsdf", profileImageUrl: "", website: "", phoneNumber: "", availabilityStatus: "available", languages: [], … }
+main.tsx:54:22
+Acting field values: main.tsx:54:22
+primarySpecialty: 
+Array []
+main.tsx:54:22
+yearsExperience: <empty string> main.tsx:54:22
+actingMethod: 
+Array []
+main.tsx:54:22
+improvisationComfort: Somewhat comfortable main.tsx:54:22
+stageCombat: <empty string> main.tsx:54:22
+intimateScenesComfort: Very comfortable main.tsx:54:22
+roleTypes: 
+Array []
+main.tsx:54:22
+motionCapture: <empty string> main.tsx:54:22
+animalWork: <empty string> main.tsx:54:22
+cryingOnCue: Somewhat comfortable main.tsx:54:22
+periodPieces: <empty string> main.tsx:54:22
+physicalComedy: <empty string> main.tsx:54:22
+accentExperience: <empty string> main.tsx:54:22
+greenScreen: <empty string> main.tsx:54:22
+stuntComfort: Very comfortable main.tsx:54:22
+shakespeareExperience: <empty string> main.tsx:54:22
+musicalTheater: <empty string> main.tsx:54:22
+horrorThriller: 
+Array []
+main.tsx:54:22
+currentAgent: <empty string> main.tsx:54:22
+currentPublicist: <empty string> main.tsx:54:22
+representationStatus: <empty string> main.tsx:54:22
+Submit button clicked main.tsx:54:22
+All form values: 
+Object { role: "talent", talentType: "actor", displayName: "sdf fffdd", bio: "asdadsfasdfsad", location: "sdfsdf", profileImageUrl: "", website: "", phoneNumber: "", availabilityStatus: "available", languages: [], … }
+main.tsx:54:22
+Acting field values: main.tsx:54:22
+primarySpecialty: 
+Array []
+main.tsx:54:22
+yearsExperience: <empty string> main.tsx:54:22
+actingMethod: 
+Array []
+main.tsx:54:22
+improvisationComfort: Somewhat comfortable main.tsx:54:22
+stageCombat: <empty string> main.tsx:54:22
+intimateScenesComfort: Very comfortable main.tsx:54:22
+roleTypes: 
+Array []
+main.tsx:54:22
+motionCapture: <empty string> main.tsx:54:22
+animalWork: <empty string> main.tsx:54:22
+cryingOnCue: Somewhat comfortable main.tsx:54:22
+periodPieces: <empty string> main.tsx:54:22
+physicalComedy: <empty string> main.tsx:54:22
+accentExperience: <empty string> main.tsx:54:22
+greenScreen: <empty string> main.tsx:54:22
+stuntComfort: Very comfortable main.tsx:54:22
+shakespeareExperience: <empty string> main.tsx:54:22
+musicalTheater: <empty string> main.tsx:54:22
+horrorThriller: 
+Array []
+main.tsx:54:22
+currentAgent: <empty string> main.tsx:54:22
+currentPublicist: <empty string> main.tsx:54:22
+representationStatus: <empty string> main.tsx:54:22
+
+​
+
