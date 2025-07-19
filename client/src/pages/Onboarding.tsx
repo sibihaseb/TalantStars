@@ -1056,9 +1056,21 @@ function Onboarding() {
     const isAuthenticated = !!user?.role;
     // For authenticated users, we skip role selection step
     if (isAuthenticated) {
-      return watchedRole === "talent" ? 7 : 5; // Talent now has 7 steps (including split acting questions)
+      if (watchedRole === "talent" && watchedTalentType === 'actor') {
+        return 8; // Actors get 3 question steps (5, 6, 7) plus final rates step (8)
+      } else if (watchedRole === "talent") {
+        return 7; // Other talent types get standard flow
+      } else {
+        return 5; // Non-talent roles
+      }
     } else {
-      return watchedRole === "talent" ? 8 : 6; // +1 for role selection
+      if (watchedRole === "talent" && watchedTalentType === 'actor') {
+        return 9; // +1 for role selection step
+      } else if (watchedRole === "talent") {
+        return 8; // +1 for role selection step
+      } else {
+        return 6; // +1 for role selection step
+      }
     }
   };
 
@@ -1168,13 +1180,21 @@ function Onboarding() {
     const isAuthenticated = !!user?.role;
     
     const roleSteps = {
-      talent: [
+      talentActor: [
         { title: "Talent Type", description: "Choose your talent type", icon: Star },
         { title: "Basic Information", description: "Personal details", icon: User },
         { title: "Profile Image", description: "Upload your photo", icon: Camera },
         { title: "Acting Experience", description: "Your experience & training", icon: Star },
         { title: "Physical & Skills", description: "Appearance & abilities", icon: Medal },
-        { title: "Role Preferences", description: "Your preferred roles & methods", icon: Crown },
+        { title: "Role Preferences", description: "Preferred roles & representation", icon: Crown },
+        { title: "Contact & Rates", description: "Location & pricing", icon: Trophy },
+      ],
+      talent: [
+        { title: "Talent Type", description: "Choose your talent type", icon: Star },
+        { title: "Basic Information", description: "Personal details", icon: User },
+        { title: "Profile Image", description: "Upload your photo", icon: Camera },
+        { title: "Professional Details", description: "Your experience & skills", icon: Star },
+        { title: "Additional Information", description: "Representation & details", icon: Medal },
         { title: "Contact & Rates", description: "Location & pricing", icon: Trophy },
       ],
       manager: [
@@ -1208,7 +1228,9 @@ function Onboarding() {
       return { title: "Role Selection", description: "Choose your role", icon: User };
     }
 
-    const steps = roleSteps[watchedRole as keyof typeof roleSteps] || roleSteps.default;
+    // Use specific actor steps for actors, regular talent steps for others
+    const stepKey = (watchedRole === 'talent' && watchedTalentType === 'actor') ? 'talentActor' : watchedRole;
+    const steps = roleSteps[stepKey as keyof typeof roleSteps] || roleSteps.default;
     const adjustedStep = isAuthenticated ? step : step - 1; // Adjust for skipped role selection
     return steps[adjustedStep - 1] || { title: "Step", description: "", icon: User };
   };
@@ -1895,7 +1917,7 @@ function Onboarding() {
                       {watchedRole === 'manager' && 'Management Details'}
                       {watchedRole === 'agent' && 'Agent Details'}
                       {watchedRole === 'producer' && 'Production Details'}
-                      {watchedRole === 'talent' && watchedTalentType === 'actor' && 'Acting Details'}
+                      {watchedRole === 'talent' && watchedTalentType === 'actor' && 'Acting Experience'}
                       {watchedRole === 'talent' && watchedTalentType === 'musician' && 'Music Details'}
                       {watchedRole === 'talent' && watchedTalentType === 'voice_artist' && 'Voice Details'}
                       {watchedRole === 'talent' && watchedTalentType === 'model' && 'Modeling Details'}
@@ -1906,7 +1928,7 @@ function Onboarding() {
                       {watchedRole === 'manager' && 'Tell us about your management experience and services'}
                       {watchedRole === 'agent' && 'Tell us about your agency experience and specializations'}
                       {watchedRole === 'producer' && 'Tell us about your production experience and projects'}
-                      {watchedRole === 'talent' && watchedTalentType === 'actor' && 'Add your acting experience, physical attributes, and special skills'}
+                      {watchedRole === 'talent' && watchedTalentType === 'actor' && 'Tell us about your acting experience, methods, and training'}
                       {watchedRole === 'talent' && watchedTalentType === 'musician' && 'Add your musical instruments, genres, and performance experience'}
                       {watchedRole === 'talent' && watchedTalentType === 'voice_artist' && 'Add your vocal range, experience, and voice skills'}
                       {watchedRole === 'talent' && watchedTalentType === 'model' && 'Add your physical attributes, modeling experience, and special skills'}
@@ -1920,65 +1942,93 @@ function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 6: Additional Information */}
+              {/* Step 6: Acting Physical & Skills OR Additional Information for other talent */}
               {currentStep === 6 && watchedRole === "talent" && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">Additional Information</CardTitle>
+                    <CardTitle className="text-2xl">
+                      {watchedTalentType === 'actor' ? 'Physical & Skills' : 'Additional Information'}
+                    </CardTitle>
                     <p className="text-gray-600 dark:text-gray-400">
-                      Add any additional details about your talent profile
+                      {watchedTalentType === 'actor' 
+                        ? 'Tell us about your physical attributes and special skills'
+                        : 'Add any additional details about your talent profile'
+                      }
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        Representation Information
-                      </h3>
-                      <div className="space-y-2">
-                        <Label htmlFor="current_manager">Current Manager (Optional)</Label>
-                        <Input
-                          {...form.register("current_manager")}
-                          placeholder="Enter your current manager's name"
-                          type="text"
-                        />
+                    {watchedTalentType === 'actor' ? (
+                      // Render step 5 questions for actors (physical & skills)
+                      renderRoleSpecificQuestions()
+                    ) : (
+                      // Render the old additional information for non-actors
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          Representation Information
+                        </h3>
+                        <div className="space-y-2">
+                          <Label htmlFor="current_manager">Current Manager (Optional)</Label>
+                          <Input
+                            {...form.register("current_manager")}
+                            placeholder="Enter your current manager's name"
+                            type="text"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="current_agent">Current Agent (Optional)</Label>
+                          <Input
+                            {...form.register("current_agent")}
+                            placeholder="Enter your current agent's name"
+                            type="text"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="current_publicist">Current Publicist (Optional)</Label>
+                          <Input
+                            {...form.register("current_publicist")}
+                            placeholder="Enter your current publicist's name"
+                            type="text"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="representation_status">Representation Status</Label>
+                          <Select onValueChange={(value) => form.setValue("representation_status", value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select representation status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="seeking">Seeking representation</SelectItem>
+                              <SelectItem value="have">Have representation</SelectItem>
+                              <SelectItem value="self">Self-represented</SelectItem>
+                              <SelectItem value="not_seeking">Not currently seeking</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="current_agent">Current Agent (Optional)</Label>
-                        <Input
-                          {...form.register("current_agent")}
-                          placeholder="Enter your current agent's name"
-                          type="text"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="current_publicist">Current Publicist (Optional)</Label>
-                        <Input
-                          {...form.register("current_publicist")}
-                          placeholder="Enter your current publicist's name"
-                          type="text"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="representation_status">Representation Status</Label>
-                        <Select onValueChange={(value) => form.setValue("representation_status", value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select representation status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="seeking">Seeking representation</SelectItem>
-                            <SelectItem value="have">Have representation</SelectItem>
-                            <SelectItem value="self">Self-represented</SelectItem>
-                            <SelectItem value="not_seeking">Not currently seeking</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
 
-              {/* Step 7 (or 6 for non-talent): Rates and Availability */}
-              {((currentStep === 7 && watchedRole === "talent") || (currentStep === 6 && watchedRole !== "talent")) && (
+              {/* Step 7: Acting Role Preferences (only for actors) */}
+              {currentStep === 7 && watchedRole === "talent" && watchedTalentType === 'actor' && (
+                <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-2xl">Role Preferences</CardTitle>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Tell us about your role preferences and representation status
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {renderRoleSpecificQuestions()}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Step 8 (or 7 for non-actors, or 6 for non-talent): Rates and Availability */}
+              {((currentStep === 8 && watchedRole === "talent" && watchedTalentType === 'actor') || 
+                (currentStep === 7 && watchedRole === "talent" && watchedTalentType !== 'actor') || 
+                (currentStep === 6 && watchedRole !== "talent")) && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">Rates & Availability</CardTitle>

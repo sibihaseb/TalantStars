@@ -1,0 +1,111 @@
+
+[vite] connecting... client:495:9
+Form errors: 
+Object { profileImageUrl: {…} }
+main.tsx:54:22
+Form is valid: true main.tsx:54:22
+Cleaned data for submission: 
+Object { role: "talent", talentType: "actor", displayName: "asdfsd asdfasd", bio: "sdsdasdfdfd", location: "sd", profileImageUrl: "https://s3.us-east-1.wasabisys.com/talent/user-74/profile/4ec0c6e7-e8ab-403a-a1cb-2137560e481b.jpg", website: null, phoneNumber: null, availabilityStatus: "available", languages: null, … }
+main.tsx:54:22
+=== SUBMITTING TO API === main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/profile main.tsx:54:22
+=== PROFILE CREATION SUCCESS === main.tsx:54:22
+Result: 
+Object { id: 51, userId: "74", role: "talent", talentType: "actor", displayName: "asdfsd asdfasd", bio: "sdsdasdfdfd", location: "sd", website: null, phoneNumber: null, isVerified: false, … }
+main.tsx:54:22
+XHRGET
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/job-history/74
+[HTTP/1.1 500 Internal Server Error 294ms]
+
+XHRGET
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/social/stats
+[HTTP/1.1 500 Internal Server Error 293ms]
+
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/applications main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/opportunities main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/user/profile main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 500, URL: /api/job-history/74 main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 500, URL: /api/social/stats main.tsx:54:22
+🚨 API ERROR: 500 - {"error":"Failed to get job history"} main.tsx:54:22
+🚨 API ERROR: 500 - {"message":"Failed to fetch social stats"} main.tsx:54:22
+=== FETCHING MEDIA FILES === main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/media main.tsx:54:22
+=== MEDIA FILES RESPONSE === 
+Array []
+main.tsx:54:22
+=== FORM SUBMIT TRIGGERED === main.tsx:54:22
+Upload type: file main.tsx:54:22
+Selected files: 
+Array [ File ]
+main.tsx:54:22
+File metadata: 
+Array [ {…} ]
+main.tsx:54:22
+Media form data: 
+Object { title: "", description: "", category: "portfolio", files: (1) […], externalUrl: "" }
+main.tsx:54:22
+=== PREPARING UPLOAD === main.tsx:54:22
+File: Screenshot 2025-07-19 at 12.02.25 AM.png (48512 bytes) main.tsx:54:22
+Title: Screenshot 2025-07-19 at 12.02.25 AM main.tsx:54:22
+Category: portfolio main.tsx:54:22
+Description: main.tsx:54:22
+=== STARTING UPLOAD MUTATION === main.tsx:54:22
+=== FRONTEND API REQUEST === main.tsx:54:22
+Method: POST, URL: /api/media main.tsx:54:22
+FormData entries: 
+Array(4) [ (2) […], (2) […], (2) […], (2) […] ]
+main.tsx:54:22
+XHRPOST
+https://d3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev/api/media
+[HTTP/1.1 500 Internal Server Error 162ms]
+
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 500, URL: /api/media main.tsx:54:22
+🚨 API ERROR: 500 - {"message":"Failed to create media"} main.tsx:54:22
+=== UPLOAD FAILED === main.tsx:27:24
+Upload failed for file: Screenshot 2025-07-19 at 12.02.25 AM.png Error: 500: {"message":"Failed to create media"}
+    throwIfResNotOk queryClient.ts:7
+    apiRequest queryClient.ts:48
+    mutationFn EnhancedMediaUpload.tsx:169
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+main.tsx:27:24
+    error main.tsx:27
+    handleFormSubmit EnhancedMediaUpload.tsx:542
+    React 32
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+    (Async: EventHandlerNonNull)
+    js scheduler.development.js:571
+    js scheduler.development.js:633
+    __require chunk-WOOG5QLI.js:12
+    js index.js:6
+    __require chunk-WOOG5QLI.js:12
+    React 2
+    __require chunk-WOOG5QLI.js:12
+    js React
+    __require chunk-WOOG5QLI.js:12
+    js React
+    __require chunk-WOOG5QLI.js:12
+    <anonymous> react-dom_client.js:38
+Error details: Error: 500: {"message":"Failed to create media"}
+    throwIfResNotOk queryClient.ts:7
+    apiRequest queryClient.ts:48
+    mutationFn EnhancedMediaUpload.tsx:169
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+main.tsx:27:24
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. main.tsx:40:23
+
+​
+
