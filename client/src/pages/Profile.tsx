@@ -685,8 +685,8 @@ export default function Profile() {
                   </TabsContent>
 
                   <TabsContent value="endorsements" className="space-y-6">
-                    {existingProfile && (
-                      <SkillEndorsements profile={existingProfile} isOwnProfile={true} />
+                    {profile && (
+                      <SkillEndorsements profile={profile} isOwnProfile={true} />
                     )}
                   </TabsContent>
 

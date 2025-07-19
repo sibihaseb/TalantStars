@@ -4588,6 +4588,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User tier update/upgrade/downgrade endpoint
+  app.post('/api/user/tier', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { tierId } = req.body;
+
+      console.log('Update tier request:', { userId, tierId });
+
+      if (!tierId || typeof tierId !== 'number') {
+        return res.status(400).json({ message: "Valid tier ID is required" });
+      }
+
+      // Get tier information
+      const tiers = await storage.getPricingTiers();
+      const tier = tiers.find(t => t.id === tierId);
+      
+      if (!tier) {
+        return res.status(400).json({ message: "Invalid tier ID" });
+      }
+
+      // For now, allow direct tier updates for any tier (free or paid)
+      // In production, paid tiers would require payment processing
+      const updatedUser = await storage.updateUserTier(userId, tierId);
+      
+      console.log('Updated user tier:', updatedUser);
+      
+      res.json({ 
+        success: true, 
+        user: updatedUser,
+        message: "Plan updated successfully" 
+      });
+    } catch (error) {
+      console.error("Error updating user tier:", error);
+      res.status(500).json({ message: "Failed to update plan" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // Subscription Management API endpoints

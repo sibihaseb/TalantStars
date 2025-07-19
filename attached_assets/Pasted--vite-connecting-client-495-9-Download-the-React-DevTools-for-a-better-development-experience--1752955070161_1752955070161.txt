@@ -1,0 +1,79 @@
+
+[vite] connecting... client:495:9
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools react-dom.development.js:29895:17
+Partitioned cookie or storage access was provided to “https://js.stripe.com/v3/controller-with-preconnect-5a125e125bbb24d882c0a6f33f679c89.html#__shared_params__[version]=basil&apiKey=pk_test_51NwxezAhOiHhM1yQX94ydY61tL8LaN6K1HeVYkAzhAaV36YpuWt9pdJ1XCYLjoxOWn4fsNzENnfeFzC0lFoB7Z3100t4ZBV3JL&apiVersion=2025-03-31.basil&stripeJsId=cc451bc9-f558-4821-a234-5e799ba760b4&stripeObjId=sobj-64d7f44d-2fe7-4be5-b1a7-b0bfe20b6754&firstStripeInstanceCreatedLatency=7&controllerCount=1&isCheckout=false&stripeJsLoadTime=1752955011401&manualBrowserDeprecationRollout=false&mids[guid]=NA&mids[muid]=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&mids[sid]=22a4725f-28a0-47c4-a02f-4dfea69d524bf2b5e0&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&controllerId=__privateStripeController8641” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+controller-with-preconnect-6c42774ced1350d667a127e6b6d290ea.js:1:22427
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/social/stats main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/opportunities main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/applications main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/user/profile main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+Partitioned cookie or storage access was provided to “https://m.stripe.network/inner.html#url=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&title=&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Fauth&muid=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&sid=22a4725f-28a0-47c4-a02f-4dfea69d524bf2b5e0&version=6&preview=false&__shared_params__[version]=basil” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+out-4.5.44.js:1:39660
+Cookie warnings 5
+Cookie “m” will soon be rejected because it is foreign and does not have the “Partitioned“ attribute. 6
+Cookie “m” will soon be rejected because it is foreign and does not have the “Partitioned“ attribute. 6
+Cookie “m” will soon be rejected because it is foreign and does not have the “Partitioned“ attribute. 2 6
+Cookie “m” will soon be rejected because it is foreign and does not have the “Partitioned“ attribute. 2 6
+Cookie “m” will soon be rejected because it is foreign and does not have the “Partitioned“ attribute. 2 6
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+Uncaught ReferenceError: existingProfile is not defined
+    Profile Profile.tsx:688
+    React 17
+    type use-browser-location.js:73
+    navigate use-browser-location.js:49
+    useLocationFromRouter index.js:93
+    ref react-deps.js:38
+    onClick index.js:284
+    ref react-deps.js:38
+    React 23
+    <anonymous> main.tsx:119
+Profile.tsx:688:22
+Uncaught ReferenceError: existingProfile is not defined
+    Profile Profile.tsx:688
+    React 18
+    type use-browser-location.js:73
+    navigate use-browser-location.js:49
+    useLocationFromRouter index.js:93
+    ref react-deps.js:38
+    onClick index.js:284
+    ref react-deps.js:38
+    React 23
+    <anonymous> main.tsx:119
+Profile.tsx:688:22
+Uncaught ReferenceError: existingProfile is not defined
+    Profile Profile.tsx:688
+    React 15
+    type use-browser-location.js:73
+    navigate use-browser-location.js:49
+    useLocationFromRouter index.js:93
+    ref react-deps.js:38
+    onClick index.js:284
+    ref react-deps.js:38
+    React 23
+    <anonymous> main.tsx:119
+Profile.tsx:688:22
+
+​
+

@@ -81,7 +81,8 @@ export interface IStorage {
   
   // Job communication operations
   getJobCommunications(jobId: number): Promise<any[]>;
-  createJobCommunication(communicationData: any): Promise<any>;
+  createJobCommunication(jobId: number, senderId: number, receiverId: number, message: string): Promise<any>;
+  markJobCommunicationAsRead(id: number): Promise<void>;
   
   // Application operations
   getUserApplications(userId: number): Promise<any[]>;
@@ -776,12 +777,16 @@ export class DatabaseStorage implements IStorage {
     return [];
   }
 
-  async createJobCommunication(communicationData: any): Promise<any> {
+  async createJobCommunication(jobId: number, senderId: number, receiverId: number, message: string): Promise<any> {
     // Mock implementation - just return the data with an ID
-    console.log("🔥 COMMUNICATION: Creating job communication", { communicationData });
+    console.log("🔥 COMMUNICATION: Creating job communication", { jobId, senderId, receiverId, message });
     const communication = {
       id: Date.now(),
-      ...communicationData,
+      jobId,
+      senderId,
+      receiverId,
+      message,
+      isRead: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -820,6 +825,12 @@ export class DatabaseStorage implements IStorage {
   async getOpportunities(userId: number): Promise<any[]> {
     // Mock implementation - return empty opportunities
     return [];
+  }
+
+  // Communication mark as read
+  async markJobCommunicationAsRead(id: number): Promise<void> {
+    // Mock implementation - just log it
+    console.log("🔥 COMMUNICATION: Marking communication as read", { id });
   }
 
 }
