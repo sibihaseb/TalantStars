@@ -292,12 +292,31 @@ export default function TalentDashboard() {
   // Create/Update job history mutation
   const createJobHistoryMutation = useMutation({
     mutationFn: async (jobData: any) => {
+      console.log("🔥🔥🔥 MUTATION FUNCTION CALLED");
+      console.log("editingJobId:", editingJobId);
+      console.log("jobData:", jobData);
+      
       const method = editingJobId ? 'PUT' : 'POST';
       const url = editingJobId ? `/api/job-history/${editingJobId}` : '/api/job-history';
-      const response = await apiRequest(method, url, jobData);
-      return response.json();
+      
+      console.log("🚀 Making API request:", { method, url, jobData });
+      
+      try {
+        const response = await apiRequest(method, url, jobData);
+        console.log("✅ API Response received:", response);
+        console.log("Response status:", response.status);
+        console.log("Response ok:", response.ok);
+        
+        const result = await response.json();
+        console.log("✅ Response JSON:", result);
+        return result;
+      } catch (error) {
+        console.error("❌ API Request failed:", error);
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("✅ MUTATION SUCCESS with data:", data);
       queryClient.invalidateQueries({ queryKey: [`/api/job-history/${user?.id}`] });
       setJobHistoryForm({
         id: null,
@@ -319,6 +338,7 @@ export default function TalentDashboard() {
       });
     },
     onError: (error) => {
+      console.error("❌ MUTATION ERROR:", error);
       toast({
         title: "Error",
         description: "Failed to add job history. Please try again.",
@@ -368,28 +388,54 @@ export default function TalentDashboard() {
   };
 
   const handleCreateJobHistory = () => {
+    console.log("🔥🔥🔥 handleCreateJobHistory CALLED");
     console.log("Form data being submitted:", jobHistoryForm);
     console.log("Form validation:", {
       title: !!jobHistoryForm.title,
       company: !!jobHistoryForm.company,
       role: !!jobHistoryForm.role
     });
+    console.log("editingJobId:", editingJobId);
+    console.log("Mutation status:", {
+      isPending: createJobHistoryMutation.isPending,
+      isError: createJobHistoryMutation.isError,
+      error: createJobHistoryMutation.error
+    });
     
     if (jobHistoryForm.title && jobHistoryForm.company && jobHistoryForm.role) {
-      console.log("Submitting job history with editingJobId:", editingJobId);
+      console.log("🚀 CALLING MUTATION with data:", jobHistoryForm);
       createJobHistoryMutation.mutate(jobHistoryForm);
     } else {
-      console.log("Form validation failed - missing required fields");
+      console.log("❌ Form validation failed - missing required fields");
+      console.log("Missing fields:", {
+        title: !jobHistoryForm.title,
+        company: !jobHistoryForm.company,
+        role: !jobHistoryForm.role
+      });
     }
   };
 
   // Delete job history mutation
   const deleteJobHistoryMutation = useMutation({
     mutationFn: async (jobId: number) => {
-      const response = await apiRequest('DELETE', `/api/job-history/${jobId}`);
-      return response.json();
+      console.log("🔥🔥🔥 DELETE MUTATION FUNCTION CALLED with jobId:", jobId);
+      
+      try {
+        const response = await apiRequest('DELETE', `/api/job-history/${jobId}`);
+        console.log("✅ DELETE API Response received:", response);
+        console.log("Response status:", response.status);
+        console.log("Response ok:", response.ok);
+        
+        const result = await response.json();
+        console.log("✅ DELETE Response JSON:", result);
+        return result;
+      } catch (error) {
+        console.error("❌ DELETE API Request failed:", error);
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("✅ DELETE MUTATION SUCCESS with data:", data);
       queryClient.invalidateQueries({ queryKey: [`/api/job-history/${user?.id}`] });
       toast({
         title: "Success",
@@ -397,6 +443,7 @@ export default function TalentDashboard() {
       });
     },
     onError: (error) => {
+      console.error("❌ DELETE MUTATION ERROR:", error);
       toast({
         title: "Error",
         description: "Failed to delete job history. Please try again.",
@@ -406,6 +453,7 @@ export default function TalentDashboard() {
   });
 
   const handleEditJob = (job: any) => {
+    console.log("🔥🔥🔥 handleEditJob CALLED with job:", job);
     setJobHistoryForm({
       id: job.id,
       title: job.title,
@@ -419,12 +467,17 @@ export default function TalentDashboard() {
       verified: job.verified
     });
     setEditingJobId(job.id);
+    console.log("🔥 Setting dialog open for edit");
     setIsJobHistoryDialogOpen(true);
   };
 
   const handleDeleteJob = (jobId: number) => {
+    console.log("🔥🔥🔥 handleDeleteJob CALLED with jobId:", jobId);
     if (confirm("Are you sure you want to delete this job history entry?")) {
+      console.log("🚀 CALLING DELETE MUTATION for jobId:", jobId);
       deleteJobHistoryMutation.mutate(jobId);
+    } else {
+      console.log("❌ Delete cancelled by user");
     }
   };
 
@@ -655,7 +708,12 @@ export default function TalentDashboard() {
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            onClick={() => handleEditJob(job)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log("🔥 EDIT BUTTON CLICKED for job:", job);
+                              handleEditJob(job);
+                            }}
                             className="h-6 w-6 p-0"
                           >
                             <Edit className="w-3 h-3" />
@@ -663,7 +721,12 @@ export default function TalentDashboard() {
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            onClick={() => handleDeleteJob(job.id)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log("🔥 DELETE BUTTON CLICKED for job ID:", job.id);
+                              handleDeleteJob(job.id);
+                            }}
                             className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
                           >
                             <Trash className="w-3 h-3" />
@@ -683,8 +746,11 @@ export default function TalentDashboard() {
                           variant="outline" 
                           className="w-full" 
                           size="sm"
-                          onClick={() => {
-                            console.log("Add Experience button clicked");
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log("🔥 ADD EXPERIENCE BUTTON CLICKED");
+                            console.log("Current dialog state:", isJobHistoryDialogOpen);
                             setEditingJobId(null);
                             setJobHistoryForm({
                               id: null,
@@ -698,6 +764,7 @@ export default function TalentDashboard() {
                               description: "",
                               verified: false
                             });
+                            console.log("Setting dialog open to true");
                             setIsJobHistoryDialogOpen(true);
                           }}
                         >
@@ -818,7 +885,18 @@ export default function TalentDashboard() {
                               Cancel
                             </Button>
                             <Button 
-                              onClick={handleCreateJobHistory}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log("🔥 FORM SUBMIT BUTTON CLICKED");
+                                console.log("Form validation state:", {
+                                  title: jobHistoryForm.title,
+                                  company: jobHistoryForm.company,
+                                  role: jobHistoryForm.role,
+                                  isPending: createJobHistoryMutation.isPending
+                                });
+                                handleCreateJobHistory();
+                              }}
                               disabled={createJobHistoryMutation.isPending || !jobHistoryForm.title || !jobHistoryForm.company || !jobHistoryForm.role}
                             >
                               {createJobHistoryMutation.isPending ? 
