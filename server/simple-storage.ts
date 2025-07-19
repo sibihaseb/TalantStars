@@ -20,6 +20,7 @@ import {
   type TalentType,
   type InsertTalentType,
 } from "@shared/simple-schema";
+import { jobHistory } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc, desc } from "drizzle-orm";
 
@@ -720,21 +721,27 @@ export class DatabaseStorage implements IStorage {
 
   async getJobHistoryById(jobId: number): Promise<any> {
     try {
-      const result = await db.execute(`SELECT * FROM job_history WHERE id = $1`, [jobId]);
-      if (result.rows && result.rows.length > 0) {
-        return result.rows[0];
+      console.log("🔥 DATABASE: Fetching job history by ID", { jobId });
+      const result = await db.select().from(jobHistory).where(eq(jobHistory.id, jobId));
+      console.log("🔥 DATABASE: Query result", { result, count: result.length });
+      if (result && result.length > 0) {
+        console.log("✅ Database fetch successful", { job: result[0] });
+        return result[0];
       }
     } catch (error) {
       console.error('Database job history fetch error:', error);
     }
     
     // Fallback to memory
+    console.log("🔥 MEMORY: Searching in memory storage");
     for (const [userId, jobs] of this.jobHistory.entries()) {
       const job = jobs.find(j => j.id === jobId);
       if (job) {
+        console.log("✅ Memory fetch successful", { job });
         return job;
       }
     }
+    console.log("❌ Job not found in database or memory");
     return null;
   }
 
