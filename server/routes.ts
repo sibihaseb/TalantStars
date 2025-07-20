@@ -3857,6 +3857,255 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Basic test email endpoint (public for testing)
+  app.post('/api/test-basic-email', async (req: any, res) => {
+    try {
+      const { email } = req.body;
+      const success = await sendTestEmail(email || 'test@example.com');
+      
+      if (success) {
+        res.json({ success: true, message: 'Basic test email sent successfully' });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to send basic test email' });
+      }
+    } catch (error) {
+      console.error("Error sending basic test email:", error);
+      res.status(500).json({ success: false, message: "Failed to send basic test email", error: error.message });
+    }
+  });
+
+  // Public test endpoints for comprehensive email testing
+  app.post('/api/test-welcome-email', async (req: any, res) => {
+    try {
+      const { email, firstName, role } = req.body;
+      const mockUser = { email, firstName, role };
+      const success = await sendWelcomeEmail(mockUser);
+      
+      if (success) {
+        res.json({ success: true, message: `Welcome email for ${role} sent successfully to ${email}` });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to send welcome email' });
+      }
+    } catch (error) {
+      console.error("Error sending welcome email:", error);
+      res.status(500).json({ success: false, message: "Failed to send welcome email", error: error.message });
+    }
+  });
+
+  app.post('/api/test-password-reset', async (req: any, res) => {
+    try {
+      const { email, firstName } = req.body;
+      const resetToken = 'TEST-RESET-TOKEN-' + Date.now();
+      const success = await sendPasswordResetEmail(email, resetToken, firstName);
+      
+      if (success) {
+        res.json({ success: true, message: `Password reset email sent successfully to ${email}` });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to send password reset email' });
+      }
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
+      res.status(500).json({ success: false, message: "Failed to send password reset email", error: error.message });
+    }
+  });
+
+  app.post('/api/test-job-notification', async (req: any, res) => {
+    try {
+      const { email, firstName, jobTitle, applicantName } = req.body;
+      
+      const jobNotificationHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #667eea; margin: 0;">🎬 New Job Application</h1>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+            <h2 style="color: #2d3748; margin-top: 0;">Hi ${firstName}!</h2>
+            <p style="color: #4a5568; line-height: 1.6;">
+              Great news! You have a new application for your job posting "<strong>${jobTitle}</strong>".
+            </p>
+            
+            <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+              <h3 style="color: #667eea; margin: 0 0 10px 0;">📋 Application Details</h3>
+              <p style="margin: 5px 0;"><strong>Applicant:</strong> ${applicantName}</p>
+              <p style="margin: 5px 0;"><strong>Position:</strong> ${jobTitle}</p>
+              <p style="margin: 5px 0;"><strong>Applied:</strong> ${new Date().toLocaleDateString()}</p>
+            </div>
+            
+            <div style="text-align: center; margin: 25px 0;">
+              <a href="#" style="display: inline-block; padding: 12px 30px; background-color: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                📄 Review Application
+              </a>
+            </div>
+          </div>
+          
+          <div style="text-align: center; font-size: 12px; color: #6c757d; margin-top: 30px;">
+            <p>© 2025 Talents & Stars - Connecting talent with opportunity</p>
+          </div>
+        </div>
+      `;
+      
+      const success = await sendEmail({
+        to: email,
+        subject: `🎬 New Application: ${applicantName} applied for ${jobTitle}`,
+        html: jobNotificationHtml,
+        text: `New application from ${applicantName} for ${jobTitle}. Login to review the application.`
+      });
+      
+      if (success) {
+        res.json({ success: true, message: `Job notification email sent successfully to ${email}` });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to send job notification email' });
+      }
+    } catch (error) {
+      console.error("Error sending job notification email:", error);
+      res.status(500).json({ success: false, message: "Failed to send job notification email", error: error.message });
+    }
+  });
+
+  app.post('/api/test-meeting-email', async (req: any, res) => {
+    try {
+      const { email, firstName, meetingTitle, meetingDate, meetingTime } = req.body;
+      const mockMeeting = { 
+        title: meetingTitle, 
+        date: meetingDate, 
+        time: meetingTime,
+        description: 'This is a test meeting invitation from the Talents & Stars platform.'
+      };
+      const success = await sendMeetingInvitation(email, mockMeeting, firstName);
+      
+      if (success) {
+        res.json({ success: true, message: `Meeting invitation sent successfully to ${email}` });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to send meeting invitation' });
+      }
+    } catch (error) {
+      console.error("Error sending meeting invitation:", error);
+      res.status(500).json({ success: false, message: "Failed to send meeting invitation", error: error.message });
+    }
+  });
+
+  app.post('/api/test-verification-email', async (req: any, res) => {
+    try {
+      const { email, firstName, verificationStatus } = req.body;
+      
+      const verificationHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #28a745; margin: 0;">✅ Profile Verification Update</h1>
+          </div>
+          
+          <div style="background: #d4edda; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #28a745;">
+            <h2 style="color: #155724; margin-top: 0;">Congratulations, ${firstName}!</h2>
+            <p style="color: #155724; line-height: 1.6;">
+              Your profile has been <strong>${verificationStatus}</strong> for verification! 
+              This means you now have the trusted verification badge on your profile.
+            </p>
+            
+            <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+              <h3 style="color: #28a745; margin: 0 0 10px 0;">🌟 Verification Benefits</h3>
+              <ul style="color: #155724; margin: 0; padding-left: 20px;">
+                <li>Increased profile visibility in search results</li>
+                <li>Trust badge displayed on your profile</li>
+                <li>Higher likelihood of getting hired</li>
+                <li>Access to premium job opportunities</li>
+              </ul>
+            </div>
+            
+            <div style="text-align: center; margin: 25px 0;">
+              <a href="#" style="display: inline-block; padding: 12px 30px; background-color: #28a745; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                🎭 View Your Profile
+              </a>
+            </div>
+          </div>
+          
+          <div style="text-align: center; font-size: 12px; color: #6c757d; margin-top: 30px;">
+            <p>© 2025 Talents & Stars - Connecting talent with opportunity</p>
+          </div>
+        </div>
+      `;
+      
+      const success = await sendEmail({
+        to: email,
+        subject: `✅ Profile Verification ${verificationStatus === 'approved' ? 'Approved' : 'Updated'} - Talents & Stars`,
+        html: verificationHtml,
+        text: `Your profile verification status has been updated to: ${verificationStatus}. Login to see your verification badge.`
+      });
+      
+      if (success) {
+        res.json({ success: true, message: `Verification email sent successfully to ${email}` });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to send verification email' });
+      }
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      res.status(500).json({ success: false, message: "Failed to send verification email", error: error.message });
+    }
+  });
+
+  app.post('/api/test-message-email', async (req: any, res) => {
+    try {
+      const { email, firstName, senderName, messagePreview } = req.body;
+      
+      const messageNotificationHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #6f42c1; margin: 0;">💬 New Message</h1>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+            <h2 style="color: #2d3748; margin-top: 0;">Hi ${firstName}!</h2>
+            <p style="color: #4a5568; line-height: 1.6;">
+              You have a new message from <strong>${senderName}</strong> on Talents & Stars.
+            </p>
+            
+            <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #6f42c1;">
+              <h3 style="color: #6f42c1; margin: 0 0 10px 0;">💌 Message Preview</h3>
+              <p style="color: #4a5568; font-style: italic; margin: 0;">
+                "${messagePreview}"
+              </p>
+              <p style="color: #6c757d; font-size: 12px; margin: 10px 0 0 0;">
+                From: ${senderName} • ${new Date().toLocaleString()}
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin: 25px 0;">
+              <a href="#" style="display: inline-block; padding: 12px 30px; background-color: #6f42c1; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                💬 Read Full Message
+              </a>
+            </div>
+          </div>
+          
+          <div style="background: #e2e3ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="color: #4c1d95; margin: 0; font-size: 14px;">
+              💡 <strong>Tip:</strong> Keep the conversation going! Quick responses help build strong professional relationships.
+            </p>
+          </div>
+          
+          <div style="text-align: center; font-size: 12px; color: #6c757d; margin-top: 30px;">
+            <p>© 2025 Talents & Stars - Connecting talent with opportunity</p>
+          </div>
+        </div>
+      `;
+      
+      const success = await sendEmail({
+        to: email,
+        subject: `💬 New Message from ${senderName} - Talents & Stars`,
+        html: messageNotificationHtml,
+        text: `New message from ${senderName}: "${messagePreview}" - Login to Talents & Stars to read the full message.`
+      });
+      
+      if (success) {
+        res.json({ success: true, message: `Message notification sent successfully to ${email}` });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to send message notification' });
+      }
+    } catch (error) {
+      console.error("Error sending message notification:", error);
+      res.status(500).json({ success: false, message: "Failed to send message notification", error: error.message });
+    }
+  });
+
   // Send welcome emails for testing
   app.post('/api/admin/test-welcome-emails', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
