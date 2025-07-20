@@ -1,0 +1,117 @@
+
+[vite] connecting... client:495:9
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools react-dom.development.js:29895:17
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:54:22
+Partitioned cookie or storage access was provided to “https://js.stripe.com/v3/controller-with-preconnect-5a125e125bbb24d882c0a6f33f679c89.html#__shared_params__[version]=basil&apiKey=pk_test_51NwxezAhOiHhM1yQX94ydY61tL8LaN6K1HeVYkAzhAaV36YpuWt9pdJ1XCYLjoxOWn4fsNzENnfeFzC0lFoB7Z3100t4ZBV3JL&apiVersion=2025-03-31.basil&stripeJsId=1b0dcc04-8d2e-47fa-84f8-241895f30353&stripeObjId=sobj-96a1a1e4-6fd4-4aea-8b49-ff19f83edb69&firstStripeInstanceCreatedLatency=4&controllerCount=1&isCheckout=false&stripeJsLoadTime=1752970887677&manualBrowserDeprecationRollout=false&mids[guid]=NA&mids[muid]=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&mids[sid]=b5d124e6-47bd-49d2-825a-fe28db6b6c87ec674f&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&controllerId=__privateStripeController3461” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+controller-with-preconnect-6c42774ced1350d667a127e6b6d290ea.js:1:22427
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/social/stats main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/applications main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/user/profile main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/opportunities main.tsx:54:22
+=== FRONTEND API RESPONSE === main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: [], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Add Experience button clicked main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. main.tsx:40:23
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+Partitioned cookie or storage access was provided to “https://m.stripe.network/inner.html#url=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Ftalent-dashboard&title=&referrer=https%3A%2F%2Fd3e3e06b-cd04-472a-8fec-78fcb4cf292d-00-2ubbs18tgduse.picard.replit.dev%2Fauth&muid=e6a5e520-8073-4b57-b5d2-ebe883e8abd941a7b7&sid=b5d124e6-47bd-49d2-825a-fe28db6b6c87ec674f&version=6&preview=false&__shared_params__[version]=basil” because it is loaded in the third-party context and dynamic state partitioning is enabled.
+out-4.5.44.js:1:39660
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+Cookie warnings 3
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+🔥 JOBHISTORYMANAGER: Component rendering 
+Object { jobHistory: (6) […], userId: 75 }
+main.tsx:54:22
+Status: 200, URL: /api/job-history/75 main.tsx:54:22
+
+​
+

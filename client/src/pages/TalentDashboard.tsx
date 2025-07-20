@@ -20,6 +20,7 @@ import { ProgressMascot } from "@/components/mascot/ProgressMascot";
 import { EnhancedMediaUpload } from "@/components/media/EnhancedMediaUpload";
 import { JobHistoryManager } from '@/components/talent/JobHistoryManager';
 import { TierUpgradeManager } from '@/components/billing/TierUpgradeManager';
+import { AvailabilityCalendar } from '@/components/talent/AvailabilityCalendar';
 
 import UsageDashboard from "@/components/usage/UsageDashboard";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
@@ -1096,35 +1097,7 @@ export default function TalentDashboard() {
           </TabsContent>
 
           <TabsContent value="calendar">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Availability Calendar</CardTitle>
-                    <CardDescription>Manage your schedule and availability</CardDescription>
-                  </div>
-                  <Button 
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                    onClick={() => toast({ title: "Coming Soon", description: "Calendar functionality will be available soon!" })}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Event
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Calendar functionality would be integrated here
-                  </p>
-                  <Button variant="outline" className="mt-4">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Open Calendar
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <AvailabilityCalendar />
           </TabsContent>
         </Tabs>
       </div>

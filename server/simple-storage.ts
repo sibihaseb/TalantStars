@@ -638,6 +638,23 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Missing availability methods needed by the availability endpoints
+  async getUserAvailability(userId: number): Promise<any[]> {
+    return this.getAvailabilityEvents(userId);
+  }
+
+  async createAvailabilityEntry(entryData: any): Promise<any> {
+    return this.createAvailabilityEvent(entryData);
+  }
+
+  async updateAvailabilityEntry(entryId: number, entryData: any): Promise<any> {
+    return this.updateAvailabilityEvent(entryId, entryData);
+  }
+
+  async deleteAvailabilityEntry(entryId: number, userId: number): Promise<void> {
+    return this.deleteAvailabilityEvent(entryId, userId);
+  }
+
   // Job History/Experience operations (database implementation)  
   async getJobHistory(userId: number): Promise<any[]> {
     try {
