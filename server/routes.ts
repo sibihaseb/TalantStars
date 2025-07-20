@@ -2276,40 +2276,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Notifications routes
+  // Notifications routes - now using simpleStorage with session-based storage
   app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      console.log(`🔔 Fetching notifications for user ID: ${userId}`);
       
-      // For now, return mock notifications since we're using simple storage
-      const mockNotifications = [
-        {
-          id: 1,
-          type: 'system',
-          title: 'Welcome to Talents & Stars!',
-          message: 'Complete your profile to get started and discover amazing opportunities.',
-          read: false,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 2,
-          type: 'profile',
-          title: 'Profile Update Reminder',
-          message: 'Your profile is 75% complete. Add more details to attract better opportunities.',
-          read: false,
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
-        },
-        {
-          id: 3,
-          type: 'job',
-          title: 'New Job Match',
-          message: 'A new casting call matches your profile. Check it out now!',
-          read: true,
-          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // 1 day ago
-        }
-      ];
+      // Get or create notifications for this user in session storage
+      let userNotifications = await simpleStorage.getUserNotifications(userId);
       
-      res.json(mockNotifications);
+      // If no notifications exist, create default ones
+      if (!userNotifications || userNotifications.length === 0) {
+        const defaultNotifications = [
+          {
+            id: 1,
+            userId: userId,
+            type: 'system',
+            title: 'Welcome to Talents & Stars!',
+            message: 'Complete your profile to get started and discover amazing opportunities.',
+            read: false,
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 2,
+            userId: userId,
+            type: 'profile',
+            title: 'Profile Update Reminder',
+            message: 'Your profile is 75% complete. Add more details to attract better opportunities.',
+            read: false,
+            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
+          },
+          {
+            id: 3,
+            userId: userId,
+            type: 'job',
+            title: 'New Job Match',
+            message: 'A new casting call matches your profile. Check it out now!',
+            read: true,
+            createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // 1 day ago
+          }
+        ];
+        
+        // Store notifications for this user
+        await simpleStorage.setUserNotifications(userId, defaultNotifications);
+        userNotifications = defaultNotifications;
+      }
+      
+      console.log(`🔔 Returning ${userNotifications.length} notifications for user ${userId}`);
+      res.json(userNotifications);
     } catch (error) {
       console.error("Error fetching notifications:", error);
       res.status(500).json({ message: "Failed to fetch notifications" });
@@ -2318,9 +2332,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/notifications/:notificationId/read', isAuthenticated, async (req: any, res) => {
     try {
-      const { notificationId } = req.params;
-      // For now, just return success since we're using mock data
-      console.log(`Marking notification ${notificationId} as read`);
+      const userId = req.user.id;
+      const notificationId = parseInt(req.params.notificationId);
+      console.log(`🔔 Marking notification ${notificationId} as read for user ${userId}`);
+      
+      // Get user notifications
+      const userNotifications = await simpleStorage.getUserNotifications(userId) || [];
+      
+      // Find and update the notification
+      const updatedNotifications = userNotifications.map(notification => 
+        notification.id === notificationId 
+          ? { ...notification, read: true }
+          : notification
+      );
+      
+      // Save updated notifications
+      await simpleStorage.setUserNotifications(userId, updatedNotifications);
+      
+      console.log(`🔔 Successfully marked notification ${notificationId} as read`);
       res.json({ success: true });
     } catch (error) {
       console.error("Error marking notification as read:", error);
@@ -2330,9 +2359,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/notifications/:notificationId', isAuthenticated, async (req: any, res) => {
     try {
-      const { notificationId } = req.params;
-      // For now, just return success since we're using mock data
-      console.log(`Deleting notification ${notificationId}`);
+      const userId = req.user.id;
+      const notificationId = parseInt(req.params.notificationId);
+      console.log(`🔔 Deleting notification ${notificationId} for user ${userId}`);
+      
+      // Get user notifications
+      const userNotifications = await simpleStorage.getUserNotifications(userId) || [];
+      
+      // Filter out the notification to delete
+      const updatedNotifications = userNotifications.filter(notification => notification.id !== notificationId);
+      
+      // Save updated notifications
+      await simpleStorage.setUserNotifications(userId, updatedNotifications);
+      
+      console.log(`🔔 Successfully deleted notification ${notificationId}`);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting notification:", error);

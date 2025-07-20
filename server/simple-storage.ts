@@ -114,11 +114,16 @@ export interface IStorage {
   createTalentType(talentType: InsertTalentType): Promise<TalentType>;
   updateTalentType(id: number, talentType: Partial<InsertTalentType>): Promise<TalentType>;
   deleteTalentType(id: number): Promise<void>;
+  
+  // Notifications operations
+  getUserNotifications(userId: number): Promise<any[]>;
+  setUserNotifications(userId: number, notifications: any[]): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
   private static instance: DatabaseStorage;
   private mediaFiles: Map<number, any[]> = new Map();
+  private userNotifications: Map<number, any[]> = new Map();
 
   constructor() {
     if (DatabaseStorage.instance) {
@@ -1109,6 +1114,17 @@ export class DatabaseStorage implements IStorage {
     
     console.log("✅ PRICING: Filtered tiers by role", { role, count: filteredTiers.length });
     return filteredTiers;
+  }
+
+  // Notifications operations
+  async getUserNotifications(userId: number): Promise<any[]> {
+    console.log(`🔔 Getting notifications for user ${userId}`);
+    return this.userNotifications.get(userId) || [];
+  }
+
+  async setUserNotifications(userId: number, notifications: any[]): Promise<void> {
+    console.log(`🔔 Setting ${notifications.length} notifications for user ${userId}`);
+    this.userNotifications.set(userId, notifications);
   }
 
 }

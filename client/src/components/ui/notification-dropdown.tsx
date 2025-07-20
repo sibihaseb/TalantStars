@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { formatDistanceToNow } from 'date-fns';
+import { useAuth } from "@/hooks/useAuth";
 
 interface Notification {
   id: number;
@@ -24,9 +25,11 @@ export function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data: notifications = [], isLoading } = useQuery<Notification[]>({
     queryKey: ['/api/notifications'],
+    enabled: !!user, // Only fetch when user is authenticated
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
@@ -69,10 +72,12 @@ export function NotificationDropdown() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleMarkAsRead = (notificationId: number) => {
+    if (!user) return;
     markAsReadMutation.mutate(notificationId);
   };
 
   const handleArchive = (notificationId: number) => {
+    if (!user) return;
     deleteNotificationMutation.mutate(notificationId);
   };
 
@@ -90,6 +95,11 @@ export function NotificationDropdown() {
         return '📱';
     }
   };
+
+  // Don't render notification dropdown if user is not authenticated
+  if (!user) {
+    return null;
+  }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
