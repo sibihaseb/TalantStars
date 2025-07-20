@@ -31,6 +31,7 @@ export function AvailabilityCalendar() {
   const [isEditingEntry, setIsEditingEntry] = useState(false);
   const [editingEntry, setEditingEntry] = useState<AvailabilityEntry | null>(null);
   const [availabilityStatus, setAvailabilityStatus] = useState<"available" | "busy" | "unavailable">("available");
+  const [isAllDay, setIsAllDay] = useState(true);
 
   const { data: availabilityEntries = [], isLoading } = useQuery<AvailabilityEntry[]>({
     queryKey: ["/api/availability"],
@@ -87,12 +88,21 @@ export function AvailabilityCalendar() {
   });
 
   const handleSaveEntry = (formData: FormData) => {
+    let startDate = formData.get("startDate") as string;
+    let endDate = formData.get("endDate") as string;
+    
+    // If all day is selected, convert date to datetime format
+    if (isAllDay) {
+      startDate = startDate + "T00:00";
+      endDate = endDate + "T23:59";
+    }
+    
     const data = {
-      startDate: formData.get("startDate") as string,
-      endDate: formData.get("endDate") as string,
+      startDate,
+      endDate,
       status: formData.get("status") as "available" | "busy" | "unavailable",
       notes: formData.get("notes") as string,
-      allDay: formData.get("allDay") === "on",
+      allDay: isAllDay,
     };
 
     if (editingEntry) {
@@ -138,7 +148,10 @@ export function AvailabilityCalendar() {
           </span>
           <Dialog open={isEditingEntry} onOpenChange={setIsEditingEntry}>
             <DialogTrigger asChild>
-              <Button onClick={() => setEditingEntry(null)}>
+              <Button onClick={() => {
+                setEditingEntry(null);
+                setIsAllDay(true);
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Availability
               </Button>
@@ -154,23 +167,43 @@ export function AvailabilityCalendar() {
                 handleSaveEntry(new FormData(e.currentTarget));
               }}>
                 <div className="space-y-4">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <Switch
+                      id="allDay"
+                      name="allDay"
+                      checked={isAllDay}
+                      onCheckedChange={setIsAllDay}
+                      defaultChecked={editingEntry?.allDay ?? true}
+                    />
+                    <Label htmlFor="allDay">All Day</Label>
+                  </div>
                   <div>
-                    <Label htmlFor="startDate">Start Date</Label>
+                    <Label htmlFor="startDate">{isAllDay ? "Start Date" : "Start Date & Time"}</Label>
                     <Input
                       id="startDate"
                       name="startDate"
-                      type="datetime-local"
-                      defaultValue={editingEntry?.startDate ? new Date(editingEntry.startDate).toISOString().slice(0, 16) : ""}
+                      type={isAllDay ? "date" : "datetime-local"}
+                      defaultValue={editingEntry?.startDate ? 
+                        (isAllDay ? 
+                          new Date(editingEntry.startDate).toISOString().slice(0, 10) : 
+                          new Date(editingEntry.startDate).toISOString().slice(0, 16)
+                        ) : ""
+                      }
                       required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="endDate">End Date</Label>
+                    <Label htmlFor="endDate">{isAllDay ? "End Date" : "End Date & Time"}</Label>
                     <Input
                       id="endDate"
                       name="endDate"
-                      type="datetime-local"
-                      defaultValue={editingEntry?.endDate ? new Date(editingEntry.endDate).toISOString().slice(0, 16) : ""}
+                      type={isAllDay ? "date" : "datetime-local"}
+                      defaultValue={editingEntry?.endDate ? 
+                        (isAllDay ? 
+                          new Date(editingEntry.endDate).toISOString().slice(0, 10) : 
+                          new Date(editingEntry.endDate).toISOString().slice(0, 16)
+                        ) : ""
+                      }
                       required
                     />
                   </div>
@@ -186,14 +219,6 @@ export function AvailabilityCalendar() {
                         <SelectItem value="unavailable">Unavailable</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="allDay"
-                      name="allDay"
-                      defaultChecked={editingEntry?.allDay ?? true}
-                    />
-                    <Label htmlFor="allDay">All Day</Label>
                   </div>
                   <div>
                     <Label htmlFor="notes">Notes</Label>
