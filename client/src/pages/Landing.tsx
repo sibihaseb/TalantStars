@@ -36,31 +36,9 @@ import {
 } from "lucide-react";
 
 export default function Landing() {
-  const { data: featuredTalents = [], isLoading } = useQuery({
-    queryKey: ['/api/featured-talents'],
-    queryFn: async () => {
-      const response = await fetch('/api/featured-talents');
-      if (!response.ok) {
-        throw new Error('Failed to fetch featured talents');
-      }
-      return response.json();
-    }
-  });
 
-  const getTalentIcon = (type: string) => {
-    switch (type) {
-      case "Actor":
-        return <Theater className="h-4 w-4" />;
-      case "Musician":
-        return <Music className="h-4 w-4" />;
-      case "Model":
-        return <Camera className="h-4 w-4" />;
-      case "Voice Artist":
-        return <Mic className="h-4 w-4" />;
-      default:
-        return <Star className="h-4 w-4" />;
-    }
-  };
+
+
 
   return (
     <ThemeProvider>
@@ -227,106 +205,7 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Featured Talents Section */}
-        <section className="pt-24 pb-20 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-800 dark:to-blue-900 mt-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                Featured Talents
-              </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                Discover exceptional professionals across all entertainment categories
-              </p>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {isLoading ? (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i} className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
-                    <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-                    <CardContent className="p-6">
-                      <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4"></div>
-                      <div className="flex items-center justify-between">
-                        <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                        <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                featuredTalents.map((talent) => (
-                <Card key={talent.id} className="group bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-                  <div className="relative">
-                    <img 
-                      src={talent.image}
-                      alt={`${talent.name} - ${talent.specialty}`}
-                      className="w-full h-64 object-cover"
-                    />
-                    {talent.verified && (
-                      <div className="absolute top-4 right-4">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                          <ShieldCheck className="h-5 w-5 text-white fill-current" />
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Availability Status */}
-                    <div className="absolute top-4 left-4">
-                      <div className={`px-3 py-1 rounded-full text-xs font-semibold shadow-lg ${
-                        talent.available 
-                          ? 'bg-gradient-to-r from-green-400 to-green-500 text-white' 
-                          : 'bg-gradient-to-r from-red-400 to-red-500 text-white'
-                      }`}>
-                        {talent.available ? 'Available' : 'Busy'}
-                      </div>
-                    </div>
-                    <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm flex items-center space-x-1">
-                      {getTalentIcon(talent.type)}
-                      <span>{talent.type}</span>
-                    </div>
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                      {talent.name}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                      {talent.specialty}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          {talent.rating} ({talent.reviews} reviews)
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
-                        <MapPin className="h-3 w-3" />
-                        <span>{talent.location}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-              )}
-            </div>
-            
-            <div className="flex justify-center gap-4 mt-12">
-              <Link 
-                to="/find-talents?featured=true" 
-                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-              >
-                <TranslatedText text="View Featured Talents" />
-              </Link>
-              <Link 
-                to="/find-talents" 
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-              >
-                <TranslatedText text="View All Talents" />
-              </Link>
-            </div>
-          </div>
-        </section>
+
 
         {/* Dashboard Preview Section */}
         <section className="py-20 bg-white dark:bg-gray-900">

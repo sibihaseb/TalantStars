@@ -24,7 +24,7 @@ async function getEmailSettings(): Promise<EmailSettings> {
   // Use environment variable for Resend API key - prioritize environment over database
   const config: EmailSettings = {
     provider: 'resend',
-    fromAddress: 'noreply@talentsandstars.com',
+    fromAddress: 'onboarding@resend.dev',
     fromName: 'Talents & Stars',
     enabled: true,
     resendApiKey: process.env.RESEND_API_KEY
