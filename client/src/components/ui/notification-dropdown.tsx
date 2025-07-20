@@ -147,9 +147,14 @@ export function NotificationDropdown() {
                   {notifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                      className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer ${
                         !notification.read ? 'bg-blue-50 dark:bg-blue-900/20' : ''
                       }`}
+                      onClick={() => {
+                        if (!notification.read) {
+                          handleMarkAsRead(notification.id);
+                        }
+                      }}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0 text-lg">
@@ -163,7 +168,7 @@ export function NotificationDropdown() {
                               }`}>
                                 {notification.title}
                               </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                 {notification.message}
                               </p>
                               <p className="text-xs text-gray-400 mt-1">
@@ -176,7 +181,10 @@ export function NotificationDropdown() {
                                   variant="ghost"
                                   size="sm"
                                   className="h-6 w-6 p-0"
-                                  onClick={() => handleMarkAsRead(notification.id)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleMarkAsRead(notification.id);
+                                  }}
                                   disabled={markAsReadMutation.isPending}
                                 >
                                   <Check className="h-3 w-3" />
@@ -186,7 +194,10 @@ export function NotificationDropdown() {
                                 variant="ghost"
                                 size="sm"
                                 className="h-6 w-6 p-0"
-                                onClick={() => handleArchive(notification.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleArchive(notification.id);
+                                }}
                                 disabled={deleteNotificationMutation.isPending}
                               >
                                 <Archive className="h-3 w-3" />
