@@ -13,7 +13,14 @@ import { logger } from "./logger";
 
 declare global {
   namespace Express {
-    interface User extends User {}
+    interface User {
+      id: number;
+      username: string;
+      email: string | null;
+      firstName: string | null;
+      lastName: string | null;
+      role: string | null;
+    }
   }
 }
 
@@ -229,7 +236,7 @@ export async function setupAuth(app: Express) {
     const { rememberMe } = req.body;
     console.log("🔥 LOGIN: Remember me option:", rememberMe);
     
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) {
         console.error("Authentication error:", err);
         return res.status(500).json({ message: "Authentication error" });
@@ -275,14 +282,14 @@ export async function setupAuth(app: Express) {
         }
         
         // Force session to be saved properly
-        req.session.save((err) => {
+        req.session.save((err: any) => {
           if (err) {
             console.error("Session save error:", err);
             return res.status(500).json({ message: "Login failed" });
           }
           
           console.log("Login successful for user:", user.username);
-          console.log("🔥 LOGIN: Session cookie maxAge set to:", req.session.cookie.maxAge / (60 * 60 * 1000), "hours");
+          console.log("🔥 LOGIN: Session cookie maxAge set to:", req.session.cookie?.maxAge ? req.session.cookie.maxAge / (60 * 60 * 1000) : 'undefined', "hours");
           res.status(200).json({ ...user, password: undefined });
         });
       });

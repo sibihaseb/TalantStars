@@ -665,7 +665,7 @@ export const postComments = pgTable("post_comments", {
   userId: integer("user_id").references(() => users.id).notNull(),
   content: text("content").notNull(),
   likes: integer("likes").default(0),
-  parentCommentId: integer("parent_comment_id").references(() => postComments.id),
+  parentCommentId: integer("parent_comment_id").references((): any => postComments.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1811,8 +1811,6 @@ export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type JobMatch = typeof jobMatches.$inferSelect;
 export type InsertJobMatch = z.infer<typeof insertJobMatchSchema>;
-export type EmailTemplate = typeof emailTemplates.$inferSelect;
-export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
 export type AiGeneratedContent = typeof aiGeneratedContent.$inferSelect;
 export type InsertAiGeneratedContent = z.infer<typeof insertAiGeneratedContentSchema>;
 export type MediaProcessingQueue = typeof mediaProcessingQueue.$inferSelect;
