@@ -455,26 +455,73 @@ export default function ProfileSharing() {
                 />
               </CardContent>
             </Card>
+
+            {/* Profile Template Section - Moved next to appearance */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Palette className="h-5 w-5" />
+                  Profile Template
+                </CardTitle>
+                <CardDescription>
+                  Choose how your profile appears to visitors
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TemplateSelector 
+                  selectedTemplate={selectedTemplate}
+                  onTemplateChange={setSelectedTemplate}
+                  userTier={userTier}
+                  onUpgrade={() => setLocation('/pricing-selection')}
+                />
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Right Column - Template Selector */}
-          <Card>
+          {/* Right Column - Profile Customization */}
+          <Card className="h-fit">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Palette className="h-5 w-5" />
-                Profile Template
+                <Settings className="h-5 w-5" />
+                Display Options
               </CardTitle>
               <CardDescription>
-                Choose how your profile appears to visitors
+                Customize how your profile information is displayed
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <TemplateSelector 
-                selectedTemplate={selectedTemplate}
-                onTemplateChange={setSelectedTemplate}
-                userTier={userTier}
-                onUpgrade={() => setLocation('/pricing-selection')}
-              />
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium">Show Social Media Icons</Label>
+                  <p className="text-xs text-gray-500">Display social media links on your profile</p>
+                </div>
+                <Switch
+                  checked={sharingSettings?.showSocialMedia || false}
+                  onCheckedChange={(checked) => handleSettingChange('showSocialMedia', checked)}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium">Show Experience Timeline</Label>
+                  <p className="text-xs text-gray-500">Display your work history timeline</p>
+                </div>
+                <Switch
+                  checked={sharingSettings?.showExperience || true}
+                  onCheckedChange={(checked) => handleSettingChange('showExperience', checked)}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium">Show Skills Section</Label>
+                  <p className="text-xs text-gray-500">Display your professional skills</p>
+                </div>
+                <Switch
+                  checked={sharingSettings?.showSkills || true}
+                  onCheckedChange={(checked) => handleSettingChange('showSkills', checked)}
+                />
+              </div>
             </CardContent>
           </Card>
         </div>
