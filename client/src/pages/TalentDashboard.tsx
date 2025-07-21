@@ -21,6 +21,7 @@ import { EnhancedMediaUpload } from "@/components/media/EnhancedMediaUpload";
 import { JobHistoryManager } from '@/components/talent/JobHistoryManager';
 import { TierUpgradeManager } from '@/components/billing/TierUpgradeManager';
 import { AvailabilityCalendar } from '@/components/talent/AvailabilityCalendar';
+import ProfileImageUpload from "@/components/ProfileImageUpload";
 
 import UsageDashboard from "@/components/usage/UsageDashboard";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
@@ -621,7 +622,7 @@ export default function TalentDashboard() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-9 mb-8">
+          <TabsList className="grid w-full grid-cols-10 mb-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
@@ -631,6 +632,7 @@ export default function TalentDashboard() {
             <TabsTrigger value="billing">Billing</TabsTrigger>
             <TabsTrigger value="usage">Usage</TabsTrigger>
             <TabsTrigger value="calendar">Calendar</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -1098,6 +1100,87 @@ export default function TalentDashboard() {
 
           <TabsContent value="calendar">
             <AvailabilityCalendar />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Settings className="w-5 h-5" />
+                    <span>Profile Settings</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Update your profile information and preferences
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  
+                  {/* Profile Image Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Profile Picture</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Upload a professional headshot that will be displayed as your avatar throughout the platform.
+                      This appears as a round profile picture, not a banner image.
+                    </p>
+                    
+                    <div className="flex items-start space-x-6">
+                      {/* Current Profile Image Preview */}
+                      <div className="space-y-2">
+                        <Avatar className="w-24 h-24 border-4 border-gray-200 dark:border-gray-700">
+                          <AvatarImage src={user?.profileImageUrl || profile?.profileImageUrl} />
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-2xl font-bold">
+                            {user?.firstName?.[0]}{user?.lastName?.[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <p className="text-xs text-gray-500 text-center">Current</p>
+                      </div>
+                      
+                      {/* Profile Image Upload Component */}
+                      <div className="flex-1">
+                        <ProfileImageUpload 
+                          currentImage={user?.profileImageUrl || profile?.profileImageUrl}
+                          onImageUpdate={(url) => {
+                            // Force refresh user data
+                            queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+                            queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  {/* Basic Profile Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Basic Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input id="firstName" defaultValue={user?.firstName} disabled />
+                      </div>
+                      <div>
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input id="lastName" defaultValue={user?.lastName} disabled />
+                      </div>
+                      <div>
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" type="email" defaultValue={user?.email} disabled />
+                      </div>
+                      <div>
+                        <Label htmlFor="role">Role</Label>
+                        <Input id="role" defaultValue={user?.role} disabled />
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      To update basic information, please use the "Edit Profile" button in the header to access the full onboarding flow.
+                    </p>
+                  </div>
+                  
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
