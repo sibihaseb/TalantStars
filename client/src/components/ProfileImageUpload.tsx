@@ -10,12 +10,22 @@ interface ProfileImageUploadProps {
   currentImage?: string;
   onImageUpdate?: (url: string) => void;
   mandatory?: boolean;
+  aspectRatio?: number; // width/height ratio (e.g., 16/9 = 1.78 for hero, 1 for profile)
+  uploadEndpoint?: string; // Custom upload endpoint
+  fieldName?: string; // Custom field name for FormData
+  title?: string; // Custom title for the upload section
+  description?: string; // Custom description
 }
 
 export default function ProfileImageUpload({ 
   currentImage, 
-  onImageUpdate, 
-  mandatory = false 
+  onImageUpdate,
+  mandatory = false,
+  aspectRatio = 1, // Default to 1:1 for profile images
+  uploadEndpoint = '/api/user/profile-image',
+  fieldName = 'image',
+  title = "Profile Image",
+  description = mandatory ? "Upload a profile image to continue" : "Upload a profile image (optional)"
 }: ProfileImageUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -45,7 +55,7 @@ export default function ProfileImageUpload({
       console.log('Uploading file to server...');
       console.log('FormData entries:', Array.from(formData.entries()));
       
-      const response = await apiRequest('POST', '/api/user/profile-image', formData);
+      const response = await apiRequest('POST', uploadEndpoint, formData);
       
       console.log('Upload response status:', response.status);
       const result = await response.json();
@@ -60,7 +70,7 @@ export default function ProfileImageUpload({
       setCropData(null);
       
       if (onImageUpdate) {
-        onImageUpdate(data.profileImageUrl);
+        onImageUpdate(data.profileImageUrl || data.heroImageUrl || data.imageUrl);
       }
       
       // Force form validation to update
@@ -168,10 +178,9 @@ export default function ProfileImageUpload({
 
     if (!ctx) return;
 
-    // Set canvas size to 1:1 aspect ratio (square)
-    const outputSize = 800; // 800x800 square
-    const outputWidth = outputSize;
-    const outputHeight = outputSize;
+    // Set canvas size based on aspect ratio
+    const outputHeight = 800;
+    const outputWidth = Math.round(outputHeight * aspectRatio);
     canvas.width = outputWidth;
     canvas.height = outputHeight;
 
@@ -200,7 +209,7 @@ export default function ProfileImageUpload({
         console.log('Blob type:', blob.type);
         
         const formData = new FormData();
-        formData.append('image', blob, 'profile-image.jpg');
+        formData.append(fieldName, blob, 'profile-image.jpg');
         
         // Debug FormData contents
         console.log('FormData contents:');
@@ -225,11 +234,18 @@ export default function ProfileImageUpload({
       const img = imageRef.current;
       const rect = img.getBoundingClientRect();
       
-      // Calculate 1:1 (square) crop area centered on the image
-      const aspectRatio = 1; // Square aspect ratio
-      let cropSize = Math.min(rect.width, rect.height);
-      let cropWidth = cropSize;
-      let cropHeight = cropSize;
+      // Calculate crop area based on specified aspect ratio
+      let cropWidth, cropHeight;
+      
+      if (rect.width / rect.height > aspectRatio) {
+        // Image is wider than desired aspect ratio
+        cropHeight = rect.height * 0.8;
+        cropWidth = cropHeight * aspectRatio;
+      } else {
+        // Image is taller than desired aspect ratio
+        cropWidth = rect.width * 0.8;
+        cropHeight = cropWidth / aspectRatio;
+      }
       
       const x = (rect.width - cropWidth) / 2;
       const y = (rect.height - cropHeight) / 2;
@@ -315,13 +331,11 @@ export default function ProfileImageUpload({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Camera className="h-5 w-5" />
-            Profile Image {mandatory && <span className="text-red-500">*</span>}
+            {title} {mandatory && <span className="text-red-500">*</span>}
           </CardTitle>
-          {mandatory && (
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              A profile image is required. Images will be automatically cropped to 1:1 (square) aspect ratio for your avatar.
-            </p>
-          )}
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {description}
+          </p>
         </CardHeader>
         <CardContent>
           {/* Current Image Display */}
@@ -331,7 +345,7 @@ export default function ProfileImageUpload({
                 src={currentImage}
                 alt="Current profile"
                 className="w-full max-w-md h-auto rounded-lg shadow-md"
-                style={{ aspectRatio: '1/1', objectFit: 'cover' }}
+                style={{ aspectRatio: aspectRatio.toString(), objectFit: 'cover' }}
               />
             </div>
           )}

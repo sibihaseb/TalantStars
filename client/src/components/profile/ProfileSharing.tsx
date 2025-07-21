@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -16,7 +15,6 @@ import {
   type ProfileTemplate 
 } from '@/components/profile/ProfileTemplates';
 import ProfileImageUpload from '@/components/ProfileImageUpload';
-import HeroImageUpload from '@/components/HeroImageUpload';
 import { 
   Copy, 
   Share, 
@@ -25,14 +23,17 @@ import {
   Twitter, 
   Mail, 
   MessageCircle, 
-  Globe,
   Eye,
   EyeOff,
   Edit2,
   Check,
   X,
   ArrowLeft,
-  Palette
+  Palette,
+  Settings,
+  Image,
+  User,
+  Shield
 } from "lucide-react";
 
 interface ProfileSharingSettings {
@@ -58,14 +59,15 @@ export default function ProfileSharing() {
   const [newCustomUrl, setNewCustomUrl] = useState("");
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<ProfileTemplate>('modern');
+  const [activeTab, setActiveTab] = useState<'sharing' | 'appearance' | 'settings'>('sharing');
 
   // Fetch current profile sharing settings
   const { data: sharingSettings, isLoading, error } = useQuery<ProfileSharingSettings>({
     queryKey: ['/api/profile/sharing'],
-    enabled: !!user, // Only run when user is authenticated
+    enabled: !!user,
     queryFn: async () => {
       const response = await fetch('/api/profile/sharing', {
-        credentials: 'include', // Ensure cookies are sent
+        credentials: 'include',
       });
       
       if (!response.ok) {
@@ -74,65 +76,61 @@ export default function ProfileSharing() {
       
       return response.json();
     },
-    retry: false, // Don't retry on auth failure
-  });
-
-  // Fetch user's pricing tier information
-  const { data: userTier } = useQuery({
-    queryKey: ['/api/user/tier'],
-    enabled: !!user,
-  });
-
-  // Update sharing settings mutation
-  const updateSettingsMutation = useMutation({
-    mutationFn: async (settings: Partial<ProfileSharingSettings>) => {
-      const response = await fetch('/api/profile/sharing', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(settings),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to update settings: ${response.status}`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/profile/sharing'] });
-      toast({
-        title: "Settings updated",
-        description: "Your profile sharing settings have been updated successfully.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Update failed",
-        description: error.message || "Failed to update sharing settings",
-        variant: "destructive",
-      });
+    // Provide default values if API fails
+    placeholderData: {
+      isPublic: true,
+      allowDirectMessages: true,
+      showContactInfo: true,
+      showSocialLinks: true,
+      showMediaGallery: true,
+      allowNonAccountHolders: false,
+      completelyPrivate: false,
+      shareableFields: ['name', 'bio', 'skills', 'experience'],
+      profileViews: 0
     }
   });
 
-  // Update custom URL mutation
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const profileUrl = sharingSettings?.customUrl 
+    ? `${baseUrl}/profile/${sharingSettings.customUrl}`
+    : `${baseUrl}/profile/${user?.username || user?.id}`;
+
+  const userTier = user?.pricingTierId || 1;
+
+  const copyToClipboard = async (text: string, type: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedUrl(type);
+      toast({
+        title: "Copied!",
+        description: `${type} copied to clipboard`,
+      });
+      setTimeout(() => setCopiedUrl(null), 2000);
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Please copy the URL manually",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const shareProfile = (platform: string, url: string) => {
+    const shareUrls = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=Check out my profile!`,
+      email: `mailto:?subject=Check out my profile&body=${encodeURIComponent(url)}`,
+      sms: `sms:?body=Check out my profile: ${encodeURIComponent(url)}`
+    };
+
+    if (shareUrls[platform]) {
+      window.open(shareUrls[platform], '_blank');
+    }
+  };
+
   const updateCustomUrlMutation = useMutation({
     mutationFn: async (customUrl: string) => {
-      const response = await fetch('/api/profile/sharing/custom-url', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ customUrl }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to update custom URL: ${response.status}`);
-      }
-      
+      const response = await apiRequest('PUT', '/api/profile/sharing', { customUrl });
       return response.json();
     },
     onSuccess: () => {
@@ -140,22 +138,39 @@ export default function ProfileSharing() {
       setIsEditingUrl(false);
       setNewCustomUrl("");
       toast({
-        title: "Custom URL updated",
-        description: "Your custom profile URL has been updated successfully.",
+        title: "Success!",
+        description: "Custom URL updated successfully",
       });
     },
-    onError: (error: any) => {
+    onError: () => {
       toast({
-        title: "URL update failed",
-        description: error.message || "Failed to update custom URL",
+        title: "Error",
+        description: "Failed to update custom URL",
         variant: "destructive",
       });
-    }
+    },
   });
 
-  const handleSettingChange = (key: keyof ProfileSharingSettings, value: any) => {
-    updateSettingsMutation.mutate({ [key]: value });
-  };
+  const updateSettingsMutation = useMutation({
+    mutationFn: async (settings: Partial<ProfileSharingSettings>) => {
+      const response = await apiRequest('PUT', '/api/profile/sharing', settings);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/profile/sharing'] });
+      toast({
+        title: "Settings updated",
+        description: "Your privacy settings have been saved",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update settings",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleCustomUrlUpdate = () => {
     if (newCustomUrl.trim()) {
@@ -163,418 +178,379 @@ export default function ProfileSharing() {
     }
   };
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedUrl(label);
-      toast({
-        title: "Copied!",
-        description: `${label} copied to clipboard`,
-      });
-      setTimeout(() => setCopiedUrl(null), 2000);
-    });
-  };
-
-  const shareProfile = (platform: string, url: string) => {
-    const shareUrls = {
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-      twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=Check out my profile on Talents & Stars`,
-      email: `mailto:?subject=My Profile - ${user?.firstName} ${user?.lastName}&body=Check out my profile: ${url}`,
-      sms: `sms:?body=Check out my profile: ${url}`,
-      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
-    };
-
-    if (shareUrls[platform]) {
-      window.open(shareUrls[platform], '_blank', 'width=600,height=400');
-    }
+  const handleSettingChange = (key: keyof ProfileSharingSettings, value: boolean) => {
+    updateSettingsMutation.mutate({ [key]: value });
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
       </div>
     );
   }
 
-  const baseUrl = window.location.origin;
-  // Use username by default, fall back to ID if no username
-  const profileIdentifier = user?.username || user?.id;
-  const profileUrl = sharingSettings?.customUrl 
-    ? `${baseUrl}/profile/${sharingSettings.customUrl}`
-    : `${baseUrl}/profile/${profileIdentifier}`;
-
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      {/* Back Button */}
-      <div className="mb-6">
+    <div className="max-w-6xl mx-auto p-6">
+      <div className="flex items-center gap-3 mb-6">
         <Button 
           variant="ghost" 
+          size="sm"
           onClick={() => setLocation('/dashboard')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          className="flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Dashboard
         </Button>
       </div>
 
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile Sharing</h1>
-        <p className="text-gray-600">
-          Share your profile with the world and control who can see what
-        </p>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
+          <Share className="w-6 h-6 text-white" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold">Settings & Sharing</h1>
+          <p className="text-gray-600">Manage your profile appearance and sharing settings</p>
+        </div>
       </div>
 
-      {/* Template Selector */}
-      <TemplateSelector 
-        selectedTemplate={selectedTemplate}
-        onTemplateChange={setSelectedTemplate}
-        userTier={userTier}
-        onUpgrade={() => setLocation('/pricing-selection')}
-      />
+      {/* Tab Navigation */}
+      <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+        <button
+          onClick={() => setActiveTab('sharing')}
+          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'sharing' 
+              ? 'bg-white shadow-sm text-blue-600' 
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <Share className="w-4 h-4 inline mr-2" />
+          Profile Sharing
+        </button>
+        <button
+          onClick={() => setActiveTab('appearance')}
+          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'appearance' 
+              ? 'bg-white shadow-sm text-blue-600' 
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <Palette className="w-4 h-4 inline mr-2" />
+          Appearance
+        </button>
+        <button
+          onClick={() => setActiveTab('settings')}
+          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'settings' 
+              ? 'bg-white shadow-sm text-blue-600' 
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <Shield className="w-4 h-4 inline mr-2" />
+          Privacy Settings
+        </button>
+      </div>
 
-      {/* Profile URL Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Link className="h-5 w-5" />
-            Your Profile URL
-          </CardTitle>
-          <CardDescription>
-            Share this link to let others view your profile
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Input
-              value={profileUrl}
-              readOnly
-              className="flex-1"
-            />
-            <Button 
-              onClick={() => copyToClipboard(profileUrl, "Profile URL")}
-              variant="outline"
-              size="sm"
-            >
-              {copiedUrl === "Profile URL" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            </Button>
-          </div>
-
-          {/* Custom URL Section */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Custom URL</Label>
-            {isEditingUrl ? (
+      {/* Content based on active tab */}
+      {activeTab === 'sharing' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column - Profile URL */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Link className="h-5 w-5" />
+                Your Profile URL
+              </CardTitle>
+              <CardDescription>
+                Share this link to let others view your profile
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">{baseUrl}/profile/</span>
                 <Input
-                  value={newCustomUrl}
-                  onChange={(e) => setNewCustomUrl(e.target.value)}
-                  placeholder="your-custom-url"
+                  value={profileUrl}
+                  readOnly
                   className="flex-1"
                 />
-                <Button
-                  onClick={handleCustomUrlUpdate}
-                  size="sm"
-                  disabled={updateCustomUrlMutation.isPending}
-                >
-                  {updateCustomUrlMutation.isPending ? "Saving..." : "Save"}
-                </Button>
-                <Button
-                  onClick={() => {
-                    setIsEditingUrl(false);
-                    setNewCustomUrl("");
-                  }}
+                <Button 
+                  onClick={() => copyToClipboard(profileUrl, "Profile URL")}
                   variant="outline"
                   size="sm"
                 >
-                  <X className="h-4 w-4" />
+                  {copiedUrl === "Profile URL" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">{baseUrl}/profile/</span>
-                <span className="font-medium">
-                  {sharingSettings?.customUrl || user?.username || user?.id}
-                </span>
+
+              {/* Custom URL Section */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Custom URL</Label>
+                {isEditingUrl ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500">{baseUrl}/profile/</span>
+                    <Input
+                      value={newCustomUrl}
+                      onChange={(e) => setNewCustomUrl(e.target.value)}
+                      placeholder="your-custom-url"
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={handleCustomUrlUpdate}
+                      size="sm"
+                      disabled={updateCustomUrlMutation.isPending}
+                    >
+                      {updateCustomUrlMutation.isPending ? "Saving..." : "Save"}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setIsEditingUrl(false);
+                        setNewCustomUrl("");
+                      }}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500">{baseUrl}/profile/</span>
+                    <span className="font-medium">
+                      {sharingSettings?.customUrl || user?.username || user?.id}
+                    </span>
+                    <Button
+                      onClick={() => {
+                        setIsEditingUrl(true);
+                        setNewCustomUrl(sharingSettings?.customUrl || user?.username || "");
+                      }}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Share Buttons */}
+              <div className="grid grid-cols-2 gap-2 pt-4">
                 <Button
-                  onClick={() => {
-                    setIsEditingUrl(true);
-                    setNewCustomUrl(sharingSettings?.customUrl || user?.username || "");
-                  }}
+                  onClick={() => window.open(`${profileUrl}?template=${selectedTemplate}`, '_blank')}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                >
+                  <Eye className="h-4 w-4" />
+                  Preview
+                </Button>
+                <Button
+                  onClick={() => shareProfile('facebook', profileUrl)}
                   variant="outline"
                   size="sm"
+                  className="flex items-center gap-2"
                 >
-                  <Edit2 className="h-4 w-4" />
+                  <Facebook className="h-4 w-4" />
+                  Facebook
+                </Button>
+                <Button
+                  onClick={() => shareProfile('twitter', profileUrl)}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Twitter className="h-4 w-4" />
+                  Twitter
+                </Button>
+                <Button
+                  onClick={() => shareProfile('email', profileUrl)}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Mail className="h-4 w-4" />
+                  Email
                 </Button>
               </div>
-            )}
-          </div>
+            </CardContent>
+          </Card>
 
-          {/* Share Buttons */}
-          <div className="flex flex-wrap gap-2 pt-4">
-            <Button
-              onClick={() => window.open(`${profileUrl}?template=${selectedTemplate}`, '_blank')}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-            >
-              <Eye className="h-4 w-4" />
-              Preview Profile
-            </Button>
-            <Button
-              onClick={() => shareProfile('facebook', profileUrl)}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Facebook className="h-4 w-4" />
-              Facebook
-            </Button>
-            <Button
-              onClick={() => shareProfile('twitter', profileUrl)}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Twitter className="h-4 w-4" />
-              Twitter
-            </Button>
-            <Button
-              onClick={() => shareProfile('email', profileUrl)}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Mail className="h-4 w-4" />
-              Email
-            </Button>
-            <Button
-              onClick={() => shareProfile('sms', profileUrl)}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <MessageCircle className="h-4 w-4" />
-              SMS
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Privacy Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Eye className="h-5 w-5" />
-            Privacy Settings
-          </CardTitle>
-          <CardDescription>
-            Control who can see your profile and what information is displayed
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label className="text-sm font-medium">Public Profile</Label>
-              <p className="text-sm text-gray-500">
-                Allow your profile to be discovered by anyone with the link
-              </p>
-            </div>
-            <Switch
-              checked={sharingSettings?.isPublic || false}
-              onCheckedChange={(checked) => handleSettingChange('isPublic', checked)}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label className="text-sm font-medium">Allow Direct Messages</Label>
-              <p className="text-sm text-gray-500">
-                Let visitors send you direct messages through your profile
-              </p>
-            </div>
-            <Switch
-              checked={sharingSettings?.allowDirectMessages || false}
-              onCheckedChange={(checked) => handleSettingChange('allowDirectMessages', checked)}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label className="text-sm font-medium">Show Contact Information</Label>
-              <p className="text-sm text-gray-500">
-                Display your email and phone number on your public profile
-              </p>
-            </div>
-            <Switch
-              checked={sharingSettings?.showContactInfo || false}
-              onCheckedChange={(checked) => handleSettingChange('showContactInfo', checked)}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label className="text-sm font-medium">Show Social Links</Label>
-              <p className="text-sm text-gray-500">
-                Display your social media links on your public profile
-              </p>
-            </div>
-            <Switch
-              checked={sharingSettings?.showSocialLinks || false}
-              onCheckedChange={(checked) => handleSettingChange('showSocialLinks', checked)}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label className="text-sm font-medium">Show Media Gallery</Label>
-              <p className="text-sm text-gray-500">
-                Display your portfolio media on your public profile
-              </p>
-            </div>
-            <Switch
-              checked={sharingSettings?.showMediaGallery || false}
-              onCheckedChange={(checked) => handleSettingChange('showMediaGallery', checked)}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label className="text-sm font-medium">Allow Non-Account Holders</Label>
-              <p className="text-sm text-gray-500">
-                Let people without accounts view your profile (limited access)
-              </p>
-            </div>
-            <Switch
-              checked={sharingSettings?.allowNonAccountHolders || false}
-              onCheckedChange={(checked) => handleSettingChange('allowNonAccountHolders', checked)}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label className="text-sm font-medium">Completely Private</Label>
-              <p className="text-sm text-gray-500">
-                Make your profile private from all users (overrides other settings)
-              </p>
-            </div>
-            <Switch
-              checked={sharingSettings?.completelyPrivate || false}
-              onCheckedChange={(checked) => handleSettingChange('completelyPrivate', checked)}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Analytics Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5" />
-            Profile Analytics
-          </CardTitle>
-          <CardDescription>
-            See how your profile is performing
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">
-                {sharingSettings?.profileViews || 0}
+          {/* Right Column - Profile Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5" />
+                Profile Analytics
+              </CardTitle>
+              <CardDescription>
+                Track your profile performance
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Profile Views</span>
+                  <Badge variant="secondary">{sharingSettings?.profileViews || 0}</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Last Shared</span>
+                  <span className="text-sm">{sharingSettings?.lastShared || 'Never'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Profile Status</span>
+                  <Badge variant={sharingSettings?.isPublic ? "default" : "secondary"}>
+                    {sharingSettings?.isPublic ? "Public" : "Private"}
+                  </Badge>
+                </div>
               </div>
-              <div className="text-sm text-gray-600">Profile Views</div>
-            </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
-                {sharingSettings?.lastShared ? "Yes" : "No"}
-              </div>
-              <div className="text-sm text-gray-600">Recently Shared</div>
-            </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">
-                {sharingSettings?.isPublic ? "Public" : "Private"}
-              </div>
-              <div className="text-sm text-gray-600">Visibility</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-      {/* Profile Images Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Edit2 className="h-5 w-5" />
-            Profile Images
-          </CardTitle>
-          <CardDescription>
-            Upload and customize your profile and hero images
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Profile Image Upload */}
-          <div>
-            <h3 className="text-sm font-medium mb-3">Profile Avatar (1:1 ratio)</h3>
-            <ProfileImageUpload 
-              currentImage={user?.profileImageUrl || undefined}
-              onImageUpdate={(url) => {
-                // Profile image update handled by component
-                queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-              }}
-            />
+      {activeTab === 'appearance' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column - Profile Images */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Profile Image
+                </CardTitle>
+                <CardDescription>
+                  Upload your main profile photo (1:1 ratio)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ProfileImageUpload
+                  currentImage={user?.profileImageUrl}
+                  onImageUpdate={(url) => {
+                    queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+                  }}
+                  mandatory={false}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Image className="h-5 w-5" />
+                  Background Image
+                </CardTitle>
+                <CardDescription>
+                  Upload a hero background image (16:9 ratio)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ProfileImageUpload
+                  currentImage={user?.heroImageUrl}
+                  onImageUpdate={(url) => {
+                    queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+                  }}
+                  mandatory={false}
+                  aspectRatio={16/9}
+                  uploadEndpoint="/api/user/hero-image"
+                  fieldName="heroImage"
+                />
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Hero Image Upload */}
-          <div>
-            <h3 className="text-sm font-medium mb-3">Hero Background Image (16:9 ratio)</h3>
-            <HeroImageUpload 
-              currentImage={user?.heroImageUrl || undefined}
-              aspectRatio={16/9}
-              onImageUpdate={(url) => {
-                // Hero image update handled by component
-                queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-              }}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Template Customization Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Palette className="h-5 w-5" />
-            Template Customization
-          </CardTitle>
-          <CardDescription>
-            Choose how your profile looks when shared
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <Label className="text-sm font-medium">Profile Template</Label>
-              <p className="text-sm text-gray-500 mb-3">
-                Select the design template for your public profile
-              </p>
+          {/* Right Column - Template Selector */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Palette className="h-5 w-5" />
+                Profile Template
+              </CardTitle>
+              <CardDescription>
+                Choose how your profile appears to visitors
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               <TemplateSelector 
                 selectedTemplate={selectedTemplate}
                 onTemplateChange={setSelectedTemplate}
+                userTier={userTier}
+                onUpgrade={() => setLocation('/pricing-selection')}
               />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === 'settings' && (
+        <div className="max-w-2xl">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Privacy Settings
+              </CardTitle>
+              <CardDescription>
+                Control who can see your profile and what information is displayed
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium">Public Profile</Label>
+                  <p className="text-sm text-gray-500">Allow anyone to view your profile</p>
+                </div>
+                <Switch
+                  checked={sharingSettings?.isPublic || false}
+                  onCheckedChange={(checked) => handleSettingChange('isPublic', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium">Direct Messages</Label>
+                  <p className="text-sm text-gray-500">Allow others to message you directly</p>
+                </div>
+                <Switch
+                  checked={sharingSettings?.allowDirectMessages || false}
+                  onCheckedChange={(checked) => handleSettingChange('allowDirectMessages', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium">Show Contact Info</Label>
+                  <p className="text-sm text-gray-500">Display your contact information</p>
+                </div>
+                <Switch
+                  checked={sharingSettings?.showContactInfo || false}
+                  onCheckedChange={(checked) => handleSettingChange('showContactInfo', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium">Show Media Gallery</Label>
+                  <p className="text-sm text-gray-500">Display your portfolio and media</p>
+                </div>
+                <Switch
+                  checked={sharingSettings?.showMediaGallery || false}
+                  onCheckedChange={(checked) => handleSettingChange('showMediaGallery', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium">Allow Non-Account Holders</Label>
+                  <p className="text-sm text-gray-500">Let people without accounts view your profile</p>
+                </div>
+                <Switch
+                  checked={sharingSettings?.allowNonAccountHolders || false}
+                  onCheckedChange={(checked) => handleSettingChange('allowNonAccountHolders', checked)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

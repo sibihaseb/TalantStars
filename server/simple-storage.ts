@@ -603,7 +603,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  // Hero image update method
+  // Hero image update method  
   async updateUserHeroImage(userId: number, imageUrl: string): Promise<User> {
     const [user] = await db
       .update(users)
