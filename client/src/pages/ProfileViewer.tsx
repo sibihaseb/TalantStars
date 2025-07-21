@@ -26,9 +26,9 @@ export default function ProfileViewer() {
   const { userId } = useParams<{ userId: string }>();
   const { user } = useAuth();
   
-  // Fetch profile data
+  // Fetch profile data for the specific user
   const { data: profile, isLoading } = useQuery({
-    queryKey: ['/api/profile', userId],
+    queryKey: ['/api/talent', userId],
     enabled: !!userId,
   });
 
@@ -67,7 +67,7 @@ export default function ProfileViewer() {
     );
   }
 
-  const isOwnProfile = user?.id === userId;
+  const isOwnProfile = user?.id === parseInt(userId);
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
