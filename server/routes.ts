@@ -6479,41 +6479,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Hero image upload endpoint
-  app.post('/api/user/hero-image', isAuthenticated, upload.array('files', 1), async (req: any, res) => {
-    try {
-      console.log('Hero image upload request received');
-      console.log('User:', req.user?.id);
-      console.log('Files:', req.files);
 
-      if (!req.files || req.files.length === 0) {
-        return res.status(400).json({ message: 'No file uploaded' });
-      }
-
-      const file = req.files[0];
-      const userId = req.user.id;
-
-      // Upload to Wasabi S3
-      const heroImageUrl = await uploadFileToWasabi(file, `user-${userId}/hero/`);
-      console.log('Hero image uploaded to S3:', heroImageUrl);
-
-      // Update user's hero image URL
-      const updatedUser = await simpleStorage.updateUserHeroImage(userId, heroImageUrl);
-      console.log('User hero image updated in database');
-
-      res.json({ 
-        success: true, 
-        heroImageUrl,
-        user: updatedUser
-      });
-    } catch (error) {
-      console.error('Hero image upload error:', error);
-      res.status(500).json({ 
-        error: 'Failed to upload hero image',
-        details: error.message
-      });
-    }
-  });
 
   // Get user profile for ProfileViewer
   app.get('/api/user/profile/:userId', async (req, res) => {

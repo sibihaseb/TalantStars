@@ -183,7 +183,7 @@ export default function HeroImageUpload({
     canvas.toBlob((blob) => {
       if (blob) {
         const formData = new FormData();
-        formData.append('files', blob, `hero-${selectedFile.name}`);
+        formData.append('heroImage', blob, `hero-${selectedFile.name}`);
         uploadMutation.mutate(formData);
       }
     }, 'image/jpeg', 0.9);
