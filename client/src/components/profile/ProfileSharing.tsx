@@ -15,6 +15,7 @@ import {
   type ProfileTemplate 
 } from '@/components/profile/ProfileTemplates';
 import ProfileImageUpload from '@/components/ProfileImageUpload';
+import { SocialMediaManager } from '@/components/SocialMediaManager';
 import { 
   Copy, 
   Share, 
@@ -547,7 +548,9 @@ export default function ProfileSharing() {
       )}
 
       {activeTab === 'settings' && (
-        <div className="max-w-2xl">
+        <div className="max-w-2xl space-y-6">
+          <SocialMediaManager />
+          
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

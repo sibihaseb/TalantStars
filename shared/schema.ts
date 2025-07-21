@@ -73,6 +73,8 @@ export const userProfiles = pgTable("user_profiles", {
   location: varchar("location"),
   website: varchar("website"),
   phoneNumber: varchar("phone_number"),
+  // Social media links
+  socialLinks: jsonb("social_links"), // Store social media URLs as JSON
   isVerified: boolean("is_verified").default(false),
   availabilityStatus: availabilityStatusEnum("availability_status").default("available"),
   

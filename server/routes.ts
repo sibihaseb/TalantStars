@@ -1191,6 +1191,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Social Links Management
+  app.get('/api/user/social-links', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const profile = await simpleStorage.getUserProfile(userId);
+      res.json({ socialLinks: profile?.socialLinks || {} });
+    } catch (error) {
+      console.error("Error getting social links:", error);
+      res.status(500).json({ message: "Failed to get social links" });
+    }
+  });
+
+  app.put('/api/user/social-links', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { socialLinks } = req.body;
+      
+      console.log('🔗 Updating social links for user:', userId, socialLinks);
+      
+      const profile = await simpleStorage.updateUserSocialLinks(userId, socialLinks);
+      res.json({ success: true, socialLinks: profile.socialLinks });
+    } catch (error) {
+      console.error("Error updating social links:", error);
+      res.status(500).json({ message: "Failed to update social links" });
+    }
+  });
+
   // Social Media Routes
   
   // Get social feed

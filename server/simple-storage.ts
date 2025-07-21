@@ -624,8 +624,8 @@ export class DatabaseStorage implements IStorage {
       return user;
     } catch (error) {
       console.error('❌ Failed to update hero image:', error);
-      console.error('❌ Error details:', error.message, error.stack);
-      throw error;
+      console.error('❌ Error details:', error?.message, error?.stack);
+      throw new Error(`Failed to update hero image: ${error?.message || 'Unknown error'}`);
     }
   }
 
@@ -651,6 +651,29 @@ export class DatabaseStorage implements IStorage {
       ...endorsementData,
       createdAt: new Date().toISOString()
     };
+  }
+
+  async updateUserSocialLinks(userId: number, socialLinks: any): Promise<UserProfile> {
+    try {
+      console.log('🔗 Updating social links for user:', userId);
+      console.log('🔗 Social links data:', socialLinks);
+      
+      const [profile] = await db
+        .update(userProfiles)
+        .set({ socialLinks })
+        .where(eq(userProfiles.userId, userId))
+        .returning();
+      
+      if (!profile) {
+        throw new Error('Profile not found or update failed');
+      }
+      
+      console.log('✅ Social links updated successfully');
+      return profile;
+    } catch (error) {
+      console.error('❌ Failed to update social links:', error);
+      throw new Error(`Failed to update social links: ${error?.message || 'Unknown error'}`);
+    }
   }
 
   // Talent categories operations
