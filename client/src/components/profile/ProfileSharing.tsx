@@ -58,12 +58,21 @@ export default function ProfileSharing() {
   const [selectedTemplate, setSelectedTemplate] = useState<ProfileTemplate>('modern');
 
   // Fetch current profile sharing settings
-  const { data: sharingSettings, isLoading } = useQuery<ProfileSharingSettings>({
+  const { data: sharingSettings, isLoading, error } = useQuery<ProfileSharingSettings>({
     queryKey: ['/api/profile/sharing'],
+    enabled: !!user, // Only run when user is authenticated
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/profile/sharing');
+      const response = await fetch('/api/profile/sharing', {
+        credentials: 'include', // Ensure cookies are sent
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       return response.json();
-    }
+    },
+    retry: false, // Don't retry on auth failure
   });
 
   // Fetch user's pricing tier information
@@ -75,7 +84,19 @@ export default function ProfileSharing() {
   // Update sharing settings mutation
   const updateSettingsMutation = useMutation({
     mutationFn: async (settings: Partial<ProfileSharingSettings>) => {
-      const response = await apiRequest('PUT', '/api/profile/sharing', settings);
+      const response = await fetch('/api/profile/sharing', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(settings),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update settings: ${response.status}`);
+      }
+      
       return response.json();
     },
     onSuccess: () => {
@@ -97,7 +118,19 @@ export default function ProfileSharing() {
   // Update custom URL mutation
   const updateCustomUrlMutation = useMutation({
     mutationFn: async (customUrl: string) => {
-      const response = await apiRequest('PUT', '/api/profile/sharing/custom-url', { customUrl });
+      const response = await fetch('/api/profile/sharing/custom-url', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ customUrl }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update custom URL: ${response.status}`);
+      }
+      
       return response.json();
     },
     onSuccess: () => {
