@@ -242,6 +242,17 @@ export default function ProfileSharing() {
           Appearance
         </button>
         <button
+          onClick={() => setActiveTab('templates')}
+          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'templates' 
+              ? 'bg-white shadow-sm text-blue-600' 
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <Palette className="w-4 h-4 inline mr-2" />
+          Template Selection
+        </button>
+        <button
           onClick={() => setActiveTab('settings')}
           className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
             activeTab === 'settings' 
@@ -456,26 +467,7 @@ export default function ProfileSharing() {
               </CardContent>
             </Card>
 
-            {/* Profile Template Section - Next to appearance sections */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Palette className="h-5 w-5" />
-                  Profile Template
-                </CardTitle>
-                <CardDescription>
-                  Choose how your profile appears to visitors
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TemplateSelector 
-                  selectedTemplate={selectedTemplate}
-                  onTemplateChange={setSelectedTemplate}
-                  userTier={userTier}
-                  onUpgrade={() => setLocation('/pricing-selection')}
-                />
-              </CardContent>
-            </Card>
+
           </div>
 
           {/* Right Column - Profile Customization */}
@@ -522,6 +514,30 @@ export default function ProfileSharing() {
                   onCheckedChange={(checked) => handleSettingChange('showSkills', checked)}
                 />
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === 'templates' && (
+        <div className="max-w-4xl">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Palette className="h-5 w-5" />
+                Profile Template Selection
+              </CardTitle>
+              <CardDescription>
+                Choose how your profile appears to visitors. Select from our professionally designed templates to showcase your talent.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TemplateSelector 
+                selectedTemplate={selectedTemplate}
+                onTemplateChange={setSelectedTemplate}
+                userTier={userTier}
+                onUpgrade={() => setLocation('/pricing-selection')}
+              />
             </CardContent>
           </Card>
         </div>
