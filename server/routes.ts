@@ -3677,5 +3677,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stripe integration for premium tier upgrades
+  app.post('/api/stripe/create-payment-intent', isAuthenticated, async (req: any, res) => {
+    try {
+      const { tierId, amount } = req.body;
+      
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(500).json({ message: "Stripe not configured" });
+      }
+
+      // Initialize Stripe with the secret key
+      const Stripe = require('stripe');
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: '2023-10-16'
+      });
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: 'usd',
+        metadata: {
+          userId: req.user.id,
+          tierId: tierId.toString()
+        }
+      });
+
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error) {
+      console.error("❌ API: Error creating payment intent:", error);
+      res.status(500).json({ message: "Failed to create payment intent" });
+    }
+  });
+
+  // Hero banner upload endpoint
+  app.post('/api/user/hero-image', isAuthenticated, upload.single('heroImage'), async (req: any, res) => {
+    try {
+      console.log("🔥 API: Uploading hero image for user:", req.user.id);
+      
+      if (!req.file) {
+        return res.status(400).json({ message: "No hero image file uploaded" });
+      }
+
+      const file = req.file;
+      const fileName = `user-${req.user.id}/hero/${Date.now()}-${file.originalname}`;
+      
+      try {
+        const uploadResult = await uploadFileToWasabi(file.buffer, fileName, file.mimetype);
+        
+        if (uploadResult.success) {
+          const updatedUser = await simpleStorage.updateUserHeroImage(req.user.id, uploadResult.url);
+          
+          console.log("✅ API: Hero image uploaded successfully");
+          res.json({
+            success: true,
+            url: uploadResult.url,
+            user: updatedUser
+          });
+        } else {
+          throw new Error(uploadResult.error || "Failed to upload to Wasabi");
+        }
+      } catch (uploadError) {
+        console.error("❌ API: Wasabi upload failed:", uploadError);
+        res.status(500).json({ message: "Failed to upload hero image to storage" });
+      }
+    } catch (error) {
+      console.error("❌ API: Error uploading hero image:", error);
+      res.status(500).json({ message: "Failed to upload hero image" });
+    }
+  });
+
   return httpServer;
 }

@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { useAuth } from "@/hooks/useAuth";
@@ -389,5 +389,82 @@ export function TierUpgradeManager() {
     <Elements stripe={stripePromise}>
       <TierUpgradeManagerContent />
     </Elements>
+  );
+}
+                    
+                    {isCurrentTier && (
+                      <Button disabled className="w-full bg-gray-200 text-gray-500 cursor-not-allowed">
+                        <Check className="h-4 w-4 mr-2" />
+                        Current Plan
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {selectedTier && getTierChangeType(selectedTier) === 'upgrade' ? 'Upgrade' : 'Downgrade'} Plan
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedTier && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <p className="text-lg">
+                  {getTierChangeType(selectedTier) === 'upgrade' ? 'Upgrade' : 'Downgrade'} to{' '}
+                  <span className="font-semibold">{selectedTier.name}</span>?
+                </p>
+                <p className="text-2xl font-bold mt-2">
+                  ${selectedTier.price}/{selectedTier.duration || 'month'}
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <p className="font-medium">Plan includes:</p>
+                <ul className="space-y-1">
+                  {(selectedTier.features || []).map((feature: string, idx: number) => (
+                    <li key={idx} className="flex items-center text-sm">
+                      <Check className="h-4 w-4 text-green-500 mr-2" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setIsUpgradeDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className={`flex-1 ${
+                    getTierChangeType(selectedTier) === 'upgrade'
+                      ? 'bg-blue-600 hover:bg-blue-700'
+                      : 'bg-orange-600 hover:bg-orange-700'
+                  }`}
+                  onClick={confirmTierChange}
+                  disabled={updateTierMutation.isPending}
+                >
+                  {updateTierMutation.isPending ? 'Processing...' : 
+                    `Confirm ${getTierChangeType(selectedTier) === 'upgrade' ? 'Upgrade' : 'Downgrade'}`
+                  }
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

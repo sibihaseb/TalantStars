@@ -23,6 +23,7 @@ import { TierUpgradeManager } from '@/components/billing/TierUpgradeManager';
 import { AvailabilityCalendar } from '@/components/talent/AvailabilityCalendar';
 import ProfileImageUpload from "@/components/ProfileImageUpload";
 import ProfileSharing from '@/components/profile/ProfileSharing';
+import { HeroBannerUpload } from '@/components/profile/HeroBannerUpload';
 
 import UsageDashboard from "@/components/usage/UsageDashboard";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
@@ -915,6 +916,36 @@ export default function TalentDashboard() {
 
           <TabsContent value="portfolio">
             <div className="space-y-6">
+              {/* Hero Banner Upload */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <HeroBannerUpload 
+                  onUploadSuccess={(url) => {
+                    toast({
+                      title: "Hero Banner Updated",
+                      description: "Your profile hero banner has been updated successfully",
+                    });
+                    queryClient.invalidateQueries({ queryKey: ['/api/user/profile'] });
+                  }}
+                />
+                
+                <Card className="cursor-pointer border-2 border-dashed border-gray-300 hover:border-green-500 transition-colors">
+                  <CardHeader className="text-center pb-2">
+                    <div className="flex justify-center mb-2">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
+                        <Camera className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+                    <CardTitle className="text-lg">Profile Image</CardTitle>
+                    <CardDescription>
+                      Upload your professional headshot
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <ProfileImageUpload />
+                  </CardContent>
+                </Card>
+              </div>
+
               {/* Media Portfolio */}
               <Card>
                 <CardHeader>
