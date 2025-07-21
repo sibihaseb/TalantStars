@@ -1,0 +1,95 @@
+[Info] Successfully preconnected to https://api.stripe.com/
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Error] Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+	(anonymous function) (main.tsx:13)
+	printWarning (chunk-RPCDYKBN.js:521)
+	error (chunk-RPCDYKBN.js:505)
+	checkForNestedUpdates (chunk-RPCDYKBN.js:19665)
+	scheduleUpdateOnFiber (chunk-RPCDYKBN.js:18533)
+	forceStoreRerender (chunk-RPCDYKBN.js:11999)
+	handleStoreChange (chunk-RPCDYKBN.js:11981)
+	(anonymous function) (@tanstack_react-query.js:598)
+	notifyFn (@tanstack_react-query.js:550)
+	(anonymous function) (@tanstack_react-query.js:572)
+	forEach
+	(anonymous function) (@tanstack_react-query.js:571)
+	batchNotifyFn (@tanstack_react-query.js:553)
+	(anonymous function) (@tanstack_react-query.js:570)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/social/stats (main.tsx, line 27)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/user/profile (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/applications (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/opportunities (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] ProfileImageUpload component rendered – Object (main.tsx, line 27)
+Object
+[Log] ProfileImageUpload component rendered – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] Choose Image button clicked (main.tsx, line 27)
+[Log] File input ref: –  (main.tsx, line 27)
+<input data-replit-metadata="client/src/components/ProfileImageUpload.tsx:404:14" data-component-name="input" type="file" accept="image/*" class="hidden" data-testid="file-input">
+
+<input data-replit-metadata="client/src/components/ProfileImageUpload.tsx:404:14" data-component-name="input" type="file" accept="image/*" class="hidden" data-testid="file-input">
+[Log] File input ref value: – "" (main.tsx, line 27)
+[Log] File input changed - event fired (main.tsx, line 27)
+[Log] Event target: –  (main.tsx, line 27)
+<input data-replit-metadata="client/src/components/ProfileImageUpload.tsx:404:14" data-component-name="input" type="file" accept="image/*" class="hidden" data-testid="file-input">
+
+<input data-replit-metadata="client/src/components/ProfileImageUpload.tsx:404:14" data-component-name="input" type="file" accept="image/*" class="hidden" data-testid="file-input">
+[Log] Files length: – 1 (main.tsx, line 27)
+[Log] File list: – FileList (main.tsx, line 27)
+FileList
+[Log] Selected file: – File (main.tsx, line 27)
+File
+[Log] File details: – Object (main.tsx, line 27)
+Object
+[Log] File selected: – "Depositphotos_58273995_XL.jpg" – "image/jpeg" – 9066306 (main.tsx, line 27)
+[Log] Setting selected file and preview URL (main.tsx, line 27)
+[Log] Cropper should now be visible (main.tsx, line 27)
+[Log] ProfileImageUpload component rendered – Object (main.tsx, line 27)
+Object
+[Log] Canvas blob created: – Blob (main.tsx, line 27)
+Blob
+[Log] Blob size: – 308469 (main.tsx, line 27)
+[Log] Blob type: – "image/jpeg" (main.tsx, line 27)
+[Log] FormData contents: (main.tsx, line 27)
+[Log] heroImage: – File (main.tsx, line 27)
+File
+[Log] Uploading file to server... (main.tsx, line 27)
+[Log] FormData entries: – Array (1) (main.tsx, line 27)
+Array (1)
+[Log] === FRONTEND API REQUEST === (main.tsx, line 27)
+[Log] Method: POST, URL: /api/user/hero-image (main.tsx, line 27)
+[Log] FormData entries: – Array (1) (main.tsx, line 27)
+Array (1)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (hero-image, line 0)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 500, URL: /api/user/hero-image (main.tsx, line 27)
+[Log] 🚨 API ERROR: 500 - {"error":"Failed to upload hero image","details":"syntax error at or near \"where\""} (main.tsx, line 27)
+> Selected Element
+< <div data-replit-metadata="client/src/components/profile/ProfileSharing.tsx:197:4" data-component-name="div" class="max-w-6xl mx-auto p-6">…</div>
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)

@@ -605,12 +605,22 @@ export class DatabaseStorage implements IStorage {
 
   // Hero image update method  
   async updateUserHeroImage(userId: number, imageUrl: string): Promise<User> {
-    const [user] = await db
-      .update(users)
-      .set({ heroImageUrl: imageUrl })
-      .where(eq(users.id, userId))
-      .returning();
-    return user;
+    try {
+      console.log('🔍 Updating hero image for user:', userId);
+      console.log('🔍 New image URL:', imageUrl);
+      
+      const [user] = await db
+        .update(users)
+        .set({ heroImageUrl: imageUrl })
+        .where(eq(users.id, userId))
+        .returning();
+      
+      console.log('✅ Hero image updated successfully:', user);
+      return user;
+    } catch (error) {
+      console.error('❌ Failed to update hero image:', error);
+      throw error;
+    }
   }
 
   // Skill endorsement operations
