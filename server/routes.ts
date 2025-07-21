@@ -3347,7 +3347,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Profile Sharing
+  // Profile Sharing - Current user's settings
+  app.get('/api/profile/sharing', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const sharing = await simpleStorage.getProfileSharingSettings(userId);
+      res.json(sharing);
+    } catch (error) {
+      console.error("Error fetching profile sharing:", error);
+      res.status(500).json({ message: "Failed to fetch profile sharing" });
+    }
+  });
+
+  app.put('/api/profile/sharing', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const sharing = await simpleStorage.updateProfileSharingSettings(userId, req.body);
+      res.json(sharing);
+    } catch (error) {
+      console.error("Error updating profile sharing:", error);
+      res.status(500).json({ message: "Failed to update profile sharing" });
+    }
+  });
+
+  // Legacy Profile Sharing endpoints for backwards compatibility
   app.get('/api/profile-sharing/:userId', async (req: any, res) => {
     try {
       const { userId } = req.params;

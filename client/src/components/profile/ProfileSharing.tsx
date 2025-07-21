@@ -33,6 +33,8 @@ interface ProfileSharingSettings {
   showContactInfo: boolean;
   showSocialLinks: boolean;
   showMediaGallery: boolean;
+  allowNonAccountHolders: boolean;
+  completelyPrivate: boolean;
   shareableFields: string[];
   profileViews: number;
   lastShared?: string;
@@ -359,6 +361,36 @@ export default function ProfileSharing() {
             <Switch
               checked={sharingSettings?.showMediaGallery || false}
               onCheckedChange={(checked) => handleSettingChange('showMediaGallery', checked)}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium">Allow Non-Account Holders</Label>
+              <p className="text-sm text-gray-500">
+                Let people without accounts view your profile (limited access)
+              </p>
+            </div>
+            <Switch
+              checked={sharingSettings?.allowNonAccountHolders || false}
+              onCheckedChange={(checked) => handleSettingChange('allowNonAccountHolders', checked)}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium">Completely Private</Label>
+              <p className="text-sm text-gray-500">
+                Make your profile private from all users (overrides other settings)
+              </p>
+            </div>
+            <Switch
+              checked={sharingSettings?.completelyPrivate || false}
+              onCheckedChange={(checked) => handleSettingChange('completelyPrivate', checked)}
             />
           </div>
         </CardContent>

@@ -20,7 +20,7 @@ import {
   type TalentType,
   type InsertTalentType,
 } from "@shared/simple-schema";
-import { jobHistory } from "@shared/schema";
+import { jobHistory, profileSharingSettings } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc, desc } from "drizzle-orm";
 
@@ -118,6 +118,14 @@ export interface IStorage {
   // Notifications operations
   getUserNotifications(userId: number): Promise<any[]>;
   setUserNotifications(userId: number, notifications: any[]): Promise<void>;
+
+  // Profile sharing operations
+  getProfileSharingSettings(userId: number): Promise<any>;
+  updateProfileSharingSettings(userId: number, settings: any): Promise<any>;
+  checkCustomUrlAvailable(customUrl: string, userId: number): Promise<boolean>;
+  getProfileByCustomUrl(customUrl: string): Promise<any>;
+  getProfileSharing(userId: string): Promise<any>; // Legacy method
+  updateProfileSharing(userId: string, settings: any): Promise<any>; // Legacy method
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1125,6 +1133,164 @@ export class DatabaseStorage implements IStorage {
   async setUserNotifications(userId: number, notifications: any[]): Promise<void> {
     console.log(`🔔 Setting ${notifications.length} notifications for user ${userId}`);
     this.userNotifications.set(userId, notifications);
+  }
+
+  // Profile sharing settings operations
+  async getProfileSharingSettings(userId: number): Promise<any> {
+    console.log(`📤 Getting profile sharing settings for user ${userId}`);
+    
+    try {
+      // Try to get from database first
+      const [settings] = await db.select()
+        .from(profileSharingSettings)
+        .where(eq(profileSharingSettings.userId, userId));
+
+      if (settings) {
+        return settings;
+      }
+
+      // Get user data to generate default username
+      const user = await this.getUser(userId);
+      let defaultUsername = `user${userId}`;
+      
+      if (user && user.firstName && user.lastName) {
+        // Generate username from first and last name
+        defaultUsername = `${user.firstName.toLowerCase()}-${user.lastName.toLowerCase()}`
+          .replace(/[^a-z0-9-]/g, '-') // Replace non-alphanumeric chars with hyphens
+          .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+          .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+      } else if (user && user.firstName) {
+        defaultUsername = `${user.firstName.toLowerCase()}-${userId}`
+          .replace(/[^a-z0-9-]/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '');
+      }
+
+      // Create default settings with public visibility
+      const defaultSettings = {
+        id: userId,
+        userId,
+        customUrl: defaultUsername,
+        isPublic: true,
+        allowDirectMessages: true,
+        showContactInfo: false,
+        showSocialLinks: true,
+        showMediaGallery: true,
+        allowNonAccountHolders: true,
+        completelyPrivate: false,
+        shareableFields: [],
+        profileViews: 0,
+        lastShared: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      console.log(`📤 Created default profile sharing settings for user ${userId}`, defaultSettings);
+      return defaultSettings;
+    } catch (error) {
+      console.error("Error getting profile sharing settings:", error);
+      // Return safe defaults even if database fails
+      return {
+        id: userId,
+        userId,
+        customUrl: `user${userId}`,
+        isPublic: true,
+        allowDirectMessages: true,
+        showContactInfo: false,
+        showSocialLinks: true,
+        showMediaGallery: true,
+        allowNonAccountHolders: true,
+        completelyPrivate: false,
+        shareableFields: [],
+        profileViews: 0,
+        lastShared: null
+      };
+    }
+  }
+
+  async updateProfileSharingSettings(userId: number, settings: any): Promise<any> {
+    console.log(`📤 Updating profile sharing settings for user ${userId}`, settings);
+    
+    try {
+      // Try to update in database
+      const updateData = {
+        ...settings,
+        updatedAt: new Date()
+      };
+
+      const [updated] = await db.insert(profileSharingSettings)
+        .values({
+          userId,
+          ...updateData
+        })
+        .onConflictDoUpdate({
+          target: profileSharingSettings.userId,
+          set: updateData
+        })
+        .returning();
+
+      console.log(`📤 Updated profile sharing settings in database`, updated);
+      return updated;
+    } catch (error) {
+      console.error("Error updating profile sharing settings:", error);
+      // Return the settings even if database update fails
+      return {
+        userId,
+        ...settings,
+        updatedAt: new Date()
+      };
+    }
+  }
+
+  async checkCustomUrlAvailable(customUrl: string, userId: number): Promise<boolean> {
+    console.log(`🔍 Checking if custom URL "${customUrl}" is available for user ${userId}`);
+    
+    try {
+      const [existing] = await db.select()
+        .from(profileSharingSettings)
+        .where(eq(profileSharingSettings.customUrl, customUrl));
+
+      // URL is available if no one uses it, or the current user is using it
+      const isAvailable = !existing || existing.userId === userId;
+      console.log(`🔍 Custom URL "${customUrl}" is ${isAvailable ? 'available' : 'taken'}`);
+      return isAvailable;
+    } catch (error) {
+      console.error("Error checking custom URL availability:", error);
+      // If we can't check, assume it's available
+      return true;
+    }
+  }
+
+  async getProfileByCustomUrl(customUrl: string): Promise<any> {
+    console.log(`🔍 Getting profile by custom URL: ${customUrl}`);
+    
+    try {
+      const [settings] = await db.select()
+        .from(profileSharingSettings)
+        .where(eq(profileSharingSettings.customUrl, customUrl));
+
+      if (!settings) {
+        console.log(`🔍 No profile found for custom URL: ${customUrl}`);
+        return null;
+      }
+
+      console.log(`🔍 Found profile for custom URL: ${customUrl}`, settings);
+      return settings;
+    } catch (error) {
+      console.error("Error getting profile by custom URL:", error);
+      return null;
+    }
+  }
+
+  // Legacy methods for backwards compatibility
+  async getProfileSharing(userId: string): Promise<any> {
+    console.log(`📤 Legacy: Getting profile sharing for user ${userId}`);
+    return this.getProfileSharingSettings(parseInt(userId));
+  }
+
+  async updateProfileSharing(userId: string, settings: any): Promise<any> {
+    console.log(`📤 Legacy: Updating profile sharing for user ${userId}`, settings);
+    return this.updateProfileSharingSettings(parseInt(userId), settings);
   }
 
 }

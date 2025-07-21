@@ -1010,6 +1010,25 @@ export const profileSharing = pgTable("profile_sharing", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Profile sharing settings for public profile access
+export const profileSharingSettings = pgTable("profile_sharing_settings", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull().unique(),
+  customUrl: varchar("custom_url").unique(), // Custom URL slug for profile
+  isPublic: boolean("is_public").default(true), // Profile is public by default
+  allowDirectMessages: boolean("allow_direct_messages").default(true), // Allow messages by default
+  showContactInfo: boolean("show_contact_info").default(false), // Don't show contact by default
+  showSocialLinks: boolean("show_social_links").default(true), // Show social links by default
+  showMediaGallery: boolean("show_media_gallery").default(true), // Show gallery by default
+  allowNonAccountHolders: boolean("allow_non_account_holders").default(true), // Allow non-account holders by default
+  completelyPrivate: boolean("completely_private").default(false), // Not completely private by default
+  shareableFields: text("shareable_fields").array().default([]), // Fields that can be shared
+  profileViews: integer("profile_views").default(0),
+  lastShared: timestamp("last_shared"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Admin settings for OpenAI keys and other configurations
 export const adminSettings = pgTable("admin_settings", {
   id: serial("id").primaryKey(),
