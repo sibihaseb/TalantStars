@@ -5004,6 +5004,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user tier endpoint
+  app.get('/api/user/tier', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await simpleStorage.getUser(parseInt(userId));
+      if (!user || !user.pricingTierId) {
+        return res.json(null);
+      }
+
+      const tier = await simpleStorage.getPricingTier(user.pricingTierId);
+      res.json(tier);
+    } catch (error) {
+      console.error("Error fetching user tier:", error);
+      res.status(500).json({ message: "Failed to fetch tier" });
+    }
+  });
+
   // User tier update/upgrade/downgrade endpoint
   app.post('/api/user/tier', isAuthenticated, async (req: any, res) => {
     try {

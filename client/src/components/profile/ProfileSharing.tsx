@@ -66,6 +66,12 @@ export default function ProfileSharing() {
     }
   });
 
+  // Fetch user's pricing tier information
+  const { data: userTier } = useQuery({
+    queryKey: ['/api/user/tier'],
+    enabled: !!user,
+  });
+
   // Update sharing settings mutation
   const updateSettingsMutation = useMutation({
     mutationFn: async (settings: Partial<ProfileSharingSettings>) => {
@@ -156,9 +162,11 @@ export default function ProfileSharing() {
   }
 
   const baseUrl = window.location.origin;
+  // Use username by default, fall back to ID if no username
+  const profileIdentifier = user?.username || user?.id;
   const profileUrl = sharingSettings?.customUrl 
     ? `${baseUrl}/profile/${sharingSettings.customUrl}`
-    : `${baseUrl}/profile/${user?.username || user?.id}`;
+    : `${baseUrl}/profile/${profileIdentifier}`;
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -185,6 +193,8 @@ export default function ProfileSharing() {
       <TemplateSelector 
         selectedTemplate={selectedTemplate}
         onTemplateChange={setSelectedTemplate}
+        userTier={userTier}
+        onUpgrade={() => setLocation('/pricing-selection')}
       />
 
       {/* Profile URL Card */}
@@ -248,12 +258,12 @@ export default function ProfileSharing() {
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500">{baseUrl}/profile/</span>
                 <span className="font-medium">
-                  {sharingSettings?.customUrl || user?.id}
+                  {sharingSettings?.customUrl || user?.username || user?.id}
                 </span>
                 <Button
                   onClick={() => {
                     setIsEditingUrl(true);
-                    setNewCustomUrl(sharingSettings?.customUrl || "");
+                    setNewCustomUrl(sharingSettings?.customUrl || user?.username || "");
                   }}
                   variant="outline"
                   size="sm"

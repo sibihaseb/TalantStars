@@ -22,14 +22,27 @@ interface ProfileTemplatesProps {
 }
 
 // Template Selector Component
-export function TemplateSelector({ selectedTemplate, onTemplateChange }: { selectedTemplate: ProfileTemplate, onTemplateChange: (template: ProfileTemplate) => void }) {
+export function TemplateSelector({ 
+  selectedTemplate, 
+  onTemplateChange, 
+  userTier,
+  onUpgrade 
+}: { 
+  selectedTemplate: ProfileTemplate, 
+  onTemplateChange: (template: ProfileTemplate) => void,
+  userTier?: any,
+  onUpgrade?: () => void
+}) {
   const templates = [
-    { id: 'classic' as ProfileTemplate, name: 'Classic', icon: Layout, color: 'bg-blue-500', description: 'Professional and timeless' },
-    { id: 'modern' as ProfileTemplate, name: 'Modern', icon: Zap, color: 'bg-purple-500', description: 'Sleek and contemporary' },
-    { id: 'artistic' as ProfileTemplate, name: 'Artistic', icon: Palette, color: 'bg-pink-500', description: 'Creative and expressive' },
-    { id: 'minimal' as ProfileTemplate, name: 'Minimal', icon: Sparkles, color: 'bg-gray-500', description: 'Clean and focused' },
-    { id: 'cinematic' as ProfileTemplate, name: 'Cinematic', icon: Crown, color: 'bg-yellow-500', description: 'Dramatic and bold' }
+    { id: 'classic' as ProfileTemplate, name: 'Classic', icon: Layout, color: 'bg-blue-500', description: 'Professional and timeless', requiresUpgrade: false },
+    { id: 'modern' as ProfileTemplate, name: 'Modern', icon: Zap, color: 'bg-purple-500', description: 'Sleek and contemporary', requiresUpgrade: true },
+    { id: 'artistic' as ProfileTemplate, name: 'Artistic', icon: Palette, color: 'bg-pink-500', description: 'Creative and expressive', requiresUpgrade: true },
+    { id: 'minimal' as ProfileTemplate, name: 'Minimal', icon: Sparkles, color: 'bg-gray-500', description: 'Clean and focused', requiresUpgrade: true },
+    { id: 'cinematic' as ProfileTemplate, name: 'Cinematic', icon: Crown, color: 'bg-yellow-500', description: 'Dramatic and bold', requiresUpgrade: true }
   ];
+
+  // Check if user has access to all templates
+  const hasAllTemplates = userTier?.features?.includes('profile_templates_all') || false;
 
   return (
     <Card className="mb-6">
@@ -43,22 +56,53 @@ export function TemplateSelector({ selectedTemplate, onTemplateChange }: { selec
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {templates.map((template) => {
             const Icon = template.icon;
+            const isLocked = template.requiresUpgrade && !hasAllTemplates;
+            
             return (
-              <button
-                key={template.id}
-                onClick={() => onTemplateChange(template.id)}
-                className={`p-4 rounded-lg border-2 transition-all hover:scale-105 ${
-                  selectedTemplate === template.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className={`w-12 h-12 ${template.color} rounded-full flex items-center justify-center mx-auto mb-2`}>
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="font-semibold text-sm">{template.name}</h3>
-                <p className="text-xs text-gray-500 mt-1">{template.description}</p>
-              </button>
+              <div key={template.id} className="relative">
+                <button
+                  onClick={() => {
+                    if (isLocked && onUpgrade) {
+                      return; // Don't change template if locked
+                    }
+                    onTemplateChange(template.id);
+                  }}
+                  disabled={isLocked}
+                  className={`w-full p-4 rounded-lg border-2 transition-all ${
+                    isLocked 
+                      ? 'border-gray-200 bg-gray-50 opacity-75 cursor-not-allowed' 
+                      : selectedTemplate === template.id
+                        ? 'border-blue-500 bg-blue-50 hover:scale-105'
+                        : 'border-gray-200 hover:border-gray-300 hover:scale-105'
+                  }`}
+                >
+                  <div className={`w-12 h-12 ${isLocked ? 'bg-gray-400' : template.color} rounded-full flex items-center justify-center mx-auto mb-2`}>
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className={`font-semibold text-sm ${isLocked ? 'text-gray-400' : ''}`}>
+                    {template.name}
+                  </h3>
+                  <p className={`text-xs mt-1 ${isLocked ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {template.description}
+                  </p>
+                </button>
+                
+                {isLocked && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 rounded-lg">
+                    <Crown className="w-6 h-6 text-yellow-500 mb-2" />
+                    <p className="text-xs text-center text-gray-600 mb-2 px-2">
+                      Please upgrade to access this template
+                    </p>
+                    <Button
+                      size="sm"
+                      onClick={onUpgrade}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-3 py-1 text-xs"
+                    >
+                      Upgrade Now
+                    </Button>
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
