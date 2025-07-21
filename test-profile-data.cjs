@@ -1,93 +1,69 @@
-// Simple direct database update using existing connection
 const { Pool, neonConfig } = require('@neondatabase/serverless');
+const { drizzle } = require('drizzle-orm/neon-serverless');
 const ws = require("ws");
 
-// Configure for serverless
 neonConfig.webSocketConstructor = ws;
 
-const DATABASE_URL = process.env.DATABASE_URL;
-if (!DATABASE_URL) {
-  console.error('DATABASE_URL not found');
-  process.exit(1);
-}
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const db = drizzle({ client: pool });
 
-const pool = new Pool({ connectionString: DATABASE_URL });
-
-async function updateTGlassmanProfile() {
-  const client = await pool.connect();
-  
+async function testAndPopulateData() {
   try {
-    console.log('Updating tglassman profile...');
-    
-    // Update user_profiles table with comprehensive data
-    const result = await client.query(`
-      UPDATE user_profiles SET 
-        display_name = $1,
-        first_name = $2,
-        last_name = $3,
-        bio = $4,
-        location = $5,
-        phone_number = $6,
-        email = $7,
-        website = $8,
-        instagram_url = $9,
-        twitter_url = $10,
-        linkedin_url = $11,
-        hourly_rate = $12,
-        daily_rate = $13,
-        weekly_rate = $14,
-        availability = $15,
-        skills = $16,
-        specialties = $17,
-        years_experience = $18,
-        education = $19,
-        awards = $20,
-        languages = $21,
-        updated_at = NOW()
-      WHERE user_id = (
-        SELECT id FROM users WHERE username = $22
-      )
-      RETURNING user_id, display_name;
-    `, [
-      'Tom Glassman',
-      'Tom',
-      'Glassman',
-      'Emmy-nominated actor with over 15 years of experience in film, television, and theater. Known for powerful dramatic performances and versatile character work. Recent Emmy nomination for Best Supporting Actor in "City of Dreams" (2024). Classically trained at Juilliard with extensive stage experience including Broadway productions.',
-      'Los Angeles, CA',
-      '+1 (555) 234-5678',
-      'tom.glassman@email.com',
-      'www.tomglassmanactor.com',
-      'https://instagram.com/tomglassmanactor',
-      'https://twitter.com/tomglassman',
-      'https://linkedin.com/in/tomglassman',
-      500,
-      4000,
-      20000,
-      'Available',
-      ['Method Acting', 'Stage Combat', 'Voice Acting', 'Improv', 'Character Development', 'Accent Work', 'Musical Theater', 'Shakespearean Theater'],
-      ['Drama', 'Thriller', 'Independent Films', 'Character Acting', 'Stage Performance'],
-      15,
-      'MFA Acting - The Juilliard School, BA Theater Arts - UCLA',
-      'Emmy Nomination - Best Supporting Actor (2024), Critics Choice Award - Best Ensemble Cast (2023), Tony Award Nomination - Best Actor in a Play (2019)',
-      ['English (Native)', 'Spanish (Conversational)', 'French (Basic)'],
-      'tglassman'
-    ]);
-    
-    if (result.rows.length > 0) {
-      console.log('✅ Updated profile for user:', result.rows[0].display_name);
-      console.log('🎯 Profile URL: /profile/tglassman');
+    console.log('🔍 Testing data population for tglassman...');
+
+    // Just check if user exists and add basic info
+    const userCheck = await db.execute(`SELECT id, username FROM users WHERE username = 'tglassman'`);
+    console.log('User check result:', userCheck.rows);
+
+    if (userCheck.rows.length > 0) {
+      const userId = userCheck.rows[0].id;
+      console.log(`✅ Found tglassman with ID: ${userId}`);
+
+      // Update basic user info
+      await db.execute(`
+        UPDATE users SET 
+          first_name = 'Tom',
+          last_name = 'Glassman',
+          email = 'tom@tglassman.com',
+          pricing_tier_id = 3
+        WHERE id = ${userId}
+      `);
+
+      console.log('✅ Updated user basic info');
+
+      // Check for existing profile
+      const profileCheck = await db.execute(`SELECT id FROM user_profiles WHERE user_id = ${userId}`);
+      
+      if (profileCheck.rows.length > 0) {
+        // Update existing profile
+        await db.execute(`
+          UPDATE user_profiles SET
+            display_name = 'Tom Glassman',
+            bio = 'Emmy-nominated actor with 15+ years experience in film, TV and theater. Known for powerful dramatic performances.',
+            location = 'Los Angeles, CA',
+            website = 'https://tomglassman.com'
+          WHERE user_id = ${userId}
+        `);
+        console.log('✅ Updated existing profile');
+      } else {
+        // Create new profile
+        await db.execute(`
+          INSERT INTO user_profiles (user_id, role, talent_type, display_name, bio, location, website)
+          VALUES (${userId}, 'talent', 'actor', 'Tom Glassman', 'Emmy-nominated actor with 15+ years experience in film, TV and theater.', 'Los Angeles, CA', 'https://tomglassman.com')
+        `);
+        console.log('✅ Created new profile');
+      }
+
+      console.log('🎉 Basic data population completed for tglassman!');
     } else {
-      console.log('❌ No profile found for tglassman user');
+      console.log('❌ User tglassman not found');
     }
     
   } catch (error) {
-    console.error('Error:', error.message);
+    console.error('❌ Error:', error.message);
   } finally {
-    client.release();
+    await pool.end();
   }
 }
 
-updateTGlassmanProfile().then(() => {
-  pool.end();
-  process.exit(0);
-}).catch(console.error);
+testAndPopulateData();

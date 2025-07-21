@@ -37,10 +37,10 @@ export function TemplateSelector({
 }) {
   const templates = [
     { id: 'classic' as ProfileTemplate, name: 'Classic', icon: Layout, color: 'bg-blue-500', description: 'Professional and timeless', requiresUpgrade: false },
-    { id: 'modern' as ProfileTemplate, name: 'Modern', icon: Zap, color: 'bg-purple-500', description: 'Sleek and contemporary', requiresUpgrade: true },
-    { id: 'artistic' as ProfileTemplate, name: 'Artistic', icon: Palette, color: 'bg-pink-500', description: 'Creative and expressive', requiresUpgrade: true },
-    { id: 'minimal' as ProfileTemplate, name: 'Minimal', icon: Sparkles, color: 'bg-gray-500', description: 'Clean and focused', requiresUpgrade: true },
-    { id: 'cinematic' as ProfileTemplate, name: 'Cinematic', icon: Crown, color: 'bg-yellow-500', description: 'Dramatic and bold', requiresUpgrade: true }
+    { id: 'modern' as ProfileTemplate, name: 'Modern', icon: Zap, color: 'bg-purple-500', description: 'Sleek and contemporary', requiresUpgrade: false },
+    { id: 'artistic' as ProfileTemplate, name: 'Artistic', icon: Palette, color: 'bg-pink-500', description: 'Creative and expressive', requiresUpgrade: false },
+    { id: 'minimal' as ProfileTemplate, name: 'Minimal', icon: Sparkles, color: 'bg-gray-500', description: 'Clean and focused', requiresUpgrade: false },
+    { id: 'cinematic' as ProfileTemplate, name: 'Cinematic', icon: Crown, color: 'bg-yellow-500', description: 'Dramatic and bold', requiresUpgrade: false }
   ];
 
   // Check if user has access to all templates
