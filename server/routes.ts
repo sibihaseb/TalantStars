@@ -6479,6 +6479,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Hero image upload endpoint
+  app.post('/api/user/hero-image', isAuthenticated, upload.array('files', 1), async (req: any, res) => {
+    try {
+      console.log('Hero image upload request received');
+      console.log('User:', req.user?.id);
+      console.log('Files:', req.files);
+
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const file = req.files[0];
+      const userId = req.user.id;
+
+      // Upload to Wasabi S3
+      const heroImageUrl = await uploadFileToWasabi(file, `user-${userId}/hero/`);
+      console.log('Hero image uploaded to S3:', heroImageUrl);
+
+      // Update user's hero image URL
+      const updatedUser = await simpleStorage.updateUserHeroImage(userId, heroImageUrl);
+      console.log('User hero image updated in database');
+
+      res.json({ 
+        success: true, 
+        heroImageUrl,
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error('Hero image upload error:', error);
+      res.status(500).json({ message: 'Failed to upload hero image' });
+    }
+  });
+
+  // Get user profile for ProfileViewer
+  app.get('/api/user/profile/:userId', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: 'Invalid user ID' });
+      }
+
+      const user = await simpleStorage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Get additional profile data
+      const profile = await simpleStorage.getUserProfileByUserId(userId.toString());
+      
+      res.json({
+        ...user,
+        ...profile,
+        userId: user.id
+      });
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      res.status(500).json({ message: 'Failed to fetch user profile' });
+    }
+  });
+
+  // Get basic user data by ID
+  app.get('/api/users/:userId', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: 'Invalid user ID' });
+      }
+
+      const user = await simpleStorage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      res.status(500).json({ message: 'Failed to fetch user' });
+    }
+  });
+
+  // Get media files for a user
+  app.get('/api/media/:userId', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: 'Invalid user ID' });
+      }
+
+      const mediaFiles = await simpleStorage.getMediaFilesByUserId(userId);
+      res.json(mediaFiles || []);
+    } catch (error) {
+      console.error('Error fetching media files:', error);
+      res.status(500).json({ message: 'Failed to fetch media files' });
+    }
+  });
+
   app.post('/api/users/:userId/skills/:skill/endorse', isAuthenticated, async (req: any, res) => {
     try {
       const { userId, skill } = req.params;

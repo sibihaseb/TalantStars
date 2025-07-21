@@ -29,13 +29,19 @@ export default function ProfileViewer() {
   
   // Fetch profile data for the specific user
   const { data: profile, isLoading, error } = useQuery<any>({
-    queryKey: ['/api/talent', userId],
+    queryKey: [`/api/user/profile/${userId}`],
+    enabled: !!userId,
+  });
+
+  // Fetch user data for the specific user
+  const { data: userData } = useQuery<any>({
+    queryKey: [`/api/users/${userId}`],
     enabled: !!userId,
   });
 
   // Fetch media files for the user
   const { data: mediaFiles = [] } = useQuery<any[]>({
-    queryKey: ['/api/media', userId],
+    queryKey: [`/api/media/${userId}`],
     enabled: !!userId,
   });
   
@@ -79,7 +85,9 @@ export default function ProfileViewer() {
     );
   }
 
-  const isOwnProfile = user?.id === profile?.userId;
+  // Determine ownership - check both user data sources
+  const profileUser = userData || profile;
+  const isOwnProfile = user?.id === profileUser?.id || user?.id === profileUser?.userId;
 
   // Create sample media data for demonstration
   const sampleMedia = [
@@ -129,11 +137,19 @@ export default function ProfileViewer() {
 
   // Render the appropriate template
   const renderTemplate = () => {
+    // Combine profile and user data properly
+    const combinedUserData = {
+      ...(userData || user || {}),
+      ...(profile || {}),
+      id: userData?.id || profile?.userId || userId,
+      userId: userData?.id || profile?.userId || userId
+    };
+
     const templateProps: any = {
-      profile,
+      profile: combinedUserData,
       mediaFiles: displayMedia,
       userId,
-      user
+      user: combinedUserData
     };
 
     switch (selectedTemplate) {

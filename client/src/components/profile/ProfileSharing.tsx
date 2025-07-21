@@ -15,6 +15,8 @@ import {
   TemplateSelector,
   type ProfileTemplate 
 } from '@/components/profile/ProfileTemplates';
+import ProfileImageUpload from '@/components/ProfileImageUpload';
+import HeroImageUpload from '@/components/HeroImageUpload';
 import { 
   Copy, 
   Share, 
@@ -503,6 +505,72 @@ export default function ProfileSharing() {
                 {sharingSettings?.isPublic ? "Public" : "Private"}
               </div>
               <div className="text-sm text-gray-600">Visibility</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Profile Images Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Edit2 className="h-5 w-5" />
+            Profile Images
+          </CardTitle>
+          <CardDescription>
+            Upload and customize your profile and hero images
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Profile Image Upload */}
+          <div>
+            <h3 className="text-sm font-medium mb-3">Profile Avatar (1:1 ratio)</h3>
+            <ProfileImageUpload 
+              currentImage={user?.profileImageUrl || undefined}
+              onImageUpdate={(url) => {
+                // Profile image update handled by component
+                queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+              }}
+            />
+          </div>
+
+          {/* Hero Image Upload */}
+          <div>
+            <h3 className="text-sm font-medium mb-3">Hero Background Image (16:9 ratio)</h3>
+            <HeroImageUpload 
+              currentImage={user?.heroImageUrl || undefined}
+              aspectRatio={16/9}
+              onImageUpdate={(url) => {
+                // Hero image update handled by component
+                queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+              }}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Template Customization Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="h-5 w-5" />
+            Template Customization
+          </CardTitle>
+          <CardDescription>
+            Choose how your profile looks when shared
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium">Profile Template</Label>
+              <p className="text-sm text-gray-500 mb-3">
+                Select the design template for your public profile
+              </p>
+              <TemplateSelector 
+                selectedTemplate={selectedTemplate}
+                onTemplateChange={setSelectedTemplate}
+              />
             </div>
           </div>
         </CardContent>
