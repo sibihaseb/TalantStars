@@ -21,7 +21,8 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
   const { toast } = useToast();
 
   const { data: pricingTiers = [], isLoading } = useQuery({
-    queryKey: ["/api/pricing-tiers"],
+    queryKey: ["/api/pricing-tiers", userRole],
+    queryFn: () => fetch(`/api/pricing-tiers?role=${userRole}`).then(res => res.json()),
     enabled: isOpen,
   });
 

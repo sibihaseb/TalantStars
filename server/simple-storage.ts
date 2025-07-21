@@ -268,8 +268,9 @@ export class DatabaseStorage implements IStorage {
       return tiers;
     } catch (error) {
       console.log("Database error, falling back to mock pricing tiers:", error.message);
-      // Mock implementation as fallback
+      // Mock implementation as fallback with tiers for all user roles
       return [
+        // Talent Tiers
         {
           id: 1,
           name: "Basic Talent",
@@ -307,6 +308,144 @@ export class DatabaseStorage implements IStorage {
           duration: "monthly",
           category: "talent",
           features: ["Everything in Professional", "Custom branding", "API access", "White-label options"],
+          maxPhotos: -1,
+          maxVideos: -1,
+          maxAudio: -1,
+          maxExternalLinks: -1,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        // Manager Tiers
+        {
+          id: 4,
+          name: "Basic Manager",
+          price: 0,
+          duration: "monthly",
+          category: "manager",
+          features: ["Client management", "Basic talent search", "Basic messaging"],
+          maxPhotos: 5,
+          maxVideos: 1,
+          maxAudio: 1,
+          maxExternalLinks: 3,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 5,
+          name: "Professional Manager",
+          price: 49,
+          duration: "monthly",
+          category: "manager",
+          features: ["Everything in Basic", "Advanced talent search", "Client roster", "Commission tracking"],
+          maxPhotos: 20,
+          maxVideos: 5,
+          maxAudio: 5,
+          maxExternalLinks: 10,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 6,
+          name: "Enterprise Manager",
+          price: 149,
+          duration: "monthly",
+          category: "manager",
+          features: ["Everything in Professional", "Team management", "API access", "Custom branding"],
+          maxPhotos: -1,
+          maxVideos: -1,
+          maxAudio: -1,
+          maxExternalLinks: -1,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        // Agent Tiers
+        {
+          id: 7,
+          name: "Basic Agent",
+          price: 0,
+          duration: "monthly",
+          category: "agent",
+          features: ["Client representation", "Basic job matching", "Deal tracking"],
+          maxPhotos: 5,
+          maxVideos: 1,
+          maxAudio: 1,
+          maxExternalLinks: 3,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 8,
+          name: "Professional Agent",
+          price: 59,
+          duration: "monthly",
+          category: "agent",
+          features: ["Everything in Basic", "Advanced deal tracking", "Commission analytics", "Client dashboard"],
+          maxPhotos: 20,
+          maxVideos: 5,
+          maxAudio: 5,
+          maxExternalLinks: 10,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 9,
+          name: "Enterprise Agent",
+          price: 199,
+          duration: "monthly",
+          category: "agent",
+          features: ["Everything in Professional", "Multi-client management", "Custom contracts", "White-label"],
+          maxPhotos: -1,
+          maxVideos: -1,
+          maxAudio: -1,
+          maxExternalLinks: -1,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        // Producer Tiers
+        {
+          id: 10,
+          name: "Basic Producer",
+          price: 0,
+          duration: "monthly",
+          category: "producer",
+          features: ["Project creation", "Basic talent search", "Casting calls"],
+          maxPhotos: 5,
+          maxVideos: 1,
+          maxAudio: 1,
+          maxExternalLinks: 3,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 11,
+          name: "Professional Producer",
+          price: 79,
+          duration: "monthly",
+          category: "producer",
+          features: ["Everything in Basic", "Advanced casting tools", "Project analytics", "Team collaboration"],
+          maxPhotos: 20,
+          maxVideos: 5,
+          maxAudio: 5,
+          maxExternalLinks: 10,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 12,
+          name: "Enterprise Producer",
+          price: 249,
+          duration: "monthly",
+          category: "producer",
+          features: ["Everything in Professional", "Multi-project management", "Studio tools", "Custom workflows"],
           maxPhotos: -1,
           maxVideos: -1,
           maxAudio: -1,

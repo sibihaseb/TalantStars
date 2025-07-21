@@ -3518,26 +3518,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Role-based pricing tier routes
-  app.get('/api/pricing-tiers', async (req, res) => {
+  // Role-based pricing tier routes (authentication optional to allow user role detection)
+  app.get('/api/pricing-tiers', (req: any, res) => {
+    // Add user to request if authenticated, but don't require it
+    passport.authenticate('local', { session: false }, (err: any, user: any) => {
+      if (user) {
+        req.user = user;
+      }
+      handlePricingTiersRequest(req, res);
+    })(req, res);
+  });
+
+  async function handlePricingTiersRequest(req: any, res: any) {
     try {
       console.log("🔥 API: Getting pricing tiers...", { role: req.query.role });
-      const role = req.query.role as string;
-      let tiers;
       
-      if (role) {
-        tiers = await simpleStorage.getPricingTiersByRole(role);
-      } else {
-        tiers = await simpleStorage.getPricingTiers();
+      // Get all pricing tiers
+      const allTiers = await simpleStorage.getPricingTiers();
+      console.log(`Found ${allTiers.length} pricing tiers`);
+      
+      // Filter based on role/category if provided, otherwise get user's role for filtering
+      let role = req.query.role as string;
+      
+      // If no role specified but user is authenticated, use their role
+      if (!role && req.user) {
+        role = req.user.role;
+        console.log(`No role provided, using user role: ${role}`);
       }
       
-      console.log("✅ API: Successfully retrieved tiers", { count: tiers.length });
-      res.json(tiers);
+      let filteredTiers = allTiers;
+      
+      if (role) {
+        console.log(`Filtering by role/category: ${role}`);
+        filteredTiers = allTiers.filter(tier => {
+          const tierCategory = tier.category?.toLowerCase();
+          const requestedRole = role.toLowerCase();
+          
+          console.log(`Tier: ${tier.name}, Category: ${tierCategory}, Requested: ${requestedRole}`);
+          
+          return tierCategory === requestedRole;
+        });
+        console.log(`After filtering: ${filteredTiers.length} tiers`);
+      }
+      
+      // If no tiers found for the specific role, return all tiers (fallback)
+      if (filteredTiers.length === 0) {
+        console.log("No tiers found for role, returning all tiers");
+        filteredTiers = allTiers;
+      }
+      
+      console.log("✅ API: Successfully retrieved tiers", { count: filteredTiers.length });
+      res.json(filteredTiers);
     } catch (error) {
       console.error("❌ API: Error fetching pricing tiers:", error);
       
-      // Return fallback pricing tiers directly in the API route
+      // Return comprehensive fallback pricing tiers for all roles
       const fallbackTiers = [
+        // Talent Tiers
         {
           id: 1,
           name: "Basic Talent",
@@ -3582,13 +3619,161 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isActive: true,
           createdAt: new Date(),
           updatedAt: new Date()
+        },
+        // Manager Tiers
+        {
+          id: 4,
+          name: "Basic Manager",
+          price: 0,
+          duration: "monthly",
+          category: "manager",
+          features: ["Client management", "Basic talent search", "Basic messaging"],
+          maxPhotos: 5,
+          maxVideos: 1,
+          maxAudio: 1,
+          maxExternalLinks: 3,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 5,
+          name: "Professional Manager",
+          price: 49,
+          duration: "monthly",
+          category: "manager",
+          features: ["Everything in Basic", "Advanced talent search", "Client roster", "Commission tracking"],
+          maxPhotos: 20,
+          maxVideos: 5,
+          maxAudio: 5,
+          maxExternalLinks: 10,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 6,
+          name: "Enterprise Manager",
+          price: 149,
+          duration: "monthly",
+          category: "manager",
+          features: ["Everything in Professional", "Team management", "API access", "Custom branding"],
+          maxPhotos: -1,
+          maxVideos: -1,
+          maxAudio: -1,
+          maxExternalLinks: -1,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        // Agent Tiers
+        {
+          id: 7,
+          name: "Basic Agent",
+          price: 0,
+          duration: "monthly",
+          category: "agent",
+          features: ["Client representation", "Basic job matching", "Deal tracking"],
+          maxPhotos: 5,
+          maxVideos: 1,
+          maxAudio: 1,
+          maxExternalLinks: 3,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 8,
+          name: "Professional Agent",
+          price: 59,
+          duration: "monthly",
+          category: "agent",
+          features: ["Everything in Basic", "Advanced deal tracking", "Commission analytics", "Client dashboard"],
+          maxPhotos: 20,
+          maxVideos: 5,
+          maxAudio: 5,
+          maxExternalLinks: 10,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 9,
+          name: "Enterprise Agent",
+          price: 199,
+          duration: "monthly",
+          category: "agent",
+          features: ["Everything in Professional", "Multi-client management", "Custom contracts", "White-label"],
+          maxPhotos: -1,
+          maxVideos: -1,
+          maxAudio: -1,
+          maxExternalLinks: -1,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        // Producer Tiers
+        {
+          id: 10,
+          name: "Basic Producer",
+          price: 0,
+          duration: "monthly",
+          category: "producer",
+          features: ["Project creation", "Basic talent search", "Casting calls"],
+          maxPhotos: 5,
+          maxVideos: 1,
+          maxAudio: 1,
+          maxExternalLinks: 3,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 11,
+          name: "Professional Producer",
+          price: 79,
+          duration: "monthly",
+          category: "producer",
+          features: ["Everything in Basic", "Advanced casting tools", "Project analytics", "Team collaboration"],
+          maxPhotos: 20,
+          maxVideos: 5,
+          maxAudio: 5,
+          maxExternalLinks: 10,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 12,
+          name: "Enterprise Producer",
+          price: 249,
+          duration: "monthly",
+          category: "producer",
+          features: ["Everything in Professional", "Multi-project management", "Studio tools", "Custom workflows"],
+          maxPhotos: -1,
+          maxVideos: -1,
+          maxAudio: -1,
+          maxExternalLinks: -1,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       ];
       
-      console.log("✅ API: Using fallback pricing tiers", { count: fallbackTiers.length });
-      res.json(fallbackTiers);
+      // Filter fallback tiers by role if provided
+      const role = req.query.role as string;
+      let filteredFallbackTiers = fallbackTiers;
+      
+      if (role) {
+        filteredFallbackTiers = fallbackTiers.filter(tier => 
+          tier.category === role.toLowerCase()
+        );
+      }
+      
+      console.log("✅ API: Using fallback pricing tiers", { count: filteredFallbackTiers.length });
+      res.json(filteredFallbackTiers);
     }
-  });
+  }
 
   app.get('/api/pricing-tiers/:id', async (req, res) => {
     try {
