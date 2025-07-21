@@ -23,7 +23,7 @@ import { TierUpgradeManager } from '@/components/billing/TierUpgradeManager';
 import { AvailabilityCalendar } from '@/components/talent/AvailabilityCalendar';
 import ProfileImageUpload from "@/components/ProfileImageUpload";
 import ProfileSharing from '@/components/profile/ProfileSharing';
-import { HeroBannerUpload } from '@/components/profile/HeroBannerUpload';
+
 import TemplateSelector from '@/components/profile/ProfileTemplates';
 
 import UsageDashboard from "@/components/usage/UsageDashboard";
@@ -539,44 +539,83 @@ export default function TalentDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Avatar className="h-16 w-16 border-4 border-white shadow-lg">
-                <AvatarImage src={profile?.profileImageUrl} />
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xl font-bold">
-                  {user?.firstName?.[0]}{user?.lastName?.[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  Welcome back, {user?.firstName}!
-                </h1>
-                <p className="text-gray-600 dark:text-gray-300 flex items-center space-x-2">
-                  <span className="capitalize">{user?.role}</span>
-                  <span>•</span>
-                  <span className="capitalize">{profile?.talentType}</span>
-                  <span>•</span>
-                  <MapPin className="w-4 h-4" />
-                  <span>{profile?.location}</span>
-                </p>
-              </div>
+      <div className="max-w-7xl mx-auto px-4 pt-4">
+        {/* Enhanced Header with larger profile and better layout */}
+        <div className="mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
+            {/* Hero background section */}
+            <div className="h-32 bg-gradient-to-r from-purple-600 via-blue-500 to-teal-400 relative">
+              <div className="absolute inset-0 bg-black/20"></div>
             </div>
-            <div className="flex items-center space-x-3">
-              <NotificationDropdown />
-              <Button variant="outline" size="sm" onClick={() => setLocation('/profile-sharing')}>
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </Button>
-              <Button 
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                onClick={handleEditProfile}
-              >
-                <Edit3 className="w-4 h-4 mr-2" />
-                Edit Profile
-              </Button>
+            
+            {/* Profile content */}
+            <div className="relative px-6 pb-6">
+              <div className="flex flex-col md:flex-row items-center md:items-end space-y-4 md:space-y-0 md:space-x-6 -mt-16">
+                {/* Larger profile avatar */}
+                <Avatar className="h-32 w-32 border-4 border-white shadow-xl ring-4 ring-purple-100">
+                  <AvatarImage src={profile?.profileImageUrl} className="object-cover" />
+                  <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-600 text-white text-3xl font-bold">
+                    {user?.firstName?.[0]}{user?.lastName?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                
+                {/* Profile info */}
+                <div className="flex-1 text-center md:text-left md:mt-4">
+                  <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+                      {user?.firstName} {user?.lastName}
+                    </h1>
+                    {profile?.isVerified && (
+                      <div className="flex items-center gap-1 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded-full">
+                        <Award className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <span className="text-xs font-medium text-blue-600 dark:text-blue-400">Verified</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
+                    <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 px-3 py-1">
+                      {user?.role}
+                    </Badge>
+                    {profile?.talentType && (
+                      <Badge variant="outline" className="px-3 py-1">
+                        {profile?.talentType}
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <p className="text-gray-600 dark:text-gray-300 max-w-2xl mb-3 leading-relaxed">
+                    {profile?.bio || `${profile?.talentType} with extensive experience in the entertainment industry.`}
+                  </p>
+                  
+                  <div className="flex items-center justify-center md:justify-start space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center gap-1">
+                      <MapPin className="w-4 h-4" />
+                      <span>{profile?.location || 'Location not set'}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      <span>Available for work</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Action buttons */}
+                <div className="flex items-center space-x-3 md:mt-4">
+                  <NotificationDropdown />
+                  <Button variant="outline" size="sm" onClick={() => setLocation('/profile-sharing')}>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </Button>
+                  <Button 
+                    className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 shadow-lg"
+                    onClick={handleEditProfile}
+                  >
+                    <Edit3 className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -938,35 +977,23 @@ export default function TalentDashboard() {
                 onUpgrade={handleUpgrade}
               />
               
-              {/* Hero Banner Upload */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <HeroBannerUpload 
-                  onUploadSuccess={(url) => {
-                    toast({
-                      title: "Hero Banner Updated",
-                      description: "Your profile hero banner has been updated successfully",
-                    });
-                    queryClient.invalidateQueries({ queryKey: ['/api/user/profile'] });
-                  }}
-                />
-                
-                <Card className="cursor-pointer border-2 border-dashed border-gray-300 hover:border-green-500 transition-colors">
-                  <CardHeader className="text-center pb-2">
-                    <div className="flex justify-center mb-2">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
-                        <Camera className="w-6 h-6 text-white" />
-                      </div>
+              {/* Profile Image Upload */}
+              <Card className="cursor-pointer border-2 border-dashed border-gray-300 hover:border-purple-500 transition-colors">
+                <CardHeader className="text-center pb-2">
+                  <div className="flex justify-center mb-2">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-blue-600 flex items-center justify-center">
+                      <Camera className="w-6 h-6 text-white" />
                     </div>
-                    <CardTitle className="text-lg">Profile Image</CardTitle>
-                    <CardDescription>
-                      Upload your professional headshot
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="text-center">
-                    <ProfileImageUpload />
-                  </CardContent>
-                </Card>
-              </div>
+                  </div>
+                  <CardTitle className="text-lg">Update Profile Image</CardTitle>
+                  <CardDescription>
+                    Upload your professional headshot
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <ProfileImageUpload />
+                </CardContent>
+              </Card>
 
               {/* Media Portfolio */}
               <Card>
@@ -1160,6 +1187,119 @@ export default function TalentDashboard() {
             <div className="space-y-6">
               {/* Profile Sharing Section */}
               <ProfileSharing />
+              
+              {/* Social Media Integration */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Social Media Integration</CardTitle>
+                      <CardDescription>Connect your social media accounts to showcase your online presence</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Instagram */}
+                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
+                          <Camera className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Instagram</p>
+                          <p className="text-sm text-gray-500">Connect your Instagram</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">Connect</Button>
+                    </div>
+                    
+                    {/* Twitter/X */}
+                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center">
+                          <MessageSquare className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Twitter/X</p>
+                          <p className="text-sm text-gray-500">Connect your Twitter</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">Connect</Button>
+                    </div>
+                    
+                    {/* LinkedIn */}
+                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                          <Users className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium">LinkedIn</p>
+                          <p className="text-sm text-gray-500">Connect your LinkedIn</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">Connect</Button>
+                    </div>
+                    
+                    {/* TikTok */}
+                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-black to-red-600 rounded-lg flex items-center justify-center">
+                          <PlayCircle className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium">TikTok</p>
+                          <p className="text-sm text-gray-500">Connect your TikTok</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">Connect</Button>
+                    </div>
+                    
+                    {/* YouTube */}
+                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+                          <PlayCircle className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium">YouTube</p>
+                          <p className="text-sm text-gray-500">Connect your YouTube</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">Connect</Button>
+                    </div>
+                    
+                    {/* Website */}
+                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gray-600 rounded-lg flex items-center justify-center">
+                          <Globe className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Personal Website</p>
+                          <p className="text-sm text-gray-500">Add your website</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">Add</Button>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Star className="w-3 h-3 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">Pro Tip</h4>
+                        <p className="text-sm text-blue-700 dark:text-blue-200">
+                          Connecting your social media accounts helps industry professionals discover your work and increases your visibility in search results.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>
