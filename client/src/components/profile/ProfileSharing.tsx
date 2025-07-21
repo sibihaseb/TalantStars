@@ -48,6 +48,9 @@ interface ProfileSharingSettings {
   shareableFields: string[];
   profileViews: number;
   lastShared?: string;
+  showSocialMedia?: boolean;
+  showExperience?: boolean;
+  showSkills?: boolean;
 }
 
 export default function ProfileSharing() {
@@ -59,7 +62,7 @@ export default function ProfileSharing() {
   const [newCustomUrl, setNewCustomUrl] = useState("");
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<ProfileTemplate>('modern');
-  const [activeTab, setActiveTab] = useState<'sharing' | 'appearance' | 'settings'>('sharing');
+  const [activeTab, setActiveTab] = useState<'sharing' | 'appearance' | 'templates' | 'settings'>('sharing');
 
   // Fetch current profile sharing settings
   const { data: sharingSettings, isLoading, error } = useQuery<ProfileSharingSettings>({
@@ -121,10 +124,10 @@ export default function ProfileSharing() {
       twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=Check out my profile!`,
       email: `mailto:?subject=Check out my profile&body=${encodeURIComponent(url)}`,
       sms: `sms:?body=Check out my profile: ${encodeURIComponent(url)}`
-    };
+    } as const;
 
-    if (shareUrls[platform]) {
-      window.open(shareUrls[platform], '_blank');
+    if (platform in shareUrls) {
+      window.open(shareUrls[platform as keyof typeof shareUrls], '_blank');
     }
   };
 
@@ -434,7 +437,7 @@ export default function ProfileSharing() {
               </CardHeader>
               <CardContent>
                 <ProfileImageUpload
-                  currentImage={user?.profileImageUrl}
+                  currentImage={user?.profileImageUrl || undefined}
                   onImageUpdate={(url) => {
                     queryClient.invalidateQueries({ queryKey: ['/api/user'] });
                   }}
@@ -455,7 +458,7 @@ export default function ProfileSharing() {
               </CardHeader>
               <CardContent>
                 <ProfileImageUpload
-                  currentImage={user?.heroImageUrl}
+                  currentImage={user?.heroImageUrl || undefined}
                   onImageUpdate={(url) => {
                     queryClient.invalidateQueries({ queryKey: ['/api/user'] });
                   }}

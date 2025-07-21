@@ -221,7 +221,7 @@ export function SkillEndorsements({ profile, isOwnProfile }: SkillEndorsementsPr
                     >
                       <Avatar className="h-8 w-8">
                         <AvatarFallback className="text-xs">
-                          {endorsement.endorserId.slice(0, 2).toUpperCase()}
+                          {String(endorsement.endorserId).slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
@@ -240,7 +240,7 @@ export function SkillEndorsements({ profile, isOwnProfile }: SkillEndorsementsPr
                           {new Date(endorsement.createdAt).toLocaleDateString()}
                         </p>
                       </div>
-                      {user && user.id === endorsement.endorserId && (
+                      {user && String(user.id) === String(endorsement.endorserId) && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -266,7 +266,7 @@ export function SkillEndorsements({ profile, isOwnProfile }: SkillEndorsementsPr
           <div className="mt-6 pt-6 border-t">
             <h4 className="text-sm font-medium mb-3">Quick Endorse</h4>
             <div className="flex flex-wrap gap-2">
-              {profileSkills.map((skill) => (
+              {profileSkills.map((skill: string) => (
                 <Button
                   key={skill}
                   variant="outline"
