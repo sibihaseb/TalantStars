@@ -1853,11 +1853,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get individual talent profile
   app.get('/api/talent/:id', async (req, res) => {
     try {
-      const userId = req.params.id;
-      const profile = await simpleStorage.getUserProfile(userId);
-      if (!profile) {
-        return res.status(404).json({ message: "Talent profile not found" });
+      const userIdParam = req.params.id;
+      console.log("Talent profile request for:", userIdParam);
+      
+      let userId: number;
+      let profile;
+      let user;
+      
+      // Check if it's a numeric ID or username
+      if (/^\d+$/.test(userIdParam)) {
+        // It's a numeric ID
+        userId = parseInt(userIdParam);
+        user = await simpleStorage.getUser(userId);
+        profile = await simpleStorage.getUserProfile(userId);
+      } else {
+        // It's a username - need to find user first
+        user = await simpleStorage.getUserByUsername(userIdParam);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        userId = user.id;
+        profile = await simpleStorage.getUserProfile(userId);
       }
+      
+      console.log("Found user:", user?.id, user?.username);
+      console.log("Looking for profile for user ID:", userId);
+      
+      if (!profile) {
+        // If no profile exists, create a basic one or return user data
+        console.log("No profile found, returning user data with basic profile");
+        const basicProfile = {
+          userId: userId,
+          displayName: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.username || 'User',
+          bio: '',
+          location: '',
+          website: '',
+          phoneNumber: '',
+          profileImageUrl: '',
+          isVerified: false,
+          isFeatured: false,
+          availabilityStatus: 'available',
+          skills: [],
+          talentType: user?.role === 'talent' ? 'actor' : null,
+          role: user?.role || 'talent'
+        };
+        return res.json(basicProfile);
+      }
+      
+      console.log("Found profile for user:", userId);
       res.json(profile);
     } catch (error) {
       console.error("Error fetching talent profile:", error);

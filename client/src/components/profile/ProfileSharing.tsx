@@ -158,7 +158,7 @@ export default function ProfileSharing() {
   const baseUrl = window.location.origin;
   const profileUrl = sharingSettings?.customUrl 
     ? `${baseUrl}/profile/${sharingSettings.customUrl}`
-    : `${baseUrl}/profile/${user?.id}`;
+    : `${baseUrl}/profile/${user?.username || user?.id}`;
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
