@@ -27,21 +27,21 @@ export default function ProfileViewer() {
   
   console.log("ProfileViewer - userId from params:", userId);
   
-  // Fetch profile data for the specific user
+  // Fetch profile data using the talent endpoint which handles both usernames and IDs
   const { data: profile, isLoading, error } = useQuery<any>({
-    queryKey: [`/api/user/profile/${userId}`],
+    queryKey: [`/api/talent/${userId}`],
     enabled: !!userId,
   });
 
-  // Fetch user data for the specific user
+  // Fetch user data using the talent endpoint
   const { data: userData } = useQuery<any>({
-    queryKey: [`/api/users/${userId}`],
+    queryKey: [`/api/talent/${userId}`],
     enabled: !!userId,
   });
 
-  // Fetch media files for the user
+  // Fetch media files for the user using the talent endpoint
   const { data: mediaFiles = [] } = useQuery<any[]>({
-    queryKey: [`/api/media/${userId}`],
+    queryKey: [`/api/media/user/${userId}`],
     enabled: !!userId,
   });
   

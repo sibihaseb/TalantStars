@@ -1,0 +1,76 @@
+[Info] Successfully preconnected to https://api.stripe.com/
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/user/profile (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/applications (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/social/stats (main.tsx, line 27)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/opportunities (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] ProfileImageUpload component rendered – Object (main.tsx, line 27)
+Object
+[Log] ProfileImageUpload component rendered – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] Choose Image button clicked (main.tsx, line 27)
+[Log] File input ref: –  (main.tsx, line 27)
+<input data-replit-metadata="client/src/components/ProfileImageUpload.tsx:404:14" data-component-name="input" type="file" accept="image/*" class="hidden" data-testid="file-input">
+
+<input data-replit-metadata="client/src/components/ProfileImageUpload.tsx:404:14" data-component-name="input" type="file" accept="image/*" class="hidden" data-testid="file-input">
+[Log] File input ref value: – "" (main.tsx, line 27)
+[Log] File input changed - event fired (main.tsx, line 27)
+[Log] Event target: –  (main.tsx, line 27)
+<input data-replit-metadata="client/src/components/ProfileImageUpload.tsx:404:14" data-component-name="input" type="file" accept="image/*" class="hidden" data-testid="file-input">
+
+<input data-replit-metadata="client/src/components/ProfileImageUpload.tsx:404:14" data-component-name="input" type="file" accept="image/*" class="hidden" data-testid="file-input">
+[Log] Files length: – 1 (main.tsx, line 27)
+[Log] File list: – FileList (main.tsx, line 27)
+FileList
+[Log] Selected file: – File (main.tsx, line 27)
+File
+[Log] File details: – Object (main.tsx, line 27)
+Object
+[Log] File selected: – "Screenshot 2025-07-21 at 1.52.36 PM.png" – "image/png" – 2862247 (main.tsx, line 27)
+[Log] Setting selected file and preview URL (main.tsx, line 27)
+[Log] Cropper should now be visible (main.tsx, line 27)
+[Log] ProfileImageUpload component rendered – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] Canvas blob created: – Blob (main.tsx, line 27)
+Blob
+[Log] Blob size: – 187427 (main.tsx, line 27)
+[Log] Blob type: – "image/jpeg" (main.tsx, line 27)
+[Log] FormData contents: (main.tsx, line 27)
+[Log] heroImage: – File (main.tsx, line 27)
+File
+[Log] Uploading file to server... (main.tsx, line 27)
+[Log] FormData entries: – Array (1) (main.tsx, line 27)
+Array (1)
+[Log] === FRONTEND API REQUEST === (main.tsx, line 27)
+[Log] Method: POST, URL: /api/user/hero-image (main.tsx, line 27)
+[Log] FormData entries: – Array (1) (main.tsx, line 27)
+Array (1)
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (hero-image, line 0)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 500, URL: /api/user/hero-image (main.tsx, line 27)
+[Log] 🚨 API ERROR: 500 - {"error":"Failed to upload hero image","details":"syntax error at or near \"where\""} (main.tsx, line 27)
+> Selected Element
+< <div data-replit-metadata="client/src/components/profile/ProfileSharing.tsx:461:10" data-component-name="Card" class="rounded-lg border bg-card text-card-foreground shadow-sm">…</div>
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)

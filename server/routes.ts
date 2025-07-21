@@ -1889,6 +1889,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Media endpoint that handles usernames and IDs
+  app.get('/api/media/user/:id', async (req, res) => {
+    try {
+      const userIdParam = req.params.id;
+      console.log("Media files request for:", userIdParam);
+      
+      let userId: number;
+      let user;
+      
+      // Check if it's a numeric ID or username
+      if (/^\d+$/.test(userIdParam)) {
+        userId = parseInt(userIdParam);
+      } else {
+        // It's a username - find user first
+        user = await simpleStorage.getUserByUsername(userIdParam);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        userId = user.id;
+      }
+      
+      const mediaFiles = await simpleStorage.getUserMediaFiles(userId);
+      res.json(mediaFiles);
+    } catch (error) {
+      console.error("Error fetching user media files:", error);
+      res.status(500).json({ message: "Failed to fetch media files" });
+    }
+  });
+
   // Get individual talent profile
   app.get('/api/talent/:id', async (req, res) => {
     try {

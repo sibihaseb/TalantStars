@@ -85,17 +85,27 @@ export default function TemplateSelector({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2 text-2xl font-bold">
-          <Palette className="h-6 w-6 text-purple-600" />
-          Choose Your Profile Style
+      {/* Header with Enhanced Styling */}
+      <div className="text-center space-y-4 mb-8">
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <div className="flex items-center justify-center gap-3 text-3xl font-bold">
+            <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-2 rounded-xl shadow-lg">
+              <Palette className="h-8 w-8 text-white" />
+            </div>
+            Choose Your Profile Style
+          </div>
         </div>
-        <p className="text-gray-600">Select a template that matches your professional image</p>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Select a stunning template that showcases your talent and professional brand
+        </p>
+        <div className="flex items-center justify-center gap-2 text-sm text-purple-600 bg-purple-50 px-4 py-2 rounded-full">
+          <Sparkles className="h-4 w-4" />
+          Professional designs crafted for entertainers
+        </div>
       </div>
 
-      {/* Template Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Template Grid with Better Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {templates.map((template) => {
           const canAccess = canAccessTemplate(template.tier);
           const TierIcon = tierInfo[template.tier].icon;
@@ -105,29 +115,42 @@ export default function TemplateSelector({
           return (
             <Card
               key={template.id}
-              className={`relative cursor-pointer transition-all duration-300 transform hover:scale-105 ${
+              className={`relative cursor-pointer transition-all duration-500 transform hover:scale-105 hover:rotate-1 ${
                 isSelected 
-                  ? 'ring-2 ring-purple-500 shadow-xl' 
-                  : 'hover:shadow-lg'
-              } ${!canAccess ? 'opacity-60' : ''}`}
+                  ? 'ring-4 ring-purple-500 shadow-2xl bg-gradient-to-br from-purple-50 to-blue-50' 
+                  : 'hover:shadow-2xl hover:bg-gradient-to-br hover:from-gray-50 hover:to-white'
+              } ${!canAccess ? 'opacity-60' : ''} group`}
               onMouseEnter={() => setHoveredTemplate(template.id)}
               onMouseLeave={() => setHoveredTemplate(null)}
               onClick={() => canAccess ? onTemplateChange(template.id) : onUpgrade()}
             >
-              {/* Template Preview */}
-              <div className={`h-32 rounded-t-lg ${template.preview} relative overflow-hidden`}>
-                {/* Preview Content */}
-                <div className="absolute inset-0 p-4">
-                  <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 h-full flex flex-col justify-between">
-                    <div>
-                      <div className="h-2 bg-gray-300 rounded mb-2"></div>
-                      <div className="h-1 bg-gray-200 rounded mb-1"></div>
-                      <div className="h-1 bg-gray-200 rounded w-3/4"></div>
+              {/* Template Preview - Enhanced */}
+              <div className={`h-48 rounded-t-lg ${template.preview} relative overflow-hidden group-hover:scale-105 transition-transform duration-300`}>
+                {/* Animated Preview Content */}
+                <div className="absolute inset-0 p-6">
+                  <div className="bg-white/90 backdrop-blur-md rounded-xl p-4 h-full flex flex-col justify-between shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+                    <div className="space-y-3">
+                      {/* Profile Header Mockup */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full animate-pulse"></div>
+                        <div className="space-y-1 flex-1">
+                          <div className="h-3 bg-gradient-to-r from-gray-400 to-gray-300 rounded-full"></div>
+                          <div className="h-2 bg-gray-200 rounded-full w-2/3"></div>
+                        </div>
+                      </div>
+                      {/* Content Lines */}
+                      <div className="space-y-2">
+                        <div className="h-2 bg-gray-300 rounded-full"></div>
+                        <div className="h-2 bg-gray-200 rounded-full w-5/6"></div>
+                        <div className="h-2 bg-gray-200 rounded-full w-3/4"></div>
+                      </div>
                     </div>
-                    <div className="flex gap-1">
-                      <div className="w-4 h-4 bg-gray-300 rounded"></div>
-                      <div className="w-4 h-4 bg-gray-200 rounded"></div>
-                      <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                    {/* Media Gallery Mockup */}
+                    <div className="flex gap-2 justify-between">
+                      <div className="w-8 h-8 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-lg shadow-sm"></div>
+                      <div className="w-8 h-8 bg-gradient-to-br from-green-300 to-blue-400 rounded-lg shadow-sm"></div>
+                      <div className="w-8 h-8 bg-gradient-to-br from-pink-300 to-purple-400 rounded-lg shadow-sm"></div>
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-300 to-indigo-400 rounded-lg shadow-sm"></div>
                     </div>
                   </div>
                 </div>
@@ -180,40 +203,68 @@ export default function TemplateSelector({
                 </div>
 
                 {/* Features */}
-                <div className="space-y-1">
-                  {template.features.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2 text-xs text-gray-500">
-                      <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                      {feature}
+                <div className="space-y-2">
+                  {template.features.slice(0, 3).map((feature, index) => (
+                    <div key={index} className="flex items-center gap-2 text-xs text-gray-600">
+                      <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-blue-500 rounded-full flex-shrink-0"></div>
+                      <span className="truncate">{feature}</span>
                     </div>
                   ))}
+                  {template.features.length > 3 && (
+                    <div className="text-xs text-gray-400 italic">
+                      +{template.features.length - 3} more features
+                    </div>
+                  )}
                 </div>
 
-                {/* Action Button */}
-                <div className="pt-2">
+                {/* Enhanced Action Section */}
+                <div className="pt-3 space-y-2">
                   {canAccess ? (
                     <Button 
                       variant={isSelected ? "default" : "outline"}
-                      className="w-full"
+                      className={`w-full transition-all duration-300 ${
+                        isSelected 
+                          ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg' 
+                          : 'border-2 border-purple-200 hover:border-purple-400 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50'
+                      }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         onTemplateChange(template.id);
                       }}
                     >
-                      {isSelected ? 'Selected' : 'Select Template'}
+                      {isSelected ? (
+                        <>
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Currently Selected
+                        </>
+                      ) : (
+                        <>
+                          <Palette className="w-4 h-4 mr-2" />
+                          Choose This Style
+                        </>
+                      )}
                     </Button>
                   ) : (
-                    <Button 
-                      variant="outline"
-                      className="w-full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onUpgrade();
-                      }}
-                    >
-                      <Crown className="w-4 h-4 mr-2" />
-                      Upgrade to Access
-                    </Button>
+                    <div className="space-y-2">
+                      <div className="text-center p-2 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200">
+                        <p className="text-xs text-gray-600 mb-1">Premium Template</p>
+                        <div className="flex items-center justify-center gap-1 text-xs font-medium text-yellow-700">
+                          <Crown className="w-3 h-3" />
+                          {tierInfo[template.tier].name} Plan Required
+                        </div>
+                      </div>
+                      <Button 
+                        variant="outline"
+                        className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-none shadow-md hover:shadow-lg transition-all duration-300"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onUpgrade();
+                        }}
+                      >
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Upgrade Now
+                      </Button>
+                    </div>
                   )}
                 </div>
               </CardContent>
