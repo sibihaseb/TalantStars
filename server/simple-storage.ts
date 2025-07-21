@@ -68,6 +68,9 @@ export interface IStorage {
 
   // Profile image update method
   updateUserProfileImage(userId: number, imageUrl: string): Promise<User>;
+  
+  // Hero image update method
+  updateUserHeroImage(userId: number, imageUrl: string): Promise<User>;
 
   // Social posts operations
   getUserSocialPosts(userId: number): Promise<any[]>;
@@ -591,6 +594,16 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .update(users)
       .set({ profileImageUrl: imageUrl })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  // Hero image update method
+  async updateUserHeroImage(userId: number, imageUrl: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ heroImageUrl: imageUrl })
       .where(eq(users.id, userId))
       .returning();
     return user;

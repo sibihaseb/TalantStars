@@ -168,9 +168,10 @@ export default function ProfileImageUpload({
 
     if (!ctx) return;
 
-    // Set canvas size to 16:9 aspect ratio (e.g., 1920x1080)
-    const outputWidth = 1920;
-    const outputHeight = 1080;
+    // Set canvas size to 1:1 aspect ratio (square)
+    const outputSize = 800; // 800x800 square
+    const outputWidth = outputSize;
+    const outputHeight = outputSize;
     canvas.width = outputWidth;
     canvas.height = outputHeight;
 
@@ -224,15 +225,11 @@ export default function ProfileImageUpload({
       const img = imageRef.current;
       const rect = img.getBoundingClientRect();
       
-      // Calculate 16:9 crop area centered on the image
-      const aspectRatio = 16 / 9;
-      let cropWidth = rect.width;
-      let cropHeight = rect.width / aspectRatio;
-      
-      if (cropHeight > rect.height) {
-        cropHeight = rect.height;
-        cropWidth = rect.height * aspectRatio;
-      }
+      // Calculate 1:1 (square) crop area centered on the image
+      const aspectRatio = 1; // Square aspect ratio
+      let cropSize = Math.min(rect.width, rect.height);
+      let cropWidth = cropSize;
+      let cropHeight = cropSize;
       
       const x = (rect.width - cropWidth) / 2;
       const y = (rect.height - cropHeight) / 2;
@@ -322,7 +319,7 @@ export default function ProfileImageUpload({
           </CardTitle>
           {mandatory && (
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              A profile image is required. Images will be automatically cropped to 16:9 aspect ratio.
+              A profile image is required. Images will be automatically cropped to 1:1 (square) aspect ratio for your avatar.
             </p>
           )}
         </CardHeader>
@@ -334,7 +331,7 @@ export default function ProfileImageUpload({
                 src={currentImage}
                 alt="Current profile"
                 className="w-full max-w-md h-auto rounded-lg shadow-md"
-                style={{ aspectRatio: '16/9', objectFit: 'cover' }}
+                style={{ aspectRatio: '1/1', objectFit: 'cover' }}
               />
             </div>
           )}
@@ -363,7 +360,7 @@ export default function ProfileImageUpload({
                     Supports JPG, PNG, GIF up to 10MB
                   </p>
                   <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
-                    Images will be automatically cropped to 16:9 aspect ratio
+                    Images will be automatically cropped to 1:1 (square) aspect ratio
                   </p>
                 </div>
                 <Button

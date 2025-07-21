@@ -341,6 +341,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload profile image
+  // Hero image upload endpoint
+  app.post('/api/user/hero-image', isAuthenticated, requirePlan, upload.single('heroImage'), async (req: any, res) => {
+    console.log('🔥🔥🔥 HERO IMAGE UPLOAD ENDPOINT CALLED');
+    console.log('User ID from session:', req.user?.id);
+    console.log('File received:', req.file ? `${req.file.originalname} (${req.file.size} bytes)` : 'No file');
+    
+    try {
+      if (!req.file) {
+        console.log('❌ No file uploaded');
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      const file = req.file;
+      const userId = req.user.id;
+      
+      console.log('📤 Uploading to Wasabi S3...');
+      const uploadResult = await uploadFileToWasabi(file, `user-${userId}/hero/`);
+      console.log('✅ S3 Upload successful:', uploadResult.url);
+
+      // Update user's heroImageUrl in database
+      console.log('💾 Updating user hero image URL in database...');
+      const updatedUser = await simpleStorage.updateUserHeroImage(userId, uploadResult.url);
+      
+      console.log('✅ Hero image updated successfully');
+      res.json({ 
+        success: true, 
+        heroImageUrl: uploadResult.url,
+        user: updatedUser
+      });
+
+    } catch (error) {
+      console.error('❌ Hero image upload failed:', error);
+      res.status(500).json({ 
+        error: 'Failed to upload hero image',
+        details: error.message 
+      });
+    }
+  });
+
   app.post('/api/user/profile-image', isAuthenticated, requirePlan, upload.single('image'), async (req: any, res) => {
     try {
       const userId = req.user.id;

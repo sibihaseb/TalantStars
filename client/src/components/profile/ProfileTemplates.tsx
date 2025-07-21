@@ -119,11 +119,18 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Traditional Header */}
       <Card className="bg-white shadow-lg">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-800 h-32"></div>
+        <div 
+          className="h-32 bg-gradient-to-r from-blue-600 to-blue-800"
+          style={{
+            backgroundImage: user?.heroImageUrl ? `linear-gradient(rgba(59, 130, 246, 0.7), rgba(30, 64, 175, 0.7)), url(${user.heroImageUrl})` : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        ></div>
         <CardContent className="relative pt-0 pb-6">
           <div className="flex flex-col md:flex-row items-center md:items-end space-y-4 md:space-y-0 md:space-x-6 -mt-16">
             <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
-              <AvatarImage src={mediaFiles.find(m => m.category === 'headshot')?.url} />
+              <AvatarImage src={user?.profileImageUrl || user?.mainImageUrl || mediaFiles.find(m => m.category === 'headshot')?.url} />
               <AvatarFallback className="text-2xl font-bold bg-blue-600 text-white">
                 {profile?.displayName?.split(' ').map((n: string) => n[0]).join('') || 'U'}
               </AvatarFallback>
