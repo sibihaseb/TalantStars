@@ -6508,7 +6508,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('Hero image upload error:', error);
-      res.status(500).json({ message: 'Failed to upload hero image' });
+      res.status(500).json({ 
+        error: 'Failed to upload hero image',
+        details: error.message
+      });
     }
   });
 

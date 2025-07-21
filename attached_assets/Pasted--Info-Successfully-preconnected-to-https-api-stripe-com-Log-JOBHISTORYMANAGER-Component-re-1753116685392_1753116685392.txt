@@ -1,0 +1,49 @@
+[Info] Successfully preconnected to https://api.stripe.com/
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (index-EfMtUnwR.js, line 844)
+Object
+[Log] === FRONTEND API RESPONSE === (index-EfMtUnwR.js, line 844)
+[Log] Status: 200, URL: /api/opportunities (index-EfMtUnwR.js, line 844)
+[Log] === FRONTEND API RESPONSE === (index-EfMtUnwR.js, line 844)
+[Log] Status: 200, URL: /api/job-history/67 (index-EfMtUnwR.js, line 844)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (index-EfMtUnwR.js, line 844)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (index-EfMtUnwR.js, line 844)
+Object
+[Log] === FRONTEND API RESPONSE === (index-EfMtUnwR.js, line 844)
+[Log] Status: 200, URL: /api/applications (index-EfMtUnwR.js, line 844)
+[Log] === FRONTEND API RESPONSE === (index-EfMtUnwR.js, line 844)
+[Log] Status: 200, URL: /api/social/stats (index-EfMtUnwR.js, line 844)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (index-EfMtUnwR.js, line 844)
+Object
+[Log] === FRONTEND API RESPONSE === (index-EfMtUnwR.js, line 844)
+[Log] Status: 200, URL: /api/user/profile (index-EfMtUnwR.js, line 844)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (index-EfMtUnwR.js, line 844)
+Object
+[Log] === FRONTEND API RESPONSE === (index-EfMtUnwR.js, line 844)
+[Log] Status: 200, URL: /api/opportunities (index-EfMtUnwR.js, line 844)
+[Log] === FRONTEND API RESPONSE === (index-EfMtUnwR.js, line 844)
+[Log] Status: 200, URL: /api/user/profile (index-EfMtUnwR.js, line 844)
+[Log] === FRONTEND API RESPONSE === (index-EfMtUnwR.js, line 844)
+[Log] Status: 200, URL: /api/applications (index-EfMtUnwR.js, line 844)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (index-EfMtUnwR.js, line 844)
+Object
+[Log] === FRONTEND API RESPONSE === (index-EfMtUnwR.js, line 844)
+[Log] Status: 200, URL: /api/job-history/67 (index-EfMtUnwR.js, line 844)
+[Log] === FRONTEND API REQUEST === (index-EfMtUnwR.js, line 844)
+[Log] Method: POST, URL: /api/user/hero-image (index-EfMtUnwR.js, line 844)
+[Log] FormData entries: – Array (1) (index-EfMtUnwR.js, line 844)
+Array (1)
+[Error] Failed to load resource: the server responded with a status of 500 () (hero-image, line 0)
+[Log] === FRONTEND API RESPONSE === (index-EfMtUnwR.js, line 844)
+[Log] Status: 500, URL: /api/user/hero-image (index-EfMtUnwR.js, line 844)
+[Log] 🚨 API ERROR: 500 - {"error":"Failed to upload hero image","details":"syntax error at or near \"where\""} (index-EfMtUnwR.js, line 844)
+[Log] === FRONTEND API RESPONSE === (index-EfMtUnwR.js, line 844)
+[Log] Status: 200, URL: /api/job-history/67 (index-EfMtUnwR.js, line 844)
+> Selected Element
+< <div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">…</div>
+[Log] === FRONTEND API RESPONSE === (index-EfMtUnwR.js, line 844)
+[Log] Status: 200, URL: /api/job-history/67 (index-EfMtUnwR.js, line 844)
+[Log] === FRONTEND API RESPONSE === (index-EfMtUnwR.js, line 844)
+[Log] Status: 200, URL: /api/job-history/67 (index-EfMtUnwR.js, line 844)
+[Log] === FRONTEND API RESPONSE === (index-EfMtUnwR.js, line 844)
+[Log] Status: 200, URL: /api/job-history/67 (index-EfMtUnwR.js, line 844)

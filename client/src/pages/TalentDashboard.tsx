@@ -22,6 +22,7 @@ import { JobHistoryManager } from '@/components/talent/JobHistoryManager';
 import { TierUpgradeManager } from '@/components/billing/TierUpgradeManager';
 import { AvailabilityCalendar } from '@/components/talent/AvailabilityCalendar';
 import ProfileImageUpload from "@/components/ProfileImageUpload";
+import ProfileSharing from '@/components/profile/ProfileSharing';
 
 import UsageDashboard from "@/components/usage/UsageDashboard";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
@@ -632,7 +633,7 @@ export default function TalentDashboard() {
             <TabsTrigger value="billing">Billing</TabsTrigger>
             <TabsTrigger value="usage">Usage</TabsTrigger>
             <TabsTrigger value="calendar">Calendar</TabsTrigger>
-            <TabsTrigger value="settings">Profile Sharing</TabsTrigger>
+            <TabsTrigger value="settings">Settings & Sharing</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -1104,157 +1105,8 @@ export default function TalentDashboard() {
 
           <TabsContent value="settings">
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Settings className="w-5 h-5" />
-                    <span>Profile Settings</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Update your profile information and preferences
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  
-                  {/* Profile Image Section */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Profile Picture</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Upload a professional headshot that will be displayed as your avatar throughout the platform.
-                      This appears as a round profile picture, not a banner image.
-                    </p>
-                    
-                    <div className="flex items-start space-x-6">
-                      {/* Current Profile Image Preview */}
-                      <div className="space-y-2">
-                        <Avatar className="w-24 h-24 border-4 border-gray-200 dark:border-gray-700">
-                          <AvatarImage src={user?.profileImageUrl || profile?.profileImageUrl} />
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-2xl font-bold">
-                            {user?.firstName?.[0]}{user?.lastName?.[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <p className="text-xs text-gray-500 text-center">Current</p>
-                      </div>
-                      
-                      {/* Profile Image Upload Component */}
-                      <div className="flex-1">
-                        <ProfileImageUpload 
-                          currentImage={user?.profileImageUrl || profile?.profileImageUrl}
-                          onImageUpdate={(url) => {
-                            // Force refresh user data
-                            queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-                            queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <Separator />
-                  
-                  {/* Hero Background Image Section */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Hero Background Image</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Upload a background image for the Classic profile template. This will appear as a hero background with an overlay.
-                      Recommended size: 1920x1080 or higher. This is separate from your profile picture.
-                    </p>
-                    
-                    <div className="flex items-start space-x-6">
-                      {/* Current Hero Image Preview */}
-                      <div className="space-y-2">
-                        {user?.heroImageUrl ? (
-                          <div 
-                            className="w-32 h-18 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-cover bg-center"
-                            style={{ backgroundImage: `url(${user.heroImageUrl})` }}
-                          />
-                        ) : (
-                          <div className="w-32 h-18 border-2 border-gray-300 dark:border-gray-700 rounded-lg bg-gradient-to-r from-blue-600 to-blue-800 flex items-center justify-center">
-                            <span className="text-white text-xs">Default Gradient</span>
-                          </div>
-                        )}
-                        <p className="text-xs text-gray-500 text-center">Current Hero</p>
-                      </div>
-                      
-                      {/* Hero Image Upload */}
-                      <div className="flex-1">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => {
-                            // Create a file input for hero image upload
-                            const input = document.createElement('input');
-                            input.type = 'file';
-                            input.accept = 'image/*';
-                            input.onchange = async (e) => {
-                              const file = (e.target as HTMLInputElement).files?.[0];
-                              if (file) {
-                                const formData = new FormData();
-                                formData.append('heroImage', file);
-                                
-                                try {
-                                  const response = await apiRequest('POST', '/api/user/hero-image', formData);
-                                  const result = await response.json();
-                                  
-                                  // Refresh user data
-                                  queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-                                  queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
-                                  
-                                  toast({
-                                    title: "Success",
-                                    description: "Hero background image updated successfully!",
-                                  });
-                                } catch (error) {
-                                  toast({
-                                    title: "Error",
-                                    description: "Failed to upload hero image. Please try again.",
-                                    variant: "destructive",
-                                  });
-                                }
-                              }
-                            };
-                            input.click();
-                          }}
-                        >
-                          <Upload className="w-4 h-4 mr-2" />
-                          Upload Hero Image
-                        </Button>
-                        <p className="text-xs text-gray-500 mt-2">
-                          JPG, PNG up to 10MB. Best aspect ratio: 16:9 (1920x1080)
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <Separator />
-                  
-                  {/* Basic Profile Information */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Basic Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="firstName">First Name</Label>
-                        <Input id="firstName" defaultValue={user?.firstName} disabled />
-                      </div>
-                      <div>
-                        <Label htmlFor="lastName">Last Name</Label>
-                        <Input id="lastName" defaultValue={user?.lastName} disabled />
-                      </div>
-                      <div>
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" defaultValue={user?.email} disabled />
-                      </div>
-                      <div>
-                        <Label htmlFor="role">Role</Label>
-                        <Input id="role" defaultValue={user?.role} disabled />
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      To update basic information, please use the "Edit Profile" button in the header to access the full onboarding flow.
-                    </p>
-                  </div>
-                  
-                </CardContent>
-              </Card>
+              {/* Profile Sharing Section */}
+              <ProfileSharing />
             </div>
           </TabsContent>
         </Tabs>
