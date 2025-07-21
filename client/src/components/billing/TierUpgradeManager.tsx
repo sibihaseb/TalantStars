@@ -99,21 +99,43 @@ function TierUpgradeManagerContent() {
 
       setIsProcessing(true);
 
-      const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: window.location.origin + '/dashboard?upgraded=true',
-        },
-      });
+      try {
+        const { error, paymentIntent } = await stripe.confirmPayment({
+          elements,
+          redirect: 'if_required',
+        });
 
-      if (error) {
+        if (error) {
+          console.error("Payment error:", error);
+          toast({
+            title: "Payment Failed",
+            description: error.message || "Payment could not be processed",
+            variant: "destructive",
+          });
+        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+          console.log("Payment succeeded:", paymentIntent.id);
+          
+          // Update user tier after successful payment
+          await updateTierMutation.mutateAsync(tierId);
+          
+          toast({
+            title: "Payment Successful!",
+            description: "Your plan has been upgraded successfully.",
+          });
+        } else {
+          console.log("Payment processing completed with status:", paymentIntent?.status);
+          toast({
+            title: "Payment Processing",
+            description: "Your payment is being processed. You'll receive an update shortly.",
+          });
+        }
+      } catch (err) {
+        console.error("Payment processing error:", err);
         toast({
-          title: "Payment Failed",
-          description: error.message || "Payment could not be processed",
+          title: "Payment Error",
+          description: "An unexpected error occurred during payment processing",
           variant: "destructive",
         });
-      } else {
-        await updateTierMutation.mutateAsync(tierId);
       }
 
       setIsProcessing(false);

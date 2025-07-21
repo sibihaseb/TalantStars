@@ -92,6 +92,15 @@ export function TemplateSelector({
                 {isLocked && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 rounded-lg">
                     <Crown className="w-6 h-6 text-yellow-500 mb-2" />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUpgrade?.();
+                      }}
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium hover:shadow-lg transition-all"
+                    >
+                      Upgrade Now
+                    </button>
                     <p className="text-xs text-center text-gray-600 mb-2 px-2">
                       Please upgrade to access this template
                     </p>
@@ -112,6 +121,8 @@ export function TemplateSelector({
     </Card>
   );
 }
+
+export default TemplateSelector;
 
 // Classic Template - Professional and Timeless
 export function ClassicTemplate({ profile, mediaFiles, userId, user }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {

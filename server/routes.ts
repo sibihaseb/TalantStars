@@ -3681,30 +3681,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/stripe/create-payment-intent', isAuthenticated, async (req: any, res) => {
     try {
       const { tierId, amount } = req.body;
+      console.log("🔥 API: Creating Stripe payment intent:", { tierId, amount, userId: req.user.id });
       
       if (!process.env.STRIPE_SECRET_KEY) {
+        console.error("❌ API: STRIPE_SECRET_KEY not found in environment");
         return res.status(500).json({ message: "Stripe not configured" });
       }
 
-      // Initialize Stripe with the secret key
+      // Initialize Stripe with proper import and updated API version
       const Stripe = require('stripe');
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-        apiVersion: '2023-10-16'
+        apiVersion: '2023-10-16' // Use stable API version compatible with current setup
       });
 
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency: 'usd',
+        automatic_payment_methods: {
+          enabled: true,
+        },
         metadata: {
-          userId: req.user.id,
+          userId: req.user.id.toString(),
           tierId: tierId.toString()
         }
       });
 
-      res.json({ clientSecret: paymentIntent.client_secret });
+      console.log("✅ API: Stripe payment intent created:", paymentIntent.id);
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id
+      });
     } catch (error) {
       console.error("❌ API: Error creating payment intent:", error);
-      res.status(500).json({ message: "Failed to create payment intent" });
+      res.status(500).json({ 
+        message: "Failed to create payment intent",
+        error: error.message 
+      });
+    }
+  });
+
+  // Stripe webhook to handle successful payments
+  app.post('/api/stripe/webhook', async (req, res) => {
+    try {
+      const sig = req.headers['stripe-signature'];
+      const Stripe = require('stripe');
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+      
+      let event;
+      try {
+        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+      } catch (err) {
+        console.log('❌ Webhook signature verification failed.', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+      }
+
+      if (event.type === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object;
+        const { userId, tierId } = paymentIntent.metadata;
+        
+        console.log("🔥 Stripe: Payment succeeded, updating user tier:", { userId, tierId });
+        await simpleStorage.updateUserTier(parseInt(userId), parseInt(tierId));
+        console.log("✅ Stripe: User tier updated successfully");
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error("❌ Stripe webhook error:", error);
+      res.status(500).json({ message: "Webhook processing failed" });
     }
   });
 

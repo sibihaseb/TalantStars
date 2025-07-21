@@ -126,8 +126,8 @@ export default function TemplateSelector({
                 if (canAccess) {
                   onTemplateChange(template.id);
                 } else {
-                  // Redirect to pricing page instead of generic upgrade
-                  window.location.href = '/pricing';
+                  // Call the onUpgrade function to trigger billing modal
+                  onUpgrade();
                 }
               }}
             >

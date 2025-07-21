@@ -24,6 +24,7 @@ import { AvailabilityCalendar } from '@/components/talent/AvailabilityCalendar';
 import ProfileImageUpload from "@/components/ProfileImageUpload";
 import ProfileSharing from '@/components/profile/ProfileSharing';
 import { HeroBannerUpload } from '@/components/profile/HeroBannerUpload';
+import TemplateSelector from '@/components/profile/ProfileTemplates';
 
 import UsageDashboard from "@/components/usage/UsageDashboard";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
@@ -514,6 +515,15 @@ export default function TalentDashboard() {
     setIsMediaDialogOpen(true);
   };
 
+  const handleUpgrade = () => {
+    setActiveTab("billing");
+    toast({
+      title: "Upgrade Required",
+      description: "Please upgrade your plan to access this feature.",
+      variant: "default",
+    });
+  };
+
   const { data: socialStats } = useQuery({
     queryKey: ['/api/social/stats'],
     queryFn: async () => {
@@ -916,6 +926,18 @@ export default function TalentDashboard() {
 
           <TabsContent value="portfolio">
             <div className="space-y-6">
+              {/* Profile Template Selection */}
+              <TemplateSelector 
+                selectedTemplate="classic"
+                onTemplateChange={(template) => {
+                  toast({
+                    title: "Template Updated",
+                    description: `Profile template changed to ${template}`,
+                  });
+                }}
+                onUpgrade={handleUpgrade}
+              />
+              
               {/* Hero Banner Upload */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <HeroBannerUpload 
