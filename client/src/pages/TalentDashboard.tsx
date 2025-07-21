@@ -59,7 +59,8 @@ import {
   BarChart3,
   PlayCircle,
   Edit,
-  Trash
+  Trash,
+  Info
 } from 'lucide-react';
 
 export default function TalentDashboard() {
