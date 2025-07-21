@@ -456,7 +456,7 @@ export default function ProfileSharing() {
               </CardContent>
             </Card>
 
-            {/* Profile Template Section - Moved next to appearance */}
+            {/* Profile Template Section - Next to appearance sections */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
