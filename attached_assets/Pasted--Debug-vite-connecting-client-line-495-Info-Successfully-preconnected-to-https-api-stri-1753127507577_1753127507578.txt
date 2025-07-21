@@ -1,0 +1,86 @@
+[Debug] [vite] connecting... (client, line 495)
+[Info] Successfully preconnected to https://api.stripe.com/
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – {jobHistory: [], userId: 67} (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/applications (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/opportunities (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/social/stats (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/user/profile (main.tsx, line 27)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – {jobHistory: [], userId: 67} (main.tsx, line 27)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – {jobHistory: [], userId: 67} (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – {jobHistory: [], userId: 67} (main.tsx, line 27)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – {jobHistory: [], userId: 67} (main.tsx, line 27)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – {jobHistory: [], userId: 67} (main.tsx, line 27)
+[Log] ProfileImageUpload component rendered – {showCropper: false, selectedFile: undefined, previewUrl: false, …} (main.tsx, line 27)
+{showCropper: false, selectedFile: undefined, previewUrl: false, mandatory: false}Object
+[Log] ProfileImageUpload component rendered – {showCropper: false, selectedFile: undefined, previewUrl: false, …} (main.tsx, line 27)
+{showCropper: false, selectedFile: undefined, previewUrl: false, mandatory: false}Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – {jobHistory: [], userId: 67} (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/opportunities (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/user/profile (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/applications (main.tsx, line 27)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – {jobHistory: [], userId: 67} (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] ProfileImageUpload component rendered – {showCropper: false, selectedFile: undefined, previewUrl: false, …} (main.tsx, line 27)
+{showCropper: false, selectedFile: undefined, previewUrl: false, mandatory: false}Object
+[Log] ProfileImageUpload component rendered – {showCropper: false, selectedFile: undefined, previewUrl: false, …} (main.tsx, line 27)
+{showCropper: false, selectedFile: undefined, previewUrl: false, mandatory: false}Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/profile/sharing (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] Choose Image button clicked (main.tsx, line 27)
+[Log] File input ref: –  (main.tsx, line 27)
+<input data-replit-metadata="client/src/components/ProfileImageUpload.tsx:404:14" data-component-name="input" type="file" accept="image/*" class="hidden" data-testid="file-input">
+
+<input data-replit-metadata="client/src/components/ProfileImageUpload.tsx:404:14" data-component-name="input" type="file" accept="image/*" class="hidden" data-testid="file-input">
+[Log] File input ref value: – "" (main.tsx, line 27)
+[Log] File input changed - event fired (main.tsx, line 27)
+[Log] Event target: –  (main.tsx, line 27)
+<input data-replit-metadata="client/src/components/ProfileImageUpload.tsx:404:14" data-component-name="input" type="file" accept="image/*" class="hidden" data-testid="file-input">
+
+<input data-replit-metadata="client/src/components/ProfileImageUpload.tsx:404:14" data-component-name="input" type="file" accept="image/*" class="hidden" data-testid="file-input">
+[Log] Files length: – 1 (main.tsx, line 27)
+[Log] File list: – FileList {0: File, length: 1, item: function} (main.tsx, line 27)
+FileList {0: File, length: 1, item: function}FileList
+[Log] Selected file: – File {name: "Screenshot 2025-07-21 at 3.31.48 PM.png", lastModified: 1753126314000, webkitRelativePath: "", …} (main.tsx, line 27)
+File {name: "Screenshot 2025-07-21 at 3.31.48 PM.png", lastModified: 1753126314000, webkitRelativePath: "", size: 2522715, type: "image/png", …}File
+[Log] File details: – {name: "Screenshot 2025-07-21 at 3.31.48 PM.png", size: 2522715, type: "image/png"} (main.tsx, line 27)
+[Log] File selected: – "Screenshot 2025-07-21 at 3.31.48 PM.png" – "image/png" – 2522715 (main.tsx, line 27)
+[Log] Setting selected file and preview URL (main.tsx, line 27)
+[Log] Cropper should now be visible (main.tsx, line 27)
+[Log] ProfileImageUpload component rendered – {showCropper: true, selectedFile: "Screenshot 2025-07-21 at 3.31.48 PM.png", previewUrl: true, …} (main.tsx, line 27)
+{showCropper: true, selectedFile: "Screenshot 2025-07-21 at 3.31.48 PM.png", previewUrl: true, mandatory: false}Object
+[Log] Canvas blob created: – Blob {size: 189410, type: "image/jpeg", slice: function, …} (main.tsx, line 27)
+Blob {size: 189410, type: "image/jpeg", slice: function, stream: function, text: function, …}Blob
+[Log] Blob size: – 189410 (main.tsx, line 27)
+[Log] Blob type: – "image/jpeg" (main.tsx, line 27)
+[Log] FormData contents: (main.tsx, line 27)
+[Log] heroImage: – File {name: "profile-image.jpg", lastModified: 1753127404881, webkitRelativePath: "", …} (main.tsx, line 27)
+File {name: "profile-image.jpg", lastModified: 1753127404881, webkitRelativePath: "", size: 189410, type: "image/jpeg", …}File
+[Log] Uploading file to server... (main.tsx, line 27)
+[Log] FormData entries: – [Array] (1) (main.tsx, line 27)
+[Array]Array (1)
+[Log] === FRONTEND API REQUEST === (main.tsx, line 27)
+[Log] Method: POST, URL: /api/user/hero-image (main.tsx, line 27)
+[Log] FormData entries: – [Array] (1) (main.tsx, line 27)
+[Array]Array (1)
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (hero-image, line 0)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 500, URL: /api/user/hero-image (main.tsx, line 27)
+[Log] 🚨 API ERROR: 500 - {"error":"Failed to upload hero image","details":"Failed to update hero image: syntax error at or near \"where\""} (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)

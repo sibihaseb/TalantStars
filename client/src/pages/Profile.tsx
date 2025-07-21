@@ -305,9 +305,22 @@ export default function Profile() {
               {/* Profile Overview */}
               <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                 <CardHeader className="text-center">
-                  <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <User className="h-12 w-12 text-white" />
-                  </div>
+                  {user?.profileImageUrl ? (
+                    <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden border-4 border-white shadow-lg">
+                      <img 
+                        src={user.profileImageUrl} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-white text-2xl font-bold">
+                        {user?.firstName?.[0] || user?.displayName?.[0] || "T"}
+                        {user?.lastName?.[0] || ""}
+                      </span>
+                    </div>
+                  )}
                   <CardTitle className="text-xl text-gray-900 dark:text-white">
                     {form.getValues("displayName") || user?.firstName || "Your Profile"}
                   </CardTitle>

@@ -122,7 +122,14 @@ export default function TemplateSelector({
               } ${!canAccess ? 'opacity-60' : ''} group`}
               onMouseEnter={() => setHoveredTemplate(template.id)}
               onMouseLeave={() => setHoveredTemplate(null)}
-              onClick={() => canAccess ? onTemplateChange(template.id) : onUpgrade()}
+              onClick={() => {
+                if (canAccess) {
+                  onTemplateChange(template.id);
+                } else {
+                  // Redirect to pricing page instead of generic upgrade
+                  window.location.href = '/pricing';
+                }
+              }}
             >
               {/* Template Preview - Enhanced */}
               <div className={`h-48 rounded-t-lg ${template.preview} relative overflow-hidden group-hover:scale-105 transition-transform duration-300`}>

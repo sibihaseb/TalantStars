@@ -57,8 +57,9 @@ export function SocialMediaManager() {
   // Fetch current social links
   const { data: socialLinksData, isLoading } = useQuery({
     queryKey: ['/api/user/social-links'],
+    select: (data) => data?.socialLinks || {},
     onSuccess: (data) => {
-      setSocialLinks(data.socialLinks || {});
+      setSocialLinks(data || {});
     }
   });
 

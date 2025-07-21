@@ -608,7 +608,9 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log('🔍 Updating hero image for user:', userId);
       console.log('🔍 New image URL:', imageUrl);
-      console.log('🔍 Database schema check:', { heroImageUrl: imageUrl });
+      
+      // Import users from the correct schema
+      const { users } = await import("@shared/schema");
       
       const [user] = await db
         .update(users)
@@ -620,11 +622,10 @@ export class DatabaseStorage implements IStorage {
         throw new Error('User not found or update failed');
       }
       
-      console.log('✅ Hero image updated successfully:', user);
+      console.log('✅ Hero image updated successfully');
       return user;
     } catch (error) {
       console.error('❌ Failed to update hero image:', error);
-      console.error('❌ Error details:', error?.message, error?.stack);
       throw new Error(`Failed to update hero image: ${error?.message || 'Unknown error'}`);
     }
   }

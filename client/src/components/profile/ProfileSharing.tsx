@@ -493,9 +493,27 @@ export default function ProfileSharing() {
                 </div>
                 <Switch
                   checked={sharingSettings?.showSocialMedia || false}
-                  onCheckedChange={(checked) => handleSettingChange('showSocialMedia', checked)}
+                  onCheckedChange={(checked) => {
+                    console.log('🔄 Social media toggle clicked:', checked);
+                    handleSettingChange('showSocialMedia', checked);
+                  }}
                 />
               </div>
+              
+              {/* Social Media Manager - Show when enabled */}
+              {sharingSettings?.showSocialMedia && (
+                <Card className="mt-4">
+                  <CardHeader>
+                    <CardTitle className="text-base">Social Media Links</CardTitle>
+                    <CardDescription>
+                      Manage your social media profiles that will be displayed on your public profile
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <SocialMediaManager />
+                  </CardContent>
+                </Card>
+              )}
               
               <div className="flex items-center justify-between">
                 <div className="space-y-1">

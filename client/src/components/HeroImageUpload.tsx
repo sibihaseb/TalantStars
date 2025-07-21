@@ -1,345 +1,323 @@
 import { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Crop, Save, X, Camera, ImageIcon } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+import { Upload, Crop, Image, Check, X } from 'lucide-react';
+import ReactCrop, { Crop as CropType, PixelCrop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
 
 interface HeroImageUploadProps {
   currentImage?: string;
-  onImageUpdate?: (url: string) => void;
-  aspectRatio?: number; // width/height ratio (e.g., 16/9 = 1.78)
+  onImageUpdate?: (imageUrl: string) => void;
+  aspectRatio?: number; // 16:9 = 1.777
 }
 
 export default function HeroImageUpload({ 
   currentImage, 
   onImageUpdate,
-  aspectRatio = 16/9 // Default to 16:9 for hero images
+  aspectRatio = 16 / 9 // 16:9 aspect ratio by default
 }: HeroImageUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [cropData, setCropData] = useState<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
   const [showCropper, setShowCropper] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isCropDragging, setIsCropDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [crop, setCrop] = useState<CropType>();
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
-  const cropperRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Upload mutation for hero images
-  const uploadMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      console.log('Uploading hero image to server...');
-      const response = await apiRequest('POST', '/api/user/hero-image', formData);
-      const result = await response.json();
-      console.log('Hero image upload result:', result);
-      return result;
+  const uploadHeroImageMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('heroImage', file);
+      
+      console.log('📸 Uploading hero image to server...');
+      console.log('📸 FormData entries:', Array.from(formData.entries()));
+      
+      const response = await fetch('/api/user/hero-image', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Upload failed' }));
+        throw new Error(error.error || 'Failed to upload hero image');
+      }
+      
+      return response.json();
     },
     onSuccess: (data) => {
-      setShowCropper(false);
-      setSelectedFile(null);
-      setPreviewUrl(null);
-      setCropData(null);
+      console.log('✅ Hero image upload successful:', data);
+      toast({
+        title: "Success!",
+        description: "Hero image updated successfully",
+      });
       
-      if (onImageUpdate) {
+      // Update the UI with new image URL
+      if (onImageUpdate && data.heroImageUrl) {
         onImageUpdate(data.heroImageUrl);
       }
       
-      // Invalidate queries to refresh user data
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/user/profile'] });
+      // Reset the form
+      setSelectedFile(null);
+      setPreviewUrl('');
+      setShowCropper(false);
       
-      toast({
-        title: "Success!",
-        description: "Hero image uploaded successfully",
-      });
+      // Invalidate queries
+      queryClient.invalidateQueries({ queryKey: ['/api/user/profile'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
     },
     onError: (error) => {
-      console.error('Hero image upload failed:', error);
+      console.error('❌ Hero image upload failed:', error);
       toast({
         title: "Upload Failed",
-        description: "Failed to upload hero image. Please try again.",
+        description: error.message || "Failed to upload hero image",
         variant: "destructive",
       });
     },
   });
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        toast({
-          title: "File too large",
-          description: "Please select an image smaller than 10MB",
-          variant: "destructive",
-        });
-        return;
-      }
+    if (!file) return;
 
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Invalid file type",
-          description: "Please select an image file",
-          variant: "destructive",
-        });
-        return;
-      }
+    console.log('🖼️ Hero image file selected:', file.name, file.type, file.size);
 
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreviewUrl(e.target?.result as string);
-        setShowCropper(true);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const initializeCropper = useCallback(() => {
-    if (!imageRef.current || !cropperRef.current) return;
-
-    const img = imageRef.current;
-    const cropper = cropperRef.current;
-    
-    const imgRect = img.getBoundingClientRect();
-    const containerRect = cropper.getBoundingClientRect();
-    
-    // Calculate crop area for the specified aspect ratio
-    const containerWidth = containerRect.width;
-    const containerHeight = containerRect.height;
-    
-    let cropWidth, cropHeight;
-    
-    if (containerWidth / containerHeight > aspectRatio) {
-      // Container is wider than desired ratio
-      cropHeight = containerHeight * 0.8;
-      cropWidth = cropHeight * aspectRatio;
-    } else {
-      // Container is taller than desired ratio
-      cropWidth = containerWidth * 0.8;
-      cropHeight = cropWidth / aspectRatio;
-    }
-    
-    const x = (containerWidth - cropWidth) / 2;
-    const y = (containerHeight - cropHeight) / 2;
-    
-    setCropData({ x, y, width: cropWidth, height: cropHeight });
-  }, [aspectRatio]);
-
-  const handleCropSubmit = async () => {
-    if (!selectedFile || !cropData || !imageRef.current || !canvasRef.current) {
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
       return;
     }
 
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const img = imageRef.current;
-
-    if (!ctx) return;
-
-    // Get the actual image dimensions
-    const imgRect = img.getBoundingClientRect();
-    const scaleX = img.naturalWidth / imgRect.width;
-    const scaleY = img.naturalHeight / imgRect.height;
-
-    // Calculate actual crop coordinates
-    const actualCrop = {
-      x: cropData.x * scaleX,
-      y: cropData.y * scaleY,
-      width: cropData.width * scaleX,
-      height: cropData.height * scaleY,
+    setSelectedFile(file);
+    
+    // Create preview URL
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    setShowCropper(true);
+    
+    // Initialize crop to 16:9 aspect ratio
+    const initialCrop: CropType = {
+      unit: '%',
+      width: 100,
+      height: 100 / aspectRatio,
+      x: 0,
+      y: 0,
     };
+    setCrop(initialCrop);
+  }, [toast, aspectRatio]);
 
-    // Set canvas size to desired output size (larger for hero images)
-    canvas.width = 1920; // HD width for hero images
-    canvas.height = 1920 / aspectRatio; // Maintain aspect ratio
+  const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { width, height } = e.currentTarget;
+    
+    // Set initial crop to maintain 16:9 aspect ratio
+    const cropHeight = width / aspectRatio;
+    const yOffset = Math.max(0, (height - cropHeight) / 2);
+    
+    const initialCrop: CropType = {
+      unit: 'px',
+      width: width,
+      height: Math.min(cropHeight, height),
+      x: 0,
+      y: yOffset,
+    };
+    
+    setCrop(initialCrop);
+  }, [aspectRatio]);
 
-    // Draw the cropped image
+  const getCroppedImage = useCallback(() => {
+    if (!completedCrop || !imageRef.current || !canvasRef.current) {
+      return null;
+    }
+
+    const image = imageRef.current;
+    const canvas = canvasRef.current;
+    const crop = completedCrop;
+
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) return null;
+
+    // Set canvas size to maintain 16:9 aspect ratio
+    const cropWidth = crop.width * scaleX;
+    const cropHeight = crop.height * scaleY;
+    
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
+
     ctx.drawImage(
-      img,
-      actualCrop.x,
-      actualCrop.y,
-      actualCrop.width,
-      actualCrop.height,
+      image,
+      crop.x * scaleX,
+      crop.y * scaleY,
+      cropWidth,
+      cropHeight,
       0,
       0,
-      canvas.width,
-      canvas.height
+      cropWidth,
+      cropHeight
     );
 
-    // Convert to blob
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const formData = new FormData();
-        formData.append('heroImage', blob, `hero-${selectedFile.name}`);
-        uploadMutation.mutate(formData);
+    return new Promise<File>((resolve) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], 'hero-image.jpg', {
+            type: 'image/jpeg',
+            lastModified: Date.now(),
+          });
+          
+          console.log('🎨 Cropped hero image created:', {
+            width: cropWidth,
+            height: cropHeight,
+            aspectRatio: cropWidth / cropHeight,
+            size: file.size
+          });
+          
+          resolve(file);
+        }
+      }, 'image/jpeg', 0.95);
+    });
+  }, [completedCrop]);
+
+  const handleUpload = async () => {
+    try {
+      const croppedFile = await getCroppedImage();
+      if (croppedFile) {
+        uploadHeroImageMutation.mutate(croppedFile);
       }
-    }, 'image/jpeg', 0.9);
+    } catch (error) {
+      console.error('❌ Error creating cropped image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process image",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDragStart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsCropDragging(true);
-    setDragStart({ x: e.clientX, y: e.clientY });
+  const handleCancel = () => {
+    setSelectedFile(null);
+    setPreviewUrl('');
+    setShowCropper(false);
+    setCrop(undefined);
+    setCompletedCrop(undefined);
+    
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
   };
-
-  const handleDragMove = useCallback((e: MouseEvent) => {
-    if (!isCropDragging || !cropData || !cropperRef.current) return;
-
-    const deltaX = e.clientX - dragStart.x;
-    const deltaY = e.clientY - dragStart.y;
-
-    const containerRect = cropperRef.current.getBoundingClientRect();
-    const newX = Math.max(0, Math.min(containerRect.width - cropData.width, cropData.x + deltaX));
-    const newY = Math.max(0, Math.min(containerRect.height - cropData.height, cropData.y + deltaY));
-
-    setCropData({ ...cropData, x: newX, y: newY });
-    setDragStart({ x: e.clientX, y: e.clientY });
-  }, [isCropDragging, cropData, dragStart]);
-
-  const handleDragEnd = useCallback(() => {
-    setIsCropDragging(false);
-  }, []);
 
   return (
-    <Card className="w-full">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <ImageIcon className="w-5 h-5" />
-          Hero Background Image
-          <span className="text-sm font-normal text-gray-500">
-            (Recommended: {aspectRatio === 16/9 ? '16:9' : `${aspectRatio.toFixed(2)}:1`} ratio)
-          </span>
+          <Image className="h-5 w-5" />
+          Background Image
         </CardTitle>
+        <CardDescription>
+          Upload a background image for your profile header (16:9 aspect ratio recommended)
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Current Image Preview */}
+        {/* Current Image Display */}
         {currentImage && !showCropper && (
-          <div className="relative">
-            <img 
-              src={currentImage} 
-              alt="Current hero image" 
-              className="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
-              style={{ aspectRatio }}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-gray-700">Current Background</label>
+            <div 
+              className="w-full h-32 bg-cover bg-center rounded-lg border border-gray-200"
+              style={{ backgroundImage: `url(${currentImage})` }}
             />
-            <div className="absolute top-2 right-2 bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
-              Current
-            </div>
           </div>
         )}
 
         {/* File Input */}
-        <div className="space-y-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-          
-          <Button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploadMutation.isPending}
-            className="w-full"
-            variant="outline"
-          >
-            <Camera className="w-4 h-4 mr-2" />
-            {currentImage ? 'Change Hero Image' : 'Upload Hero Image'}
-          </Button>
-        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          className="hidden"
+          data-testid="hero-file-input"
+        />
 
-        {/* Cropper */}
+        {/* Image Cropper */}
         {showCropper && previewUrl && (
           <div className="space-y-4">
-            <div className="text-sm text-gray-600">
-              Crop your hero image to {aspectRatio === 16/9 ? '16:9' : `${aspectRatio.toFixed(2)}:1`} ratio:
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-gray-700">
+                Crop Your Background Image (16:9 ratio)
+              </label>
+              <div className="text-xs text-gray-500">
+                Drag to reposition • Resize corners to adjust
+              </div>
             </div>
             
-            <div 
-              ref={cropperRef}
-              className="relative w-full h-80 border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-100"
-              onMouseMove={handleDragMove}
-              onMouseUp={handleDragEnd}
-              onMouseLeave={handleDragEnd}
-            >
-              <img
-                ref={imageRef}
-                src={previewUrl}
-                alt="Preview"
-                className="w-full h-full object-contain"
-                onLoad={initializeCropper}
-                draggable={false}
-              />
-              
-              {cropData && (
-                <div
-                  className="absolute border-2 border-blue-500 bg-blue-500/20 cursor-move"
-                  style={{
-                    left: cropData.x,
-                    top: cropData.y,
-                    width: cropData.width,
-                    height: cropData.height,
-                  }}
-                  onMouseDown={handleDragStart}
-                >
-                  <div className="absolute -top-8 left-0 bg-blue-500 text-white px-2 py-1 rounded text-xs">
-                    Hero Image Area
-                  </div>
-                </div>
-              )}
+            <div className="max-h-96 overflow-hidden rounded-lg border">
+              <ReactCrop
+                crop={crop}
+                onChange={(_, percentCrop) => setCrop(percentCrop)}
+                onComplete={(c) => setCompletedCrop(c)}
+                aspect={aspectRatio}
+                minHeight={100}
+              >
+                <img
+                  ref={imageRef}
+                  alt="Crop preview"
+                  src={previewUrl}
+                  onLoad={onImageLoad}
+                  className="max-w-full h-auto"
+                />
+              </ReactCrop>
             </div>
 
+            {/* Hidden canvas for cropping */}
+            <canvas
+              ref={canvasRef}
+              className="hidden"
+            />
+
             <div className="flex gap-2">
-              <Button
-                onClick={handleCropSubmit}
-                disabled={uploadMutation.isPending || !cropData}
+              <Button 
+                onClick={handleUpload}
+                disabled={uploadHeroImageMutation.isPending || !completedCrop}
                 className="flex-1"
               >
-                {uploadMutation.isPending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Hero Image
-                  </>
-                )}
+                <Check className="h-4 w-4 mr-2" />
+                {uploadHeroImageMutation.isPending ? 'Uploading...' : 'Upload Background'}
               </Button>
-              
-              <Button
-                onClick={() => {
-                  setShowCropper(false);
-                  setSelectedFile(null);
-                  setPreviewUrl(null);
-                  setCropData(null);
-                }}
-                variant="outline"
-                disabled={uploadMutation.isPending}
+              <Button 
+                variant="outline" 
+                onClick={handleCancel}
+                disabled={uploadHeroImageMutation.isPending}
               >
-                <X className="w-4 h-4 mr-2" />
+                <X className="h-4 w-4 mr-2" />
                 Cancel
               </Button>
             </div>
           </div>
         )}
 
-        {/* Hidden canvas for processing */}
-        <canvas ref={canvasRef} className="hidden" />
+        {/* Upload Button */}
+        {!showCropper && (
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            variant="outline"
+            className="w-full"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            {currentImage ? 'Change Background Image' : 'Upload Background Image'}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
