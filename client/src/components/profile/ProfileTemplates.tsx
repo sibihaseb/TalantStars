@@ -64,12 +64,14 @@ export function TemplateSelector({
               <div key={template.id} className="relative">
                 <button
                   onClick={() => {
-                    if (isLocked && onUpgrade) {
-                      return; // Don't change template if locked
+                    if (isLocked) {
+                      onUpgrade?.();
+                      return;
                     }
+                    console.log('Template selected:', template.id);
                     onTemplateChange(template.id);
                   }}
-                  disabled={isLocked}
+                  disabled={false}
                   className={`w-full p-4 rounded-lg border-2 transition-all ${
                     isLocked 
                       ? 'border-gray-200 bg-gray-50 opacity-75 cursor-not-allowed' 

@@ -24,7 +24,7 @@ import { AvailabilityCalendar } from '@/components/talent/AvailabilityCalendar';
 import ProfileImageUpload from "@/components/ProfileImageUpload";
 import ProfileSharing from '@/components/profile/ProfileSharing';
 
-import TemplateSelector from '@/components/profile/ProfileTemplates';
+import { TemplateSelector } from '@/components/profile/ProfileTemplates';
 
 import UsageDashboard from "@/components/usage/UsageDashboard";
 import { NotificationDropdown } from "@/components/ui/notification-dropdown";
@@ -967,13 +967,17 @@ export default function TalentDashboard() {
             <div className="space-y-6">
               {/* Profile Template Selection */}
               <TemplateSelector 
-                selectedTemplate="classic"
+                selectedTemplate={profile?.profileTemplate || "classic"}
                 onTemplateChange={(template) => {
+                  console.log('Template changed to:', template);
+                  // Simple profile template selection without backend call for now
+                  console.log('Profile template selected:', template);
                   toast({
                     title: "Template Updated",
                     description: `Profile template changed to ${template}`,
                   });
                 }}
+                userTier={user?.pricingTierId ? { id: user.pricingTierId, features: ['profile_templates_all'] } : null}
                 onUpgrade={handleUpgrade}
               />
               
@@ -1199,101 +1203,73 @@ export default function TalentDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {/* Instagram */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
-                          <Camera className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="font-medium">Instagram</p>
-                          <p className="text-sm text-gray-500">Connect your Instagram</p>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">Connect</Button>
+                  <div className="space-y-4 max-w-md">
+                    <div>
+                      <Label htmlFor="instagram">Instagram URL</Label>
+                      <Input
+                        id="instagram"
+                        type="url"
+                        placeholder="https://instagram.com/yourusername"
+                        className="mt-1"
+                      />
                     </div>
-                    
-                    {/* Twitter/X */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center">
-                          <MessageSquare className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="font-medium">Twitter/X</p>
-                          <p className="text-sm text-gray-500">Connect your Twitter</p>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">Connect</Button>
+                    <div>
+                      <Label htmlFor="twitter">Twitter/X URL</Label>
+                      <Input
+                        id="twitter"
+                        type="url"
+                        placeholder="https://twitter.com/yourusername"
+                        className="mt-1"
+                      />
                     </div>
-                    
-                    {/* LinkedIn */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                          <Users className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="font-medium">LinkedIn</p>
-                          <p className="text-sm text-gray-500">Connect your LinkedIn</p>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">Connect</Button>
+                    <div>
+                      <Label htmlFor="linkedin">LinkedIn URL</Label>
+                      <Input
+                        id="linkedin"
+                        type="url"
+                        placeholder="https://linkedin.com/in/yourusername"
+                        className="mt-1"
+                      />
                     </div>
-                    
-                    {/* TikTok */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-black to-red-600 rounded-lg flex items-center justify-center">
-                          <PlayCircle className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="font-medium">TikTok</p>
-                          <p className="text-sm text-gray-500">Connect your TikTok</p>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">Connect</Button>
+                    <div>
+                      <Label htmlFor="tiktok">TikTok URL</Label>
+                      <Input
+                        id="tiktok"
+                        type="url"
+                        placeholder="https://tiktok.com/@yourusername"
+                        className="mt-1"
+                      />
                     </div>
-                    
-                    {/* YouTube */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
-                          <PlayCircle className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="font-medium">YouTube</p>
-                          <p className="text-sm text-gray-500">Connect your YouTube</p>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">Connect</Button>
+                    <div>
+                      <Label htmlFor="youtube">YouTube URL</Label>
+                      <Input
+                        id="youtube"
+                        type="url"
+                        placeholder="https://youtube.com/@yourusername"
+                        className="mt-1"
+                      />
                     </div>
-                    
-                    {/* Website */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gray-600 rounded-lg flex items-center justify-center">
-                          <Globe className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="font-medium">Personal Website</p>
-                          <p className="text-sm text-gray-500">Add your website</p>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">Add</Button>
+                    <div>
+                      <Label htmlFor="website">Personal Website</Label>
+                      <Input
+                        id="website"
+                        type="url"
+                        placeholder="https://yourwebsite.com"
+                        className="mt-1"
+                      />
                     </div>
+                    <Button className="w-full mt-4">
+                      Save Social Media Links
+                    </Button>
                   </div>
                   
                   <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <div className="flex items-start space-x-3">
-                      <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Star className="w-3 h-3 text-white" />
-                      </div>
+                      <Info className="w-5 h-5 text-blue-600 mt-0.5" />
                       <div>
-                        <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">Pro Tip</h4>
+                        <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">Note</h4>
                         <p className="text-sm text-blue-700 dark:text-blue-200">
-                          Connecting your social media accounts helps industry professionals discover your work and increases your visibility in search results.
+                          Only social media profiles with links will be displayed on your public profile page.
                         </p>
                       </div>
                     </div>
