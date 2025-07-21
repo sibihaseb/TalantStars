@@ -28,13 +28,13 @@ export default function ProfileViewer() {
   console.log("ProfileViewer - userId from params:", userId);
   
   // Fetch profile data for the specific user
-  const { data: profile, isLoading, error } = useQuery({
+  const { data: profile, isLoading, error } = useQuery<any>({
     queryKey: ['/api/talent', userId],
     enabled: !!userId,
   });
 
   // Fetch media files for the user
-  const { data: mediaFiles = [] } = useQuery({
+  const { data: mediaFiles = [] } = useQuery<any[]>({
     queryKey: ['/api/media', userId],
     enabled: !!userId,
   });
@@ -79,7 +79,7 @@ export default function ProfileViewer() {
     );
   }
 
-  const isOwnProfile = user?.id === parseInt(userId);
+  const isOwnProfile = user?.id === profile?.userId;
 
   // Create sample media data for demonstration
   const sampleMedia = [
@@ -125,11 +125,11 @@ export default function ProfileViewer() {
     }
   ];
 
-  const displayMedia = mediaFiles.length > 0 ? mediaFiles : sampleMedia;
+  const displayMedia = Array.isArray(mediaFiles) && mediaFiles.length > 0 ? mediaFiles : sampleMedia;
 
   // Render the appropriate template
   const renderTemplate = () => {
-    const templateProps = {
+    const templateProps: any = {
       profile,
       mediaFiles: displayMedia,
       userId,
@@ -161,10 +161,10 @@ export default function ProfileViewer() {
           {renderTemplate()}
 
           {/* Skill Endorsements */}
-          {userId && (
+          {profile?.userId && (
             <div className="mt-12">
               <SkillEndorsements 
-                userId={userId} 
+                profile={profile} 
                 isOwnProfile={isOwnProfile} 
               />
             </div>

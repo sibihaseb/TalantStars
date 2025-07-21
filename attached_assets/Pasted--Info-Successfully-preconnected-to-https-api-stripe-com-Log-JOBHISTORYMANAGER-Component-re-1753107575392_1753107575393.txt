@@ -1,0 +1,37 @@
+[Info] Successfully preconnected to https://api.stripe.com/
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (index-CVDyxNv_.js, line 839)
+Object
+[Log] === FRONTEND API RESPONSE === (index-CVDyxNv_.js, line 839)
+[Log] Status: 200, URL: /api/user/profile (index-CVDyxNv_.js, line 839)
+[Log] === FRONTEND API RESPONSE === (index-CVDyxNv_.js, line 839)
+[Log] Status: 200, URL: /api/opportunities (index-CVDyxNv_.js, line 839)
+[Log] === FRONTEND API RESPONSE === (index-CVDyxNv_.js, line 839)
+[Log] Status: 200, URL: /api/applications (index-CVDyxNv_.js, line 839)
+[Log] === FRONTEND API RESPONSE === (index-CVDyxNv_.js, line 839)
+[Log] Status: 200, URL: /api/social/stats (index-CVDyxNv_.js, line 839)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (index-CVDyxNv_.js, line 839)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (index-CVDyxNv_.js, line 839)
+Object
+[Log] === FRONTEND API RESPONSE === (index-CVDyxNv_.js, line 839)
+[Log] Status: 200, URL: /api/job-history/67 (index-CVDyxNv_.js, line 839)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (index-CVDyxNv_.js, line 839)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (index-CVDyxNv_.js, line 839)
+Object
+[Log] === FRONTEND API RESPONSE === (index-CVDyxNv_.js, line 839)
+[Log] Status: 200, URL: /api/profile/sharing (index-CVDyxNv_.js, line 839)
+[Error] Failed to load resource: the server responded with a status of 401 () (sharing, line 0)
+[Log] === FRONTEND API RESPONSE === (index-CVDyxNv_.js, line 839)
+[Log] Status: 401, URL: /api/profile/sharing (index-CVDyxNv_.js, line 839)
+[Log] 🚨 API ERROR: 401 - {"message":"Unauthorized"} (index-CVDyxNv_.js, line 839)
+[Error] Failed to load resource: the server responded with a status of 401 () (sharing, line 0)
+[Log] === FRONTEND API RESPONSE === (index-CVDyxNv_.js, line 839)
+[Log] Status: 401, URL: /api/profile/sharing (index-CVDyxNv_.js, line 839)
+[Log] 🚨 API ERROR: 401 - {"message":"Unauthorized"} (index-CVDyxNv_.js, line 839)
+[Error] Failed to load resource: the server responded with a status of 401 () (sharing, line 0)
+[Log] === FRONTEND API RESPONSE === (index-CVDyxNv_.js, line 839)
+[Log] Status: 401, URL: /api/profile/sharing (index-CVDyxNv_.js, line 839)
+[Log] 🚨 API ERROR: 401 - {"message":"Unauthorized"} (index-CVDyxNv_.js, line 839)
+> Selected Element
+< <div id="root">…</div>

@@ -9,7 +9,11 @@ import { PlusIcon, StarIcon, CheckIcon, XIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/useAuth';
-import { UserProfile } from '@/shared/schema';
+interface UserProfile {
+  userId: number;
+  displayName?: string;
+  [key: string]: any;
+}
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -37,21 +41,19 @@ export function SkillEndorsements({ profile, isOwnProfile }: SkillEndorsementsPr
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: endorsements = [] } = useQuery({
+  const { data: endorsements = [] } = useQuery<SkillEndorsement[]>({
     queryKey: ['/api/skill-endorsements', profile.userId],
     enabled: !!profile.userId,
   });
 
   const endorseMutation = useMutation({
     mutationFn: async (data: { skill: string; message: string }) => {
-      return await apiRequest(`/api/skill-endorsements`, {
-        method: 'POST',
-        body: JSON.stringify({
-          endorsedUserId: profile.userId,
-          skill: data.skill,
-          message: data.message,
-        }),
+      const response = await apiRequest('POST', '/api/skill-endorsements', {
+        endorsedUserId: profile.userId,
+        skill: data.skill,
+        message: data.message,
       });
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/skill-endorsements', profile.userId] });
@@ -75,9 +77,8 @@ export function SkillEndorsements({ profile, isOwnProfile }: SkillEndorsementsPr
 
   const removeEndorsementMutation = useMutation({
     mutationFn: async (endorsementId: number) => {
-      return await apiRequest(`/api/skill-endorsements/${endorsementId}`, {
-        method: 'DELETE',
-      });
+      const response = await apiRequest('DELETE', `/api/skill-endorsements/${endorsementId}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/skill-endorsements', profile.userId] });
