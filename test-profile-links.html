@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile Test Links</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .link { display: block; margin: 10px 0; padding: 10px; background: #f0f0f0; text-decoration: none; color: #333; }
+        .link:hover { background: #e0e0e0; }
+    </style>
+</head>
+<body>
+    <h1>Profile Test Links</h1>
+    <p>Click these links to test profile viewing:</p>
+    
+    <a href="/profile/76" class="link">
+        View Emma Thompson's Profile (User ID 76) - via /profile/:userId route
+    </a>
+    
+    <a href="/talent/76" class="link">
+        View Emma Thompson's Profile (User ID 76) - via /talent/:userId route
+    </a>
+    
+    <h2>API Endpoints (for debugging):</h2>
+    <a href="/api/talent/76" class="link">
+        Direct API: /api/talent/76 (JSON response)
+    </a>
+    
+    <h2>Profile Details:</h2>
+    <ul>
+        <li>User ID: 76</li>
+        <li>Display Name: Emma Thompson</li>
+        <li>Role: Talent (Actor)</li>
+        <li>Bio: Professional actress with 15 years of experience</li>
+        <li>Location: Los Angeles, CA</li>
+        <li>Daily Rate: $750</li>
+        <li>Skills: Method Acting, Character Development, Improvisation, Stage Combat, Voice Training</li>
+    </ul>
+</body>
+</html>

@@ -26,11 +26,17 @@ export default function ProfileViewer() {
   const { userId } = useParams<{ userId: string }>();
   const { user } = useAuth();
   
+  console.log("ProfileViewer - userId from params:", userId);
+  
   // Fetch profile data for the specific user
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, error } = useQuery({
     queryKey: ['/api/talent', userId],
     enabled: !!userId,
   });
+  
+  console.log("ProfileViewer - profile data:", profile);
+  console.log("ProfileViewer - isLoading:", isLoading);
+  console.log("ProfileViewer - error:", error);
 
   if (isLoading) {
     return (

@@ -69,6 +69,7 @@ function Router() {
       <Route path="/test-upload" component={TestUpload} />
       <Route path="/debug-logs" component={DebugLogs} />
       <Route path="/verification-demo" component={VerificationDemo} />
+      <Route path="/talent/:userId" component={ProfileViewer} />
       
       {/* Protected admin routes */}
       <Route path="/admin">
@@ -141,7 +142,7 @@ function Router() {
         {isAuthenticated ? <PlanProtectedRoute><TalentProfile /></PlanProtectedRoute> : <Auth />}
       </Route>
       <Route path="/profile/:userId">
-        {isAuthenticated ? <PlanProtectedRoute><ProfileViewer /></PlanProtectedRoute> : <Auth />}
+        <ProfileViewer />
       </Route>
       <Route path="/meetings">
         {isAuthenticated ? <PlanProtectedRoute><MeetingManagement /></PlanProtectedRoute> : <Auth />}
