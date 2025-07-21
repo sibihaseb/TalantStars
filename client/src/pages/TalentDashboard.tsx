@@ -632,7 +632,7 @@ export default function TalentDashboard() {
             <TabsTrigger value="billing">Billing</TabsTrigger>
             <TabsTrigger value="usage">Usage</TabsTrigger>
             <TabsTrigger value="calendar">Calendar</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="settings">Profile Sharing</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">

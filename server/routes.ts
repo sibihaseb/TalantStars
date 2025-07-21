@@ -6467,5 +6467,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Skill endorsement routes
+  app.get('/api/users/:userId/skills/:skill/endorsements', async (req: any, res) => {
+    try {
+      const { userId, skill } = req.params;
+      const endorsements = await simpleStorage.getSkillEndorsements(parseInt(userId), skill);
+      res.json(endorsements);
+    } catch (error) {
+      console.error('Error fetching skill endorsements:', error);
+      res.status(500).json({ message: 'Failed to fetch endorsements' });
+    }
+  });
+
+  app.post('/api/users/:userId/skills/:skill/endorse', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId, skill } = req.params;
+      const { message } = req.body;
+      const endorserId = req.user.id;
+      
+      if (endorserId === parseInt(userId)) {
+        return res.status(400).json({ message: 'Cannot endorse your own skills' });
+      }
+
+      const endorsement = await simpleStorage.createSkillEndorsement({
+        userId: parseInt(userId),
+        skill,
+        endorserId,
+        endorserName: req.user.displayName || req.user.username,
+        endorserImage: req.user.profileImageUrl,
+        message: message || null
+      });
+
+      res.json(endorsement);
+    } catch (error) {
+      console.error('Error creating skill endorsement:', error);
+      res.status(500).json({ message: 'Failed to create endorsement' });
+    }
+  });
+
   return httpServer;
 }

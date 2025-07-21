@@ -7,8 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   MapPin, Phone, Globe, Star, CheckCircle, MessageCircle, DollarSign, 
   Clock, Play, Eye, Camera, Film, Award, Users, Heart, Share2, 
-  Palette, Layout, Sparkles, Zap, Crown
+  Palette, Layout, Sparkles, Zap, Crown, Music
 } from "lucide-react";
+import MediaModal from '@/components/MediaModal';
+import SkillEndorsement from '@/components/SkillEndorsement';
 
 export type ProfileTemplate = 'classic' | 'modern' | 'artistic' | 'minimal' | 'cinematic';
 
@@ -114,6 +116,13 @@ export function TemplateSelector({
 // Classic Template - Professional and Timeless
 export function ClassicTemplate({ profile, mediaFiles, userId, user }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const isOwnProfile = user?.id === parseInt(userId);
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
+  const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+
+  const handleMediaClick = (index: number) => {
+    setSelectedMediaIndex(index);
+    setIsMediaModalOpen(true);
+  };
   
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -203,15 +212,56 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {mediaFiles.map((media, index) => (
-                  <div key={index} className="aspect-square overflow-hidden rounded-lg border">
+                  <div key={index} className="relative aspect-square overflow-hidden rounded-lg border cursor-pointer hover:shadow-lg transition-all"
+                       onClick={() => handleMediaClick(index)}>
                     <img src={media.url} alt={media.title} className="w-full h-full object-cover hover:scale-105 transition-transform" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 bg-black/50 transition-opacity">
+                      {media.fileType?.startsWith('video') ? (
+                        <Play className="w-8 h-8 text-white" />
+                      ) : media.fileType?.startsWith('audio') ? (
+                        <Music className="w-8 h-8 text-white" />
+                      ) : (
+                        <Eye className="w-8 h-8 text-white" />
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
+          
+          {/* Skills Section */}
+          {profile?.skills && profile.skills.length > 0 && (
+            <Card className="mt-6">
+              <CardHeader><CardTitle>Skills & Endorsements</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {profile.skills.map((skill: string, index: number) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <Badge variant="secondary" className="text-sm">{skill}</Badge>
+                      <SkillEndorsement 
+                        skill={skill}
+                        userId={parseInt(userId)}
+                        currentUser={user}
+                        endorsements={[]} // This would come from API in real implementation
+                      />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
+      
+      {/* Media Modal */}
+      <MediaModal
+        isOpen={isMediaModalOpen}
+        onClose={() => setIsMediaModalOpen(false)}
+        mediaItems={mediaFiles}
+        currentIndex={selectedMediaIndex}
+        onIndexChange={setSelectedMediaIndex}
+      />
     </div>
   );
 }

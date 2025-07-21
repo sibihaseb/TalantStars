@@ -72,6 +72,10 @@ export interface IStorage {
   // Hero image update method
   updateUserHeroImage(userId: number, imageUrl: string): Promise<User>;
 
+  // Skill endorsement operations
+  getSkillEndorsements(userId: number, skill: string): Promise<any[]>;
+  createSkillEndorsement(endorsementData: any): Promise<any>;
+
   // Social posts operations
   getUserSocialPosts(userId: number): Promise<any[]>;
 
@@ -607,6 +611,30 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  // Skill endorsement operations
+  async getSkillEndorsements(userId: number, skill: string): Promise<any[]> {
+    // For now, return mock data since we haven't created the endorsements table
+    return [
+      {
+        id: 1,
+        endorserId: 2,
+        endorserName: "John Smith",
+        endorserImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
+        message: "Excellent work ethic and professionalism",
+        createdAt: new Date().toISOString()
+      }
+    ];
+  }
+
+  async createSkillEndorsement(endorsementData: any): Promise<any> {
+    // For now, return mock data since we haven't created the endorsements table
+    return {
+      id: Date.now(),
+      ...endorsementData,
+      createdAt: new Date().toISOString()
+    };
   }
 
   // Talent categories operations
