@@ -19,7 +19,11 @@ import {
 export default function ProfileViewer() {
   const { userId } = useParams<{ userId: string }>();
   const { user } = useAuth();
-  const [selectedTemplate, setSelectedTemplate] = useState<ProfileTemplate>('modern');
+  
+  // Get template from URL params or default to modern
+  const urlParams = new URLSearchParams(window.location.search);
+  const templateFromUrl = urlParams.get('template') as ProfileTemplate || 'modern';
+  const [selectedTemplate, setSelectedTemplate] = useState<ProfileTemplate>(templateFromUrl);
   
   console.log("ProfileViewer - userId from params:", userId);
   
@@ -153,12 +157,6 @@ export default function ProfileViewer() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
         <Header />
         <main className="container mx-auto px-4 py-8">
-          {/* Template Selector */}
-          <TemplateSelector 
-            selectedTemplate={selectedTemplate}
-            onTemplateChange={setSelectedTemplate}
-          />
-          
           {/* Render Selected Template */}
           {renderTemplate()}
 

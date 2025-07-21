@@ -10,6 +10,11 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
+import { 
+  TemplateSelector,
+  type ProfileTemplate 
+} from '@/components/profile/ProfileTemplates';
 import { 
   Copy, 
   Share, 
@@ -23,7 +28,9 @@ import {
   EyeOff,
   Edit2,
   Check,
-  X
+  X,
+  ArrowLeft,
+  Palette
 } from "lucide-react";
 
 interface ProfileSharingSettings {
@@ -44,9 +51,11 @@ export default function ProfileSharing() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [isEditingUrl, setIsEditingUrl] = useState(false);
   const [newCustomUrl, setNewCustomUrl] = useState("");
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<ProfileTemplate>('modern');
 
   // Fetch current profile sharing settings
   const { data: sharingSettings, isLoading } = useQuery<ProfileSharingSettings>({
@@ -153,12 +162,30 @@ export default function ProfileSharing() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
+      {/* Back Button */}
+      <div className="mb-6">
+        <Button 
+          variant="ghost" 
+          onClick={() => setLocation('/dashboard')}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Dashboard
+        </Button>
+      </div>
+
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile Sharing</h1>
         <p className="text-gray-600">
           Share your profile with the world and control who can see what
         </p>
       </div>
+
+      {/* Template Selector */}
+      <TemplateSelector 
+        selectedTemplate={selectedTemplate}
+        onTemplateChange={setSelectedTemplate}
+      />
 
       {/* Profile URL Card */}
       <Card>
@@ -239,6 +266,13 @@ export default function ProfileSharing() {
 
           {/* Share Buttons */}
           <div className="flex flex-wrap gap-2 pt-4">
+            <Button
+              onClick={() => window.open(`${profileUrl}?template=${selectedTemplate}`, '_blank')}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+            >
+              <Eye className="h-4 w-4" />
+              Preview Profile
+            </Button>
             <Button
               onClick={() => shareProfile('facebook', profileUrl)}
               variant="outline"
