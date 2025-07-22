@@ -63,7 +63,7 @@ export default function ProfileSharing() {
   const [isEditingUrl, setIsEditingUrl] = useState(false);
   const [newCustomUrl, setNewCustomUrl] = useState("");
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<ProfileTemplate>(user?.profileTemplate || 'classic');
+  const [selectedTemplate, setSelectedTemplate] = useState<ProfileTemplate>((user?.profileTemplate as ProfileTemplate) || 'classic');
   const [activeTab, setActiveTab] = useState<'sharing' | 'appearance' | 'templates' | 'settings'>('sharing');
 
   // Update selected template when user data loads
@@ -500,34 +500,9 @@ export default function ProfileSharing() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="text-sm font-medium">Show Social Media Icons</Label>
-                  <p className="text-xs text-gray-500">Display social media links on your profile</p>
-                </div>
-                <Switch
-                  checked={sharingSettings?.showSocialMedia || false}
-                  onCheckedChange={(checked) => {
-                    console.log('🔄 Social media toggle clicked:', checked);
-                    handleSettingChange('showSocialMedia', checked);
-                  }}
-                />
-              </div>
+
               
-              {/* Social Media Manager - Show when enabled */}
-              {sharingSettings?.showSocialMedia && (
-                <Card className="mt-4">
-                  <CardHeader>
-                    <CardTitle className="text-base">Social Media Links</CardTitle>
-                    <CardDescription>
-                      Manage your social media profiles that will be displayed on your public profile
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <SocialMediaManager />
-                  </CardContent>
-                </Card>
-              )}
+
               
               <div className="flex items-center justify-between">
                 <div className="space-y-1">

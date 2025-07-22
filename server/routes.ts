@@ -517,13 +517,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const eventData = {
         userId,
-        title: req.body.title || 'Event',
-        start: req.body.start,
-        end: req.body.end,
+        title: req.body.title || 'Availability',
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
         status: req.body.status || 'available',
-        type: req.body.type || 'general',
         notes: req.body.notes || null,
-        allDay: req.body.allDay !== undefined ? req.body.allDay : false,
+        allDay: req.body.allDay !== undefined ? req.body.allDay : true,
       };
       const event = await simpleStorage.createAvailabilityEvent(eventData);
       res.json(event);
@@ -571,6 +570,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching availability events:", error);
       res.status(500).json({ message: "Failed to fetch availability events" });
+    }
+  });
+
+  app.post('/api/availability', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const eventData = {
+        userId,
+        title: req.body.title || 'Availability',
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
+        status: req.body.status || 'available',
+        notes: req.body.notes || null,
+        allDay: req.body.allDay !== undefined ? req.body.allDay : true,
+      };
+      const event = await simpleStorage.createAvailabilityEvent(eventData);
+      res.json(event);
+    } catch (error) {
+      console.error("Error creating availability entry:", error);
+      res.status(500).json({ message: "Failed to create availability entry" });
+    }
+  });
+
+  app.put('/api/availability/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const entryId = parseInt(req.params.id);
+      const eventData = {
+        title: req.body.title,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
+        status: req.body.status,
+        notes: req.body.notes,
+        allDay: req.body.allDay !== undefined ? req.body.allDay : true,
+      };
+      const event = await simpleStorage.updateAvailabilityEvent(entryId, eventData);
+      res.json(event);
+    } catch (error) {
+      console.error("Error updating availability entry:", error);
+      res.status(500).json({ message: "Failed to update availability entry" });
+    }
+  });
+
+  app.delete('/api/availability/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const entryId = parseInt(req.params.id);
+      await simpleStorage.deleteAvailabilityEvent(entryId, userId);
+      res.json({ message: "Availability entry deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting availability entry:", error);
+      res.status(500).json({ message: "Failed to delete availability entry" });
     }
   });
 

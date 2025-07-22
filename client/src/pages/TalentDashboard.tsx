@@ -20,6 +20,7 @@ import { ProgressMascot } from "@/components/mascot/ProgressMascot";
 import { EnhancedMediaUpload } from "@/components/media/EnhancedMediaUpload";
 import { JobHistoryManager } from '@/components/talent/JobHistoryManager';
 import { SkillEndorsements } from '@/components/talent/SkillEndorsements';
+import { WorkExperienceManager } from '@/components/talent/WorkExperienceManager';
 import { TierUpgradeManager } from '@/components/billing/TierUpgradeManager';
 import { AvailabilityCalendar } from '@/components/talent/AvailabilityCalendar';
 import ProfileImageUpload from "@/components/ProfileImageUpload";
@@ -608,26 +609,58 @@ export default function TalentDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Work Experience - Enhanced with JobHistoryManager */}
+              {/* Quick Experience Overview - Enhanced */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Award className="w-5 h-5" />
-                    <span>Work Experience</span>
-                    <Badge variant="outline" className="text-xs">AI Enhanced</Badge>
+                    <span>Recent Experience</span>
                   </CardTitle>
                   <CardDescription>
-                    Drag to reorder, enhance with AI, and validate skills
+                    Latest work experience entries
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <JobHistoryManager 
-                    jobHistory={jobHistory || []}
-                    onJobUpdated={() => {
-                      queryClient.invalidateQueries({ queryKey: [`/api/job-history/${user?.id}`] });
-                    }}
-                    userId={user?.id || 0}
-                  />
+                  {jobHistory && jobHistory.length > 0 ? (
+                    <div className="space-y-3">
+                      {jobHistory.slice(0, 3).map((job: any, index: number) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Briefcase className="w-4 h-4 text-purple-500" />
+                            <div>
+                              <p className="font-medium text-sm">{job.title}</p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400">{job.company}</p>
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            {job.role || 'General'}
+                          </Badge>
+                        </div>
+                      ))}
+                      <Button 
+                        variant="outline" 
+                        className="w-full" 
+                        size="sm" 
+                        onClick={() => setActiveTab('experience')}
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        Manage All Experience
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <Briefcase className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">No work experience added yet</p>
+                      <Button 
+                        size="sm" 
+                        onClick={() => setActiveTab('experience')}
+                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Experience
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
                 </Card>
               </div>
@@ -917,52 +950,7 @@ export default function TalentDashboard() {
           </TabsContent>
 
           <TabsContent value="experience">
-            <div className="space-y-6">
-              {/* Work Experience - Using the working JobHistoryManager component */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Award className="w-5 h-5" />
-                    <span>Work Experience & Achievements</span>
-                    <Badge variant="outline" className="text-xs">AI Enhanced</Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    Add your professional work history with AI enhancement and skill validation. Drag to reorder entries.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <JobHistoryManager 
-                    jobHistory={jobHistory || []}
-                    onJobUpdated={() => {
-                      queryClient.invalidateQueries({ queryKey: [`/api/job-history/${user?.id}`] });
-                    }}
-                    userId={user?.id || 0}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Skills & Endorsements Section */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Target className="w-5 h-5" />
-                    <span>Skills & Endorsements</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Manage your professional skills and get endorsements from colleagues
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <SkillEndorsements 
-                    profile={{ 
-                      id: user?.id, 
-                      skills: profile?.skills, 
-                      talentType: profile?.talentType 
-                    }} 
-                  />
-                </CardContent>
-              </Card>
-            </div>
+            <WorkExperienceManager />
           </TabsContent>
 
           <TabsContent value="billing">
