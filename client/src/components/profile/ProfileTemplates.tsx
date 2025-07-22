@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import MediaModal from '@/components/MediaModal';
 import SkillEndorsement from '@/components/SkillEndorsement';
+import SocialMediaLinks from '@/components/profile/SocialMediaLinks';
 import { useQuery } from "@tanstack/react-query";
 
 export type ProfileTemplate = 'classic' | 'modern' | 'artistic' | 'minimal' | 'cinematic';
@@ -305,6 +306,18 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
             </Card>
           )}
           
+          {/* Social Media Links */}
+          <Card>
+            <CardHeader><CardTitle>Connect with Me</CardTitle></CardHeader>
+            <CardContent>
+              <SocialMediaLinks
+                socialLinks={[]}
+                userId={parseInt(userId)}
+                variant="classic"
+              />
+            </CardContent>
+          </Card>
+
           {/* Rates */}
           <Card>
             <CardHeader><CardTitle>Professional Rates</CardTitle></CardHeader>

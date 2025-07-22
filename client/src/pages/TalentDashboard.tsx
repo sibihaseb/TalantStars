@@ -88,6 +88,7 @@ import { TierUpgradeManager } from '@/components/billing/TierUpgradeManager';
 import { AvailabilityCalendar } from '@/components/talent/AvailabilityCalendar';
 import ProfileImageUpload from "@/components/ProfileImageUpload";
 import ProfileSharing from '@/components/profile/ProfileSharing';
+import SocialMediaManager from '@/components/profile/SocialMediaManager';
 
 import { TemplateSelector } from '@/components/profile/ProfileTemplates';
 
@@ -1063,6 +1064,9 @@ export default function TalentDashboard() {
             <div className="space-y-6">
               {/* Profile Sharing Section */}
               <ProfileSharing />
+              
+              {/* Social Media Links Management */}
+              <SocialMediaManager />
             </div>
           </TabsContent>
         </Tabs>

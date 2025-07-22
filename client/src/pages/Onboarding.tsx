@@ -581,7 +581,14 @@ function Onboarding() {
     },
   });
 
-  // Auto-populate role and skip role selection for authenticated users
+  // Fetch existing user profile for pre-population
+  const { data: existingProfile } = useQuery({
+    queryKey: ["/api/profile"],
+    enabled: !!user?.id,
+    staleTime: 0, // Always fetch fresh data for profile editing
+  });
+
+  // Auto-populate role and existing profile data for authenticated users
   useEffect(() => {
     if (user?.role) {
       form.setValue("role", user.role);
@@ -593,7 +600,46 @@ function Onboarding() {
         setCurrentStep(3); // Start at basic info for non-talent roles  
       }
     }
-  }, [user?.role]); // Only depend on user role, not entire user object or form
+  }, [user?.role]);
+
+  // Pre-populate form with existing profile data when available
+  useEffect(() => {
+    if (existingProfile && user) {
+      console.log("Pre-populating form with existing profile:", existingProfile);
+      
+      // Basic user info
+      if (existingProfile.displayName) form.setValue("displayName", existingProfile.displayName);
+      if (existingProfile.bio) form.setValue("bio", existingProfile.bio);
+      if (existingProfile.location) form.setValue("location", existingProfile.location);
+      if (existingProfile.website) form.setValue("website", existingProfile.website);
+      if (existingProfile.phoneNumber) form.setValue("phoneNumber", existingProfile.phoneNumber);
+      if (user.profileImageUrl) form.setValue("profileImageUrl", user.profileImageUrl);
+      
+      // Actor-specific fields
+      if (existingProfile.height) form.setValue("height", existingProfile.height);
+      if (existingProfile.weight) form.setValue("weight", existingProfile.weight);
+      if (existingProfile.eyeColor) form.setValue("eyeColor", existingProfile.eyeColor);
+      if (existingProfile.hairColor) form.setValue("hairColor", existingProfile.hairColor);
+      
+      // Arrays and multi-select fields
+      if (existingProfile.languages) form.setValue("languages", existingProfile.languages);
+      if (existingProfile.accents) form.setValue("accents", existingProfile.accents);
+      if (existingProfile.instruments) form.setValue("instruments", existingProfile.instruments);
+      if (existingProfile.genres) form.setValue("genres", existingProfile.genres);
+      if (existingProfile.unionStatus) form.setValue("unionStatus", existingProfile.unionStatus);
+      if (existingProfile.skills) form.setValue("skills", existingProfile.skills);
+      
+      // Rates
+      if (existingProfile.dailyRate) form.setValue("dailyRate", existingProfile.dailyRate);
+      if (existingProfile.weeklyRate) form.setValue("weeklyRate", existingProfile.weeklyRate);
+      if (existingProfile.projectRate) form.setValue("projectRate", existingProfile.projectRate);
+      
+      // Additional fields
+      if (existingProfile.availabilityStatus) form.setValue("availabilityStatus", existingProfile.availabilityStatus);
+      
+      console.log("Form populated with existing data");
+    }
+  }, [existingProfile, user, form]);
 
   const createProfileMutation = useMutation({
     mutationFn: async (data: OnboardingFormData) => {

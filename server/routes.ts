@@ -1349,6 +1349,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Social Media Links endpoints for Profile Analytics
+  app.get('/api/social-media-links', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const links = await simpleStorage.getSocialMediaLinks(userId);
+      res.json(links);
+    } catch (error) {
+      console.error("Error fetching social media links:", error);
+      res.status(500).json({ message: "Failed to fetch social media links" });
+    }
+  });
+
+  app.post('/api/social-media-links', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const linkData = { ...req.body, userId };
+      const link = await simpleStorage.createSocialMediaLink(linkData);
+      res.json(link);
+    } catch (error) {
+      console.error("Error creating social media link:", error);
+      res.status(500).json({ message: "Failed to create social media link" });
+    }
+  });
+
+  app.put('/api/social-media-links/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const linkId = parseInt(req.params.id);
+      const link = await simpleStorage.updateSocialMediaLink(linkId, req.body);
+      res.json(link);
+    } catch (error) {
+      console.error("Error updating social media link:", error);
+      res.status(500).json({ message: "Failed to update social media link" });
+    }
+  });
+
+  app.delete('/api/social-media-links/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const linkId = parseInt(req.params.id);
+      await simpleStorage.deleteSocialMediaLink(linkId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting social media link:", error);
+      res.status(500).json({ message: "Failed to delete social media link" });
+    }
+  });
+
+  app.post('/api/social-media-links/:id/click', isAuthenticated, async (req: any, res) => {
+    try {
+      const linkId = parseInt(req.params.id);
+      await simpleStorage.updateSocialMediaLinkClicks(linkId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating social media link clicks:", error);
+      res.status(500).json({ message: "Failed to update social media link clicks" });
+    }
+  });
+
   // Social Media Routes
   
   // Get social feed

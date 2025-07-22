@@ -20,9 +20,9 @@ import {
   type TalentType,
   type InsertTalentType,
 } from "@shared/simple-schema";
-import { jobHistory, profileSharingSettings, availabilityCalendar, mediaFiles, jobApplications, jobCommunications, socialPosts, jobs } from "@shared/schema";
+import { jobHistory, profileSharingSettings, availabilityCalendar, mediaFiles, jobApplications, jobCommunications, socialPosts, jobs, socialMediaLinks } from "@shared/schema";
 import { db } from "./db";
-import { eq, asc, desc } from "drizzle-orm";
+import { eq, asc, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (for traditional auth)
@@ -74,8 +74,13 @@ export interface IStorage {
   
   // Skills update method
   updateUserSkills(userId: number, skills: string[]): Promise<User>;
-
-
+  
+  // Social Media Links operations
+  getSocialMediaLinks(userId: number): Promise<any[]>;
+  createSocialMediaLink(linkData: any): Promise<any>;
+  updateSocialMediaLink(id: number, linkData: any): Promise<any>;
+  deleteSocialMediaLink(id: number): Promise<void>;
+  updateSocialMediaLinkClicks(id: number): Promise<void>;
 
   // Skill endorsement operations
   getSkillEndorsements(userId: number, skill: string): Promise<any[]>;
@@ -592,6 +597,89 @@ export class DatabaseStorage implements IStorage {
       currentFiles: (this.mediaFiles.get(userId) || []).length,
       currentSize: (this.mediaFiles.get(userId) || []).reduce((sum, file) => sum + (file.size || 0), 0)
     };
+  }
+
+  // Social Media Links Management
+  async getSocialMediaLinks(userId: number): Promise<any[]> {
+    try {
+      const links = await db
+        .select()
+        .from(socialMediaLinks)
+        .where(eq(socialMediaLinks.userId, userId))
+        .orderBy(asc(socialMediaLinks.sortOrder));
+      return links;
+    } catch (error) {
+      console.error('Database social media links retrieval error:', error);
+      return [];
+    }
+  }
+
+  async createSocialMediaLink(linkData: any): Promise<any> {
+    try {
+      const [link] = await db
+        .insert(socialMediaLinks)
+        .values({
+          userId: linkData.userId,
+          platform: linkData.platform,
+          username: linkData.username,
+          url: linkData.url,
+          displayName: linkData.displayName,
+          isVisible: linkData.isVisible !== false,
+          iconColor: linkData.iconColor,
+          sortOrder: linkData.sortOrder || 0,
+        })
+        .returning();
+      return link;
+    } catch (error) {
+      console.error('Database social media link creation error:', error);
+      throw error;
+    }
+  }
+
+  async updateSocialMediaLink(id: number, linkData: any): Promise<any> {
+    try {
+      const [link] = await db
+        .update(socialMediaLinks)
+        .set({
+          username: linkData.username,
+          url: linkData.url,
+          displayName: linkData.displayName,
+          isVisible: linkData.isVisible,
+          iconColor: linkData.iconColor,
+          sortOrder: linkData.sortOrder,
+          updatedAt: new Date().toISOString()
+        })
+        .where(eq(socialMediaLinks.id, id))
+        .returning();
+      return link;
+    } catch (error) {
+      console.error('Database social media link update error:', error);
+      throw error;
+    }
+  }
+
+  async deleteSocialMediaLink(id: number): Promise<void> {
+    try {
+      await db
+        .delete(socialMediaLinks)
+        .where(eq(socialMediaLinks.id, id));
+    } catch (error) {
+      console.error('Database social media link deletion error:', error);
+      throw error;
+    }
+  }
+
+  async updateSocialMediaLinkClicks(id: number): Promise<void> {
+    try {
+      await db
+        .update(socialMediaLinks)
+        .set({
+          clickCount: sql`${socialMediaLinks.clickCount} + 1`
+        })
+        .where(eq(socialMediaLinks.id, id));
+    } catch (error) {
+      console.error('Database social media link click update error:', error);
+    }
   }
 
   async getMediaFile(id: number): Promise<any> {
@@ -1617,6 +1705,92 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error getting profile by custom URL:", error);
       return null;
+    }
+  }
+
+  // Social Media Links operations
+  async getSocialMediaLinks(userId: number): Promise<any[]> {
+    console.log(`🔗 Getting social media links for user ${userId}`);
+    
+    try {
+      const links = await db.select().from(socialMediaLinks)
+        .where(eq(socialMediaLinks.userId, userId))
+        .orderBy(asc(socialMediaLinks.sortOrder));
+      
+      console.log(`🔗 Found ${links.length} social media links for user ${userId}`);
+      return links;
+    } catch (error) {
+      console.error("Error getting social media links:", error);
+      return [];
+    }
+  }
+
+  async createSocialMediaLink(linkData: any): Promise<any> {
+    console.log(`🔗 Creating social media link:`, linkData);
+    
+    try {
+      const [newLink] = await db.insert(socialMediaLinks)
+        .values({
+          ...linkData,
+          createdAt: new Date(),
+          clickCount: 0,
+          sortOrder: linkData.sortOrder || 0
+        })
+        .returning();
+      
+      console.log(`🔗 Created social media link:`, newLink);
+      return newLink;
+    } catch (error) {
+      console.error("Error creating social media link:", error);
+      throw error;
+    }
+  }
+
+  async updateSocialMediaLink(id: number, linkData: any): Promise<any> {
+    console.log(`🔗 Updating social media link ${id}:`, linkData);
+    
+    try {
+      const [updatedLink] = await db.update(socialMediaLinks)
+        .set(linkData)
+        .where(eq(socialMediaLinks.id, id))
+        .returning();
+      
+      console.log(`🔗 Updated social media link:`, updatedLink);
+      return updatedLink;
+    } catch (error) {
+      console.error("Error updating social media link:", error);
+      throw error;
+    }
+  }
+
+  async deleteSocialMediaLink(id: number): Promise<void> {
+    console.log(`🔗 Deleting social media link ${id}`);
+    
+    try {
+      await db.delete(socialMediaLinks)
+        .where(eq(socialMediaLinks.id, id));
+      
+      console.log(`🔗 Deleted social media link ${id}`);
+    } catch (error) {
+      console.error("Error deleting social media link:", error);
+      throw error;
+    }
+  }
+
+  async updateSocialMediaLinkClicks(id: number): Promise<void> {
+    console.log(`🔗 Updating click count for social media link ${id}`);
+    
+    try {
+      await db.update(socialMediaLinks)
+        .set({ 
+          clickCount: sql`${socialMediaLinks.clickCount} + 1` 
+        })
+        .where(eq(socialMediaLinks.id, id));
+      
+      console.log(`🔗 Updated click count for social media link ${id}`);
+    } catch (error) {
+      console.error("Error updating social media link clicks:", error);
+      throw error;
     }
   }
 

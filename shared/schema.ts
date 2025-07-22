@@ -1034,6 +1034,23 @@ export const profileSharingSettings = pgTable("profile_sharing_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Social Media Links for Profile Analytics
+export const socialMediaLinks = pgTable("social_media_links", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  platform: varchar("platform").notNull(), // facebook, instagram, twitter, linkedin, etc.
+  username: varchar("username"), // @username or handle
+  url: varchar("url").notNull(), // Full URL to profile
+  displayName: varchar("display_name"), // Custom display name
+  isVisible: boolean("is_visible").default(true), // Show on profile templates
+  iconColor: varchar("icon_color"), // Custom icon color
+  sortOrder: integer("sort_order").default(0), // Display order
+  verifiedAt: timestamp("verified_at"), // When link was verified
+  clickCount: integer("click_count").default(0), // Analytics
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Admin settings for OpenAI keys and other configurations
 export const adminSettings = pgTable("admin_settings", {
   id: serial("id").primaryKey(),
@@ -1081,6 +1098,14 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   paymentTransactions: many(paymentTransactions),
   refundedPayments: many(paymentTransactions, { relationName: "refundedPayments" }),
   tags: many(userTags),
+  socialMediaLinks: many(socialMediaLinks),
+}));
+
+export const socialMediaLinksRelations = relations(socialMediaLinks, ({ one }) => ({
+  user: one(users, {
+    fields: [socialMediaLinks.userId],
+    references: [users.id],
+  }),
 }));
 
 export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
@@ -1704,6 +1729,13 @@ export const insertSocialConnectionSchema = createInsertSchema(socialConnections
 export const insertUserTagSchema = createInsertSchema(userTags).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertSocialMediaLinkSchema = createInsertSchema(socialMediaLinks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  clickCount: true,
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
