@@ -44,6 +44,12 @@ export default function ProfileViewer() {
     queryKey: [`/api/media/user/${userId}`],
     enabled: !!userId,
   });
+
+  // Fetch sharing settings for the user
+  const { data: sharingSettings = {} } = useQuery<any>({
+    queryKey: [`/api/user/sharing-settings/${userId}`],
+    enabled: !!userId,
+  });
   
   console.log("ProfileViewer - profile data:", profile);
   console.log("ProfileViewer - media files:", mediaFiles);
@@ -106,7 +112,8 @@ export default function ProfileViewer() {
       profile: combinedUserData,
       mediaFiles: displayMedia,
       userId,
-      user: combinedUserData
+      user: combinedUserData,
+      sharingSettings
     };
 
     switch (selectedTemplate) {
@@ -138,7 +145,6 @@ export default function ProfileViewer() {
             <div className="mt-12">
               <SkillEndorsements 
                 profile={profile} 
-                isOwnProfile={isOwnProfile} 
               />
             </div>
           )}

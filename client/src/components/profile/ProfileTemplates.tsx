@@ -22,6 +22,7 @@ interface ProfileTemplatesProps {
   userId: string;
   user: any;
   selectedTemplate: ProfileTemplate;
+  sharingSettings?: any;
   onTemplateChange: (template: ProfileTemplate) => void;
 }
 
@@ -129,7 +130,7 @@ export function TemplateSelector({
 export default TemplateSelector;
 
 // Classic Template - Professional and Timeless
-export function ClassicTemplate({ profile, mediaFiles, userId, user }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const isOwnProfile = user?.id === parseInt(userId);
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
@@ -243,7 +244,7 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
                   <span className="text-sm">{profile.phoneNumber}</span>
                 </div>
               )}
-              {profile?.website && (
+              {profile?.website && (sharingSettings?.showSocialMedia !== false) && (
                 <div className="flex items-center gap-2">
                   <Globe className="w-4 h-4 text-gray-500" />
                   <a href={profile.website} target="_blank" rel="noopener noreferrer" 
@@ -390,7 +391,7 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
 }
 
 // Modern Template - Sleek and Contemporary 
-export function ModernTemplate({ profile, mediaFiles, userId, user }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   // Query to fetch current availability status from calendar
   const { data: availabilityEntries = [] } = useQuery({
     queryKey: [`/api/availability/user/${userId}`],
@@ -512,7 +513,7 @@ export function ModernTemplate({ profile, mediaFiles, userId, user }: Omit<Profi
                 <span className="text-sm">{profile.phoneNumber}</span>
               </div>
             )}
-            {profile?.website && (
+            {profile?.website && (sharingSettings?.showSocialMedia !== false) && (
               <div className="flex items-center gap-2">
                 <Globe className="w-4 h-4 text-gray-500" />
                 <a href={profile.website} target="_blank" rel="noopener noreferrer" 
@@ -638,7 +639,7 @@ export function ModernTemplate({ profile, mediaFiles, userId, user }: Omit<Profi
 }
 
 // Artistic Template - Creative and Expressive
-export function ArtisticTemplate({ profile, mediaFiles, userId, user }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
 
@@ -803,7 +804,7 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user }: Omit<Pro
                 <span className="font-medium">{profile.phoneNumber}</span>
               </div>
             )}
-            {profile?.website && (
+            {profile?.website && (sharingSettings?.showSocialMedia !== false) && (
               <div className="flex items-center gap-3 p-3 bg-white rounded-xl">
                 <Globe className="w-5 h-5 text-indigo-500" />
                 <a href={profile.website} target="_blank" rel="noopener noreferrer" 
@@ -910,7 +911,7 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user }: Omit<Pro
 }
 
 // Minimal Template - Clean and Focused
-export function MinimalTemplate({ profile, mediaFiles, userId, user }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   // Query to fetch current availability status from calendar
   const { data: availabilityEntries = [] } = useQuery({
     queryKey: [`/api/availability/user/${userId}`],
@@ -1031,7 +1032,7 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
                     <span className="font-medium">{profile.phoneNumber}</span>
                   </div>
                 )}
-                {profile?.website && (
+                {profile?.website && (sharingSettings?.showSocialMedia !== false) && (
                   <div className="flex justify-between">
                     <span className="text-gray-600 font-light">Website</span>
                     <a href={profile.website} target="_blank" rel="noopener noreferrer" 
@@ -1131,7 +1132,7 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
 }
 
 // Cinematic Template - Dramatic and Bold
-export function CinematicTemplate({ profile, mediaFiles, userId, user }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   // Query to fetch current availability status from calendar
   const { data: availabilityEntries = [] } = useQuery({
     queryKey: [`/api/availability/user/${userId}`],
@@ -1329,7 +1330,7 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user }: Omit<Pr
                   <span className="text-lg font-medium">{profile.phoneNumber}</span>
                 </div>
               )}
-              {profile?.website && (
+              {profile?.website && (sharingSettings?.showSocialMedia !== false) && (
                 <div className="flex items-center gap-4 p-4 bg-black/40 rounded-lg border border-yellow-500/20">
                   <Globe className="w-6 h-6 text-yellow-500" />
                   <a href={profile.website} target="_blank" rel="noopener noreferrer" 

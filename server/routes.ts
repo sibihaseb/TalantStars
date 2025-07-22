@@ -3725,6 +3725,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get sharing settings for a specific user (public - for profile viewing)
+  app.get('/api/user/sharing-settings/:userId', async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const sharing = await simpleStorage.getProfileSharingSettings(userId);
+      res.json(sharing || { showSocialMedia: true }); // Default to showing social media
+    } catch (error) {
+      console.error("Error fetching user sharing settings:", error);
+      res.json({ showSocialMedia: true }); // Default fallback
+    }
+  });
+
   // Public route for getting SEO data for a specific page
   app.get('/api/seo/:route', async (req: any, res) => {
     try {

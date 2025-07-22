@@ -526,9 +526,15 @@ export default function ProfileSharing() {
                 />
               </div>
 
-              {/* Social Media Links Management */}
-              <div className="border-t pt-4 mt-6">
-                <SocialMediaManager />
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium">Show Social Media</Label>
+                  <p className="text-xs text-gray-500">Display website and social links on profile</p>
+                </div>
+                <Switch
+                  checked={sharingSettings?.showSocialMedia || true}
+                  onCheckedChange={(checked) => handleSettingChange('showSocialMedia', checked)}
+                />
               </div>
             </CardContent>
           </Card>
