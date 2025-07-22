@@ -205,8 +205,68 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
                   <span className="text-sm">{profile.phoneNumber}</span>
                 </div>
               )}
+              {profile?.website && (
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-gray-500" />
+                  <a href={profile.website} target="_blank" rel="noopener noreferrer" 
+                     className="text-sm text-blue-600 hover:underline">{profile.website}</a>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-gray-500" />
+                <Badge variant={profile?.availabilityStatus === 'available' ? 'default' : 'secondary'} className="text-xs">
+                  {profile?.availabilityStatus || 'Unknown'}
+                </Badge>
+              </div>
             </CardContent>
           </Card>
+
+          {/* Physical Stats */}
+          {(profile?.height || profile?.weight || profile?.eyeColor || profile?.hairColor) && (
+            <Card>
+              <CardHeader><CardTitle>Physical Details</CardTitle></CardHeader>
+              <CardContent className="space-y-3">
+                {profile?.height && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Height:</span>
+                    <span className="text-sm font-medium">{profile.height}</span>
+                  </div>
+                )}
+                {profile?.weight && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Weight:</span>
+                    <span className="text-sm font-medium">{profile.weight}</span>
+                  </div>
+                )}
+                {profile?.eyeColor && profile.eyeColor.length > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Eyes:</span>
+                    <span className="text-sm font-medium">{Array.isArray(profile.eyeColor) ? profile.eyeColor.join(', ') : profile.eyeColor}</span>
+                  </div>
+                )}
+                {profile?.hairColor && profile.hairColor.length > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Hair:</span>
+                    <span className="text-sm font-medium">{Array.isArray(profile.hairColor) ? profile.hairColor.join(', ') : profile.hairColor}</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Languages */}
+          {profile?.languages && profile.languages.length > 0 && (
+            <Card>
+              <CardHeader><CardTitle>Languages</CardTitle></CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {profile.languages.map((lang: string, index: number) => (
+                    <Badge key={index} variant="outline" className="text-xs">{lang}</Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
           
           {/* Rates */}
           <Card>
@@ -343,8 +403,124 @@ export function ModernTemplate({ profile, mediaFiles, userId, user }: Omit<Profi
         </Card>
       </div>
 
+      {/* Profile Details Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Contact & Availability */}
+        <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-blue-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-blue-600" />
+              Contact & Location
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {profile?.location && (
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-gray-500" />
+                <span className="text-sm">{profile.location}</span>
+              </div>
+            )}
+            {profile?.phoneNumber && (
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-gray-500" />
+                <span className="text-sm">{profile.phoneNumber}</span>
+              </div>
+            )}
+            {profile?.website && (
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-gray-500" />
+                <a href={profile.website} target="_blank" rel="noopener noreferrer" 
+                   className="text-sm text-blue-600 hover:underline truncate">{profile.website}</a>
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Status:</span>
+              <Badge variant={profile?.availabilityStatus === 'available' ? 'default' : 'secondary'} className="text-xs">
+                {profile?.availabilityStatus || 'Unknown'}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Physical Details */}
+        {(profile?.height || profile?.weight || profile?.eyeColor || profile?.hairColor) && (
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-purple-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-purple-600" />
+                Physical Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {profile?.height && (
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Height:</span>
+                  <span className="text-sm font-medium">{profile.height}</span>
+                </div>
+              )}
+              {profile?.weight && (
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Weight:</span>
+                  <span className="text-sm font-medium">{profile.weight}</span>
+                </div>
+              )}
+              {profile?.eyeColor && profile.eyeColor.length > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Eyes:</span>
+                  <span className="text-sm font-medium">{Array.isArray(profile.eyeColor) ? profile.eyeColor.join(', ') : profile.eyeColor}</span>
+                </div>
+              )}
+              {profile?.hairColor && profile.hairColor.length > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Hair:</span>
+                  <span className="text-sm font-medium">{Array.isArray(profile.hairColor) ? profile.hairColor.join(', ') : profile.hairColor}</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Languages & Skills */}
+        <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-cyan-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Award className="w-5 h-5 text-cyan-600" />
+              Skills & Languages
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {profile?.languages && profile.languages.length > 0 && (
+              <div>
+                <p className="text-sm text-gray-600 mb-2">Languages:</p>
+                <div className="flex flex-wrap gap-1">
+                  {profile.languages.map((lang: string, index: number) => (
+                    <Badge key={index} variant="outline" className="text-xs">{lang}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            {profile?.skills && profile.skills.length > 0 && (
+              <div>
+                <p className="text-sm text-gray-600 mb-2">Top Skills:</p>
+                <div className="flex flex-wrap gap-1">
+                  {profile.skills.slice(0, 3).map((skill: string, index: number) => (
+                    <Badge key={index} className="text-xs bg-gradient-to-r from-cyan-500 to-blue-500">{skill}</Badge>
+                  ))}
+                  {profile.skills.length > 3 && (
+                    <Badge variant="outline" className="text-xs">+{profile.skills.length - 3} more</Badge>
+                  )}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Modern Media Grid */}
       <Card className="border-0 shadow-2xl overflow-hidden">
+        <CardHeader>
+          <CardTitle className="text-2xl">Portfolio</CardTitle>
+        </CardHeader>
         <CardContent className="p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {mediaFiles.map((media, index) => (
@@ -362,6 +538,12 @@ export function ModernTemplate({ profile, mediaFiles, userId, user }: Omit<Profi
                 </div>
               </div>
             ))}
+            {mediaFiles.length === 0 && (
+              <div className="col-span-full text-center py-12 text-gray-500">
+                <Camera className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No media files uploaded yet</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -371,6 +553,14 @@ export function ModernTemplate({ profile, mediaFiles, userId, user }: Omit<Profi
 
 // Artistic Template - Creative and Expressive
 export function ArtisticTemplate({ profile, mediaFiles, userId, user }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
+  const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+
+  const handleMediaClick = (index: number) => {
+    setSelectedMediaIndex(index);
+    setIsMediaModalOpen(true);
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       {/* Artistic Header with Asymmetric Layout */}
@@ -468,6 +658,131 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user }: Omit<Pro
           ))}
         </div>
       </div>
+
+      {/* Artistic Profile Details */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Contact & Rates */}
+        <Card className="bg-gradient-to-br from-pink-50 to-purple-50 border-2 border-pink-200 rounded-3xl shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-2xl bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+              Contact & Rates
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {profile?.location && (
+              <div className="flex items-center gap-3 p-3 bg-white rounded-xl">
+                <MapPin className="w-5 h-5 text-pink-500" />
+                <span className="font-medium">{profile.location}</span>
+              </div>
+            )}
+            {profile?.phoneNumber && (
+              <div className="flex items-center gap-3 p-3 bg-white rounded-xl">
+                <Phone className="w-5 h-5 text-purple-500" />
+                <span className="font-medium">{profile.phoneNumber}</span>
+              </div>
+            )}
+            {profile?.website && (
+              <div className="flex items-center gap-3 p-3 bg-white rounded-xl">
+                <Globe className="w-5 h-5 text-indigo-500" />
+                <a href={profile.website} target="_blank" rel="noopener noreferrer" 
+                   className="font-medium text-indigo-600 hover:underline">{profile.website}</a>
+              </div>
+            )}
+            {profile?.dailyRate && (
+              <div className="flex items-center gap-3 p-3 bg-white rounded-xl">
+                <DollarSign className="w-5 h-5 text-green-500" />
+                <span className="font-bold text-green-600">${profile.dailyRate} / day</span>
+              </div>
+            )}
+            <div className="flex items-center gap-3 p-3 bg-white rounded-xl">
+              <Clock className="w-5 h-5 text-orange-500" />
+              <Badge className={`${profile?.availabilityStatus === 'available' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                {profile?.availabilityStatus || 'Unknown'}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Physical & Professional Details */}
+        <Card className="bg-gradient-to-br from-indigo-50 to-blue-50 border-2 border-indigo-200 rounded-3xl shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-2xl bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+              Professional Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {(profile?.height || profile?.weight) && (
+              <div className="p-3 bg-white rounded-xl">
+                <p className="text-sm text-gray-600 mb-2">Physical Stats:</p>
+                <div className="flex gap-4">
+                  {profile?.height && <span className="font-medium">{profile.height}</span>}
+                  {profile?.weight && <span className="font-medium">{profile.weight}</span>}
+                </div>
+              </div>
+            )}
+            {(profile?.eyeColor && profile.eyeColor.length > 0) && (
+              <div className="p-3 bg-white rounded-xl">
+                <p className="text-sm text-gray-600 mb-2">Eye Color:</p>
+                <div className="flex flex-wrap gap-2">
+                  {(Array.isArray(profile.eyeColor) ? profile.eyeColor : [profile.eyeColor]).map((color: string, index: number) => (
+                    <Badge key={index} variant="outline" className="text-xs">{color}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            {(profile?.hairColor && profile.hairColor.length > 0) && (
+              <div className="p-3 bg-white rounded-xl">
+                <p className="text-sm text-gray-600 mb-2">Hair Color:</p>
+                <div className="flex flex-wrap gap-2">
+                  {(Array.isArray(profile.hairColor) ? profile.hairColor : [profile.hairColor]).map((color: string, index: number) => (
+                    <Badge key={index} variant="outline" className="text-xs">{color}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            {profile?.languages && profile.languages.length > 0 && (
+              <div className="p-3 bg-white rounded-xl">
+                <p className="text-sm text-gray-600 mb-2">Languages:</p>
+                <div className="flex flex-wrap gap-2">
+                  {profile.languages.map((lang: string, index: number) => (
+                    <Badge key={index} className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white text-xs">{lang}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* All Skills */}
+      {profile?.skills && profile.skills.length > 5 && (
+        <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-3xl shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-2xl bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+              All Skills & Talents
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-3">
+              {profile.skills.map((skill: string, index: number) => (
+                <Badge key={index} 
+                       className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-3 py-1 text-sm font-medium hover:shadow-lg transition-shadow">
+                  {skill}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Media Modal */}
+      <MediaModal
+        isOpen={isMediaModalOpen}
+        onClose={() => setIsMediaModalOpen(false)}
+        mediaItems={mediaFiles}
+        currentIndex={selectedMediaIndex}
+        onIndexChange={setSelectedMediaIndex}
+      />
     </div>
   );
 }
@@ -536,6 +851,122 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
             </div>
           ))}
         </div>
+        {mediaFiles.length === 0 && (
+          <div className="text-center py-12 text-gray-400">
+            <Camera className="w-16 h-16 mx-auto mb-4 opacity-30" />
+            <p className="font-light">No portfolio items yet</p>
+          </div>
+        )}
+      </div>
+
+      {/* Minimal Profile Details */}
+      <div className="max-w-3xl mx-auto space-y-12">
+        {/* Essential Information */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="space-y-6">
+            <div className="border-b border-gray-200 pb-6">
+              <h3 className="text-xl font-light text-gray-900 mb-4">Contact</h3>
+              <div className="space-y-3">
+                {profile?.phoneNumber && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 font-light">Phone</span>
+                    <span className="font-medium">{profile.phoneNumber}</span>
+                  </div>
+                )}
+                {profile?.website && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 font-light">Website</span>
+                    <a href={profile.website} target="_blank" rel="noopener noreferrer" 
+                       className="text-gray-900 hover:underline font-medium">{profile.website}</a>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-gray-600 font-light">Status</span>
+                  <span className={`font-medium ${profile?.availabilityStatus === 'available' ? 'text-green-600' : 'text-gray-600'}`}>
+                    {profile?.availabilityStatus || 'Unknown'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            {profile?.skills && profile.skills.length > 0 && (
+              <div className="border-b border-gray-200 pb-6">
+                <h3 className="text-xl font-light text-gray-900 mb-4">Skills</h3>
+                <div className="space-y-2">
+                  {profile.skills.map((skill: string, index: number) => (
+                    <div key={index} className="text-gray-700 font-light">• {skill}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="space-y-6">
+            {(profile?.height || profile?.weight || profile?.eyeColor || profile?.hairColor) && (
+              <div className="border-b border-gray-200 pb-6">
+                <h3 className="text-xl font-light text-gray-900 mb-4">Physical Details</h3>
+                <div className="space-y-3">
+                  {profile?.height && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 font-light">Height</span>
+                      <span className="font-medium">{profile.height}</span>
+                    </div>
+                  )}
+                  {profile?.weight && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 font-light">Weight</span>
+                      <span className="font-medium">{profile.weight}</span>
+                    </div>
+                  )}
+                  {profile?.eyeColor && profile.eyeColor.length > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 font-light">Eyes</span>
+                      <span className="font-medium">{Array.isArray(profile.eyeColor) ? profile.eyeColor.join(', ') : profile.eyeColor}</span>
+                    </div>
+                  )}
+                  {profile?.hairColor && profile.hairColor.length > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 font-light">Hair</span>
+                      <span className="font-medium">{Array.isArray(profile.hairColor) ? profile.hairColor.join(', ') : profile.hairColor}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {profile?.languages && profile.languages.length > 0 && (
+              <div className="border-b border-gray-200 pb-6">
+                <h3 className="text-xl font-light text-gray-900 mb-4">Languages</h3>
+                <div className="space-y-2">
+                  {profile.languages.map((lang: string, index: number) => (
+                    <div key={index} className="text-gray-700 font-light">• {lang}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Additional Rates */}
+        {(profile?.weeklyRate || profile?.projectRate) && (
+          <div className="border-t border-gray-200 pt-8">
+            <h3 className="text-xl font-light text-gray-900 mb-6 text-center">Additional Rates</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-lg mx-auto">
+              {profile?.weeklyRate && (
+                <div className="text-center">
+                  <div className="text-2xl font-light text-gray-900">${profile.weeklyRate}</div>
+                  <div className="text-sm text-gray-500 uppercase tracking-wide">Weekly Rate</div>
+                </div>
+              )}
+              {profile?.projectRate && (
+                <div className="text-center">
+                  <div className="text-2xl font-light text-gray-900">${profile.projectRate}</div>
+                  <div className="text-sm text-gray-500 uppercase tracking-wide">Project Rate</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -649,6 +1080,188 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user }: Omit<Pr
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Cinematic Content Sections */}
+      <div className="max-w-7xl mx-auto px-8 space-y-16 py-16">
+        {/* Stats & Contact */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <Card className="bg-black/80 border-yellow-500 border-2 text-white">
+            <CardContent className="p-6 text-center">
+              <DollarSign className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-yellow-500">${profile?.dailyRate}</div>
+              <div className="text-sm text-gray-300">DAILY RATE</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-black/80 border-white border-2 text-white">
+            <CardContent className="p-6 text-center">
+              <MapPin className="w-8 h-8 text-white mx-auto mb-2" />
+              <div className="text-lg font-bold">{profile?.location}</div>
+              <div className="text-sm text-gray-300">LOCATION</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-black/80 border-yellow-500 border-2 text-white">
+            <CardContent className="p-6 text-center">
+              <Award className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-yellow-500">{profile?.skills?.length || 0}</div>
+              <div className="text-sm text-gray-300">SKILLS</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-black/80 border-white border-2 text-white">
+            <CardContent className="p-6 text-center">
+              <Film className="w-8 h-8 text-white mx-auto mb-2" />
+              <div className="text-lg font-bold">{mediaFiles.length}</div>
+              <div className="text-sm text-gray-300">PORTFOLIO</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Professional Details Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Contact & Availability */}
+          <Card className="bg-gradient-to-br from-gray-900 to-black border-yellow-500 border-2">
+            <CardHeader>
+              <CardTitle className="text-2xl text-yellow-500 font-bold tracking-wide">
+                CONTACT & AVAILABILITY
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6 text-white">
+              {profile?.phoneNumber && (
+                <div className="flex items-center gap-4 p-4 bg-black/40 rounded-lg border border-yellow-500/20">
+                  <Phone className="w-6 h-6 text-yellow-500" />
+                  <span className="text-lg font-medium">{profile.phoneNumber}</span>
+                </div>
+              )}
+              {profile?.website && (
+                <div className="flex items-center gap-4 p-4 bg-black/40 rounded-lg border border-yellow-500/20">
+                  <Globe className="w-6 h-6 text-yellow-500" />
+                  <a href={profile.website} target="_blank" rel="noopener noreferrer" 
+                     className="text-lg font-medium text-yellow-400 hover:text-yellow-300">{profile.website}</a>
+                </div>
+              )}
+              <div className="flex items-center gap-4 p-4 bg-black/40 rounded-lg border border-yellow-500/20">
+                <Clock className="w-6 h-6 text-yellow-500" />
+                <Badge className={`text-lg px-4 py-2 ${profile?.availabilityStatus === 'available' ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-200'}`}>
+                  {profile?.availabilityStatus?.toUpperCase() || 'UNKNOWN'}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Physical & Skills */}
+          <Card className="bg-gradient-to-br from-gray-900 to-black border-white border-2">
+            <CardHeader>
+              <CardTitle className="text-2xl text-white font-bold tracking-wide">
+                PROFESSIONAL SPECS
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6 text-white">
+              {(profile?.height || profile?.weight) && (
+                <div className="p-4 bg-black/40 rounded-lg border border-white/20">
+                  <h4 className="text-yellow-500 font-bold mb-3">PHYSICAL</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {profile?.height && <span className="font-medium">{profile.height}</span>}
+                    {profile?.weight && <span className="font-medium">{profile.weight}</span>}
+                  </div>
+                </div>
+              )}
+              
+              {(profile?.eyeColor && profile.eyeColor.length > 0) && (
+                <div className="p-4 bg-black/40 rounded-lg border border-white/20">
+                  <h4 className="text-yellow-500 font-bold mb-3">FEATURES</h4>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <span className="text-gray-300">Eyes:</span>
+                      {(Array.isArray(profile.eyeColor) ? profile.eyeColor : [profile.eyeColor]).map((color: string, index: number) => (
+                        <Badge key={index} className="bg-yellow-500/20 text-yellow-200 text-sm">{color}</Badge>
+                      ))}
+                    </div>
+                    {(profile?.hairColor && profile.hairColor.length > 0) && (
+                      <div className="flex gap-2">
+                        <span className="text-gray-300">Hair:</span>
+                        {(Array.isArray(profile.hairColor) ? profile.hairColor : [profile.hairColor]).map((color: string, index: number) => (
+                          <Badge key={index} className="bg-white/20 text-white text-sm">{color}</Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {profile?.languages && profile.languages.length > 0 && (
+                <div className="p-4 bg-black/40 rounded-lg border border-white/20">
+                  <h4 className="text-yellow-500 font-bold mb-3">LANGUAGES</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {profile.languages.map((lang: string, index: number) => (
+                      <Badge key={index} className="bg-yellow-500 text-black font-bold text-sm">{lang}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Skills Showcase */}
+        {profile?.skills && profile.skills.length > 0 && (
+          <Card className="bg-gradient-to-r from-yellow-500/10 to-white/5 border-yellow-500 border-2">
+            <CardHeader className="text-center">
+              <CardTitle className="text-4xl text-yellow-500 font-bold tracking-wider">
+                TALENT SHOWCASE
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap justify-center gap-4">
+                {profile.skills.map((skill: string, index: number) => (
+                  <Badge key={index} 
+                         className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-black px-6 py-3 text-lg font-bold uppercase tracking-wide hover:shadow-2xl hover:scale-105 transition-all">
+                    {skill}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Cinematic Media Gallery */}
+        <Card className="bg-black border-yellow-500 border-2 overflow-hidden">
+          <CardHeader className="text-center">
+            <CardTitle className="text-4xl text-yellow-500 font-bold tracking-wider">
+              FEATURED WORK
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mediaFiles.map((media, index) => (
+                <div key={index} className="group relative overflow-hidden rounded-lg border-2 border-yellow-500/50 hover:border-yellow-500 transition-all">
+                  <img 
+                    src={media.url} 
+                    alt={media.title}
+                    className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-700" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute bottom-4 left-4">
+                      <h3 className="text-white font-bold text-xl">{media.title}</h3>
+                      <p className="text-yellow-400 font-medium">{media.category}</p>
+                    </div>
+                  </div>
+                  <div className="absolute top-2 right-2">
+                    <Film className="w-6 h-6 text-yellow-500" />
+                  </div>
+                </div>
+              ))}
+              {mediaFiles.length === 0 && (
+                <div className="col-span-full text-center py-16">
+                  <Film className="w-20 h-20 mx-auto mb-6 text-yellow-500/50" />
+                  <p className="text-white/50 text-xl font-light">No featured work uploaded yet</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
