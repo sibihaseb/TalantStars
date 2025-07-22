@@ -172,6 +172,22 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
 
   const currentAvailability = getCurrentAvailabilityStatus();
 
+  // Get availability display properties
+  const getAvailabilityDisplay = (status: string) => {
+    switch (status) {
+      case 'available':
+        return { text: 'Available for work', color: 'bg-green-100 text-green-800', variant: 'default' as const };
+      case 'busy':
+        return { text: 'Currently busy', color: 'bg-yellow-100 text-yellow-800', variant: 'secondary' as const };
+      case 'unavailable':
+        return { text: 'Not available', color: 'bg-red-100 text-red-800', variant: 'destructive' as const };
+      default:
+        return { text: 'Available for work', color: 'bg-green-100 text-green-800', variant: 'default' as const };
+    }
+  };
+
+  const availabilityDisplay = getAvailabilityDisplay(currentAvailability);
+
   const handleMediaClick = (index: number) => {
     setSelectedMediaIndex(index);
     setIsMediaModalOpen(true);
@@ -254,8 +270,8 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
               )}
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-gray-500" />
-                <Badge variant={currentAvailability.status === 'available' ? 'default' : 'secondary'} className="text-xs">
-                  {currentAvailability.text || 'Available for work'}
+                <Badge variant={availabilityDisplay.variant} className={`text-xs ${availabilityDisplay.color}`}>
+                  {availabilityDisplay.text}
                 </Badge>
               </div>
             </CardContent>
@@ -430,6 +446,22 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
 
   const currentAvailability = getCurrentAvailabilityStatus();
 
+  // Get availability display properties
+  const getAvailabilityDisplay = (status: string) => {
+    switch (status) {
+      case 'available':
+        return { text: 'Available for work', color: 'bg-green-100 text-green-800', variant: 'default' as const };
+      case 'busy':
+        return { text: 'Currently busy', color: 'bg-yellow-100 text-yellow-800', variant: 'secondary' as const };
+      case 'unavailable':
+        return { text: 'Not available', color: 'bg-red-100 text-red-800', variant: 'destructive' as const };
+      default:
+        return { text: 'Available for work', color: 'bg-green-100 text-green-800', variant: 'default' as const };
+    }
+  };
+
+  const availabilityDisplay = getAvailabilityDisplay(currentAvailability);
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Hero Section with Glass Morphism */}
@@ -524,8 +556,8 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
             )}
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Status:</span>
-              <Badge variant={currentAvailability === 'available' ? 'default' : 'secondary'} className="text-xs">
-                {currentAvailability || 'Unknown'}
+              <Badge variant={availabilityDisplay.variant} className={`text-xs ${availabilityDisplay.color}`}>
+                {availabilityDisplay.text}
               </Badge>
             </div>
           </CardContent>
@@ -682,6 +714,22 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
 
   const currentAvailability = getCurrentAvailabilityStatus();
 
+  // Get availability display properties
+  const getAvailabilityDisplay = (status: string) => {
+    switch (status) {
+      case 'available':
+        return { text: 'Available for work', color: 'bg-green-100 text-green-800', variant: 'default' as const };
+      case 'busy':
+        return { text: 'Currently busy', color: 'bg-yellow-100 text-yellow-800', variant: 'secondary' as const };
+      case 'unavailable':
+        return { text: 'Not available', color: 'bg-red-100 text-red-800', variant: 'destructive' as const };
+      default:
+        return { text: 'Available for work', color: 'bg-green-100 text-green-800', variant: 'default' as const };
+    }
+  };
+
+  const availabilityDisplay = getAvailabilityDisplay(currentAvailability);
+
   const handleMediaClick = (index: number) => {
     setSelectedMediaIndex(index);
     setIsMediaModalOpen(true);
@@ -822,8 +870,8 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
             )}
             <div className="flex items-center gap-3 p-3 bg-white rounded-xl">
               <Clock className="w-5 h-5 text-orange-500" />
-              <Badge className={`${currentAvailability === 'available' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-                {currentAvailability || 'Unknown'}
+              <Badge variant={availabilityDisplay.variant} className={`${availabilityDisplay.color}`}>
+                {availabilityDisplay.text}
               </Badge>
             </div>
           </CardContent>
@@ -952,6 +1000,22 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
 
   const currentAvailability = getCurrentAvailabilityStatus();
 
+  // Get availability display properties
+  const getAvailabilityDisplay = (status: string) => {
+    switch (status) {
+      case 'available':
+        return { text: 'Available for work', color: 'text-green-600', variant: 'default' as const };
+      case 'busy':
+        return { text: 'Currently busy', color: 'text-yellow-600', variant: 'secondary' as const };
+      case 'unavailable':
+        return { text: 'Not available', color: 'text-red-600', variant: 'destructive' as const };
+      default:
+        return { text: 'Available for work', color: 'text-green-600', variant: 'default' as const };
+    }
+  };
+
+  const availabilityDisplay = getAvailabilityDisplay(currentAvailability);
+
   return (
     <div className="max-w-5xl mx-auto space-y-12 py-8">
       {/* Ultra Clean Header */}
@@ -1045,8 +1109,8 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
                 )}
                 <div className="flex justify-between">
                   <span className="text-gray-600 font-light">Status</span>
-                  <span className={`font-medium ${currentAvailability === 'available' ? 'text-green-600' : 'text-gray-600'}`}>
-                    {currentAvailability || 'Unknown'}
+                  <span className={`font-medium ${availabilityDisplay.color}`}>
+                    {availabilityDisplay.text}
                   </span>
                 </div>
               </div>
@@ -1173,6 +1237,22 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
   };
 
   const currentAvailability = getCurrentAvailabilityStatus();
+
+  // Get availability display properties
+  const getAvailabilityDisplay = (status: string) => {
+    switch (status) {
+      case 'available':
+        return { text: 'Available for work', color: 'bg-green-600', variant: 'default' as const };
+      case 'busy':
+        return { text: 'Currently busy', color: 'bg-yellow-600', variant: 'secondary' as const };
+      case 'unavailable':
+        return { text: 'Not available', color: 'bg-red-600', variant: 'destructive' as const };
+      default:
+        return { text: 'Available for work', color: 'bg-green-600', variant: 'default' as const };
+    }
+  };
+
+  const availabilityDisplay = getAvailabilityDisplay(currentAvailability);
 
   return (
     <div className="max-w-full mx-auto">
@@ -1344,8 +1424,8 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
               )}
               <div className="flex items-center gap-4 p-4 bg-black/40 rounded-lg border border-yellow-500/20">
                 <Clock className="w-6 h-6 text-yellow-500" />
-                <Badge className={`text-lg px-4 py-2 ${currentAvailability === 'available' ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-200'}`}>
-                  {currentAvailability?.toUpperCase() || 'UNKNOWN'}
+                <Badge className={`text-lg px-4 py-2 ${availabilityDisplay.color} text-white`}>
+                  {availabilityDisplay.text.toUpperCase()}
                 </Badge>
               </div>
             </CardContent>
