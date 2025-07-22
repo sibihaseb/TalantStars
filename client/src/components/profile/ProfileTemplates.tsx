@@ -251,8 +251,8 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
               )}
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-gray-500" />
-                <Badge variant={currentAvailability === 'available' ? 'default' : 'secondary'} className="text-xs">
-                  {currentAvailability || 'Unknown'}
+                <Badge variant={currentAvailability.status === 'available' ? 'default' : 'secondary'} className="text-xs">
+                  {currentAvailability.text || 'Available for work'}
                 </Badge>
               </div>
             </CardContent>

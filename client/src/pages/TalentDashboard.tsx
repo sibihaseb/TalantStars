@@ -14,6 +14,69 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
+
+// Dynamic Availability Status Component
+function DynamicAvailabilityStatus({ userId }: { userId: number }) {
+  const { data: availabilityEntries = [] } = useQuery({
+    queryKey: [`/api/availability/user/${userId}`],
+    enabled: !!userId,
+    queryFn: async () => {
+      const response = await fetch(`/api/availability/user/${userId}`, {
+        credentials: 'include',
+      });
+      if (!response.ok) return [];
+      return response.json();
+    },
+  });
+
+  // Function to determine current availability status from calendar entries
+  const getCurrentAvailabilityStatus = () => {
+    if (!availabilityEntries?.length) return { status: 'available', text: 'Available for work' };
+    
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    // Check if there's a current busy/unavailable entry for today
+    const currentEntry = availabilityEntries.find((entry: any) => {
+      const startDate = new Date(entry.startDate).toISOString().split('T')[0];
+      const endDate = new Date(entry.endDate).toISOString().split('T')[0];
+      return startDate <= todayStr && endDate >= todayStr;
+    });
+    
+    if (currentEntry) {
+      const statusText = {
+        'busy': 'Currently busy',
+        'unavailable': 'Unavailable',
+        'available': 'Available for work'
+      }[currentEntry.status] || 'Available for work';
+      
+      return { status: currentEntry.status, text: statusText };
+    }
+    
+    return { status: 'available', text: 'Available for work' };
+  };
+
+  const availability = getCurrentAvailabilityStatus();
+  
+  // Color coding for different statuses
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'busy':
+        return 'text-yellow-600 dark:text-yellow-400';
+      case 'unavailable':
+        return 'text-red-600 dark:text-red-400';
+      default:
+        return 'text-green-600 dark:text-green-400';
+    }
+  };
+
+  return (
+    <div className={`flex items-center gap-1 ${getStatusColor(availability.status)}`}>
+      <Calendar className="w-4 h-4" />
+      <span>{availability.text}</span>
+    </div>
+  );
+}
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ProgressMascot } from "@/components/mascot/ProgressMascot";
@@ -469,10 +532,7 @@ export default function TalentDashboard() {
                       <MapPin className="w-4 h-4" />
                       <span>{profile?.location || 'Location not set'}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      <span>Available for work</span>
-                    </div>
+                    <DynamicAvailabilityStatus userId={user?.id} />
                   </div>
                 </div>
                 

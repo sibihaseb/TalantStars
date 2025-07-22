@@ -625,11 +625,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get availability for specific user
-  app.get('/api/availability/user/:userId', isAuthenticated, async (req: any, res) => {
+  // Get availability for specific user (public access for profile viewing)
+  app.get('/api/availability/user/:userId', async (req: any, res) => {
     try {
       const userId = parseInt(req.params.userId);
+      console.log(`🔥 AVAILABILITY: Getting events for user ${userId}`);
       const events = await simpleStorage.getAvailabilityEvents(userId);
+      console.log(`🔥 AVAILABILITY: Found ${events.length} events for user ${userId}`);
       res.json(events);
     } catch (error) {
       console.error("Error fetching user availability events:", error);
