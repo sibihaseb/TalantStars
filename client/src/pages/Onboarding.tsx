@@ -510,10 +510,10 @@ function Onboarding() {
 
   // Redirect if user already has a profile
   useEffect(() => {
-    if (user?.profile) {
+    if (user && 'profile' in user && user.profile) {
       setLocation("/");
     }
-  }, [user?.profile, setLocation]); // Only depend on profile, not entire user object
+  }, [user, setLocation]);
 
   const form = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
@@ -813,43 +813,44 @@ function Onboarding() {
     queryKey: ["/api/profile-questions"],
     enabled: !!watchedRole,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (previously cacheTime)
   });
 
   // Helper function to group acting questions by step
   const getActingQuestionGroups = () => {
-    if (!profileQuestions) return { step4: [], step5: [], step6: [] };
+    if (!profileQuestions) return { step5: [], step6: [], step7: [] };
     
-    const actingQuestions = profileQuestions.filter(q => {
+    const actingQuestions = (profileQuestions as any[]).filter((q: any) => {
       const questionType = q.talentType;
       const fieldName = q.fieldName || q.field_name;
-      return questionType === watchedTalentType && 
+      return questionType === 'actor' && 
              questionType !== 'profile' &&
-             !['displayName', 'bio', 'location', 'website', 'phoneNumber'].includes(fieldName);
+             fieldName &&
+             !['displayName', 'bio', 'location', 'website', 'phoneNumber', 'profileImageUrl'].includes(fieldName);
     });
 
-    // Step 4: Acting Experience (experience & training related)
+    // Step 5: Acting Experience (experience & training related)
     const experienceFields = ['primarySpecialty', 'yearsExperience', 'actingMethod', 'stageCombat', 'shakespeareExperience', 'musicalTheater'];
     
-    // Step 5: Physical & Skills (physical attributes & abilities)  
+    // Step 6: Physical & Skills (physical attributes & abilities)  
     const physicalFields = ['improvisationComfort', 'intimateScenesComfort', 'cryingOnCue', 'physicalComedy', 'stuntComfort', 'motionCapture', 'animalWork'];
     
-    // Step 6: Role Preferences (preferred roles & representation)
+    // Step 7: Role Preferences (preferred roles & representation)
     const roleFields = ['roleTypes', 'periodPieces', 'accentExperience', 'greenScreen', 'horrorThriller', 'currentAgent', 'currentPublicist', 'representationStatus'];
 
     return {
-      step4: actingQuestions.filter(q => {
-        const fieldName = q.fieldName || q.field_name;
-        return experienceFields.includes(fieldName);
-      }).sort((a, b) => a.order - b.order),
       step5: actingQuestions.filter(q => {
         const fieldName = q.fieldName || q.field_name;
-        return physicalFields.includes(fieldName);
-      }).sort((a, b) => a.order - b.order),
+        return experienceFields.includes(fieldName);
+      }).sort((a: any, b: any) => (a.order || 0) - (b.order || 0)),
       step6: actingQuestions.filter(q => {
         const fieldName = q.fieldName || q.field_name;
+        return physicalFields.includes(fieldName);
+      }).sort((a: any, b: any) => (a.order || 0) - (b.order || 0)),
+      step7: actingQuestions.filter(q => {
+        const fieldName = q.fieldName || q.field_name;
         return roleFields.includes(fieldName);
-      }).sort((a, b) => a.order - b.order)
+      }).sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
     };
   };
 
@@ -861,12 +862,12 @@ function Onboarding() {
     if (watchedRole === 'talent' && watchedTalentType === 'actor') {
       const questionGroups = getActingQuestionGroups();
       
-      if (currentStep === 4) {
-        return questionGroups.step4;
-      } else if (currentStep === 5) {
+      if (currentStep === 5) {
         return questionGroups.step5;
       } else if (currentStep === 6) {
         return questionGroups.step6;
+      } else if (currentStep === 7) {
+        return questionGroups.step7;
       }
       return [];
     }
@@ -879,23 +880,23 @@ function Onboarding() {
       questionTypes = ['profile'];
     }
 
-    return profileQuestions
-      .filter(q => {
+    return (profileQuestions as any[])
+      .filter((q: any) => {
         const questionType = q.talentType;
         const isRelevant = questionTypes.includes(questionType) && q.active;
         
         // Exclude profile image question since it has its own dedicated step
-        const isProfileImageQuestion = q.fieldName === 'profileImageUrl' || q.field_name === 'profileImageUrl';
+        const isProfileImageQuestion = (q as any).fieldName === 'profileImageUrl' || (q as any).field_name === 'profileImageUrl';
         
         // Exclude basic profile questions that are handled in earlier steps
-        const fieldName = q.fieldName || q.field_name;
+        const fieldName = (q as any).fieldName || (q as any).field_name;
         const isBasicProfileQuestion = [
           'displayName', 'bio', 'location', 'website', 'phoneNumber'
         ].includes(fieldName);
         
         return isRelevant && !isProfileImageQuestion && !isBasicProfileQuestion;
       })
-      .sort((a, b) => a.order - b.order);
+      .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
   }, [watchedRole, watchedTalentType, profileQuestions, currentStep]);
 
   // Render questions directly without inline component
@@ -1355,7 +1356,7 @@ function Onboarding() {
       // Convert empty strings to null for optional fields
       website: data.website?.trim() || null,
       phoneNumber: data.phoneNumber?.trim() || null,
-      profileImageUrl: data.profileImageUrl?.trim() || null,
+      profileImageUrl: data.profileImageUrl?.trim() || user?.profileImageUrl || '',
       // Acting experience fields
       yearsExperience: data.yearsExperience?.toString() || null,
       improvisationComfort: data.improvisationComfort?.trim() || null,
@@ -1371,9 +1372,9 @@ function Onboarding() {
       stuntComfort: data.stuntComfort?.trim() || null,
       shakespeareExperience: data.shakespeareExperience?.trim() || null,
       musicalTheater: data.musicalTheater?.trim() || null,
-      currentAgent: data.currentAgent?.trim() || null,
-      currentPublicist: data.currentPublicist?.trim() || null,
-      representationStatus: data.representationStatus?.trim() || null,
+      currentAgent: (data as any).currentAgent?.trim() || null,
+      currentPublicist: (data as any).currentPublicist?.trim() || null,
+      representationStatus: (data as any).representationStatus?.trim() || null,
       // Handle numeric fields as strings (backend expects strings)
       dailyRate: data.dailyRate ? String(data.dailyRate) : null,
       weeklyRate: data.weeklyRate ? String(data.weeklyRate) : null,
@@ -1967,32 +1968,32 @@ function Onboarding() {
                           Representation Information
                         </h3>
                         <div className="space-y-2">
-                          <Label htmlFor="current_manager">Current Manager (Optional)</Label>
+                          <Label htmlFor="currentManager">Current Manager (Optional)</Label>
                           <Input
-                            {...form.register("current_manager")}
+                            {...form.register("currentManager")}
                             placeholder="Enter your current manager's name"
                             type="text"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="current_agent">Current Agent (Optional)</Label>
+                          <Label htmlFor="currentAgent">Current Agent (Optional)</Label>
                           <Input
-                            {...form.register("current_agent")}
+                            {...form.register("currentAgent")}
                             placeholder="Enter your current agent's name"
                             type="text"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="current_publicist">Current Publicist (Optional)</Label>
+                          <Label htmlFor="currentPublicist">Current Publicist (Optional)</Label>
                           <Input
-                            {...form.register("current_publicist")}
+                            {...form.register("currentPublicist")}
                             placeholder="Enter your current publicist's name"
                             type="text"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="representation_status">Representation Status</Label>
-                          <Select onValueChange={(value) => form.setValue("representation_status", value)}>
+                          <Label htmlFor="representationStatus">Representation Status</Label>
+                          <Select onValueChange={(value) => form.setValue("representationStatus", value)}>
                             <SelectTrigger>
                               <SelectValue placeholder="Select representation status" />
                             </SelectTrigger>
@@ -2190,7 +2191,7 @@ function Onboarding() {
                 ) : (
                   <Button
                     type="button"
-                    disabled={createProfileMutation.isPending || !watchedDisplayName || !watchedBio || !watchedLocation || (watchedBio && watchedBio.length < 10)}
+                    disabled={createProfileMutation.isPending || !watchedDisplayName || !watchedBio || !watchedLocation || (watchedBio && (watchedBio as string).length < 10)}
                     className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     onClick={async (e) => {
                       e.preventDefault();
@@ -2212,7 +2213,7 @@ function Onboarding() {
                       
                       console.log("Acting field values:");
                       actingFields.forEach(field => {
-                        console.log(`${field}:`, allFormValues[field]);
+                        console.log(`${field}:`, (allFormValues as any)[field]);
                       });
                       
                       // Force submission with current form values
