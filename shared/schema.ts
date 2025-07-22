@@ -48,6 +48,7 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   mainImageUrl: varchar("main_image_url"), // 1:1 cropped main profile image
   heroImageUrl: varchar("hero_image_url"), // Background hero image for profile templates
+  profileTemplate: varchar("profile_template").default("classic"), // Selected profile template
   role: userRoleEnum("role").default("talent"),
   pricingTierId: integer("pricing_tier_id"),
   language: varchar("language").default("en"), // User's preferred language
@@ -1022,6 +1023,7 @@ export const profileSharingSettings = pgTable("profile_sharing_settings", {
   allowDirectMessages: boolean("allow_direct_messages").default(true), // Allow messages by default
   showContactInfo: boolean("show_contact_info").default(false), // Don't show contact by default
   showSocialLinks: boolean("show_social_links").default(true), // Show social links by default
+  showSocialMedia: boolean("show_social_media").default(true), // Show social media integration by default
   showMediaGallery: boolean("show_media_gallery").default(true), // Show gallery by default
   allowNonAccountHolders: boolean("allow_non_account_holders").default(true), // Allow non-account holders by default
   completelyPrivate: boolean("completely_private").default(false), // Not completely private by default

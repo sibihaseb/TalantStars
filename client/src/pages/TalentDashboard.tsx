@@ -545,17 +545,17 @@ export default function TalentDashboard() {
         <div className="mb-6">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
             {/* Hero background section */}
-            <div className="h-32 bg-gradient-to-r from-purple-600 via-blue-500 to-teal-400 relative">
+            <div className="h-24 bg-gradient-to-r from-purple-600 via-blue-500 to-teal-400 relative">
               <div className="absolute inset-0 bg-black/20"></div>
             </div>
             
             {/* Profile content */}
             <div className="relative px-6 pb-6">
-              <div className="flex flex-col md:flex-row items-center md:items-end space-y-4 md:space-y-0 md:space-x-6 -mt-16">
+              <div className="flex flex-col md:flex-row items-center md:items-end space-y-4 md:space-y-0 md:space-x-6 -mt-20">
                 {/* Larger profile avatar */}
-                <Avatar className="h-32 w-32 border-4 border-white shadow-xl ring-4 ring-purple-100">
-                  <AvatarImage src={user?.profileImageUrl || profile?.profileImageUrl} className="object-cover" />
-                  <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-600 text-white text-3xl font-bold">
+                <Avatar className="h-40 w-40 border-4 border-white shadow-xl ring-4 ring-purple-100">
+                  <AvatarImage src={user?.profileImageUrl} className="object-cover" />
+                  <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-600 text-white text-4xl font-bold">
                     {user?.firstName?.[0]}{user?.lastName?.[0]}
                   </AvatarFallback>
                 </Avatar>
