@@ -290,7 +290,7 @@ export function ModernTemplate({ profile, mediaFiles, userId, user }: Omit<Profi
           <div className="backdrop-blur-xl bg-white/10 rounded-2xl p-6 border border-white/20">
             <div className="flex items-end gap-6">
               <Avatar className="w-24 h-24 ring-4 ring-white/50">
-                <AvatarImage src={mediaFiles.find(m => m.category === 'headshot')?.url} />
+                <AvatarImage src={user?.profileImageUrl || user?.mainImageUrl || mediaFiles.find(m => m.category === 'headshot')?.url} />
                 <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white text-xl font-bold">
                   {profile?.displayName?.split(' ').map((n: string) => n[0]).join('') || 'U'}
                 </AvatarFallback>
@@ -382,7 +382,7 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user }: Omit<Pro
               <div className="relative">
                 <div className="absolute -inset-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full opacity-20 animate-pulse"></div>
                 <Avatar className="w-32 h-32 relative z-10 ring-4 ring-white shadow-2xl">
-                  <AvatarImage src={mediaFiles.find(m => m.category === 'headshot')?.url} />
+                  <AvatarImage src={user?.profileImageUrl || user?.mainImageUrl || mediaFiles.find(m => m.category === 'headshot')?.url} />
                   <AvatarFallback className="bg-gradient-to-br from-pink-500 to-purple-500 text-white text-2xl font-bold">
                     {profile?.displayName?.split(' ').map((n: string) => n[0]).join('') || 'U'}
                   </AvatarFallback>
@@ -479,7 +479,7 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
       {/* Ultra Clean Header */}
       <div className="text-center space-y-6">
         <Avatar className="w-24 h-24 mx-auto">
-          <AvatarImage src={mediaFiles.find(m => m.category === 'headshot')?.url} />
+          <AvatarImage src={user?.profileImageUrl || user?.mainImageUrl || mediaFiles.find(m => m.category === 'headshot')?.url} />
           <AvatarFallback className="bg-gray-900 text-white text-xl font-light">
             {profile?.displayName?.split(' ').map((n: string) => n[0]).join('') || 'U'}
           </AvatarFallback>
@@ -560,7 +560,7 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user }: Omit<Pr
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white max-w-4xl px-8">
             <Avatar className="w-32 h-32 mx-auto mb-8 ring-4 ring-yellow-400">
-              <AvatarImage src={mediaFiles.find(m => m.category === 'headshot')?.url} />
+              <AvatarImage src={user?.profileImageUrl || user?.mainImageUrl || mediaFiles.find(m => m.category === 'headshot')?.url} />
               <AvatarFallback className="bg-yellow-500 text-black text-3xl font-bold">
                 {profile?.displayName?.split(' ').map((n: string) => n[0]).join('') || 'U'}
               </AvatarFallback>
