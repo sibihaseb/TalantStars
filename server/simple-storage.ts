@@ -69,8 +69,10 @@ export interface IStorage {
   // Profile image update method
   updateUserProfileImage(userId: number, imageUrl: string): Promise<User>;
   
-  // Hero image update method
-  updateUserHeroImage(userId: number, imageUrl: string): Promise<User>;
+  // Profile template update method
+  updateUserProfileTemplate(userId: number, template: string): Promise<User>;
+  
+
 
   // Skill endorsement operations
   getSkillEndorsements(userId: number, skill: string): Promise<any[]>;
@@ -603,18 +605,18 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  // Hero image update method  
-  async updateUserHeroImage(userId: number, imageUrl: string): Promise<User> {
+  // Profile template update method
+  async updateUserProfileTemplate(userId: number, template: string): Promise<User> {
     try {
-      console.log('🔍 Updating hero image for user:', userId);
-      console.log('🔍 New image URL:', imageUrl);
+      console.log('🔍 Updating profile template for user:', userId);
+      console.log('🔍 New template:', template);
       
       // Import users from the correct schema
       const { users } = await import("@shared/schema");
       
       const [user] = await db
         .update(users)
-        .set({ heroImageUrl: imageUrl })
+        .set({ profileTemplate: template })
         .where(eq(users.id, userId))
         .returning();
       
@@ -622,11 +624,11 @@ export class DatabaseStorage implements IStorage {
         throw new Error('User not found or update failed');
       }
       
-      console.log('✅ Hero image updated successfully');
+      console.log('✅ Profile template updated successfully');
       return user;
     } catch (error) {
-      console.error('❌ Failed to update hero image:', error);
-      throw new Error(`Failed to update hero image: ${error?.message || 'Unknown error'}`);
+      console.error('❌ Failed to update profile template:', error);
+      throw new Error(`Failed to update profile template: ${error?.message || 'Unknown error'}`);
     }
   }
 

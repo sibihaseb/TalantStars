@@ -969,36 +969,42 @@ export default function TalentDashboard() {
               {/* Profile Template Selection */}
               <TemplateSelector 
                 selectedTemplate={profile?.profileTemplate || "classic"}
-                onTemplateChange={(template) => {
+                onTemplateChange={async (template) => {
                   console.log('Template changed to:', template);
-                  // Simple profile template selection without backend call for now
-                  console.log('Profile template selected:', template);
-                  toast({
-                    title: "Template Updated",
-                    description: `Profile template changed to ${template}`,
-                  });
+                  try {
+                    const response = await fetch('/api/user/profile-template', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      credentials: 'include',
+                      body: JSON.stringify({ selectedTemplate: template }),
+                    });
+                    
+                    if (response.ok) {
+                      toast({
+                        title: "Template Updated",
+                        description: `Profile template changed to ${template}`,
+                      });
+                      // Refresh profile data
+                      queryClient.invalidateQueries({ queryKey: ['/api/user/profile'] });
+                    } else {
+                      throw new Error('Failed to save template');
+                    }
+                  } catch (error) {
+                    console.error('Error saving template:', error);
+                    toast({
+                      title: "Error",
+                      description: "Failed to save template selection",
+                      variant: "destructive",
+                    });
+                  }
                 }}
                 userTier={user?.pricingTierId ? { id: user.pricingTierId, features: ['profile_templates_all'] } : null}
                 onUpgrade={handleUpgrade}
               />
               
-              {/* Profile Image Upload */}
-              <Card className="cursor-pointer border-2 border-dashed border-gray-300 hover:border-purple-500 transition-colors">
-                <CardHeader className="text-center pb-2">
-                  <div className="flex justify-center mb-2">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-blue-600 flex items-center justify-center">
-                      <Camera className="w-6 h-6 text-white" />
-                    </div>
-                  </div>
-                  <CardTitle className="text-lg">Update Profile Image</CardTitle>
-                  <CardDescription>
-                    Upload your professional headshot
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <ProfileImageUpload />
-                </CardContent>
-              </Card>
+
 
               {/* Media Portfolio */}
               <Card>

@@ -343,45 +343,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload profile image
-  // Hero image upload endpoint
-  app.post('/api/user/hero-image', isAuthenticated, requirePlan, upload.single('heroImage'), async (req: any, res) => {
-    console.log('🔥🔥🔥 HERO IMAGE UPLOAD ENDPOINT CALLED');
-    console.log('User ID from session:', req.user?.id);
-    console.log('File received:', req.file ? `${req.file.originalname} (${req.file.size} bytes)` : 'No file');
-    
-    try {
-      if (!req.file) {
-        console.log('❌ No file uploaded');
-        return res.status(400).json({ error: 'No file uploaded' });
-      }
-
-      const file = req.file;
-      const userId = req.user.id;
-      
-      console.log('📤 Uploading to Wasabi S3...');
-      const uploadResult = await uploadFileToWasabi(file, `user-${userId}/hero/`);
-      console.log('✅ S3 Upload successful:', uploadResult.url);
-
-      // Update user's heroImageUrl in database
-      console.log('💾 Updating user hero image URL in database...');
-      const updatedUser = await simpleStorage.updateUserHeroImage(userId, uploadResult.url);
-      
-      console.log('✅ Hero image updated successfully');
-      res.json({ 
-        success: true, 
-        heroImageUrl: uploadResult.url,
-        user: updatedUser
-      });
-
-    } catch (error) {
-      console.error('❌ Hero image upload failed:', error);
-      res.status(500).json({ 
-        error: 'Failed to upload hero image',
-        details: error.message 
-      });
-    }
-  });
-
   app.post('/api/user/profile-image', isAuthenticated, requirePlan, upload.single('image'), async (req: any, res) => {
     try {
       const userId = req.user.id;
@@ -411,6 +372,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error uploading profile image:", error);
       res.status(500).json({ message: "Failed to upload profile image" });
+    }
+  });
+
+  // Profile template selection endpoint
+  app.post('/api/user/profile-template', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { selectedTemplate } = req.body;
+      
+      console.log('Saving profile template:', selectedTemplate, 'for user:', userId);
+      
+      // Validate template
+      const validTemplates = ['classic', 'modern', 'artistic', 'minimal', 'cinematic'];
+      if (!validTemplates.includes(selectedTemplate)) {
+        return res.status(400).json({ message: 'Invalid template selection' });
+      }
+      
+      // Update user profile template
+      const updatedUser = await simpleStorage.updateUserProfileTemplate(userId, selectedTemplate);
+      
+      res.json({ 
+        success: true, 
+        selectedTemplate,
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error('Error saving profile template:', error);
+      res.status(500).json({ message: 'Failed to save profile template' });
     }
   });
 
