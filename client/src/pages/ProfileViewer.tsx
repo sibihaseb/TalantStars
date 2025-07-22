@@ -33,9 +33,9 @@ export default function ProfileViewer() {
     enabled: !!userId,
   });
 
-  // Fetch user data using the talent endpoint
+  // Fetch user account data to get profileImageUrl and other user account fields
   const { data: userData } = useQuery<any>({
-    queryKey: [`/api/talent/${userId}`],
+    queryKey: [`/api/user/profile/${userId}`],
     enabled: !!userId,
   });
 
@@ -139,8 +139,8 @@ export default function ProfileViewer() {
   const renderTemplate = () => {
     // Combine profile and user data properly
     const combinedUserData = {
-      ...(userData || user || {}),
-      ...(profile || {}),
+      ...(profile || {}), // Talent profile data (displayName, bio, etc.)
+      ...(userData || user || {}), // User account data (profileImageUrl, email, etc.)
       id: userData?.id || profile?.userId || userId,
       userId: userData?.id || profile?.userId || userId
     };

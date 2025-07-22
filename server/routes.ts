@@ -3777,5 +3777,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user account data by username or ID
+  app.get('/api/user/profile/:id', async (req, res) => {
+    try {
+      const userIdParam = req.params.id;
+      let userId: number;
+      let user;
+      
+      // Check if it's a numeric ID or username
+      if (/^\d+$/.test(userIdParam)) {
+        // It's a numeric ID
+        userId = parseInt(userIdParam);
+        user = await simpleStorage.getUser(userId);
+      } else {
+        // It's a username - need to find user first
+        user = await simpleStorage.getUserByUsername(userIdParam);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        userId = user.id;
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Return user account data including profileImageUrl
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      res.status(500).json({ message: "Failed to fetch user profile" });
+    }
+  });
+
   return httpServer;
 }
