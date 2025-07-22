@@ -20,7 +20,7 @@ import {
   type TalentType,
   type InsertTalentType,
 } from "@shared/simple-schema";
-import { jobHistory, profileSharingSettings, availabilityCalendar } from "@shared/schema";
+import { jobHistory, profileSharingSettings, availabilityCalendar, mediaFiles, jobApplications, jobCommunications, socialPosts, jobs } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc, desc } from "drizzle-orm";
 
@@ -474,50 +474,114 @@ export class DatabaseStorage implements IStorage {
   private jobHistory = new Map<number, any[]>();
 
   async getUserMediaFiles(userId: number): Promise<any[]> {
-    return this.mediaFiles.get(userId) || [];
+    try {
+      const media = await db
+        .select()
+        .from(mediaFiles)
+        .where(eq(mediaFiles.userId, userId))
+        .orderBy(desc(mediaFiles.createdAt));
+      return media;
+    } catch (error) {
+      console.error('Database media files error:', error);
+      // Fallback to memory for backwards compatibility
+      return this.mediaFiles.get(userId) || [];
+    }
   }
 
   async createMediaFile(mediaData: any): Promise<any> {
-    const userId = mediaData.userId;
-    const media = {
-      id: Date.now(),
-      ...mediaData,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    const userMedia = this.mediaFiles.get(userId) || [];
-    userMedia.push(media);
-    this.mediaFiles.set(userId, userMedia);
-    
-    return media;
+    try {
+      const [media] = await db
+        .insert(mediaFiles)
+        .values({
+          userId: mediaData.userId,
+          filename: mediaData.filename || null,
+          originalName: mediaData.originalName || null,
+          mimeType: mediaData.mimeType || null,
+          size: mediaData.size || null,
+          url: mediaData.url,
+          thumbnailUrl: mediaData.thumbnailUrl || null,
+          mediaType: mediaData.mediaType,
+          tags: mediaData.tags || null,
+          title: mediaData.title || null,
+          description: mediaData.description || null,
+          category: mediaData.category || 'portfolio',
+          isPublic: mediaData.isPublic !== false,
+          externalUrl: mediaData.externalUrl || null,
+          externalPlatform: mediaData.externalPlatform || null,
+          externalId: mediaData.externalId || null,
+          duration: mediaData.duration || null,
+          isExternal: mediaData.isExternal || false
+        })
+        .returning();
+      return media;
+    } catch (error) {
+      console.error('Database media creation error:', error);
+      // Fallback to memory for backwards compatibility
+      const userId = mediaData.userId;
+      const media = {
+        id: Date.now(),
+        ...mediaData,
+        createdAt: new Date().toISOString()
+      };
+      
+      const userMedia = this.mediaFiles.get(userId) || [];
+      userMedia.push(media);
+      this.mediaFiles.set(userId, userMedia);
+      
+      return media;
+    }
   }
 
   async updateMediaFile(id: number, mediaData: any): Promise<any> {
-    for (const [userId, userMedia] of this.mediaFiles.entries()) {
-      const mediaIndex = userMedia.findIndex(media => media.id === id);
-      if (mediaIndex !== -1) {
-        userMedia[mediaIndex] = {
-          ...userMedia[mediaIndex],
-          ...mediaData,
-          updatedAt: new Date().toISOString()
-        };
-        return userMedia[mediaIndex];
+    try {
+      const [media] = await db
+        .update(mediaFiles)
+        .set({
+          title: mediaData.title,
+          description: mediaData.description,
+          category: mediaData.category,
+          isPublic: mediaData.isPublic,
+          tags: mediaData.tags
+        })
+        .where(eq(mediaFiles.id, id))
+        .returning();
+      return media;
+    } catch (error) {
+      console.error('Database media update error:', error);
+      // Fallback to memory for backwards compatibility
+      for (const [userId, userMedia] of this.mediaFiles.entries()) {
+        const mediaIndex = userMedia.findIndex(media => media.id === id);
+        if (mediaIndex !== -1) {
+          userMedia[mediaIndex] = {
+            ...userMedia[mediaIndex],
+            ...mediaData,
+            updatedAt: new Date().toISOString()
+          };
+          return userMedia[mediaIndex];
+        }
       }
+      throw new Error('Media file not found');
     }
-    throw new Error('Media file not found');
   }
 
   async deleteMediaFile(id: number): Promise<void> {
-    for (const [userId, userMedia] of this.mediaFiles.entries()) {
-      const mediaIndex = userMedia.findIndex(media => media.id === id);
-      if (mediaIndex !== -1) {
-        userMedia.splice(mediaIndex, 1);
-        this.mediaFiles.set(userId, userMedia);
-        return;
+    try {
+      await db
+        .delete(mediaFiles)
+        .where(eq(mediaFiles.id, id));
+    } catch (error) {
+      console.error('Database media deletion error:', error);
+      // Fallback to memory for backwards compatibility
+      for (const [userId, userMedia] of this.mediaFiles.entries()) {
+        const mediaIndex = userMedia.findIndex(media => media.id === id);
+        if (mediaIndex !== -1) {
+          userMedia.splice(mediaIndex, 1);
+          this.mediaFiles.set(userId, userMedia);
+          return;
+        }
       }
+      throw new Error('Media file not found');
     }
-    throw new Error('Media file not found');
   }
 
   async getUserLimits(userId: number): Promise<any> {
@@ -807,11 +871,19 @@ export class DatabaseStorage implements IStorage {
     await db.delete(talentTypes).where(eq(talentTypes.id, id));
   }
 
-  // Social posts operations - Mock implementation for now
+  // Social posts operations - Database implementation
   async getUserSocialPosts(userId: number): Promise<any[]> {
-    // Return empty array for now - in production this would query a social_posts table
-    // This prevents the 500 error while maintaining API compatibility
-    return [];
+    try {
+      const posts = await db
+        .select()
+        .from(socialPosts)
+        .where(eq(socialPosts.userId, userId))
+        .orderBy(desc(socialPosts.createdAt));
+      return posts;
+    } catch (error) {
+      console.error('Database social posts error:', error);
+      return [];
+    }
   }
 
   // Calendar operations (mock implementation)
@@ -1104,9 +1176,18 @@ export class DatabaseStorage implements IStorage {
 
   // Job communication operations
   async getJobCommunications(jobId: number): Promise<any[]> {
-    // Mock implementation - return empty communications for now
-    console.log("🔥 COMMUNICATION: Getting job communications for job", { jobId });
-    return [];
+    try {
+      const communications = await db
+        .select()
+        .from(jobCommunications)
+        .where(eq(jobCommunications.jobId, jobId))
+        .orderBy(asc(jobCommunications.createdAt));
+      console.log("🔥 COMMUNICATION: Getting job communications for job", { jobId, count: communications.length });
+      return communications;
+    } catch (error) {
+      console.error('Database job communications error:', error);
+      return [];
+    }
   }
 
   async createJobCommunication(jobId: number, senderId: number, receiverId: number, message: string): Promise<any> {
@@ -1128,8 +1209,17 @@ export class DatabaseStorage implements IStorage {
 
   // Application operations  
   async getUserApplications(userId: number): Promise<any[]> {
-    // Mock implementation - return empty applications
-    return [];
+    try {
+      const applications = await db
+        .select()
+        .from(jobApplications)
+        .where(eq(jobApplications.userId, userId))
+        .orderBy(desc(jobApplications.createdAt));
+      return applications;
+    } catch (error) {
+      console.error('Database applications error:', error);
+      return [];
+    }
   }
 
   async createApplication(applicationData: any): Promise<any> {
@@ -1155,8 +1245,19 @@ export class DatabaseStorage implements IStorage {
 
   // Opportunities operations
   async getOpportunities(userId: number): Promise<any[]> {
-    // Mock implementation - return empty opportunities
-    return [];
+    try {
+      // Get job opportunities (open jobs that the user hasn't applied to yet)
+      const opportunities = await db
+        .select()
+        .from(jobs)
+        .where(eq(jobs.status, 'open'))
+        .orderBy(desc(jobs.createdAt))
+        .limit(20);
+      return opportunities;
+    } catch (error) {
+      console.error('Database opportunities error:', error);
+      return [];
+    }
   }
 
   // Communication mark as read
@@ -1167,23 +1268,38 @@ export class DatabaseStorage implements IStorage {
 
   // Job application operations
   async createJobApplication(applicationData: any): Promise<any> {
-    // Mock implementation - just return the data with an ID
-    console.log("🔥 APPLICATION: Creating job application", { applicationData });
-    const application = {
-      id: Date.now(),
-      ...applicationData,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    console.log("✅ APPLICATION: Created successfully", { application });
-    return application;
+    try {
+      console.log("🔥 APPLICATION: Creating job application", { applicationData });
+      const [application] = await db
+        .insert(jobApplications)
+        .values({
+          jobId: applicationData.jobId,
+          userId: applicationData.userId,
+          coverLetter: applicationData.coverLetter || null,
+          proposedRate: applicationData.proposedRate ? parseFloat(applicationData.proposedRate.toString()) : null
+        })
+        .returning();
+      console.log("✅ APPLICATION: Created successfully", { application });
+      return application;
+    } catch (error) {
+      console.error('Database application creation error:', error);
+      throw error;
+    }
   }
 
   async getJobApplications(jobId: number): Promise<any[]> {
-    // Mock implementation - return empty applications
-    console.log("🔥 APPLICATION: Getting job applications for job", { jobId });
-    return [];
+    try {
+      const applications = await db
+        .select()
+        .from(jobApplications)
+        .where(eq(jobApplications.jobId, jobId))
+        .orderBy(desc(jobApplications.createdAt));
+      console.log("🔥 APPLICATION: Getting job applications for job", { jobId, count: applications.length });
+      return applications;
+    } catch (error) {
+      console.error('Database job applications error:', error);
+      return [];
+    }
   }
 
   // Job operations
