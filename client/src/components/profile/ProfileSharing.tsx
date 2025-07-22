@@ -525,6 +525,11 @@ export default function ProfileSharing() {
                   onCheckedChange={(checked) => handleSettingChange('showSkills', checked)}
                 />
               </div>
+
+              {/* Social Media Links Management */}
+              <div className="border-t pt-4 mt-6">
+                <SocialMediaManager />
+              </div>
             </CardContent>
           </Card>
         </div>
