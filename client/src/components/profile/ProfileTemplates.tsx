@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import MediaModal from '@/components/MediaModal';
 import SkillEndorsement from '@/components/SkillEndorsement';
+import { useQuery } from "@tanstack/react-query";
 
 export type ProfileTemplate = 'classic' | 'modern' | 'artistic' | 'minimal' | 'cinematic';
 
@@ -132,6 +133,42 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
 
+  // Query to fetch current availability status from calendar
+  const { data: availabilityEntries = [] } = useQuery({
+    queryKey: [`/api/availability/user/${userId}`],
+    enabled: !!userId,
+    queryFn: async () => {
+      const response = await fetch(`/api/availability/user/${userId}`, {
+        credentials: 'include',
+      });
+      if (!response.ok) return [];
+      return response.json();
+    },
+  });
+
+  // Function to determine current availability status from calendar entries
+  const getCurrentAvailabilityStatus = () => {
+    if (!availabilityEntries?.length) return profile?.availabilityStatus || 'available';
+    
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    // Check if there's a current busy/unavailable entry for today
+    const currentEntry = availabilityEntries.find((entry: any) => {
+      const startDate = new Date(entry.startDate).toISOString().split('T')[0];
+      const endDate = new Date(entry.endDate).toISOString().split('T')[0];
+      return startDate <= todayStr && endDate >= todayStr;
+    });
+    
+    if (currentEntry) {
+      return currentEntry.status;
+    }
+    
+    return profile?.availabilityStatus || 'available';
+  };
+
+  const currentAvailability = getCurrentAvailabilityStatus();
+
   const handleMediaClick = (index: number) => {
     setSelectedMediaIndex(index);
     setIsMediaModalOpen(true);
@@ -214,8 +251,8 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
               )}
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-gray-500" />
-                <Badge variant={profile?.availabilityStatus === 'available' ? 'default' : 'secondary'} className="text-xs">
-                  {profile?.availabilityStatus || 'Unknown'}
+                <Badge variant={currentAvailability === 'available' ? 'default' : 'secondary'} className="text-xs">
+                  {currentAvailability || 'Unknown'}
                 </Badge>
               </div>
             </CardContent>
@@ -341,6 +378,42 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
 
 // Modern Template - Sleek and Contemporary 
 export function ModernTemplate({ profile, mediaFiles, userId, user }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+  // Query to fetch current availability status from calendar
+  const { data: availabilityEntries = [] } = useQuery({
+    queryKey: [`/api/availability/user/${userId}`],
+    enabled: !!userId,
+    queryFn: async () => {
+      const response = await fetch(`/api/availability/user/${userId}`, {
+        credentials: 'include',
+      });
+      if (!response.ok) return [];
+      return response.json();
+    },
+  });
+
+  // Function to determine current availability status from calendar entries
+  const getCurrentAvailabilityStatus = () => {
+    if (!availabilityEntries?.length) return profile?.availabilityStatus || 'available';
+    
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    // Check if there's a current busy/unavailable entry for today
+    const currentEntry = availabilityEntries.find((entry: any) => {
+      const startDate = new Date(entry.startDate).toISOString().split('T')[0];
+      const endDate = new Date(entry.endDate).toISOString().split('T')[0];
+      return startDate <= todayStr && endDate >= todayStr;
+    });
+    
+    if (currentEntry) {
+      return currentEntry.status;
+    }
+    
+    return profile?.availabilityStatus || 'available';
+  };
+
+  const currentAvailability = getCurrentAvailabilityStatus();
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Hero Section with Glass Morphism */}
@@ -435,8 +508,8 @@ export function ModernTemplate({ profile, mediaFiles, userId, user }: Omit<Profi
             )}
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Status:</span>
-              <Badge variant={profile?.availabilityStatus === 'available' ? 'default' : 'secondary'} className="text-xs">
-                {profile?.availabilityStatus || 'Unknown'}
+              <Badge variant={currentAvailability === 'available' ? 'default' : 'secondary'} className="text-xs">
+                {currentAvailability || 'Unknown'}
               </Badge>
             </div>
           </CardContent>
@@ -555,6 +628,42 @@ export function ModernTemplate({ profile, mediaFiles, userId, user }: Omit<Profi
 export function ArtisticTemplate({ profile, mediaFiles, userId, user }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+
+  // Query to fetch current availability status from calendar
+  const { data: availabilityEntries = [] } = useQuery({
+    queryKey: [`/api/availability/user/${userId}`],
+    enabled: !!userId,
+    queryFn: async () => {
+      const response = await fetch(`/api/availability/user/${userId}`, {
+        credentials: 'include',
+      });
+      if (!response.ok) return [];
+      return response.json();
+    },
+  });
+
+  // Function to determine current availability status from calendar entries
+  const getCurrentAvailabilityStatus = () => {
+    if (!availabilityEntries?.length) return profile?.availabilityStatus || 'available';
+    
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    // Check if there's a current busy/unavailable entry for today
+    const currentEntry = availabilityEntries.find((entry: any) => {
+      const startDate = new Date(entry.startDate).toISOString().split('T')[0];
+      const endDate = new Date(entry.endDate).toISOString().split('T')[0];
+      return startDate <= todayStr && endDate >= todayStr;
+    });
+    
+    if (currentEntry) {
+      return currentEntry.status;
+    }
+    
+    return profile?.availabilityStatus || 'available';
+  };
+
+  const currentAvailability = getCurrentAvailabilityStatus();
 
   const handleMediaClick = (index: number) => {
     setSelectedMediaIndex(index);
@@ -696,8 +805,8 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user }: Omit<Pro
             )}
             <div className="flex items-center gap-3 p-3 bg-white rounded-xl">
               <Clock className="w-5 h-5 text-orange-500" />
-              <Badge className={`${profile?.availabilityStatus === 'available' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-                {profile?.availabilityStatus || 'Unknown'}
+              <Badge className={`${currentAvailability === 'available' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                {currentAvailability || 'Unknown'}
               </Badge>
             </div>
           </CardContent>
@@ -789,6 +898,42 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user }: Omit<Pro
 
 // Minimal Template - Clean and Focused
 export function MinimalTemplate({ profile, mediaFiles, userId, user }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+  // Query to fetch current availability status from calendar
+  const { data: availabilityEntries = [] } = useQuery({
+    queryKey: [`/api/availability/user/${userId}`],
+    enabled: !!userId,
+    queryFn: async () => {
+      const response = await fetch(`/api/availability/user/${userId}`, {
+        credentials: 'include',
+      });
+      if (!response.ok) return [];
+      return response.json();
+    },
+  });
+
+  // Function to determine current availability status from calendar entries
+  const getCurrentAvailabilityStatus = () => {
+    if (!availabilityEntries?.length) return profile?.availabilityStatus || 'available';
+    
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    // Check if there's a current busy/unavailable entry for today
+    const currentEntry = availabilityEntries.find((entry: any) => {
+      const startDate = new Date(entry.startDate).toISOString().split('T')[0];
+      const endDate = new Date(entry.endDate).toISOString().split('T')[0];
+      return startDate <= todayStr && endDate >= todayStr;
+    });
+    
+    if (currentEntry) {
+      return currentEntry.status;
+    }
+    
+    return profile?.availabilityStatus || 'available';
+  };
+
+  const currentAvailability = getCurrentAvailabilityStatus();
+
   return (
     <div className="max-w-5xl mx-auto space-y-12 py-8">
       {/* Ultra Clean Header */}
@@ -882,8 +1027,8 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
                 )}
                 <div className="flex justify-between">
                   <span className="text-gray-600 font-light">Status</span>
-                  <span className={`font-medium ${profile?.availabilityStatus === 'available' ? 'text-green-600' : 'text-gray-600'}`}>
-                    {profile?.availabilityStatus || 'Unknown'}
+                  <span className={`font-medium ${currentAvailability === 'available' ? 'text-green-600' : 'text-gray-600'}`}>
+                    {currentAvailability || 'Unknown'}
                   </span>
                 </div>
               </div>
@@ -974,6 +1119,42 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
 
 // Cinematic Template - Dramatic and Bold
 export function CinematicTemplate({ profile, mediaFiles, userId, user }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+  // Query to fetch current availability status from calendar
+  const { data: availabilityEntries = [] } = useQuery({
+    queryKey: [`/api/availability/user/${userId}`],
+    enabled: !!userId,
+    queryFn: async () => {
+      const response = await fetch(`/api/availability/user/${userId}`, {
+        credentials: 'include',
+      });
+      if (!response.ok) return [];
+      return response.json();
+    },
+  });
+
+  // Function to determine current availability status from calendar entries
+  const getCurrentAvailabilityStatus = () => {
+    if (!availabilityEntries?.length) return profile?.availabilityStatus || 'available';
+    
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    // Check if there's a current busy/unavailable entry for today
+    const currentEntry = availabilityEntries.find((entry: any) => {
+      const startDate = new Date(entry.startDate).toISOString().split('T')[0];
+      const endDate = new Date(entry.endDate).toISOString().split('T')[0];
+      return startDate <= todayStr && endDate >= todayStr;
+    });
+    
+    if (currentEntry) {
+      return currentEntry.status;
+    }
+    
+    return profile?.availabilityStatus || 'available';
+  };
+
+  const currentAvailability = getCurrentAvailabilityStatus();
+
   return (
     <div className="max-w-full mx-auto">
       {/* Full-width Cinematic Header */}
@@ -1144,8 +1325,8 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user }: Omit<Pr
               )}
               <div className="flex items-center gap-4 p-4 bg-black/40 rounded-lg border border-yellow-500/20">
                 <Clock className="w-6 h-6 text-yellow-500" />
-                <Badge className={`text-lg px-4 py-2 ${profile?.availabilityStatus === 'available' ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-200'}`}>
-                  {profile?.availabilityStatus?.toUpperCase() || 'UNKNOWN'}
+                <Badge className={`text-lg px-4 py-2 ${currentAvailability === 'available' ? 'bg-green-600 text-white' : 'bg-gray-600 text-gray-200'}`}>
+                  {currentAvailability?.toUpperCase() || 'UNKNOWN'}
                 </Badge>
               </div>
             </CardContent>

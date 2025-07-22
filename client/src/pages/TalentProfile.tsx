@@ -37,6 +37,42 @@ export default function TalentProfile() {
     enabled: !!id && isAuthenticated,
   });
 
+  // Query to fetch current availability status from calendar
+  const { data: availabilityEntries = [] } = useQuery({
+    queryKey: [`/api/availability/user/${talent?.userId || id}`],
+    enabled: !!talent?.userId || !!id,
+    queryFn: async () => {
+      const response = await fetch(`/api/availability/user/${talent?.userId || id}`, {
+        credentials: 'include',
+      });
+      if (!response.ok) return [];
+      return response.json();
+    },
+  });
+
+  // Function to determine current availability status from calendar entries
+  const getCurrentAvailabilityStatus = () => {
+    if (!availabilityEntries?.length) return talent?.availability || 'available';
+    
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    // Check if there's a current busy/unavailable entry for today
+    const currentEntry = availabilityEntries.find((entry: any) => {
+      const startDate = new Date(entry.startDate).toISOString().split('T')[0];
+      const endDate = new Date(entry.endDate).toISOString().split('T')[0];
+      return startDate <= todayStr && endDate >= todayStr;
+    });
+    
+    if (currentEntry) {
+      return currentEntry.status;
+    }
+    
+    return talent?.availability || 'available';
+  };
+
+  const currentAvailability = getCurrentAvailabilityStatus();
+
   // Redirect if not authenticated
   if (!isLoading && !isAuthenticated) {
     return (
@@ -175,8 +211,8 @@ export default function TalentProfile() {
                     {getTalentIcon(talent.talentType)}
                     <span>{talent.talentType}</span>
                   </div>
-                  <Badge className={getAvailabilityColor(talent.availability)}>
-                    {talent.availability}
+                  <Badge className={getAvailabilityColor(currentAvailability)}>
+                    {currentAvailability}
                   </Badge>
                 </CardHeader>
                 <CardContent className="space-y-4">
