@@ -66,7 +66,7 @@ export const users = pgTable("users", {
 // User profiles with role-specific data
 export const userProfiles = pgTable("user_profiles", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id").notNull(), // Fixed: database expects VARCHAR, not integer
   role: userRoleEnum("role").notNull(),
   talentType: talentTypeEnum("talent_type"),
   displayName: varchar("display_name"),

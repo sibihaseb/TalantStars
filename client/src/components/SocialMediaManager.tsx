@@ -45,7 +45,7 @@ const socialPlatforms = [
   { key: 'youtube', name: 'YouTube', icon: Youtube, placeholder: 'https://youtube.com/channel/username' },
   { key: 'spotify', name: 'Spotify', icon: Music, placeholder: 'https://open.spotify.com/artist/username' },
   { key: 'tiktok', name: 'TikTok', icon: Music, placeholder: 'https://tiktok.com/@username' },
-  { key: 'website', name: 'Personal Website', icon: Globe, placeholder: 'https://yourwebsite.com' },
+
 ];
 
 export function SocialMediaManager() {

@@ -187,11 +187,32 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserProfile(userId: number): Promise<UserProfile | undefined> {
-    const [profile] = await db
-      .select()
-      .from(userProfiles)
-      .where(eq(userProfiles.userId, userId.toString()));
-    return profile || undefined;
+    console.log('👤 Getting profile for userId:', userId);
+    
+    try {
+      // Get complete profile data including socialLinks
+      const [profile] = await db
+        .select({
+          id: userProfiles.id,
+          userId: userProfiles.userId,
+          displayName: userProfiles.displayName,
+          socialLinks: userProfiles.socialLinks
+        })
+        .from(userProfiles)
+        .where(eq(userProfiles.userId, userId.toString()));
+        
+      if (profile) {
+        console.log('👤 Profile found with socialLinks:', !!profile.socialLinks);
+        console.log('👤 socialLinks data:', JSON.stringify(profile.socialLinks));
+        return profile as any;
+      }
+      
+      console.log('👤 No profile found');
+      return undefined;
+    } catch (error) {
+      console.error('👤 Error in getUserProfile:', error);
+      throw error;
+    }
   }
 
   async createUserProfile(profile: InsertUserProfile): Promise<UserProfile> {
@@ -203,11 +224,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserProfile(userId: number, profile: Partial<InsertUserProfile>): Promise<UserProfile> {
+    console.log('📝 Updating user profile for userId:', userId);
+    console.log('📝 Profile updates:', profile);
+    
     const [userProfile] = await db
       .update(userProfiles)
       .set(profile)
       .where(eq(userProfiles.userId, userId.toString()))
       .returning();
+    
+    console.log('📝 Updated profile:', !!userProfile);
     return userProfile;
   }
 
@@ -847,10 +873,11 @@ export class DatabaseStorage implements IStorage {
       console.log('🔗 Updating social links for user:', userId);
       console.log('🔗 Social links data:', socialLinks);
       
+      // Direct database update to avoid the problematic updateUserProfile method
       const [profile] = await db
         .update(userProfiles)
-        .set({ socialLinks })
-        .where(eq(userProfiles.userId, userId))
+        .set({ socialLinks: socialLinks })
+        .where(eq(userProfiles.userId, userId.toString()))
         .returning();
       
       if (!profile) {
@@ -859,7 +886,7 @@ export class DatabaseStorage implements IStorage {
       
       console.log('✅ Social links updated successfully');
       return profile;
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Failed to update social links:', error);
       throw new Error(`Failed to update social links: ${error?.message || 'Unknown error'}`);
     }

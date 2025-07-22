@@ -1326,8 +1326,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/social-links', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      console.log('🔍 Fetching social links for userId:', userId);
       const profile = await simpleStorage.getUserProfile(userId);
-      res.json({ socialLinks: profile?.socialLinks || {} });
+      console.log('🔍 Profile retrieved:', !!profile);
+      console.log('🔍 Full profile data:', profile);
+      console.log('🔍 Profile social links:', profile?.socialLinks);
+      const socialLinks = profile?.socialLinks || {};
+      console.log('🔍 Returning social links:', socialLinks);
+      res.json({ socialLinks });
     } catch (error) {
       console.error("Error getting social links:", error);
       res.status(500).json({ message: "Failed to get social links" });
@@ -1337,9 +1343,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/user/social-links', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const { socialLinks } = req.body;
+      const socialLinks = req.body; // Accept the entire body as social links data
       
-      console.log('🔗 Updating social links for user:', userId, socialLinks);
+      console.log('🔗 Request body received:', JSON.stringify(req.body));
+      console.log('🔗 Social links to save:', JSON.stringify(socialLinks));
+      console.log('🔗 User ID:', userId);
+      
+      if (!socialLinks || Object.keys(socialLinks).length === 0) {
+        console.log('🔗 No social links data provided');
+        return res.status(400).json({ message: "No social links data provided" });
+      }
       
       const profile = await simpleStorage.updateUserSocialLinks(userId, socialLinks);
       res.json({ success: true, socialLinks: profile.socialLinks });
