@@ -152,7 +152,7 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user }: Omit<Prof
         <CardContent className="relative pt-0 pb-6">
           <div className="flex flex-col md:flex-row items-center md:items-end space-y-4 md:space-y-0 md:space-x-6 -mt-16">
             <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
-              <AvatarImage src={user?.profileImageUrl || user?.mainImageUrl || mediaFiles.find(m => m.category === 'headshot')?.url} />
+              <AvatarImage src={user?.profileImageUrl || user?.mainImageUrl || mediaFiles.find(m => m.category === 'headshot')?.url} className="object-cover" />
               <AvatarFallback className="text-2xl font-bold bg-blue-600 text-white">
                 {profile?.displayName?.split(' ').map((n: string) => n[0]).join('') || 'U'}
               </AvatarFallback>

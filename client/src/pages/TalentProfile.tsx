@@ -158,7 +158,7 @@ export default function TalentProfile() {
               <Card className="glass-card">
                 <CardHeader className="text-center">
                   <Avatar className="w-24 h-24 mx-auto mb-4">
-                    <AvatarImage src={talent.profileImageUrl} alt={talent.displayName} />
+                    <AvatarImage src={talent.profileImageUrl} alt={talent.displayName} className="object-cover" />
                     <AvatarFallback className="text-lg">
                       {talent.displayName?.split(' ').map((n: string) => n[0]).join('') || 'T'}
                     </AvatarFallback>

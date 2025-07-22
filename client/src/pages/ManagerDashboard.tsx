@@ -95,7 +95,7 @@ export default function ManagerDashboard() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Avatar className="h-16 w-16 border-4 border-white shadow-lg">
-                <AvatarImage src={user?.profileImageUrl} />
+                <AvatarImage src={user?.profileImageUrl} className="object-cover" />
                 <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-blue-600 text-white text-xl font-bold">
                   {user?.firstName?.[0]}{user?.lastName?.[0]}
                 </AvatarFallback>

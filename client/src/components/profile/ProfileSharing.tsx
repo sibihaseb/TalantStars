@@ -447,29 +447,7 @@ export default function ProfileSharing() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Image className="h-5 w-5" />
-                  Background Image
-                </CardTitle>
-                <CardDescription>
-                  Upload a hero background image (16:9 ratio)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ProfileImageUpload
-                  currentImage={user?.heroImageUrl || undefined}
-                  onImageUpdate={(url) => {
-                    queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-                  }}
-                  mandatory={false}
-                  aspectRatio={16/9}
-                  uploadEndpoint="/api/user/hero-image"
-                  fieldName="heroImage"
-                />
-              </CardContent>
-            </Card>
+
 
 
           </div>
