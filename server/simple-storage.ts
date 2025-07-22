@@ -72,6 +72,9 @@ export interface IStorage {
   // Profile template update method
   updateUserProfileTemplate(userId: number, template: string): Promise<User>;
   
+  // Skills update method
+  updateUserSkills(userId: number, skills: string[]): Promise<User>;
+
 
 
   // Skill endorsement operations
@@ -629,6 +632,38 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('❌ Failed to update profile template:', error);
       throw new Error(`Failed to update profile template: ${error?.message || 'Unknown error'}`);
+    }
+  }
+
+  // Skills update method
+  async updateUserSkills(userId: number, skills: string[]): Promise<User> {
+    try {
+      console.log('🎯 Updating skills for user:', userId);
+      console.log('🎯 Skills:', skills);
+      
+      // Update skills in the user profile table where skills field exists
+      const [profile] = await db
+        .update(userProfiles)
+        .set({ skills: skills })
+        .where(eq(userProfiles.userId, userId))
+        .returning();
+      
+      if (!profile) {
+        throw new Error('Profile not found or update failed');
+      }
+      
+      console.log('✅ Skills updated successfully');
+      
+      // Return the user data to maintain interface consistency
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user) {
+        throw new Error('User not found');
+      }
+      
+      return user;
+    } catch (error) {
+      console.error('❌ Failed to update skills:', error);
+      throw new Error(`Failed to update skills: ${error?.message || 'Unknown error'}`);
     }
   }
 

@@ -942,7 +942,13 @@ export default function TalentDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <SkillEndorsements userId={user?.id || 0} currentUser={user} />
+                  <SkillEndorsements 
+                    profile={{ 
+                      id: user?.id, 
+                      skills: profile?.skills, 
+                      talentType: profile?.talentType 
+                    }} 
+                  />
                 </CardContent>
               </Card>
             </div>

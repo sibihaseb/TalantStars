@@ -266,7 +266,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Registration endpoint - removed duplicate from routes.ts as it's handled in auth.ts
 
+  // Get user skills
+  app.get("/api/user/skills", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      console.log("🎯 SKILLS API: Get skills request", { userId });
+      
+      const profile = await simpleStorage.getUserProfile(userId);
+      
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      
+      console.log("🎯 SKILLS API: Skills retrieved successfully", { userId, skillCount: profile.skills?.length || 0 });
+      
+      res.json({ 
+        skills: profile.skills || [],
+        skillCount: profile.skills?.length || 0
+      });
+    } catch (error) {
+      console.error("🎯 SKILLS API: Error getting skills:", error);
+      res.status(500).json({ message: "Failed to get skills" });
+    }
+  });
 
+  // Update user skills
+  app.put("/api/user/skills", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const { skills } = req.body;
+      
+      console.log("🎯 SKILLS API: Update request", { userId, skills });
+      
+      if (!Array.isArray(skills)) {
+        return res.status(400).json({ message: "Skills must be an array" });
+      }
+      
+      // Update user skills using storage
+      const updatedUser = await simpleStorage.updateUserSkills(userId, skills);
+      
+      console.log("🎯 SKILLS API: Skills updated successfully", { userId, skillCount: skills.length });
+      
+      res.json({ 
+        message: "Skills updated successfully", 
+        user: updatedUser,
+        skillCount: skills.length
+      });
+    } catch (error) {
+      console.error("🎯 SKILLS API: Error updating skills:", error);
+      res.status(500).json({ message: "Failed to update skills" });
+    }
+  });
 
   // Profile routes
   app.get('/api/profile', isAuthenticated, async (req: any, res) => {

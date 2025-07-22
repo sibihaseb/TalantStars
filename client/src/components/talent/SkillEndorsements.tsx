@@ -1,293 +1,338 @@
-import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { PlusIcon, StarIcon, CheckIcon, XIcon } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-import { useAuth } from '@/hooks/useAuth';
-interface UserProfile {
-  userId: number;
-  displayName?: string;
-  [key: string]: any;
-}
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CheckCircle2, Plus, X, Zap, Users, Camera, Music, Mic, Theater, Car, Waves, Sword, Dumbbell } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-interface SkillEndorsement {
-  id: number;
-  endorserId: string;
-  endorsedUserId: string;
-  skill: string;
-  message?: string;
-  createdAt: string;
-}
+// Comprehensive skill categories with extensive options
+const SKILL_CATEGORIES = {
+  stunts: {
+    icon: Car,
+    title: "Stunts & Action",
+    skills: [
+      "Stunt Driving", "Horseback Riding", "Motorcycle Riding", "Fight Choreography", 
+      "Wire Work", "Fire Stunts", "Car Stunts", "Precision Driving", "Stage Combat",
+      "Sword Fighting", "Aerial Work", "High Falls", "Parkour", "Rappelling"
+    ]
+  },
+  physical: {
+    icon: Dumbbell,
+    title: "Physical & Athletics",
+    skills: [
+      "Swimming", "Karate", "Gymnastics", "Boxing", "Wrestling", "Martial Arts",
+      "Rock Climbing", "Skiing", "Surfing", "Skateboarding", "Cycling", "Running",
+      "Weight Lifting", "Yoga", "Pilates", "Dance", "Ballet", "Tap Dance",
+      "Hip Hop", "Contemporary Dance", "Ballroom Dancing", "Acrobatics"
+    ]
+  },
+  performing: {
+    icon: Theater,
+    title: "Performing Arts",
+    skills: [
+      "Acting", "Voice Acting", "Singing", "Musical Theater", "Opera", "Stand-up Comedy",
+      "Improv", "Mime", "Puppetry", "Storytelling", "Public Speaking", "Stage Presence",
+      "Character Development", "Method Acting", "Meisner Technique", "Shakespeare",
+      "Period Acting", "Accent Work", "Dialects", "Cold Reading"
+    ]
+  },
+  music: {
+    icon: Music,
+    title: "Musical Skills",
+    skills: [
+      "Piano", "Guitar", "Violin", "Drums", "Bass", "Saxophone", "Trumpet", "Flute",
+      "Cello", "Clarinet", "Harmonica", "Banjo", "Ukulele", "Harp", "Accordion",
+      "Music Composition", "Music Production", "Sound Engineering", "DJ", "Beat Boxing"
+    ]
+  },
+  technical: {
+    icon: Camera,
+    title: "Technical & Media",
+    skills: [
+      "Photography", "Videography", "Film Editing", "Sound Recording", "Lighting",
+      "Camera Operation", "Directing", "Producing", "Screenwriting", "Script Supervision",
+      "Makeup Artistry", "Costume Design", "Set Design", "Props", "Special Effects",
+      "3D Animation", "Motion Graphics", "Video Editing", "Color Grading"
+    ]
+  },
+  voice: {
+    icon: Mic,
+    title: "Voice & Communication",
+    skills: [
+      "Voice Over", "Radio", "Podcasting", "Narration", "Commercial Voice",
+      "Cartoon Voice", "Video Game Voice", "Audiobook Narration", "E-Learning Voice",
+      "Phone System Voice", "Accent Coaching", "Speech Therapy", "Presentation Skills",
+      "Broadcasting", "News Reporting", "Interviewing"
+    ]
+  },
+  specialty: {
+    icon: Zap,
+    title: "Special Skills",
+    skills: [
+      "Magic", "Juggling", "Fire Breathing", "Contortion", "Tightrope Walking",
+      "Clowning", "Animal Training", "Falconry", "Archery", "Knife Throwing",
+      "Lockpicking", "Escape Artistry", "Balloon Artistry", "Face Painting",
+      "Caricature Drawing", "Speed Reading", "Memory Techniques", "Hypnosis"
+    ]
+  },
+  languages: {
+    icon: Users,
+    title: "Languages & Dialects",
+    skills: [
+      "Spanish", "French", "German", "Italian", "Portuguese", "Russian", "Mandarin",
+      "Japanese", "Korean", "Arabic", "Hebrew", "Hindi", "Thai", "Vietnamese",
+      "Dutch", "Swedish", "Norwegian", "Polish", "Greek", "Turkish", "ASL",
+      "British Accent", "Southern Accent", "New York Accent", "Boston Accent"
+    ]
+  }
+};
 
 interface SkillEndorsementsProps {
-  profile: UserProfile;
-  isOwnProfile: boolean;
+  profile?: {
+    id?: number;
+    skills?: string[];
+    talentType?: string;
+  };
 }
 
-export function SkillEndorsements({ profile, isOwnProfile }: SkillEndorsementsProps) {
-  const [endorseSkill, setEndorseSkill] = useState('');
-  const [endorseMessage, setEndorseMessage] = useState('');
-  const [isEndorseDialogOpen, setIsEndorseDialogOpen] = useState(false);
-  const { user } = useAuth();
+export function SkillEndorsements({ profile }: SkillEndorsementsProps) {
+  // Safety check for profile data
+  if (!profile || !profile.id) {
+    console.log("SkillEndorsements: No profile data available");
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5" />
+            Skills
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-500">Profile data is loading...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const [selectedSkills, setSelectedSkills] = useState<string[]>(profile?.skills || []);
+  const [customSkill, setCustomSkill] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: endorsements = [] } = useQuery<SkillEndorsement[]>({
-    queryKey: ['/api/skill-endorsements', profile?.userId],
-    enabled: !!profile?.userId,
+  // Update skills when profile changes
+  useEffect(() => {
+    if (profile?.skills) {
+      setSelectedSkills(profile.skills);
+    }
+  }, [profile?.skills]);
+
+  // Save skills mutation with proper error handling
+  const saveSkillsMutation = useMutation({
+    mutationFn: async (skills: string[]) => {
+      console.log("🎯 SKILLS: Starting save mutation", { skills, profileId: profile?.id });
+      setIsSubmitting(true);
+      
+      if (!profile?.id) {
+        throw new Error("Profile ID is required");
+      }
+      
+      try {
+        const response = await apiRequest("PUT", `/api/user/skills`, { skills });
+        
+        if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(`Failed to save skills: ${response.status} ${errorData}`);
+        }
+        
+        const result = await response.json();
+        console.log("🎯 SKILLS: Save successful", { result });
+        return result;
+      } catch (error) {
+        console.error("🎯 SKILLS: Save error", error);
+        throw error;
+      }
+    },
+    onSuccess: (data) => {
+      console.log("🎯 SKILLS: Mutation success", { data });
+      setIsSubmitting(false);
+      
+      // Invalidate profile queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      
+      toast({
+        title: "Skills Updated",
+        description: "Your skills have been saved successfully!",
+      });
+    },
+    onError: (error) => {
+      console.error("🎯 SKILLS: Mutation error", error);
+      setIsSubmitting(false);
+      
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      console.log("Final skills error message:", errorMessage);
+      
+      toast({
+        title: "Failed to Save Skills",
+        description: `Error: ${errorMessage}. Please try again.`,
+        variant: "destructive",
+      });
+    },
   });
 
-  const endorseMutation = useMutation({
-    mutationFn: async (data: { skill: string; message: string }) => {
-      const response = await apiRequest('POST', '/api/skill-endorsements', {
-        endorsedUserId: profile?.userId,
-        skill: data.skill,
-        message: data.message,
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/skill-endorsements', profile?.userId] });
-      setIsEndorseDialogOpen(false);
-      setEndorseSkill('');
-      setEndorseMessage('');
-      toast({
-        title: 'Skill endorsed successfully',
-        description: 'Your endorsement has been added to their profile.',
-      });
-    },
-    onError: (error: any) => {
-      console.error('Error endorsing skill:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to endorse skill. Please try again.',
-        variant: 'destructive',
-      });
-    },
-  });
+  const addSkill = (skill: string) => {
+    if (!selectedSkills.includes(skill)) {
+      const newSkills = [...selectedSkills, skill];
+      setSelectedSkills(newSkills);
+      console.log("🎯 SKILLS: Added skill", { skill, newSkills });
+    }
+  };
 
-  const removeEndorsementMutation = useMutation({
-    mutationFn: async (endorsementId: number) => {
-      const response = await apiRequest('DELETE', `/api/skill-endorsements/${endorsementId}`);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/skill-endorsements', profile?.userId] });
-      toast({
-        title: 'Endorsement removed',
-        description: 'The skill endorsement has been removed.',
-      });
-    },
-    onError: (error: any) => {
-      console.error('Error removing endorsement:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to remove endorsement. Please try again.',
-        variant: 'destructive',
-      });
-    },
-  });
+  const removeSkill = (skill: string) => {
+    const newSkills = selectedSkills.filter(s => s !== skill);
+    setSelectedSkills(newSkills);
+    console.log("🎯 SKILLS: Removed skill", { skill, newSkills });
+  };
 
-  const handleEndorse = () => {
-    if (!endorseSkill.trim()) {
+  const addCustomSkill = () => {
+    if (customSkill.trim() && !selectedSkills.includes(customSkill.trim())) {
+      const newSkills = [...selectedSkills, customSkill.trim()];
+      setSelectedSkills(newSkills);
+      setCustomSkill("");
+      console.log("🎯 SKILLS: Added custom skill", { skill: customSkill.trim(), newSkills });
+    }
+  };
+
+  const handleSaveSkills = () => {
+    console.log("🎯 SKILLS: Save button clicked", { selectedSkills, profileId: profile?.id });
+    if (selectedSkills.length === 0) {
       toast({
-        title: 'Error',
-        description: 'Please enter a skill to endorse.',
-        variant: 'destructive',
+        title: "No Skills Selected",
+        description: "Please select at least one skill to save.",
+        variant: "destructive",
       });
       return;
     }
-
-    endorseMutation.mutate({
-      skill: endorseSkill.trim(),
-      message: endorseMessage.trim(),
-    });
+    saveSkillsMutation.mutate(selectedSkills);
   };
-
-  const handleRemoveEndorsement = (endorsementId: number) => {
-    removeEndorsementMutation.mutate(endorsementId);
-  };
-
-  // Group endorsements by skill
-  const groupedEndorsements = endorsements.reduce((acc: Record<string, SkillEndorsement[]>, endorsement: SkillEndorsement) => {
-    if (!acc[endorsement.skill]) {
-      acc[endorsement.skill] = [];
-    }
-    acc[endorsement.skill].push(endorsement);
-    return acc;
-  }, {});
-
-  // Get profile skills for quick endorsement
-  const profileSkills = profile?.skills || [];
-  const endorsedSkills = Object.keys(groupedEndorsements);
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <StarIcon className="h-5 w-5 text-yellow-500" />
-              Skill Endorsements
-            </CardTitle>
-            <CardDescription>
-              {isOwnProfile 
-                ? "Skills endorsed by your network"
-                : `Skills endorsed by ${profile?.displayName || 'this user'}'s network`
-              }
-            </CardDescription>
-          </div>
-          {!isOwnProfile && user && (
-            <Dialog open={isEndorseDialogOpen} onOpenChange={setIsEndorseDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <PlusIcon className="h-4 w-4 mr-2" />
-                  Endorse Skill
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Endorse a Skill</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="skill">Skill</Label>
-                    <Input
-                      id="skill"
-                      value={endorseSkill}
-                      onChange={(e) => setEndorseSkill(e.target.value)}
-                      placeholder="Enter skill to endorse"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="message">Message (optional)</Label>
-                    <Textarea
-                      id="message"
-                      value={endorseMessage}
-                      onChange={(e) => setEndorseMessage(e.target.value)}
-                      placeholder="Add a personal message about their skill"
-                      rows={3}
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => setIsEndorseDialogOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button onClick={handleEndorse} disabled={endorseMutation.isPending}>
-                      {endorseMutation.isPending ? 'Endorsing...' : 'Endorse'}
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
+        <CardTitle className="flex items-center gap-2">
+          <CheckCircle2 className="w-5 h-5" />
+          Skills
+        </CardTitle>
+        <p className="text-sm text-gray-500">
+          Select skills from categories below or add your own custom skills
+        </p>
       </CardHeader>
-      <CardContent>
-        {Object.keys(groupedEndorsements).length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <StarIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No skill endorsements yet</p>
-            {!isOwnProfile && (
-              <p className="text-sm">Be the first to endorse their skills!</p>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {Object.entries(groupedEndorsements).map(([skill, skillEndorsements]) => (
-              <div key={skill} className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Badge variant="secondary" className="text-sm">
-                    {skill}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    {skillEndorsements.length} endorsement{skillEndorsements.length !== 1 ? 's' : ''}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {skillEndorsements.map((endorsement) => (
-                    <div
-                      key={endorsement.id}
-                      className="flex items-start gap-3 p-3 rounded-lg border bg-muted/50"
-                    >
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="text-xs">
-                          {String(endorsement.endorserId).slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">
-                            {endorsement.endorserId}
-                          </span>
-                          <CheckIcon className="h-4 w-4 text-green-500" />
-                        </div>
-                        {endorsement.message && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            "{endorsement.message}"
-                          </p>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(endorsement.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      {user && String(user.id) === String(endorsement.endorserId) && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveEndorsement(endorsement.id)}
-                          disabled={removeEndorsementMutation.isPending}
-                        >
-                          <XIcon className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                {skillEndorsements.length > 0 && (
-                  <Separator className="my-4" />
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Quick endorse profile skills */}
-        {!isOwnProfile && user && profileSkills.length > 0 && (
-          <div className="mt-6 pt-6 border-t">
-            <h4 className="text-sm font-medium mb-3">Quick Endorse</h4>
-            <div className="flex flex-wrap gap-2">
-              {profileSkills.map((skill: string) => (
-                <Button
-                  key={skill}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setEndorseSkill(skill);
-                    setIsEndorseDialogOpen(true);
-                  }}
-                  disabled={endorsedSkills.includes(skill)}
-                >
-                  {endorsedSkills.includes(skill) ? (
-                    <CheckIcon className="h-4 w-4 mr-1" />
-                  ) : (
-                    <PlusIcon className="h-4 w-4 mr-1" />
-                  )}
+      <CardContent className="space-y-6">
+        {/* Selected Skills Display */}
+        {selectedSkills.length > 0 && (
+          <div>
+            <h4 className="font-medium mb-3">Your Selected Skills ({selectedSkills.length})</h4>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {selectedSkills.map((skill) => (
+                <Badge key={skill} variant="default" className="flex items-center gap-1 px-3 py-1">
                   {skill}
-                </Button>
+                  <X 
+                    className="h-3 w-3 cursor-pointer hover:text-red-500 ml-1" 
+                    onClick={() => removeSkill(skill)}
+                  />
+                </Badge>
               ))}
             </div>
           </div>
         )}
+
+        {/* Custom Skill Input */}
+        <div className="space-y-2">
+          <h4 className="font-medium">Add Custom Skill</h4>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Enter a skill not listed below..."
+              value={customSkill}
+              onChange={(e) => setCustomSkill(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && addCustomSkill()}
+              className="flex-1"
+            />
+            <Button 
+              onClick={addCustomSkill} 
+              disabled={!customSkill.trim()}
+              variant="outline"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Skill Categories */}
+        <div>
+          <h4 className="font-medium mb-3">Browse Skills by Category</h4>
+          <Tabs defaultValue="performing" className="w-full">
+            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+              {Object.entries(SKILL_CATEGORIES).map(([key, category]) => {
+                const IconComponent = category.icon;
+                return (
+                  <TabsTrigger key={key} value={key} className="text-xs">
+                    <IconComponent className="h-3 w-3 mr-1" />
+                    <span className="hidden sm:inline">{category.title.split(' ')[0]}</span>
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+            
+            {Object.entries(SKILL_CATEGORIES).map(([key, category]) => (
+              <TabsContent key={key} value={key} className="mt-4">
+                <div className="space-y-3">
+                  <h5 className="font-medium flex items-center gap-2">
+                    <category.icon className="h-4 w-4" />
+                    {category.title}
+                  </h5>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                    {category.skills.map((skill) => {
+                      const isSelected = selectedSkills.includes(skill);
+                      return (
+                        <Button
+                          key={skill}
+                          variant={isSelected ? "default" : "outline"}
+                          size="sm"
+                          className={`justify-start text-left h-auto py-2 ${
+                            isSelected 
+                              ? "bg-primary text-primary-foreground" 
+                              : "hover:bg-muted"
+                          }`}
+                          onClick={() => isSelected ? removeSkill(skill) : addSkill(skill)}
+                        >
+                          <span className="truncate">{skill}</span>
+                          {isSelected && <CheckCircle2 className="h-3 w-3 ml-auto flex-shrink-0" />}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
+        </div>
+
+        {/* Save Button */}
+        <div className="flex justify-end pt-4 border-t">
+          <Button 
+            onClick={handleSaveSkills}
+            disabled={isSubmitting || selectedSkills.length === 0}
+            className="min-w-[120px]"
+          >
+            {isSubmitting ? "Saving..." : "Save Skills"}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
