@@ -10,6 +10,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Profile Edit Dialog Implementation with Pre-populated Fields (July 22, 2025)
+- **CRITICAL SUCCESS**: Replaced onboarding redirect with proper profile edit dialog that pre-populates with existing user data
+- **Profile Edit Form Fix**: Created dedicated ProfileEditForm component with pre-populated fields from existing profile data
+- **Data Integrity Verified**: Form now correctly initializes with user's existing displayName, location, bio, website, phoneNumber, height, weight, and other profile fields
+- **User Experience Enhanced**: Users can now edit their profile information without losing existing data or going through full onboarding flow
+- **TypeScript Cleanup**: Fixed multiple compilation errors by removing unused job history form references and properly typing availability colors
+- **Component Integration**: Added proper Dialog, Label, Input, and Textarea imports for complete profile editing functionality
+- **Real-time Updates**: Profile changes are saved via PUT request to talent API and automatically refresh user data on success
+- **Actor-Specific Fields**: Additional actor fields (height, weight) are conditionally shown for actor talent type
+- **Form Validation**: Required field validation with proper error handling and success feedback via toast notifications
+
 ### Dynamic Calendar Availability Status Implementation (July 22, 2025)
 - **CRITICAL SUCCESS**: Fixed database parameter error causing data integrity issues in availability API
 - **Root Cause Fixed**: Replaced raw SQL queries with proper Drizzle ORM syntax in availability methods:

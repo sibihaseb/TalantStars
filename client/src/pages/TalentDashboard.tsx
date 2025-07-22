@@ -264,7 +264,7 @@ export default function TalentDashboard() {
         break;
       case 'experience':
         if (!item.completed) {
-          setIsJobHistoryDialogOpen(true);
+          setActiveTab('experience');
         } else {
           setActiveTab('overview');
         }
@@ -390,33 +390,7 @@ export default function TalentDashboard() {
     }
   };
 
-  const handleCreateJobHistory = () => {
-    console.log("🔥🔥🔥 handleCreateJobHistory CALLED");
-    console.log("Form data being submitted:", jobHistoryForm);
-    console.log("Form validation:", {
-      title: !!jobHistoryForm.title,
-      company: !!jobHistoryForm.company,
-      role: !!jobHistoryForm.role
-    });
-    console.log("editingJobId:", editingJobId);
-    console.log("Mutation status:", {
-      isPending: createJobHistoryMutation.isPending,
-      isError: createJobHistoryMutation.isError,
-      error: createJobHistoryMutation.error
-    });
-    
-    if (jobHistoryForm.title && jobHistoryForm.company && jobHistoryForm.role) {
-      console.log("🚀 CALLING MUTATION with data:", jobHistoryForm);
-      createJobHistoryMutation.mutate(jobHistoryForm);
-    } else {
-      console.log("❌ Form validation failed - missing required fields");
-      console.log("Missing fields:", {
-        title: !jobHistoryForm.title,
-        company: !jobHistoryForm.company,
-        role: !jobHistoryForm.role
-      });
-    }
-  };
+  // Job history is now handled by JobHistoryManager component
 
 
 
@@ -431,13 +405,13 @@ export default function TalentDashboard() {
     setActiveTab("applications");
   };
 
+  const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
+  
   const handleEditProfile = () => {
-    setLocation('/onboarding');
+    setIsProfileEditOpen(true);
   };
 
-  const handleUpdateProfile = () => {
-    setLocation('/onboarding');
-  };
+  // Profile update is now handled by ProfileEditForm component
 
   const handleUploadMedia = () => {
     setIsMediaDialogOpen(true);
@@ -1089,12 +1063,187 @@ export default function TalentDashboard() {
             <div className="space-y-6">
               {/* Profile Sharing Section */}
               <ProfileSharing />
-              
-
             </div>
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Profile Edit Dialog */}
+      <Dialog open={isProfileEditOpen} onOpenChange={setIsProfileEditOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+          </DialogHeader>
+          <ProfileEditForm 
+            profile={profile} 
+            user={user} 
+            onClose={() => setIsProfileEditOpen(false)}
+            onSave={() => {
+              setIsProfileEditOpen(false);
+              queryClient.invalidateQueries({ queryKey: ['/api/user/profile'] });
+              queryClient.invalidateQueries({ queryKey: [`/api/talent/${user?.username}`] });
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+// Profile Edit Form Component with pre-populated data
+function ProfileEditForm({ profile, user, onClose, onSave }: {
+  profile: any;
+  user: any;
+  onClose: () => void;
+  onSave: () => void;
+}) {
+  const { toast } = useToast();
+  
+  const [formData, setFormData] = useState({
+    displayName: profile?.displayName || `${user?.firstName} ${user?.lastName}` || '',
+    location: profile?.location || '',
+    bio: profile?.bio || '',
+    website: profile?.website || '',
+    phoneNumber: profile?.phoneNumber || '',
+    height: profile?.height || '',
+    weight: profile?.weight || '',
+    eyeColor: profile?.eyeColor || [],
+    hairColor: profile?.hairColor || [],
+  });
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('PUT', `/api/talent/${user?.username}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Profile updated successfully!",
+      });
+      onSave();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateProfileMutation.mutate(formData);
+  };
+
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <Label htmlFor="displayName">Display Name *</Label>
+          <Input
+            id="displayName"
+            value={formData.displayName}
+            onChange={(e) => handleInputChange('displayName', e.target.value)}
+            placeholder="Your display name"
+            required
+          />
+        </div>
+        
+        <div>
+          <Label htmlFor="location">Location *</Label>
+          <Input
+            id="location"
+            value={formData.location}
+            onChange={(e) => handleInputChange('location', e.target.value)}
+            placeholder="City, State"
+            required
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="bio">Professional Bio *</Label>
+        <Textarea
+          id="bio"
+          value={formData.bio}
+          onChange={(e) => handleInputChange('bio', e.target.value)}
+          placeholder="Tell us about your experience and what makes you unique (minimum 10 characters)"
+          rows={4}
+          required
+        />
+        <p className="text-sm text-gray-500 mt-1">
+          {formData.bio.length}/500 characters
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <Label htmlFor="website">Website (Optional)</Label>
+          <Input
+            id="website"
+            value={formData.website}
+            onChange={(e) => handleInputChange('website', e.target.value)}
+            placeholder="https://yourwebsite.com"
+          />
+        </div>
+        
+        <div>
+          <Label htmlFor="phoneNumber">Phone Number (Optional)</Label>
+          <Input
+            id="phoneNumber"
+            value={formData.phoneNumber}
+            onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+            placeholder="+1 (555) 123-4567"
+          />
+        </div>
+      </div>
+
+      {profile?.talentType === 'actor' && (
+        <div className="border-t pt-6">
+          <h3 className="text-lg font-semibold mb-4">Actor-Specific Information</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="height">Height</Label>
+              <Input
+                id="height"
+                value={formData.height}
+                onChange={(e) => handleInputChange('height', e.target.value)}
+                placeholder="5'8&quot;"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="weight">Weight</Label>
+              <Input
+                id="weight"
+                value={formData.weight}
+                onChange={(e) => handleInputChange('weight', e.target.value)}
+                placeholder="150 lbs"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-end gap-3 pt-6 border-t">
+        <Button type="button" variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button 
+          type="submit" 
+          disabled={updateProfileMutation.isPending}
+          className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700"
+        >
+          {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
+        </Button>
+      </div>
+    </form>
   );
 }
