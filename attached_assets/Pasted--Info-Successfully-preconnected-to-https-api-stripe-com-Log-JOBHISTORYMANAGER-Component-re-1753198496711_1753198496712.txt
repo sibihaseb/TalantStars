@@ -1,0 +1,70 @@
+[Info] Successfully preconnected to https://api.stripe.com/
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Error] Error: Rendered more hooks than during the previous render.
+	updateWorkInProgressHook (chunk-RPCDYKBN.js:11678:87)
+	updateReducer (chunk-RPCDYKBN.js:11727)
+	useState (chunk-RPCDYKBN.js:12753)
+	JobHistoryManager (JobHistoryManager.tsx:390)
+	renderWithHooks (chunk-RPCDYKBN.js:11548)
+	updateFunctionComponent (chunk-RPCDYKBN.js:14582)
+	callCallback2 (chunk-RPCDYKBN.js:3674)
+	dispatchEvent
+	invokeGuardedCallbackDev (chunk-RPCDYKBN.js:3699)
+	invokeGuardedCallback (chunk-RPCDYKBN.js:3733)
+	beginWork$1 (chunk-RPCDYKBN.js:19765)
+	performUnitOfWork (chunk-RPCDYKBN.js:19198)
+	workLoopSync (chunk-RPCDYKBN.js:19137)
+	renderRootSync (chunk-RPCDYKBN.js:19116)
+	performConcurrentWorkOnRoot (chunk-RPCDYKBN.js:18678:98)
+	workLoop (chunk-RPCDYKBN.js:197)
+	flushWork (chunk-RPCDYKBN.js:176)
+	performWorkUntilDeadline (chunk-RPCDYKBN.js:384)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Error] Error: Rendered more hooks than during the previous render.
+	updateWorkInProgressHook (chunk-RPCDYKBN.js:11678:87)
+	updateReducer (chunk-RPCDYKBN.js:11727)
+	useState (chunk-RPCDYKBN.js:12753)
+	JobHistoryManager (JobHistoryManager.tsx:390)
+	renderWithHooks (chunk-RPCDYKBN.js:11548)
+	updateFunctionComponent (chunk-RPCDYKBN.js:14582)
+	callCallback2 (chunk-RPCDYKBN.js:3674)
+	dispatchEvent
+	invokeGuardedCallbackDev (chunk-RPCDYKBN.js:3699)
+	invokeGuardedCallback (chunk-RPCDYKBN.js:3733)
+	beginWork$1 (chunk-RPCDYKBN.js:19765)
+	performUnitOfWork (chunk-RPCDYKBN.js:19198)
+	workLoopSync (chunk-RPCDYKBN.js:19137)
+	renderRootSync (chunk-RPCDYKBN.js:19116)
+	recoverFromConcurrentError (chunk-RPCDYKBN.js:18736)
+	performConcurrentWorkOnRoot (chunk-RPCDYKBN.js:18684)
+	workLoop (chunk-RPCDYKBN.js:197)
+	flushWork (chunk-RPCDYKBN.js:176)
+	performWorkUntilDeadline (chunk-RPCDYKBN.js:384)
+[Error] Error: Rendered more hooks than during the previous render.
+	commitRootImpl (chunk-RPCDYKBN.js:19413)
+	commitRoot (chunk-RPCDYKBN.js:19277)
+	finishConcurrentRender (chunk-RPCDYKBN.js:18760)
+	performConcurrentWorkOnRoot (chunk-RPCDYKBN.js:18718)
+	workLoop (chunk-RPCDYKBN.js:197)
+	flushWork (chunk-RPCDYKBN.js:176)
+	performWorkUntilDeadline (chunk-RPCDYKBN.js:384)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/user/profile (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/social/stats (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/applications (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/opportunities (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+> Selected Element
+< <html lang="en">…</html>
