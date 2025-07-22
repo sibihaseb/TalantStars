@@ -536,22 +536,20 @@ export default function ProfileSharing() {
                   onCheckedChange={(checked) => handleSettingChange('showSocialMedia', checked)}
                 />
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Social Media Connections Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Share className="h-5 w-5" />
-                Social Media Connections
-              </CardTitle>
-              <CardDescription>
-                Connect your social media accounts and website to showcase your online presence
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <SocialMediaManager />
+              {/* Social Media Connections Section */}
+              <div className="pt-4 border-t">
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <Share className="h-4 w-4" />
+                      Social Media Connections
+                    </Label>
+                    <p className="text-xs text-gray-500 mt-1">Connect your social media accounts and website</p>
+                  </div>
+                  <SocialMediaManager />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

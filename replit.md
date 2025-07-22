@@ -8,6 +8,13 @@ Talents & Stars is a comprehensive AI-powered entertainment industry platform th
 
 Preferred communication style: Simple, everyday language.
 
+**CRITICAL DEVELOPMENT RULE**: Always preserve existing functionality when making changes. Before any modification:
+1. Debug and test thoroughly before making changes
+2. Check for conflicts with existing features
+3. Never delete or break things that are working
+4. Test all related functionality after changes
+5. Document what was working before making any modifications
+
 ## Recent Changes
 
 ### Social Media Connection Interface Restoration (July 22, 2025)
