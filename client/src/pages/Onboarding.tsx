@@ -398,10 +398,12 @@ const getFieldSuggestions = (fieldName: string, value: string, talentType?: stri
       
     case 'phoneNumber':
       if (value && value.length > 0) {
-        if (!/^[\+]?[1-9][\d]{0,15}$/.test(value)) {
+        // Accept common phone number formats: (xxx) xxx-xxxx, xxx-xxx-xxxx, xxx.xxx.xxxx, xxxxxxxxxx, +x xxx xxx xxxx
+        const phoneRegex = /^(\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/;
+        if (!phoneRegex.test(value)) {
           suggestions.push({
             type: 'error',
-            message: 'Invalid phone number format',
+            message: 'Please use format: 407-555-1212 or (407) 555-1212',
             icon: AlertCircle
           });
         } else {
