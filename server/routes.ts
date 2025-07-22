@@ -3789,6 +3789,188 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Job History Management Routes
+  app.get('/api/job-history/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      console.log("🔥 JOB HISTORY: Getting job history for user", userId);
+      
+      // Verify user can access this data (own data or admin)
+      if (req.user.id !== userId && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const jobHistory = await simpleStorage.getJobHistory(userId);
+      console.log("🔥 JOB HISTORY: Found", jobHistory.length, "entries");
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.json(jobHistory);
+    } catch (error) {
+      console.error("🔥 JOB HISTORY: Error fetching job history:", error);
+      res.status(500).setHeader('Content-Type', 'application/json').json({ 
+        message: "Failed to fetch job history", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.post('/api/job-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      console.log("🔥 JOB HISTORY: Creating job history entry", req.body);
+      
+      const jobData = {
+        ...req.body,
+        userId,
+        verified: false,
+        ai_enhanced: false
+      };
+      
+      const jobEntry = await simpleStorage.createJobHistory(jobData);
+      console.log("🔥 JOB HISTORY: Created entry with ID", jobEntry.id);
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.json(jobEntry);
+    } catch (error) {
+      console.error("🔥 JOB HISTORY: Error creating job history:", error);
+      res.status(500).setHeader('Content-Type', 'application/json').json({ 
+        message: "Failed to create job history", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.put('/api/job-history/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      const userId = req.user.id;
+      console.log("🔥 JOB HISTORY: Updating job history entry", jobId, req.body);
+      
+      // Verify ownership
+      const existingEntry = await simpleStorage.getJobHistoryById(jobId);
+      if (!existingEntry || existingEntry.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const updatedEntry = await simpleStorage.updateJobHistory(jobId, req.body);
+      console.log("🔥 JOB HISTORY: Updated entry", updatedEntry.id);
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.json(updatedEntry);
+    } catch (error) {
+      console.error("🔥 JOB HISTORY: Error updating job history:", error);
+      res.status(500).setHeader('Content-Type', 'application/json').json({ 
+        message: "Failed to update job history", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.delete('/api/job-history/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      const userId = req.user.id;
+      console.log("🔥 JOB HISTORY: Deleting job history entry", jobId);
+      
+      // Verify ownership
+      const existingEntry = await simpleStorage.getJobHistoryById(jobId);
+      if (!existingEntry || existingEntry.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      await simpleStorage.deleteJobHistory(jobId);
+      console.log("🔥 JOB HISTORY: Deleted entry", jobId);
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.json({ success: true });
+    } catch (error) {
+      console.error("🔥 JOB HISTORY: Error deleting job history:", error);
+      res.status(500).setHeader('Content-Type', 'application/json').json({ 
+        message: "Failed to delete job history", 
+        error: error.message 
+      });
+    }
+  });
+
+  // AI Enhancement endpoints for job history
+  app.post('/api/job-history/:id/enhance', isAuthenticated, async (req: any, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      const userId = req.user.id;
+      console.log("🔥 JOB HISTORY AI: Enhancing job description for", jobId);
+      
+      // Verify ownership
+      const existingEntry = await simpleStorage.getJobHistoryById(jobId);
+      if (!existingEntry || existingEntry.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      // Enhance description using AI
+      const enhancedDescription = await enhanceJobDescription(
+        existingEntry.title, 
+        existingEntry.company, 
+        existingEntry.description || ''
+      );
+      
+      // Update job history with enhanced description
+      const updatedEntry = await simpleStorage.updateJobHistory(jobId, {
+        description: enhancedDescription,
+        ai_enhanced: true
+      });
+      
+      console.log("🔥 JOB HISTORY AI: Enhanced description for", jobId);
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.json(updatedEntry);
+    } catch (error) {
+      console.error("🔥 JOB HISTORY AI: Error enhancing job history:", error);
+      res.status(500).setHeader('Content-Type', 'application/json').json({ 
+        message: "Failed to enhance job history", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.post('/api/job-history/:id/validate-skills', isAuthenticated, async (req: any, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      const userId = req.user.id;
+      console.log("🔥 JOB HISTORY SKILLS: Validating skills for", jobId);
+      
+      // Verify ownership
+      const existingEntry = await simpleStorage.getJobHistoryById(jobId);
+      if (!existingEntry || existingEntry.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      // Validate skills using AI
+      const validatedSkills = await validateJobSkills(
+        existingEntry.title, 
+        existingEntry.company, 
+        existingEntry.description || ''
+      );
+      
+      // Update job history with validated skills
+      const updatedEntry = await simpleStorage.updateJobHistory(jobId, {
+        skill_validations: validatedSkills
+      });
+      
+      console.log("🔥 JOB HISTORY SKILLS: Validated", validatedSkills.length, "skills for", jobId);
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.json({ 
+        ...updatedEntry,
+        validatedSkills 
+      });
+    } catch (error) {
+      console.error("🔥 JOB HISTORY SKILLS: Error validating skills:", error);
+      res.status(500).setHeader('Content-Type', 'application/json').json({ 
+        message: "Failed to validate skills", 
+        error: error.message 
+      });
+    }
+  });
+
   // Get user account data by username or ID
   app.get('/api/user/profile/:id', async (req, res) => {
     try {
