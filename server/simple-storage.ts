@@ -185,7 +185,7 @@ export class DatabaseStorage implements IStorage {
     const [profile] = await db
       .select()
       .from(userProfiles)
-      .where(eq(userProfiles.userId, userId));
+      .where(eq(userProfiles.userId, userId.toString()));
     return profile || undefined;
   }
 
@@ -201,7 +201,7 @@ export class DatabaseStorage implements IStorage {
     const [userProfile] = await db
       .update(userProfiles)
       .set(profile)
-      .where(eq(userProfiles.userId, userId))
+      .where(eq(userProfiles.userId, userId.toString()))
       .returning();
     return userProfile;
   }
