@@ -634,21 +634,12 @@ export class DatabaseStorage implements IStorage {
 
   // Skill endorsement operations
   async getSkillEndorsements(userId: number, skill: string): Promise<any[]> {
-    // For now, return mock data since we haven't created the endorsements table
-    return [
-      {
-        id: 1,
-        endorserId: 2,
-        endorserName: "John Smith",
-        endorserImage: "",
-        message: "Excellent work ethic and professionalism",
-        createdAt: new Date().toISOString()
-      }
-    ];
+    // Return empty array - no hardcoded data
+    return [];
   }
 
   async createSkillEndorsement(endorsementData: any): Promise<any> {
-    // For now, return mock data since we haven't created the endorsements table
+    // Return basic structure without hardcoded data
     return {
       id: Date.now(),
       ...endorsementData,
@@ -1112,7 +1103,7 @@ export class DatabaseStorage implements IStorage {
 
   // Social stats operations
   async getUserSocialStats(userId: number): Promise<any> {
-    // Mock implementation
+    // Return empty stats - no hardcoded data
     return {
       totalPosts: 0,
       totalLikes: 0,
@@ -1171,50 +1162,11 @@ export class DatabaseStorage implements IStorage {
 
   async getJobs(filters?: any): Promise<any[]> {
     console.log("🔥 JOB: Getting jobs", { filters });
-    // Mock implementation - return sample jobs with communication enabled
-    const sampleJobs = [
-      {
-        id: 1,
-        title: "Lead Actor for Indie Film",
-        description: "Looking for experienced actor for leading role in independent drama film.",
-        type: "Full-time",
-        location: "Los Angeles, CA",
-        budget: "$50,000 - $75,000",
-        requirements: ["5+ years acting experience", "Previous film credits", "Available for 3-month shoot"],
-        status: "open",
-        postedBy: 2,
-        allowCommunication: true,
-        talentType: "actor",
-        userId: 2,
-        createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-        updatedAt: new Date(Date.now() - 86400000).toISOString()
-      },
-      {
-        id: 2,
-        title: "Voice Actor for Animation Series",
-        description: "Seeking talented voice actor for recurring character in animated series.",
-        type: "Part-time",
-        location: "Remote",
-        budget: "$1,000 - $2,000 per episode",
-        requirements: ["Voice acting experience", "Home recording setup", "Animation experience preferred"],
-        status: "open",
-        postedBy: 3,
-        allowCommunication: true,
-        talentType: "voice_artist",
-        userId: 3,
-        createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-        updatedAt: new Date(Date.now() - 172800000).toISOString()
-      }
-    ];
+    // Return empty array - no hardcoded sample jobs
+    const jobs: any[] = [];
     
-    // Apply filters if provided
-    let filteredJobs = sampleJobs;
-    if (filters?.status) {
-      filteredJobs = filteredJobs.filter(job => job.status === filters.status);
-    }
-    
-    console.log("✅ JOB: Retrieved jobs", { count: filteredJobs.length });
-    return filteredJobs;
+    console.log("✅ JOB: Retrieved jobs", { count: jobs.length });
+    return jobs;
   }
 
   async getJob(id: number): Promise<any> {

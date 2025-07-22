@@ -89,51 +89,8 @@ export default function ProfileViewer() {
   const profileUser = userData || profile;
   const isOwnProfile = user?.id === profileUser?.id || user?.id === profileUser?.userId;
 
-  // Create sample media data for demonstration
-  const sampleMedia = [
-    {
-      id: 1,
-      url: "https://images.unsplash.com/photo-1594736797933-d0e501ba2fe1?w=800&h=600&fit=crop",
-      mediaType: "image",
-      category: "headshot",
-      title: "Professional Headshot",
-      description: "Professional headshot for casting calls"
-    },
-    {
-      id: 2,
-      url: "",
-      mediaType: "image", 
-      category: "portfolio",
-      title: "Character Study",
-      description: "Character work from latest production"
-    },
-    {
-      id: 3,
-      url: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&h=600&fit=crop",
-      mediaType: "image",
-      category: "portfolio", 
-      title: "Stage Performance",
-      description: "Live performance at Lincoln Center"
-    },
-    {
-      id: 4,
-      url: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&h=600&fit=crop",
-      mediaType: "video",
-      category: "demo",
-      title: "Acting Demo Reel",
-      description: "2024 professional demo reel showcasing range"
-    },
-    {
-      id: 5,
-      url: "https://images.unsplash.com/photo-1533584595016-84b0be18b738?w=800&h=600&fit=crop",
-      mediaType: "image",
-      category: "portfolio",
-      title: "Theater Production",
-      description: "Live theater performance"
-    }
-  ];
-
-  const displayMedia = Array.isArray(mediaFiles) && mediaFiles.length > 0 ? mediaFiles : sampleMedia;
+  // Use only actual media files from the user - no hardcoded data
+  const displayMedia = Array.isArray(mediaFiles) ? mediaFiles : [];
 
   // Render the appropriate template
   const renderTemplate = () => {
