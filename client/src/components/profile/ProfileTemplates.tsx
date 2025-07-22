@@ -13,6 +13,8 @@ import MediaModal from '@/components/MediaModal';
 import SkillEndorsement from '@/components/SkillEndorsement';
 import SocialMediaLinks from '@/components/profile/SocialMediaLinks';
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 export type ProfileTemplate = 'classic' | 'modern' | 'artistic' | 'minimal' | 'cinematic';
 
@@ -129,11 +131,72 @@ export function TemplateSelector({
 
 export default TemplateSelector;
 
+// Shared authentication and button logic
+function useProfileActions() {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  
+  // Check authentication status
+  const { data: currentUser } = useQuery({
+    queryKey: ['/api/user'],
+    queryFn: async () => {
+      const response = await fetch('/api/user', { credentials: 'include' });
+      if (!response.ok) return null;
+      return response.json();
+    },
+  });
+
+  const handleContact = (targetProfile: any) => {
+    if (!currentUser) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to contact this talent.",
+        variant: "default"
+      });
+      setLocation('/login');
+      return;
+    }
+    
+    // TODO: Implement contact functionality
+    toast({
+      title: "Contact Feature",
+      description: "Contact functionality will be implemented here.",
+      variant: "default"
+    });
+  };
+
+  const handleFollow = (targetProfile: any) => {
+    if (!currentUser) {
+      toast({
+        title: "Login Required", 
+        description: "Please log in to follow this talent.",
+        variant: "default"
+      });
+      setLocation('/login');
+      return;
+    }
+    
+    // TODO: Implement follow functionality
+    toast({
+      title: "Follow Feature",
+      description: "Follow functionality will be implemented here.", 
+      variant: "default"
+    });
+  };
+
+  return {
+    currentUser,
+    handleContact,
+    handleFollow
+  };
+}
+
 // Classic Template - Professional and Timeless
 export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const isOwnProfile = user?.id === parseInt(userId);
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+  const { handleContact, handleFollow } = useProfileActions();
 
   // Query to fetch current availability status from calendar
   const actualUserId = profile?.userId || profile?.id || userId;
@@ -228,12 +291,18 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
               <p className="text-gray-600 max-w-2xl">{profile?.bio}</p>
             </div>
             
-            <div className="flex gap-2">
-              <Button className="bg-blue-600 hover:bg-blue-700">
+            <div className="flex gap-4">
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => handleContact(profile)}
+              >
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Contact
               </Button>
-              <Button variant="outline">
+              <Button 
+                variant="outline"
+                onClick={() => handleFollow(profile)}
+              >
                 <Star className="w-4 h-4 mr-2" />
                 Follow
               </Button>
@@ -409,6 +478,7 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
 
 // Modern Template - Sleek and Contemporary 
 export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+  const { handleContact, handleFollow } = useProfileActions();
   // Query to fetch current availability status from calendar
   const actualUserId = profile?.userId || profile?.id || userId;
   const { data: availabilityEntries = [] } = useQuery({
@@ -483,6 +553,23 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
                   <Badge className="bg-gradient-to-r from-pink-500 to-orange-500 text-white border-0">{profile?.talentType}</Badge>
                 </div>
                 <p className="text-lg opacity-90">{profile?.bio}</p>
+              </div>
+              <div className="flex gap-4">
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => handleContact(profile)}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Contact
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="border-white text-white hover:bg-white hover:text-blue-600"
+                  onClick={() => handleFollow(profile)}
+                >
+                  <Star className="w-4 h-4 mr-2" />
+                  Follow
+                </Button>
               </div>
             </div>
           </div>
@@ -676,6 +763,7 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
 export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+  const { handleContact, handleFollow } = useProfileActions();
 
   // Query to fetch current availability status from calendar
   const actualUserId = profile?.userId || profile?.id || userId;
@@ -963,6 +1051,7 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
 
 // Minimal Template - Clean and Focused
 export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+  const { handleContact, handleFollow } = useProfileActions();
   // Query to fetch current availability status from calendar
   const actualUserId = profile?.userId || profile?.id || userId;
   const { data: availabilityEntries = [] } = useQuery({
@@ -1036,9 +1125,20 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
           <p className="text-gray-700 text-lg leading-relaxed font-light">{profile?.bio}</p>
         </div>
         
-        <div className="flex justify-center gap-8 pt-4">
-          <Button variant="ghost" className="text-gray-900 hover:bg-gray-100 px-8">Contact</Button>
-          <Button className="bg-gray-900 hover:bg-gray-800 text-white px-8">Follow</Button>
+        <div className="flex justify-center gap-4 pt-4">
+          <Button 
+            variant="ghost" 
+            className="text-gray-900 hover:bg-gray-100 px-8"
+            onClick={() => handleContact(profile)}
+          >
+            Contact
+          </Button>
+          <Button 
+            className="bg-gray-900 hover:bg-gray-800 text-white px-8"
+            onClick={() => handleFollow(profile)}
+          >
+            Follow
+          </Button>
         </div>
       </div>
 
@@ -1201,6 +1301,7 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
 
 // Cinematic Template - Dramatic and Bold
 export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+  const { handleContact, handleFollow } = useProfileActions();
   // Query to fetch current availability status from calendar
   const actualUserId = profile?.userId || profile?.id || userId;
   const { data: availabilityEntries = [] } = useQuery({
@@ -1288,14 +1389,23 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
             
             <p className="text-2xl mb-12 font-light opacity-90">{profile?.bio}</p>
             
-            <div className="flex justify-center gap-6">
-              <Button size="lg" className="bg-yellow-500 text-black hover:bg-yellow-400 px-12 py-4 text-lg">
-                <Film className="w-5 h-5 mr-2" />
-                View Reel
-              </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-black px-12 py-4 text-lg">
+            <div className="flex justify-center gap-4">
+              <Button 
+                size="lg" 
+                className="bg-yellow-500 text-black hover:bg-yellow-400 px-12 py-4 text-lg"
+                onClick={() => handleContact(profile)}
+              >
                 <MessageCircle className="w-5 h-5 mr-2" />
-                Get in Touch
+                Contact
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-white text-white hover:bg-white hover:text-black px-12 py-4 text-lg"
+                onClick={() => handleFollow(profile)}
+              >
+                <Star className="w-5 h-5 mr-2" />
+                Follow
               </Button>
             </div>
           </div>
