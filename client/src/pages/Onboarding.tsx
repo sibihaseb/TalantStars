@@ -604,16 +604,39 @@ function Onboarding() {
 
   // Pre-populate form with existing profile data when available
   useEffect(() => {
+    console.log("🔄 Profile pre-population check:");
+    console.log("  existingProfile:", existingProfile);
+    console.log("  user:", user);
+    console.log("  existingProfile keys:", existingProfile ? Object.keys(existingProfile) : 'none');
+    
     if (existingProfile && user) {
-      console.log("Pre-populating form with existing profile:", existingProfile);
+      console.log("✅ Pre-populating form with existing profile:", existingProfile);
       
       // Basic user info
-      if (existingProfile.displayName) form.setValue("displayName", existingProfile.displayName);
-      if (existingProfile.bio) form.setValue("bio", existingProfile.bio);
-      if (existingProfile.location) form.setValue("location", existingProfile.location);
-      if (existingProfile.website) form.setValue("website", existingProfile.website);
-      if (existingProfile.phoneNumber) form.setValue("phoneNumber", existingProfile.phoneNumber);
-      if (user.profileImageUrl) form.setValue("profileImageUrl", user.profileImageUrl);
+      if (existingProfile.displayName) {
+        console.log("  Setting displayName:", existingProfile.displayName);
+        form.setValue("displayName", existingProfile.displayName);
+      }
+      if (existingProfile.bio) {
+        console.log("  Setting bio:", existingProfile.bio);
+        form.setValue("bio", existingProfile.bio);
+      }
+      if (existingProfile.location) {
+        console.log("  Setting location:", existingProfile.location);
+        form.setValue("location", existingProfile.location);
+      }
+      if (existingProfile.website) {
+        console.log("  Setting website:", existingProfile.website);
+        form.setValue("website", existingProfile.website);
+      }
+      if (existingProfile.phoneNumber) {
+        console.log("  Setting phoneNumber:", existingProfile.phoneNumber);
+        form.setValue("phoneNumber", existingProfile.phoneNumber);
+      }
+      if (user.profileImageUrl) {
+        console.log("  Setting profileImageUrl:", user.profileImageUrl);
+        form.setValue("profileImageUrl", user.profileImageUrl);
+      }
       
       // Actor-specific fields
       if (existingProfile.height) form.setValue("height", existingProfile.height);
@@ -637,7 +660,10 @@ function Onboarding() {
       // Additional fields
       if (existingProfile.availabilityStatus) form.setValue("availabilityStatus", existingProfile.availabilityStatus);
       
-      console.log("Form populated with existing data");
+      console.log("✅ Form populated with existing data");
+      console.log("📋 Current form values:", form.getValues());
+    } else {
+      console.log("❌ No profile data to populate - existingProfile:", !!existingProfile, "user:", !!user);
     }
   }, [existingProfile, user, form]);
 

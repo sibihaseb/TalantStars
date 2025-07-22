@@ -187,23 +187,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserProfile(userId: number): Promise<UserProfile | undefined> {
-    console.log('👤 Getting profile for userId:', userId);
+    console.log('👤 Getting complete profile for userId:', userId);
     
     try {
-      // Get complete profile data including socialLinks
+      // Get ALL profile data for form pre-population
       const [profile] = await db
-        .select({
-          id: userProfiles.id,
-          userId: userProfiles.userId,
-          displayName: userProfiles.displayName,
-          socialLinks: userProfiles.socialLinks
-        })
+        .select()
         .from(userProfiles)
         .where(eq(userProfiles.userId, userId.toString()));
         
       if (profile) {
-        console.log('👤 Profile found with socialLinks:', !!profile.socialLinks);
-        console.log('👤 socialLinks data:', JSON.stringify(profile.socialLinks));
+        console.log('👤 Complete profile found - has bio:', !!profile.bio);
+        console.log('👤 Profile location:', profile.location);
+        console.log('👤 Profile skills count:', profile.skills ? profile.skills.length : 0);
+        console.log('👤 Profile rates:', { daily: profile.dailyRate, weekly: profile.weeklyRate });
         return profile as any;
       }
       
