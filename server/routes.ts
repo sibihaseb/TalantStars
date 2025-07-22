@@ -3253,7 +3253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Keep the old endpoints for backward compatibility
   // Public endpoint for profile questions (used in onboarding)
-  app.get('/api/profile-questions', isAuthenticated, async (req: any, res) => {
+  app.get('/api/profile-questions', async (req: any, res) => {
     try {
       console.log("=== PROFILE QUESTIONS REQUEST ===");
       console.log("User:", req.user?.id, req.user?.username);
