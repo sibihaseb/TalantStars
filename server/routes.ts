@@ -342,8 +342,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Clear profile image endpoint (for removing hardcoded images)
+  app.post('/api/user/profile-image-clear', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const updatedUser = await simpleStorage.updateUserProfileImage(userId, null);
+      res.json({ success: true, user: updatedUser });
+    } catch (error) {
+      console.error("Error clearing profile image:", error);
+      res.status(500).json({ message: "Failed to clear profile image" });
+    }
+  });
+
   // Upload profile image
-  app.post('/api/user/profile-image', isAuthenticated, requirePlan, upload.single('image'), async (req: any, res) => {
+  app.post('/api/user/profile-image', isAuthenticated, upload.single('image'), async (req: any, res) => {
     try {
       const userId = req.user.id;
       const file = req.file;

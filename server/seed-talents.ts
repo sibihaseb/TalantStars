@@ -31,7 +31,7 @@ export const seedTalents = [
       credits: ['Hamilton National Tour', 'Netflix: City Lights', 'Broadway: Chicago'],
       awards: ['Tony Award Nomination 2022', 'Drama Desk Award 2021']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1494790108755-2616b86e2390?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Broadway', 'Film', 'Television']
   },
@@ -59,7 +59,7 @@ export const seedTalents = [
       credits: ['3 Platinum Albums', 'Grammy Nomination 2023', 'CMA Award Winner'],
       awards: ['Grammy Nomination', 'CMA Award', 'Latin Grammy Winner']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Singer-Songwriter', 'Live Performance', 'Recording']
   },
@@ -92,7 +92,7 @@ export const seedTalents = [
       credits: ['Vogue Cover 2023', 'Chanel Campaign', 'Paris Fashion Week'],
       awards: ['Model of the Year 2022', 'Fashion Icon Award']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['High Fashion', 'Editorial', 'Runway']
   },
@@ -120,7 +120,7 @@ export const seedTalents = [
       credits: ['Dragon Quest Series', 'Disney Documentaries', 'Toyota Commercials'],
       awards: ['Voice Acting Award 2023', 'Best Game Voice 2022']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Animation', 'Video Games', 'Commercial']
   },
@@ -151,7 +151,7 @@ export const seedTalents = [
       education: 'BFA Acting, Georgia Southern University',
       credits: ['Riverside High (TV)', 'Netflix: The Valley', 'Short Film: Sunset']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Television', 'Drama', 'Comedy']
   },
@@ -179,7 +179,7 @@ export const seedTalents = [
       education: 'Electronic Music Production, Full Sail University',
       credits: ['Coachella 2023', 'Ultra Music Festival', 'Film: Neon Nights Soundtrack']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Electronic Music', 'DJ', 'Production']
   },
@@ -211,7 +211,7 @@ export const seedTalents = [
       agencies: ['Wilhelmina Models', 'Ford Models'],
       credits: ['NYFW 2023', 'Target Campaign', 'Cosmopolitan Cover']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Plus-Size Modeling', 'Body Positivity', 'Commercial']
   },
@@ -238,7 +238,7 @@ export const seedTalents = [
       education: 'Voice Acting Institute, Los Angeles',
       credits: ['200+ Audiobooks', 'National Geographic Docs', 'Ford Commercials']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Audiobooks', 'Documentary', 'Commercial']
   },
@@ -269,7 +269,7 @@ export const seedTalents = [
       education: 'MFA Acting, Harvard University',
       credits: ['RSC: Hamlet', 'Independent Film: The Garden', 'Broadway: Macbeth']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Shakespeare', 'Classical Theatre', 'Independent Film']
   },
@@ -296,7 +296,7 @@ export const seedTalents = [
       education: 'Berklee College of Music, New Orleans Center for Creative Arts',
       credits: ['5 Grammy Nominations', 'Film: Midnight in Havana', 'Jazz Festival Circuit']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Latin Jazz', 'Film Scoring', 'Live Performance']
   },
@@ -330,7 +330,7 @@ export const seedTalents = [
       agencies: ['Next Model Management'],
       credits: ['Nike Campaign', 'Fitness Magazine', 'Wellness Brand Ambassador']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Fitness', 'Lifestyle', 'Commercial']
   },
@@ -362,7 +362,7 @@ export const seedTalents = [
       education: 'BA Theatre, University of British Columbia',
       credits: ['Supernatural (TV)', 'The Flash (TV)', 'Indie Film: Northern Lights']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Character Acting', 'Television', 'Supporting Roles']
   },
@@ -390,7 +390,7 @@ export const seedTalents = [
       education: 'Voice Acting Studio, Los Angeles',
       credits: ['Anime: Dragon Ball Super', 'Video Game: Final Fantasy XVI', 'Children\'s Audiobooks']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Anime', 'Video Games', 'Children\'s Content']
   },
@@ -418,7 +418,7 @@ export const seedTalents = [
       education: 'Musicians Institute, Hollywood',
       credits: ['Warped Tour 2022', 'Album: Thunder Road', 'Session Work: 50+ Albums']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: false,
     specialties: ['Rock Drumming', 'Session Work', 'Live Performance']
   },
@@ -450,7 +450,7 @@ export const seedTalents = [
       education: 'BFA Musical Theatre, Carnegie Mellon',
       credits: ['Broadway: Wicked', 'Regional: Les Misérables', 'National Tour: Chicago']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Musical Theatre', 'Broadway', 'Dance']
   },
@@ -483,7 +483,7 @@ export const seedTalents = [
       education: 'MFA Acting, University of Texas',
       credits: ['Indie Film: Broken Dreams', 'Short Film: The Letter', 'Web Series: City Life']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: false,
     specialties: ['Independent Film', 'Drama', 'Character Studies']
   },
@@ -511,7 +511,7 @@ export const seedTalents = [
       education: 'Masters in Music, Boston Conservatory',
       credits: ['Film: The Quiet Storm', 'Album: Nocturnes', 'Boston Symphony Orchestra']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: false,
     specialties: ['Classical Piano', 'Film Scoring', 'Composition']
   },
@@ -544,7 +544,7 @@ export const seedTalents = [
       agencies: ['Elite Model Management'],
       credits: ['Vogue Italy', 'Milan Fashion Week', 'Prada Campaign']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['High Fashion', 'Runway', 'Editorial']
   },
@@ -572,7 +572,7 @@ export const seedTalents = [
       education: 'Voice Acting Masterclass, Chicago Voice Studio',
       credits: ['Audiobook: The Great Adventure', 'Commercial: Ford Motors', 'Video Game: Space Warriors']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: false,
     specialties: ['Commercial Voice', 'Audiobooks', 'Video Games']
   },
@@ -604,7 +604,7 @@ export const seedTalents = [
       education: 'BFA Theatre, Georgia Southern University',
       credits: ['TV: The Walking Dead', 'TV Movie: Summer Dreams', 'Series: Atlanta Medical']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Television', 'Drama', 'Period Pieces']
   },
@@ -631,7 +631,7 @@ export const seedTalents = [
       projectTypes: ['Feature Films', 'Documentaries', 'TV Series'],
       credits: ['Film: The Last Stand', 'Documentary: Behind the Scenes', 'TV: Crime Drama']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Independent Film', 'Studio Projects', 'TV Production']
   },
@@ -657,7 +657,7 @@ export const seedTalents = [
       projectTypes: ['Streaming Series', 'Web Content', 'Digital Films'],
       credits: ['Netflix: The New World', 'Hulu: City Stories', 'YouTube: Viral Hits']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1494790108755-2616b86e2390?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Streaming Content', 'Digital Media', 'Web Series']
   },
@@ -684,7 +684,7 @@ export const seedTalents = [
       clientTypes: ['Actors', 'Directors', 'Writers'],
       credits: ['Managed: Oscar Winner Jane Doe', 'Developed: Rising Star Program', 'Negotiated: Major Studio Deals']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['A-List Talent', 'Career Development', 'Contract Negotiation']
   },
@@ -710,7 +710,7 @@ export const seedTalents = [
       clientTypes: ['Musicians', 'Songwriters', 'Producers'],
       credits: ['Grammy Winner: Best New Artist', 'Platinum Album: Summer Hits', 'Tour Management: World Tour 2023']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Music Industry', 'Artist Development', 'Record Deals']
   },
@@ -737,7 +737,7 @@ export const seedTalents = [
       clientTypes: ['Film Actors', 'TV Actors', 'Theater Performers'],
       credits: ['Booked: Marvel Movie Lead', 'Secured: Broadway Opening', 'Negotiated: Series Regular']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Film Casting', 'TV Casting', 'Theater Booking']
   },
@@ -763,7 +763,7 @@ export const seedTalents = [
       clientTypes: ['Emerging Actors', 'Models', 'Voice Artists'],
       credits: ['Discovered: Breakout Star 2023', 'Booked: Commercial Campaign', 'Launched: New Talent Program']
     },
-    profileImageUrl: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400',
+    profileImageUrl: '',
     featured: true,
     specialties: ['Emerging Talent', 'Unique Opportunities', 'Personal Attention']
   }

@@ -339,7 +339,7 @@ export default function ProfileImageUpload({
         </CardHeader>
         <CardContent>
           {/* Current Image Display */}
-          {currentImage && !showCropper && (
+          {currentImage && currentImage !== "/placeholder-avatar.svg" && !showCropper && (
             <div className="mb-4">
               <img
                 src={currentImage}

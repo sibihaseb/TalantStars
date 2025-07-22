@@ -67,7 +67,7 @@ export interface IStorage {
   updateSeoSettings(settings: Partial<InsertSeoSettings>): Promise<SeoSettings>;
 
   // Profile image update method
-  updateUserProfileImage(userId: number, imageUrl: string): Promise<User>;
+  updateUserProfileImage(userId: number, imageUrl: string | null): Promise<User>;
   
   // Profile template update method
   updateUserProfileTemplate(userId: number, template: string): Promise<User>;
@@ -596,7 +596,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Profile image update method
-  async updateUserProfileImage(userId: number, imageUrl: string): Promise<User> {
+  async updateUserProfileImage(userId: number, imageUrl: string | null): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ profileImageUrl: imageUrl })
@@ -640,7 +640,7 @@ export class DatabaseStorage implements IStorage {
         id: 1,
         endorserId: 2,
         endorserName: "John Smith",
-        endorserImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
+        endorserImage: "",
         message: "Excellent work ethic and professionalism",
         createdAt: new Date().toISOString()
       }
