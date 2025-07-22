@@ -136,25 +136,37 @@ function useProfileActions() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   
-  // Check authentication status
-  const { data: currentUser } = useQuery({
+  // Check authentication status - handle errors gracefully
+  const { data: currentUser, error: authError } = useQuery({
     queryKey: ['/api/user'],
     queryFn: async () => {
-      const response = await fetch('/api/user', { credentials: 'include' });
-      if (!response.ok) return null;
-      return response.json();
+      try {
+        const response = await fetch('/api/user', { credentials: 'include' });
+        if (!response.ok) return null;
+        return response.json();
+      } catch (error) {
+        console.log('Auth check failed:', error);
+        return null;
+      }
     },
+    retry: false, // Don't retry on auth failures
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   const handleContact = (targetProfile: any) => {
+    console.log('Contact button clicked, currentUser:', currentUser);
+    
     if (!currentUser) {
       toast({
         title: "Login Required",
         description: "Please log in to contact this talent.",
         variant: "default"
       });
-      // Safe navigation with window.location
-      window.location.href = '/login';
+      
+      // Navigate to login after showing toast
+      setTimeout(() => {
+        setLocation('/login');
+      }, 500);
       return;
     }
     
@@ -167,14 +179,19 @@ function useProfileActions() {
   };
 
   const handleFollow = (targetProfile: any) => {
+    console.log('Follow button clicked, currentUser:', currentUser);
+    
     if (!currentUser) {
       toast({
         title: "Login Required", 
         description: "Please log in to follow this talent.",
         variant: "default"
       });
-      // Safe navigation with window.location
-      window.location.href = '/login';
+      
+      // Navigate to login after showing toast
+      setTimeout(() => {
+        setLocation('/login');
+      }, 500);
       return;
     }
     
@@ -285,9 +302,9 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
                 {profile?.isVerified && <CheckCircle className="w-6 h-6 text-blue-500" />}
               </div>
               
-              <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
-                <Badge className="bg-blue-100 text-blue-800">{profile?.role}</Badge>
-                {profile?.talentType && <Badge variant="outline">{profile?.talentType}</Badge>}
+              <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-6">
+                <Badge className="bg-blue-100 text-blue-800 mb-2">{profile?.role}</Badge>
+                {profile?.talentType && <Badge variant="outline" className="mb-2">{profile?.talentType}</Badge>}
               </div>
               
               <p className="text-gray-600 max-w-2xl">{profile?.bio}</p>
@@ -558,9 +575,9 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
               </Avatar>
               <div className="flex-1 text-white">
                 <h1 className="text-4xl font-bold mb-2">{profile?.displayName}</h1>
-                <div className="flex gap-2 mb-3">
-                  <Badge className="bg-white/20 text-white border-0">{profile?.role}</Badge>
-                  <Badge className="bg-gradient-to-r from-pink-500 to-orange-500 text-white border-0">{profile?.talentType}</Badge>
+                <div className="flex gap-2 mb-4">
+                  <Badge className="bg-white/20 text-white border-0 mb-2">{profile?.role}</Badge>
+                  <Badge className="bg-gradient-to-r from-pink-500 to-orange-500 text-white border-0 mb-2">{profile?.talentType}</Badge>
                 </div>
                 <p className="text-lg opacity-90">{profile?.bio}</p>
               </div>
