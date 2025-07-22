@@ -132,6 +132,30 @@ export default function ProfileSharing() {
     }
   };
 
+  // Save template selection mutation
+  const saveTemplateMutation = useMutation({
+    mutationFn: async ({ template }: { template: string }) => {
+      console.log('💾 Saving template to backend:', template);
+      const response = await apiRequest('POST', '/api/user/profile-template', { selectedTemplate: template });
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Template Saved",
+        description: "Your profile template has been updated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+    },
+    onError: (error: any) => {
+      console.error('❌ Failed to save template:', error);
+      toast({
+        title: "Save Failed",
+        description: "Failed to save your template selection. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const updateCustomUrlMutation = useMutation({
     mutationFn: async (customUrl: string) => {
       const response = await apiRequest('PUT', '/api/profile/sharing', { customUrl });
@@ -183,6 +207,7 @@ export default function ProfileSharing() {
   };
 
   const handleSettingChange = (key: keyof ProfileSharingSettings, value: boolean) => {
+    console.log('🔧 Setting change:', key, '=', value);
     updateSettingsMutation.mutate({ [key]: value });
   };
 
@@ -534,7 +559,12 @@ export default function ProfileSharing() {
             <CardContent>
               <TemplateSelector 
                 selectedTemplate={selectedTemplate}
-                onTemplateChange={setSelectedTemplate}
+                onTemplateChange={(template) => {
+                  console.log('🎨 Template selected:', template);
+                  setSelectedTemplate(template);
+                  // Save template selection to backend
+                  saveTemplateMutation.mutate({ template });
+                }}
                 userTier={userTier}
                 onUpgrade={() => setLocation('/pricing-selection')}
               />
@@ -545,8 +575,6 @@ export default function ProfileSharing() {
 
       {activeTab === 'settings' && (
         <div className="max-w-2xl space-y-6">
-          <SocialMediaManager />
-          
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
