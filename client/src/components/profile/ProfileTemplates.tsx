@@ -302,7 +302,7 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
                 {profile?.isVerified && <CheckCircle className="w-6 h-6 text-blue-500" />}
               </div>
               
-              <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-8">
+              <div className="flex flex-wrap justify-center md:justify-start gap-2" style={{ marginBottom: '15px' }}>
                 <Badge className="bg-blue-100 text-blue-800">{profile?.role}</Badge>
                 {profile?.talentType && <Badge variant="outline">{profile?.talentType}</Badge>}
               </div>
