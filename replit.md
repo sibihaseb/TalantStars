@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Social Media Connection Interface Restoration (July 22, 2025)
+- **CRITICAL REGRESSION FIXED**: Restored social media connection interface that was accidentally removed while implementing visibility controls
+- **Root Cause**: Social media management functionality was removed from ProfileSharing component when adding visibility toggle feature
+- **Solution**: Added back the SocialMediaManager component to the 'appearance' tab in ProfileSharing component
+- **User Experience Enhanced**: Users now have both capabilities simultaneously:
+  - Social media connection interface for adding/managing social media links and website
+  - Visibility toggle controls to show/hide social media information on public profiles
+- **Component Structure**: Social Media Connections card spans full width (lg:col-span-2) in appearance tab grid layout
+- **Result**: Complete social media management system with both connection interface AND visibility controls working together
+
 ### Critical Media Upload Fix - Database Retrieval Issue Resolved (July 22, 2025)
 - **CRITICAL SUCCESS**: Fixed "Media was created but cannot be retrieved - database inconsistency" error
 - **Root Cause**: getMediaFile method only checked in-memory storage, while createMediaFile saved to database

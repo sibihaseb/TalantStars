@@ -538,6 +538,22 @@ export default function ProfileSharing() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Social Media Connections Card */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Share className="h-5 w-5" />
+                Social Media Connections
+              </CardTitle>
+              <CardDescription>
+                Connect your social media accounts and website to showcase your online presence
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SocialMediaManager />
+            </CardContent>
+          </Card>
         </div>
       )}
 
