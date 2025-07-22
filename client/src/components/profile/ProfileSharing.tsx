@@ -15,6 +15,7 @@ import {
   type ProfileTemplate 
 } from '@/components/profile/ProfileTemplates';
 import ProfileImageUpload from '@/components/ProfileImageUpload';
+import React from 'react';
 import { SocialMediaManager } from '@/components/SocialMediaManager';
 import { 
   Copy, 
@@ -62,8 +63,15 @@ export default function ProfileSharing() {
   const [isEditingUrl, setIsEditingUrl] = useState(false);
   const [newCustomUrl, setNewCustomUrl] = useState("");
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<ProfileTemplate>('modern');
+  const [selectedTemplate, setSelectedTemplate] = useState<ProfileTemplate>(user?.profileTemplate || 'classic');
   const [activeTab, setActiveTab] = useState<'sharing' | 'appearance' | 'templates' | 'settings'>('sharing');
+
+  // Update selected template when user data loads
+  React.useEffect(() => {
+    if (user?.profileTemplate) {
+      setSelectedTemplate(user.profileTemplate as ProfileTemplate);
+    }
+  }, [user?.profileTemplate]);
 
   // Fetch current profile sharing settings
   const { data: sharingSettings, isLoading, error } = useQuery<ProfileSharingSettings>({
@@ -139,12 +147,15 @@ export default function ProfileSharing() {
       const response = await apiRequest('POST', '/api/user/profile-template', { selectedTemplate: template });
       return response;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('✅ Template saved successfully:', data);
       toast({
         title: "Template Saved",
         description: "Your profile template has been updated successfully.",
       });
+      // Invalidate and refetch user data to get updated profileTemplate
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      queryClient.refetchQueries({ queryKey: ['/api/user'] });
     },
     onError: (error: any) => {
       console.error('❌ Failed to save template:', error);
