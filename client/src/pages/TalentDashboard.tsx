@@ -449,7 +449,7 @@ export default function TalentDashboard() {
                   </div>
                   
                   <p className="text-gray-600 dark:text-gray-300 max-w-2xl mb-3 leading-relaxed">
-                    {profile?.bio || `${profile?.talentType || 'Talented professional'} with extensive experience in the entertainment industry.`}
+                    {profile?.bio || 'Click the edit button to add your professional bio and showcase your experience.'}
                   </p>
                   
                   <div className="flex items-center justify-center md:justify-start space-x-4 text-sm text-gray-500 dark:text-gray-400">

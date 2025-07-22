@@ -511,6 +511,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add missing availability endpoint
+  app.get('/api/availability', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const events = await simpleStorage.getAvailabilityEvents(userId);
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching availability events:", error);
+      res.status(500).json({ message: "Failed to fetch availability events" });
+    }
+  });
+
   // Media routes - support single file and external URLs
   app.post('/api/media', (req: any, res: any, next: any) => {
     logger.mediaUpload('🔥 MEDIA UPLOAD ENDPOINT HIT - INITIAL ENTRY', {
