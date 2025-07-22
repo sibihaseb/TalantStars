@@ -20,7 +20,7 @@ import { ProgressMascot } from "@/components/mascot/ProgressMascot";
 import { EnhancedMediaUpload } from "@/components/media/EnhancedMediaUpload";
 import { JobHistoryManager } from '@/components/talent/JobHistoryManager';
 import { SkillEndorsements } from '@/components/talent/SkillEndorsements';
-import { WorkExperienceManager } from '@/components/talent/WorkExperienceManager';
+
 import { TierUpgradeManager } from '@/components/billing/TierUpgradeManager';
 import { AvailabilityCalendar } from '@/components/talent/AvailabilityCalendar';
 import ProfileImageUpload from "@/components/ProfileImageUpload";
@@ -950,7 +950,67 @@ export default function TalentDashboard() {
           </TabsContent>
 
           <TabsContent value="experience">
-            <WorkExperienceManager />
+            <div className="space-y-6">
+              <Tabs defaultValue="work-history" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="work-history" className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4" />
+                    Work Experience
+                  </TabsTrigger>
+                  <TabsTrigger value="skills" className="flex items-center gap-2">
+                    <Target className="w-4 h-4" />
+                    Skills & Endorsements
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="work-history" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Award className="w-5 h-5" />
+                        <span>Work Experience & Achievements</span>
+                        <Badge variant="outline" className="text-xs">AI Enhanced</Badge>
+                      </CardTitle>
+                      <CardDescription>
+                        Add your professional work history with AI enhancement and skill validation. Drag to reorder entries.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <JobHistoryManager 
+                        jobHistory={jobHistory || []}
+                        onJobUpdated={() => {
+                          queryClient.invalidateQueries({ queryKey: [`/api/job-history/${user?.id}`] });
+                        }}
+                        userId={user?.id || 0}
+                      />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="skills" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Target className="w-5 h-5" />
+                        <span>Skills & Endorsements</span>
+                      </CardTitle>
+                      <CardDescription>
+                        Manage your professional skills and get endorsements from colleagues
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <SkillEndorsements 
+                        profile={{ 
+                          id: user?.id, 
+                          skills: profile?.skills, 
+                          talentType: profile?.talentType 
+                        }} 
+                      />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
           </TabsContent>
 
           <TabsContent value="billing">
