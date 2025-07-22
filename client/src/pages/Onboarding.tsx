@@ -843,7 +843,8 @@ function Onboarding() {
     options: Array<{ value: string; label: string }>,
     placeholder: string = "Select options..."
   ) => {
-    const currentValues = form.getValues(field) as string[] || [];
+    // Use watch instead of getValues for reactive updates
+    const currentValues = form.watch(field) as string[] || [];
     
     // Debug logging for multi-select fields
     console.log(`🔍 MultiSelect Debug - Field: ${field}`);
@@ -885,7 +886,7 @@ function Onboarding() {
   };
 
   const renderCustomField = (field: keyof OnboardingFormData, label: string) => {
-    const currentValues = form.getValues(field) as string[] || [];
+    const currentValues = form.watch(field) as string[] || [];
     
     return (
       <div className="space-y-2">
