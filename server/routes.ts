@@ -1721,6 +1721,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Follow user (alias for friend request)
+  app.post("/api/social/follow", isAuthenticated, async (req: any, res) => {
+    try {
+      const addresseeId = parseInt(req.body.addresseeId);
+      const friendship = await simpleStorage.sendFriendRequest(req.user.id, addresseeId);
+      res.json({ success: true, friendship });
+    } catch (error: any) {
+      res.status(500).json({ message: "Error following user: " + error.message });
+    }
+  });
+
   // Professional Connections
   
   // Get professional connections

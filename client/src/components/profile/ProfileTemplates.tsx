@@ -153,7 +153,7 @@ function useProfileActions() {
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
-  const handleContact = (targetProfile: any) => {
+  const handleContact = async (targetProfile: any) => {
     console.log('Contact button clicked, currentUser:', currentUser);
     
     if (!currentUser) {
@@ -170,15 +170,45 @@ function useProfileActions() {
       return;
     }
     
-    // TODO: Implement contact functionality
-    toast({
-      title: "Contact Feature",
-      description: "Contact functionality will be implemented here.",
-      variant: "default"
-    });
+    try {
+      // Create a direct message to the talent
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          receiverId: targetProfile.userId || targetProfile.id,
+          content: `Hi ${targetProfile.displayName}, I'm interested in discussing potential opportunities with you. Let's connect!`,
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Message Sent",
+          description: `Your message has been sent to ${targetProfile.displayName}.`,
+          variant: "default"
+        });
+        
+        // Redirect to messages page to continue conversation
+        setTimeout(() => {
+          setLocation('/messages');
+        }, 1500);
+      } else {
+        throw new Error('Failed to send message');
+      }
+    } catch (error) {
+      console.error('Contact error:', error);
+      toast({
+        title: "Message Failed",
+        description: "Unable to send message. Please try again later.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleFollow = (targetProfile: any) => {
+  const handleFollow = async (targetProfile: any) => {
     console.log('Follow button clicked, currentUser:', currentUser);
     
     if (!currentUser) {
@@ -195,12 +225,36 @@ function useProfileActions() {
       return;
     }
     
-    // TODO: Implement follow functionality
-    toast({
-      title: "Follow Feature",
-      description: "Follow functionality will be implemented here.", 
-      variant: "default"
-    });
+    try {
+      // Send a friend/follow request
+      const response = await fetch('/api/social/follow', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          addresseeId: targetProfile.userId || targetProfile.id,
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Follow Request Sent",
+          description: `You are now following ${targetProfile.displayName}!`,
+          variant: "default"
+        });
+      } else {
+        throw new Error('Failed to follow user');
+      }
+    } catch (error) {
+      console.error('Follow error:', error);
+      toast({
+        title: "Follow Failed",
+        description: "Unable to follow this user. Please try again later.",
+        variant: "destructive"
+      });
+    }
   };
 
   return {
