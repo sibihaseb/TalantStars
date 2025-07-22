@@ -613,16 +613,26 @@ function Onboarding() {
       setShowCelebration(true);
       
       setTimeout(() => {
+        // Comprehensive cache invalidation
         queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
         queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+        
+        // Force user data refresh to ensure persistence
+        queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+        
         toast({
           title: "🎉 Welcome to Talents & Stars!",
           description: "Your profile has been created successfully. You'll now be redirected to your dashboard!",
         });
         setShowCelebration(false);
-        // Redirect to dashboard for verification and full platform access
+        
+        // Enhanced redirect with proper session management
         setTimeout(() => {
-          setLocation("/dashboard");
+          console.log("=== REDIRECTING TO DASHBOARD ===");
+          // Use window.location for hard navigation to ensure clean state
+          window.location.href = "/dashboard";
         }, 500);
       }, 1000);
     },

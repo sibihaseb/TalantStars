@@ -42,21 +42,21 @@ export function SkillEndorsements({ profile, isOwnProfile }: SkillEndorsementsPr
   const queryClient = useQueryClient();
 
   const { data: endorsements = [] } = useQuery<SkillEndorsement[]>({
-    queryKey: ['/api/skill-endorsements', profile.userId],
-    enabled: !!profile.userId,
+    queryKey: ['/api/skill-endorsements', profile?.userId],
+    enabled: !!profile?.userId,
   });
 
   const endorseMutation = useMutation({
     mutationFn: async (data: { skill: string; message: string }) => {
       const response = await apiRequest('POST', '/api/skill-endorsements', {
-        endorsedUserId: profile.userId,
+        endorsedUserId: profile?.userId,
         skill: data.skill,
         message: data.message,
       });
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/skill-endorsements', profile.userId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/skill-endorsements', profile?.userId] });
       setIsEndorseDialogOpen(false);
       setEndorseSkill('');
       setEndorseMessage('');
@@ -81,7 +81,7 @@ export function SkillEndorsements({ profile, isOwnProfile }: SkillEndorsementsPr
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/skill-endorsements', profile.userId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/skill-endorsements', profile?.userId] });
       toast({
         title: 'Endorsement removed',
         description: 'The skill endorsement has been removed.',
@@ -127,7 +127,7 @@ export function SkillEndorsements({ profile, isOwnProfile }: SkillEndorsementsPr
   }, {});
 
   // Get profile skills for quick endorsement
-  const profileSkills = profile.skills || [];
+  const profileSkills = profile?.skills || [];
   const endorsedSkills = Object.keys(groupedEndorsements);
 
   return (
@@ -142,7 +142,7 @@ export function SkillEndorsements({ profile, isOwnProfile }: SkillEndorsementsPr
             <CardDescription>
               {isOwnProfile 
                 ? "Skills endorsed by your network"
-                : `Skills endorsed by ${profile.displayName}'s network`
+                : `Skills endorsed by ${profile?.displayName || 'this user'}'s network`
               }
             </CardDescription>
           </div>

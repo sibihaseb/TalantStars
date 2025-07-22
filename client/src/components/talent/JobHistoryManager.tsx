@@ -180,6 +180,9 @@ interface JobHistoryManagerProps {
 
 export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHistoryManagerProps) {
   console.log("🔥 JOBHISTORYMANAGER: Component rendering", { jobHistory, userId });
+  
+  // Add safety check for component mounting
+  const [isComponentReady, setIsComponentReady] = useState(false);
   const [items, setItems] = useState(jobHistory);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<JobHistoryItem | null>(null);
@@ -189,7 +192,13 @@ export function JobHistoryManager({ jobHistory, onJobUpdated, userId }: JobHisto
   // Update items when jobHistory prop changes to prevent excessive re-renders
   useEffect(() => {
     setItems(jobHistory);
+    // Allow component to fully mount before rendering
+    setIsComponentReady(true);
   }, [jobHistory]);
+  
+  if (!isComponentReady) {
+    return <div className="text-center py-4">Loading experience data...</div>;
+  }
   const [formData, setFormData] = useState({
     title: '',
     company: '',

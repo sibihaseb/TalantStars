@@ -4016,5 +4016,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user usage stats
+  app.get("/api/user/usage", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await simpleStorage.getUser(userId);
+      const pricingTier = user?.pricingTierId ? await simpleStorage.getPricingTier(user.pricingTierId) : null;
+      
+      if (!pricingTier) {
+        return res.status(404).json({ message: "Pricing tier not found" });
+      }
+      
+      const mediaFiles = await simpleStorage.getUserMediaFiles(userId);
+      const photos = mediaFiles.filter(f => f.type === 'image');
+      const videos = mediaFiles.filter(f => f.type === 'video');
+      const audio = mediaFiles.filter(f => f.type === 'audio');
+      const externalLinks = mediaFiles.filter(f => f.externalUrl);
+      
+      const totalStorage = mediaFiles.reduce((sum, file) => sum + (file.size || 0), 0);
+      
+      const usage = {
+        photos: { current: photos.length, limit: pricingTier.maxPhotos === -1 ? 999 : pricingTier.maxPhotos },
+        videos: { current: videos.length, limit: pricingTier.maxVideos === -1 ? 999 : pricingTier.maxVideos },
+        audio: { current: audio.length, limit: pricingTier.maxAudio === -1 ? 999 : pricingTier.maxAudio },
+        externalLinks: { current: externalLinks.length, limit: pricingTier.maxExternalLinks === -1 ? 999 : pricingTier.maxExternalLinks },
+        storage: { current: totalStorage, limit: 1024 * 1024 * 1024, unit: 'bytes' }, // 1GB default
+        tierName: pricingTier.name,
+        tierCategory: pricingTier.category
+      };
+      
+      res.json(usage);
+    } catch (error: any) {
+      console.error("Error fetching usage stats:", error);
+      res.status(500).json({ message: "Failed to fetch usage stats" });
+    }
+  });
+
   return httpServer;
 }
