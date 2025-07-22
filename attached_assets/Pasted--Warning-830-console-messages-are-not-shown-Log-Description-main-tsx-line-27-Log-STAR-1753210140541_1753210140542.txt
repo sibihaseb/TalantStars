@@ -1,0 +1,155 @@
+[Warning] 830 console messages are not shown.
+[Log] Description:  (main.tsx, line 27)
+[Log] === STARTING UPLOAD MUTATION === (main.tsx, line 27)
+[Log] === FRONTEND API REQUEST === (main.tsx, line 27)
+[Log] Method: POST, URL: /api/media (main.tsx, line 27)
+[Log] FormData entries: – Array (4) (main.tsx, line 27)
+Array (4)
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (media, line 0)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 500, URL: /api/media (main.tsx, line 27)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"} (main.tsx, line 27)
+[Error] === UPLOAD FAILED ===
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:441)
+[Error] Upload failed for file: – "DSC06220.jpg" – Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:442)
+[Error] Error details: – Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:443)
+[Log] === PREPARING UPLOAD === (main.tsx, line 27)
+[Log] File: DSC06207.jpg (555851 bytes) (main.tsx, line 27)
+[Log] Title: DSC06207 (main.tsx, line 27)
+[Log] Category: portfolio (main.tsx, line 27)
+[Log] Description:  (main.tsx, line 27)
+[Log] === STARTING UPLOAD MUTATION === (main.tsx, line 27)
+[Log] === FRONTEND API REQUEST === (main.tsx, line 27)
+[Log] Method: POST, URL: /api/media (main.tsx, line 27)
+[Log] FormData entries: – Array (4) (main.tsx, line 27)
+Array (4)
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (media, line 0)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 500, URL: /api/media (main.tsx, line 27)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"} (main.tsx, line 27)
+[Error] === UPLOAD FAILED ===
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:441)
+[Error] Upload failed for file: – "DSC06207.jpg" – Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:442)
+[Error] Error details: – Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:443)
+[Log] === PREPARING UPLOAD === (main.tsx, line 27)
+[Log] File: DSC06197.jpg (597656 bytes) (main.tsx, line 27)
+[Log] Title: DSC06197 (main.tsx, line 27)
+[Log] Category: portfolio (main.tsx, line 27)
+[Log] Description:  (main.tsx, line 27)
+[Log] === STARTING UPLOAD MUTATION === (main.tsx, line 27)
+[Log] === FRONTEND API REQUEST === (main.tsx, line 27)
+[Log] Method: POST, URL: /api/media (main.tsx, line 27)
+[Log] FormData entries: – Array (4) (main.tsx, line 27)
+Array (4)
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (media, line 0)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 500, URL: /api/media (main.tsx, line 27)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"} (main.tsx, line 27)
+[Error] === UPLOAD FAILED ===
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:441)
+[Error] Upload failed for file: – "DSC06197.jpg" – Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:442)
+[Error] Error details: – Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:443)
+[Log] === PREPARING UPLOAD === (main.tsx, line 27)
+[Log] File: DSC06163.jpg (582393 bytes) (main.tsx, line 27)
+[Log] Title: DSC06163 (main.tsx, line 27)
+[Log] Category: portfolio (main.tsx, line 27)
+[Log] Description:  (main.tsx, line 27)
+[Log] === STARTING UPLOAD MUTATION === (main.tsx, line 27)
+[Log] === FRONTEND API REQUEST === (main.tsx, line 27)
+[Log] Method: POST, URL: /api/media (main.tsx, line 27)
+[Log] FormData entries: – Array (4) (main.tsx, line 27)
+Array (4)
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (media, line 0)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 500, URL: /api/media (main.tsx, line 27)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"} (main.tsx, line 27)
+[Error] === UPLOAD FAILED ===
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:441)
+[Error] Upload failed for file: – "DSC06163.jpg" – Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:442)
+[Error] Error details: – Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:443)
+[Log] === PREPARING UPLOAD === (main.tsx, line 27)
+[Log] File: DSC06154.jpg (486519 bytes) (main.tsx, line 27)
+[Log] Title: DSC06154 (main.tsx, line 27)
+[Log] Category: portfolio (main.tsx, line 27)
+[Log] Description:  (main.tsx, line 27)
+[Log] === STARTING UPLOAD MUTATION === (main.tsx, line 27)
+[Log] === FRONTEND API REQUEST === (main.tsx, line 27)
+[Log] Method: POST, URL: /api/media (main.tsx, line 27)
+[Log] FormData entries: – Array (4) (main.tsx, line 27)
+Array (4)
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (media, line 0)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 500, URL: /api/media (main.tsx, line 27)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"} (main.tsx, line 27)
+[Error] === UPLOAD FAILED ===
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:441)
+[Error] Upload failed for file: – "DSC06154.jpg" – Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:442)
+[Error] Error details: – Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:443)
+[Log] === PREPARING UPLOAD === (main.tsx, line 27)
+[Log] File: DSC06157.jpg (505686 bytes) (main.tsx, line 27)
+[Log] Title: DSC06157 (main.tsx, line 27)
+[Log] Category: press (main.tsx, line 27)
+[Log] Description:  (main.tsx, line 27)
+[Log] === STARTING UPLOAD MUTATION === (main.tsx, line 27)
+[Log] === FRONTEND API REQUEST === (main.tsx, line 27)
+[Log] Method: POST, URL: /api/media (main.tsx, line 27)
+[Log] FormData entries: – Array (4) (main.tsx, line 27)
+Array (4)
+[Error] Failed to load resource: the server responded with a status of 500 (Internal Server Error) (media, line 0)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 500, URL: /api/media (main.tsx, line 27)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"} (main.tsx, line 27)
+[Error] === UPLOAD FAILED ===
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:441)
+[Error] Upload failed for file: – "DSC06157.jpg" – Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:442)
+[Error] Error details: – Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+Error: 500: {"message":"Failed to upload file: Media was created but cannot be retrieved - database inconsistency"}
+	(anonymous function) (main.tsx:13)
+	(anonymous function) (EnhancedMediaUpload.tsx:443)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+> Selected Element
+< <div data-state="closed" data-replit-metadata="client/src/components/ui/dialog.tsx:37:4" data-component-name="DialogOverlay" class="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" style="pointer-events: auto;"></div>
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)

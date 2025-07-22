@@ -595,7 +595,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMediaFile(id: number): Promise<any> {
-    // Find media file across all users
+    try {
+      // First try to get from database
+      const [media] = await db.select().from(mediaFiles).where(eq(mediaFiles.id, id));
+      if (media) return media;
+    } catch (error) {
+      console.error('Database media retrieval error:', error);
+    }
+    
+    // Fallback to memory storage
     for (const [userId, userMedia] of this.mediaFiles.entries()) {
       const media = userMedia.find(m => m.id === id);
       if (media) return media;
