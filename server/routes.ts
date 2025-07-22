@@ -350,8 +350,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User ID is required" });
       }
       
-      // Add userId to the request body before validation
-      const dataWithUserId = { ...req.body, userId };
+      // Add userId to the request body before validation - convert to string
+      const dataWithUserId = { ...req.body, userId: userId.toString() };
       console.log("Data with userId:", dataWithUserId);
       
       // Clean empty strings to null for numeric fields
@@ -384,12 +384,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/profile', isAuthenticated, requirePlan, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const profileData = insertUserProfileSchema.partial().parse(req.body);
-      const profile = await simpleStorage.updateUserProfile(userId, profileData);
+      console.log("Updating profile for user:", userId);
+      console.log("Request body:", req.body);
+      
+      // Convert userId to string for schema compatibility
+      const dataWithUserId = { ...req.body, userId: userId.toString() };
+      console.log("Data with userId:", dataWithUserId);
+      
+      const profileData = insertUserProfileSchema.partial().parse(dataWithUserId);
+      console.log("Parsed profile data:", profileData);
+      
+      const profile = await simpleStorage.updateUserProfile(userId.toString(), profileData);
+      console.log("Updated profile:", profile);
+      
       res.json(profile);
     } catch (error) {
       console.error("Error updating profile:", error);
-      res.status(500).json({ message: "Failed to update profile" });
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      res.status(500).json({ message: "Failed to update profile", error: errorMessage });
     }
   });
 
