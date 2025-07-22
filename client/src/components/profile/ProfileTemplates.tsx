@@ -153,7 +153,8 @@ function useProfileActions() {
         description: "Please log in to contact this talent.",
         variant: "default"
       });
-      setLocation('/login');
+      // Safe navigation with window.location
+      window.location.href = '/login';
       return;
     }
     
@@ -172,7 +173,8 @@ function useProfileActions() {
         description: "Please log in to follow this talent.",
         variant: "default"
       });
-      setLocation('/login');
+      // Safe navigation with window.location
+      window.location.href = '/login';
       return;
     }
     
@@ -294,14 +296,22 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
             <div className="flex gap-4">
               <Button 
                 className="bg-blue-600 hover:bg-blue-700"
-                onClick={() => handleContact(profile)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleContact(profile);
+                }}
               >
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Contact
               </Button>
               <Button 
                 variant="outline"
-                onClick={() => handleFollow(profile)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleFollow(profile);
+                }}
               >
                 <Star className="w-4 h-4 mr-2" />
                 Follow
@@ -557,7 +567,11 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
               <div className="flex gap-4">
                 <Button 
                   className="bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={() => handleContact(profile)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleContact(profile);
+                  }}
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Contact
@@ -565,7 +579,11 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
                 <Button 
                   variant="outline" 
                   className="border-white text-white hover:bg-white hover:text-blue-600"
-                  onClick={() => handleFollow(profile)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleFollow(profile);
+                  }}
                 >
                   <Star className="w-4 h-4 mr-2" />
                   Follow
@@ -1129,13 +1147,21 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
           <Button 
             variant="ghost" 
             className="text-gray-900 hover:bg-gray-100 px-8"
-            onClick={() => handleContact(profile)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleContact(profile);
+            }}
           >
             Contact
           </Button>
           <Button 
             className="bg-gray-900 hover:bg-gray-800 text-white px-8"
-            onClick={() => handleFollow(profile)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleFollow(profile);
+            }}
           >
             Follow
           </Button>
@@ -1393,7 +1419,11 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
               <Button 
                 size="lg" 
                 className="bg-yellow-500 text-black hover:bg-yellow-400 px-12 py-4 text-lg"
-                onClick={() => handleContact(profile)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleContact(profile);
+                }}
               >
                 <MessageCircle className="w-5 h-5 mr-2" />
                 Contact
@@ -1402,7 +1432,11 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
                 size="lg" 
                 variant="outline" 
                 className="border-white text-white hover:bg-white hover:text-black px-12 py-4 text-lg"
-                onClick={() => handleFollow(profile)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleFollow(profile);
+                }}
               >
                 <Star className="w-5 h-5 mr-2" />
                 Follow
