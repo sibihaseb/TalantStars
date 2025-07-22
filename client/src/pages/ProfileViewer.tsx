@@ -111,7 +111,7 @@ export default function ProfileViewer() {
     const templateProps: any = {
       profile: combinedUserData,
       mediaFiles: displayMedia,
-      userId,
+      userId: combinedUserData.id, // Pass the actual numeric user ID
       user: combinedUserData,
       sharingSettings
     };

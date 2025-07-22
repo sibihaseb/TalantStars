@@ -540,7 +540,7 @@ export default function ProfileSharing() {
           </Card>
 
           {/* Social Media Connections Card */}
-          <Card className="lg:col-span-2">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Share className="h-5 w-5" />

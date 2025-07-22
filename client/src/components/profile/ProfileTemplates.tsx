@@ -136,11 +136,12 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
 
   // Query to fetch current availability status from calendar
+  const actualUserId = profile?.userId || profile?.id || userId;
   const { data: availabilityEntries = [] } = useQuery({
-    queryKey: [`/api/availability/user/${userId}`],
-    enabled: !!userId,
+    queryKey: [`/api/availability/user/${actualUserId}`],
+    enabled: !!actualUserId,
     queryFn: async () => {
-      const response = await fetch(`/api/availability/user/${userId}`, {
+      const response = await fetch(`/api/availability/user/${actualUserId}`, {
         credentials: 'include',
       });
       if (!response.ok) return [];
@@ -393,11 +394,12 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
 // Modern Template - Sleek and Contemporary 
 export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   // Query to fetch current availability status from calendar
+  const actualUserId = profile?.userId || profile?.id || userId;
   const { data: availabilityEntries = [] } = useQuery({
-    queryKey: [`/api/availability/user/${userId}`],
-    enabled: !!userId,
+    queryKey: [`/api/availability/user/${actualUserId}`],
+    enabled: !!actualUserId,
     queryFn: async () => {
-      const response = await fetch(`/api/availability/user/${userId}`, {
+      const response = await fetch(`/api/availability/user/${actualUserId}`, {
         credentials: 'include',
       });
       if (!response.ok) return [];
@@ -644,11 +646,12 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
 
   // Query to fetch current availability status from calendar
+  const actualUserId = profile?.userId || profile?.id || userId;
   const { data: availabilityEntries = [] } = useQuery({
-    queryKey: [`/api/availability/user/${userId}`],
-    enabled: !!userId,
+    queryKey: [`/api/availability/user/${actualUserId}`],
+    enabled: !!actualUserId,
     queryFn: async () => {
-      const response = await fetch(`/api/availability/user/${userId}`, {
+      const response = await fetch(`/api/availability/user/${actualUserId}`, {
         credentials: 'include',
       });
       if (!response.ok) return [];
@@ -913,11 +916,12 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
 // Minimal Template - Clean and Focused
 export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   // Query to fetch current availability status from calendar
+  const actualUserId = profile?.userId || profile?.id || userId;
   const { data: availabilityEntries = [] } = useQuery({
-    queryKey: [`/api/availability/user/${userId}`],
-    enabled: !!userId,
+    queryKey: [`/api/availability/user/${actualUserId}`],
+    enabled: !!actualUserId,
     queryFn: async () => {
-      const response = await fetch(`/api/availability/user/${userId}`, {
+      const response = await fetch(`/api/availability/user/${actualUserId}`, {
         credentials: 'include',
       });
       if (!response.ok) return [];
@@ -1134,11 +1138,12 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
 // Cinematic Template - Dramatic and Bold
 export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   // Query to fetch current availability status from calendar
+  const actualUserId = profile?.userId || profile?.id || userId;
   const { data: availabilityEntries = [] } = useQuery({
-    queryKey: [`/api/availability/user/${userId}`],
-    enabled: !!userId,
+    queryKey: [`/api/availability/user/${actualUserId}`],
+    enabled: !!actualUserId,
     queryFn: async () => {
-      const response = await fetch(`/api/availability/user/${userId}`, {
+      const response = await fetch(`/api/availability/user/${actualUserId}`, {
         credentials: 'include',
       });
       if (!response.ok) return [];
