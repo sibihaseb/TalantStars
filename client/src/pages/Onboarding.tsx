@@ -647,12 +647,31 @@ function Onboarding() {
       if (existingProfile.hairColor) form.setValue("hairColor", existingProfile.hairColor);
       
       // Arrays and multi-select fields
-      if (existingProfile.languages) form.setValue("languages", existingProfile.languages);
-      if (existingProfile.accents) form.setValue("accents", existingProfile.accents);
-      if (existingProfile.instruments) form.setValue("instruments", existingProfile.instruments);
-      if (existingProfile.genres) form.setValue("genres", existingProfile.genres);
-      if (existingProfile.unionStatus) form.setValue("unionStatus", existingProfile.unionStatus);
-      if (existingProfile.skills) form.setValue("skills", existingProfile.skills);
+      if (existingProfile.languages) {
+        console.log("  Setting languages:", existingProfile.languages);
+        form.setValue("languages", existingProfile.languages);
+      }
+      if (existingProfile.accents) {
+        console.log("  Setting accents:", existingProfile.accents);
+        form.setValue("accents", existingProfile.accents);
+      }
+      if (existingProfile.instruments) {
+        console.log("  Setting instruments:", existingProfile.instruments);
+        form.setValue("instruments", existingProfile.instruments);
+      }
+      if (existingProfile.genres) {
+        console.log("  Setting genres:", existingProfile.genres);
+        form.setValue("genres", existingProfile.genres);
+      }
+      if (existingProfile.unionStatus) {
+        console.log("  Setting unionStatus:", existingProfile.unionStatus);
+        form.setValue("unionStatus", existingProfile.unionStatus);
+      }
+      if (existingProfile.skills) {
+        console.log("  Setting skills count:", existingProfile.skills.length);
+        console.log("  Setting skills sample:", existingProfile.skills.slice(0, 5));
+        form.setValue("skills", existingProfile.skills);
+      }
       
       // Rates
       if (existingProfile.dailyRate) form.setValue("dailyRate", existingProfile.dailyRate);
@@ -825,6 +844,13 @@ function Onboarding() {
     placeholder: string = "Select options..."
   ) => {
     const currentValues = form.getValues(field) as string[] || [];
+    
+    // Debug logging for multi-select fields
+    console.log(`🔍 MultiSelect Debug - Field: ${field}`);
+    console.log(`🔍 Current values:`, currentValues);
+    console.log(`🔍 Current values type:`, typeof currentValues);
+    console.log(`🔍 Is array:`, Array.isArray(currentValues));
+    console.log(`🔍 Values length:`, currentValues.length);
     
     return (
       <div className="space-y-2">
