@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ProgressMascot } from "@/components/mascot/ProgressMascot";
 import { EnhancedMediaUpload } from "@/components/media/EnhancedMediaUpload";
 import { JobHistoryManager } from '@/components/talent/JobHistoryManager';
+import { SkillEndorsements } from '@/components/talent/SkillEndorsements';
 import { TierUpgradeManager } from '@/components/billing/TierUpgradeManager';
 import { AvailabilityCalendar } from '@/components/talent/AvailabilityCalendar';
 import ProfileImageUpload from "@/components/ProfileImageUpload";
@@ -68,22 +69,8 @@ export default function TalentDashboard() {
   const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
-  const [isJobHistoryDialogOpen, setIsJobHistoryDialogOpen] = useState(false);
   const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
   const [postContent, setPostContent] = useState("");
-  const [jobHistoryForm, setJobHistoryForm] = useState({
-    id: null,
-    title: "",
-    company: "",
-    jobType: "",
-    role: "",
-    startDate: "",
-    endDate: "",
-    location: "",
-    description: "",
-    verified: false
-  });
-  const [editingJobId, setEditingJobId] = useState<number | null>(null);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
@@ -297,63 +284,7 @@ export default function TalentDashboard() {
     },
   });
 
-  // Create/Update job history mutation
-  const createJobHistoryMutation = useMutation({
-    mutationFn: async (jobData: any) => {
-      console.log("🔥🔥🔥 MUTATION FUNCTION CALLED");
-      console.log("editingJobId:", editingJobId);
-      console.log("jobData:", jobData);
-      
-      const method = editingJobId ? 'PUT' : 'POST';
-      const url = editingJobId ? `/api/job-history/${editingJobId}` : '/api/job-history';
-      
-      console.log("🚀 Making API request:", { method, url, jobData });
-      
-      try {
-        const response = await apiRequest(method, url, jobData);
-        console.log("✅ API Response received:", response);
-        console.log("Response status:", response.status);
-        console.log("Response ok:", response.ok);
-        
-        const result = await response.json();
-        console.log("✅ Response JSON:", result);
-        return result;
-      } catch (error) {
-        console.error("❌ API Request failed:", error);
-        throw error;
-      }
-    },
-    onSuccess: (data) => {
-      console.log("✅ MUTATION SUCCESS with data:", data);
-      queryClient.invalidateQueries({ queryKey: [`/api/job-history/${user?.id}`] });
-      setJobHistoryForm({
-        id: null,
-        title: "",
-        company: "",
-        jobType: "",
-        role: "",
-        startDate: "",
-        endDate: "",
-        location: "",
-        description: "",
-        verified: false
-      });
-      setEditingJobId(null);
-      setIsJobHistoryDialogOpen(false);
-      toast({
-        title: "Success",
-        description: editingJobId ? "Job history updated successfully!" : "Job history added successfully!",
-      });
-    },
-    onError: (error) => {
-      console.error("❌ MUTATION ERROR:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add job history. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   // Media upload mutation
   const uploadMediaMutation = useMutation({
@@ -423,77 +354,9 @@ export default function TalentDashboard() {
     }
   };
 
-  // Delete job history mutation
-  const deleteJobHistoryMutation = useMutation({
-    mutationFn: async (jobId: number) => {
-      console.log("🔥🔥🔥 DELETE MUTATION FUNCTION CALLED with jobId:", jobId);
-      
-      try {
-        const response = await apiRequest('DELETE', `/api/job-history/${jobId}`);
-        console.log("✅ DELETE API Response received:", response);
-        console.log("Response status:", response.status);
-        console.log("Response ok:", response.ok);
-        
-        const result = await response.json();
-        console.log("✅ DELETE Response JSON:", result);
-        return result;
-      } catch (error) {
-        console.error("❌ DELETE API Request failed:", error);
-        throw error;
-      }
-    },
-    onSuccess: (data) => {
-      console.log("✅ DELETE MUTATION SUCCESS with data:", data);
-      queryClient.invalidateQueries({ queryKey: [`/api/job-history/${user?.id}`] });
-      toast({
-        title: "Success",
-        description: "Job history deleted successfully!",
-      });
-    },
-    onError: (error) => {
-      console.error("❌ DELETE MUTATION ERROR:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete job history. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
 
-  const handleEditJob = (job: any) => {
-    console.log("🔥🔥🔥 handleEditJob CALLED with job:", job);
-    setJobHistoryForm({
-      id: job.id,
-      title: job.title,
-      company: job.company,
-      jobType: job.job_type || "",
-      role: job.role,
-      startDate: job.start_date,
-      endDate: job.end_date,
-      location: job.location || "",
-      description: job.description,
-      verified: job.verified
-    });
-    setEditingJobId(job.id);
-    console.log("🔥 Setting dialog open for edit");
-    setIsJobHistoryDialogOpen(true);
-  };
 
-  const handleDeleteJob = (jobId: number) => {
-    console.log("🔥🔥🔥 handleDeleteJob CALLED with jobId:", jobId);
-    if (confirm("Are you sure you want to delete this job history entry?")) {
-      console.log("🚀 CALLING DELETE MUTATION for jobId:", jobId);
-      deleteJobHistoryMutation.mutate(jobId);
-    } else {
-      console.log("❌ Delete cancelled by user");
-    }
-  };
 
-  const handleAddJobHistory = () => {
-    if (jobHistoryForm.title && jobHistoryForm.company && jobHistoryForm.role) {
-      createJobHistoryMutation.mutate(jobHistoryForm);
-    }
-  };
 
   const handleCompleteProfile = () => {
     // Navigate to onboarding page for profile completion
@@ -554,7 +417,7 @@ export default function TalentDashboard() {
               <div className="flex flex-col md:flex-row items-center md:items-end space-y-4 md:space-y-0 md:space-x-6 -mt-20">
                 {/* Larger profile avatar */}
                 <Avatar className="h-40 w-40 border-4 border-white shadow-xl ring-4 ring-purple-100">
-                  <AvatarImage src={user?.profileImageUrl} className="object-cover" />
+                  <AvatarImage src={user?.profileImageUrl || undefined} className="object-cover" />
                   <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-600 text-white text-4xl font-bold">
                     {user?.firstName?.[0]}{user?.lastName?.[0]}
                   </AvatarFallback>
@@ -1044,143 +907,46 @@ export default function TalentDashboard() {
 
           <TabsContent value="experience">
             <div className="space-y-6">
-              {/* Achievements Section */}
+              {/* Work Experience - Using the working JobHistoryManager component */}
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Work Experience & Achievements</CardTitle>
-                      <CardDescription>Add your professional work history and achievements</CardDescription>
-                    </div>
-                    <Dialog open={isJobHistoryDialogOpen} onOpenChange={setIsJobHistoryDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Experience
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Add Work Experience</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div>
-                              <Label htmlFor="job-title">Job Title</Label>
-                              <Input
-                                id="job-title"
-                                value={jobHistoryForm.title}
-                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, title: e.target.value})}
-                                placeholder="Lead Actor, Background Vocalist, etc."
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="company">Company/Production</Label>
-                              <Input
-                                id="company"
-                                value={jobHistoryForm.company}
-                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, company: e.target.value})}
-                                placeholder="Netflix, Warner Bros, etc."
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="job-type">Job Type</Label>
-                              <Select value={jobHistoryForm.jobType} onValueChange={(value) => setJobHistoryForm({...jobHistoryForm, jobType: value})}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select job type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="feature_film">Feature Film</SelectItem>
-                                  <SelectItem value="short_film">Short Film</SelectItem>
-                                  <SelectItem value="tv_series">TV Series</SelectItem>
-                                  <SelectItem value="commercial">Commercial</SelectItem>
-                                  <SelectItem value="music_video">Music Video</SelectItem>
-                                  <SelectItem value="theater">Theater</SelectItem>
-                                  <SelectItem value="fashion_show">Fashion Show</SelectItem>
-                                  <SelectItem value="concert">Concert</SelectItem>
-                                  <SelectItem value="other">Other</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <Label htmlFor="start-date">Start Date</Label>
-                                <Input
-                                  id="start-date"
-                                  type="date"
-                                  value={jobHistoryForm.startDate}
-                                  onChange={(e) => setJobHistoryForm({...jobHistoryForm, startDate: e.target.value})}
-                                />
-                              </div>
-                              <div>
-                                <Label htmlFor="end-date">End Date</Label>
-                                <Input
-                                  id="end-date"
-                                  type="date"
-                                  value={jobHistoryForm.endDate}
-                                  onChange={(e) => setJobHistoryForm({...jobHistoryForm, endDate: e.target.value})}
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <Label htmlFor="description">Description</Label>
-                              <Textarea
-                                id="description"
-                                value={jobHistoryForm.description}
-                                onChange={(e) => setJobHistoryForm({...jobHistoryForm, description: e.target.value})}
-                                placeholder="Describe your role and achievements..."
-                              />
-                            </div>
-                            <div className="flex justify-end space-x-2">
-                              <Button variant="outline" onClick={() => setIsJobHistoryDialogOpen(false)}>
-                                Cancel
-                              </Button>
-                              <Button 
-                                onClick={handleAddJobHistory}
-                                disabled={!jobHistoryForm.title || !jobHistoryForm.company || createJobHistoryMutation.isPending}
-                              >
-                                {createJobHistoryMutation.isPending ? "Adding..." : "Add"}
-                              </Button>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {jobHistory?.map((job: any, index: number) => (
-                        <div key={index} className="flex items-start space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                            <Award className="w-6 h-6 text-white" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2">
-                              <p className="font-medium text-lg">{job.title}</p>
-                              {job.verified && <CheckCircle className="w-5 h-5 text-green-500" />}
-                            </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{job.company}</p>
-                            <p className="text-sm text-gray-500 mb-2">
-                              {new Date(job.startDate).getFullYear()} - {job.endDate ? new Date(job.endDate).getFullYear() : 'Present'}
-                            </p>
-                            {job.description && (
-                              <p className="text-sm text-gray-700 dark:text-gray-300">{job.description}</p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                      {(!jobHistory || jobHistory.length === 0) && (
-                        <div className="text-center py-8">
-                          <Award className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-600 dark:text-gray-400">
-                            Add your work history and achievements to showcase your experience
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Award className="w-5 h-5" />
+                    <span>Work Experience & Achievements</span>
+                    <Badge variant="outline" className="text-xs">AI Enhanced</Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    Add your professional work history with AI enhancement and skill validation. Drag to reorder entries.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <JobHistoryManager 
+                    jobHistory={jobHistory || []}
+                    onJobUpdated={() => {
+                      queryClient.invalidateQueries({ queryKey: [`/api/job-history/${user?.id}`] });
+                    }}
+                    userId={user?.id || 0}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Skills & Endorsements Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Target className="w-5 h-5" />
+                    <span>Skills & Endorsements</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your professional skills and get endorsements from colleagues
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SkillEndorsements userId={user?.id || 0} currentUser={user} />
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
           <TabsContent value="billing">
             <TierUpgradeManager />
