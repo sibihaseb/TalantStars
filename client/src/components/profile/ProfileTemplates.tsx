@@ -280,11 +280,12 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
       {/* Traditional Header */}
       <Card className="bg-white shadow-lg">
         <div 
-          className="h-32 bg-gradient-to-r from-blue-600 to-blue-800"
+          className="bg-gradient-to-r from-blue-600 to-blue-800"
           style={{
             backgroundImage: user?.heroImageUrl ? `linear-gradient(rgba(59, 130, 246, 0.7), rgba(30, 64, 175, 0.7)), url(${user.heroImageUrl})` : undefined,
             backgroundSize: 'cover',
-            backgroundPosition: 'center'
+            backgroundPosition: 'center',
+            height: '160px'
           }}
         ></div>
         <CardContent className="relative pt-0 pb-6">
@@ -301,13 +302,6 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
                 <h1 className="text-3xl font-bold text-gray-900">{profile?.displayName}</h1>
                 {profile?.isVerified && <CheckCircle className="w-6 h-6 text-blue-500" />}
               </div>
-              
-              <div className="flex flex-wrap justify-center md:justify-start gap-2" style={{ marginBottom: '15px' }}>
-                <Badge className="bg-blue-100 text-blue-800">{profile?.role}</Badge>
-                {profile?.talentType && <Badge variant="outline">{profile?.talentType}</Badge>}
-              </div>
-              
-              <p className="text-gray-600 max-w-2xl">{profile?.bio}</p>
             </div>
             
             <div className="flex gap-4">
@@ -335,6 +329,17 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
               </Button>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Badges and Bio Section */}
+      <Card className="bg-white shadow-lg">
+        <CardContent className="pt-6">
+          <div className="flex flex-wrap justify-center md:justify-start gap-2" style={{ marginBottom: '15px' }}>
+            <Badge className="bg-blue-100 text-blue-800">{profile?.role}</Badge>
+            {profile?.talentType && <Badge variant="outline">{profile?.talentType}</Badge>}
+          </div>
+          <p className="text-gray-600 max-w-4xl text-center md:text-left">{profile?.bio}</p>
         </CardContent>
       </Card>
 
