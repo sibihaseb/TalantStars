@@ -4034,6 +4034,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get current user's profile data (combined user + profile data)
+  app.get('/api/user/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      console.log('👤 Getting profile for user:', userId);
+      
+      // Get user data
+      const user = await simpleStorage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get profile data
+      const profile = await simpleStorage.getUserProfile(userId);
+      
+      // Combine user and profile data
+      const combinedProfile = {
+        ...user,
+        ...profile,
+        // Ensure key fields are accessible
+        displayName: profile?.displayName || `${user.firstName} ${user.lastName}`.trim() || user.username,
+        location: profile?.location || 'Location not set',
+        bio: profile?.bio || '',
+        skills: profile?.skills || [],
+        availabilityStatus: profile?.availabilityStatus || 'not_set',
+        verified: profile?.verified || false,
+        dailyRate: profile?.dailyRate || 0,
+        talentType: profile?.talentType || '',
+        languages: profile?.languages || [],
+        accents: profile?.accents || [],
+        instruments: profile?.instruments || [],
+        genres: profile?.genres || [],
+        unionStatus: profile?.unionStatus || profile?.union_status || []
+      };
+      
+      console.log('👤 Returning profile data:', {
+        userId,
+        hasProfile: !!profile,
+        location: combinedProfile.location,
+        languages: combinedProfile.languages,
+        skills: combinedProfile.skills?.length || 0
+      });
+      
+      res.json(combinedProfile);
+    } catch (error: any) {
+      console.error('❌ Profile fetch error:', error);
+      res.status(500).json({ message: "Failed to get profile: " + error.message });
+    }
+  });
+
   // Get user account data by username or ID
   app.get('/api/user/profile/:id', async (req, res) => {
     try {

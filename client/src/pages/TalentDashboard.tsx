@@ -397,7 +397,18 @@ export default function TalentDashboard() {
     enabled: !!user,
   });
 
-  const profileCompletion = 75; // Calculate based on profile data
+  // Calculate actual progress percentage
+  const profileCompletion = useMemo(() => {
+    if (!profileProgress || profileProgress.length === 0) return 0;
+    
+    const totalPoints = profileProgress.reduce((sum, item) => sum + item.points, 0);
+    const completedPoints = profileProgress
+      .filter(item => item.completed)
+      .reduce((sum, item) => sum + item.points, 0);
+    
+    if (totalPoints === 0) return 0;
+    return Math.round((completedPoints / totalPoints) * 100);
+  }, [profileProgress]);
   const recentApplications = applications?.slice(0, 3) || [];
   const recentOpportunities = opportunities?.slice(0, 4) || [];
 

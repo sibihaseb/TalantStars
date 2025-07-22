@@ -1,0 +1,126 @@
+[Debug] [vite] connecting... (client, line 495)
+[Info] Successfully preconnected to https://api.stripe.com/
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/opportunities (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/applications (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/user/profile (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/social/stats (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Added skill – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Save button clicked – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Starting save mutation – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/user/skills (main.tsx, line 27)
+[Log] 🎯 SKILLS: Save successful – Object (main.tsx, line 27)
+Object
+[Log] 🎯 SKILLS: Mutation success – Object (main.tsx, line 27)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/user/profile (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] === FETCHING MEDIA FILES === (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/media (main.tsx, line 27)
+[Log] === MEDIA FILES RESPONSE === – Array (0) (main.tsx, line 27)
+Array (0)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] 🔥 JOBHISTORYMANAGER: Component rendering – Object (main.tsx, line 27)
+Object
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Warning] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. (main.tsx, line 20)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/availability (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/availability (main.tsx, line 27)
+> Selected Element
+< <div data-state="open" data-replit-metadata="client/src/components/ui/dialog.tsx:37:4" data-component-name="DialogOverlay" class="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" style="pointer-events: auto;" data-aria-hidden="true" aria-hidden="true"></div>
+[Log] === FRONTEND API RESPONSE === (main.tsx, line 27)
+[Log] Status: 200, URL: /api/job-history/67 (main.tsx, line 27)
