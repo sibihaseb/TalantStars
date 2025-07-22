@@ -363,6 +363,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileViews: dataWithUserId.profileViews === '' ? null : dataWithUserId.profileViews,
       };
       
+      // Debug the cleanedData before parsing
+      console.log("🔍 About to parse cleanedData:");
+      console.log("🔍 cleanedData userId:", cleanedData.userId, "type:", typeof cleanedData.userId);
+      console.log("🔍 cleanedData full:", JSON.stringify(cleanedData, null, 2));
+      
       const profileData = insertUserProfileSchema.parse(cleanedData);
       console.log("Parsed profile data:", profileData);
       
