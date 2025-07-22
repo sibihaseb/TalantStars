@@ -20,7 +20,7 @@ import {
   type TalentType,
   type InsertTalentType,
 } from "@shared/simple-schema";
-import { jobHistory, profileSharingSettings } from "@shared/schema";
+import { jobHistory, profileSharingSettings, availabilityCalendar } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc, desc } from "drizzle-orm";
 
@@ -819,11 +819,12 @@ export class DatabaseStorage implements IStorage {
 
   async getAvailabilityEvents(userId: number): Promise<any[]> {
     try {
-      const results = await db.execute(
-        `SELECT * FROM availability_events WHERE user_id = $1 ORDER BY start_time ASC`,
-        [userId]
-      );
-      return results.rows || [];
+      const results = await db
+        .select()
+        .from(availabilityCalendar)
+        .where(eq(availabilityCalendar.userId, userId.toString()))
+        .orderBy(asc(availabilityCalendar.startDate));
+      return results || [];
     } catch (error) {
       console.error('Database calendar error:', error);
       return this.calendar.get(userId) || [];
@@ -832,20 +833,18 @@ export class DatabaseStorage implements IStorage {
 
   async createAvailabilityEvent(eventData: any): Promise<any> {
     try {
-      const result = await db.execute(
-        `INSERT INTO availability_events (user_id, title, start_time, end_time, status, event_type, notes, all_day) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-        [
-          eventData.userId,
-          eventData.title || 'Availability',
-          eventData.startDate || eventData.startTime,
-          eventData.endDate || eventData.endTime,
-          eventData.status || 'available',
-          eventData.eventType || 'general',
-          eventData.notes || '',
-          eventData.allDay || false
-        ]
-      );
-      return result.rows?.[0] || {};
+      const [result] = await db
+        .insert(availabilityCalendar)
+        .values({
+          userId: eventData.userId.toString(),
+          startDate: new Date(eventData.startDate || eventData.startTime),
+          endDate: new Date(eventData.endDate || eventData.endTime),
+          status: eventData.status || 'available',
+          notes: eventData.notes || '',
+          allDay: eventData.allDay || false
+        })
+        .returning();
+      return result;
     } catch (error) {
       console.error('Database calendar creation error:', error);
       // Fallback to memory
@@ -865,11 +864,18 @@ export class DatabaseStorage implements IStorage {
 
   async updateAvailabilityEvent(eventId: number, eventData: any): Promise<any> {
     try {
-      const result = await db.execute(
-        `UPDATE availability_events SET title = $2, start_time = $3, end_time = $4, status = $5, notes = $6, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *`,
-        [eventId, eventData.title, eventData.startDate || eventData.startTime, eventData.endDate || eventData.endTime, eventData.status, eventData.notes]
-      );
-      return result.rows?.[0] || {};
+      const [result] = await db
+        .update(availabilityCalendar)
+        .set({
+          startDate: eventData.startDate ? new Date(eventData.startDate) : undefined,
+          endDate: eventData.endDate ? new Date(eventData.endDate) : undefined,
+          status: eventData.status,
+          notes: eventData.notes,
+          allDay: eventData.allDay
+        })
+        .where(eq(availabilityCalendar.id, eventId))
+        .returning();
+      return result;
     } catch (error) {
       console.error('Database calendar update error:', error);
       // Fallback to memory
@@ -886,10 +892,9 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAvailabilityEvent(eventId: number, userId: number): Promise<void> {
     try {
-      await db.execute(
-        `DELETE FROM availability_events WHERE id = $1 AND user_id = $2`,
-        [eventId, userId]
-      );
+      await db
+        .delete(availabilityCalendar)
+        .where(eq(availabilityCalendar.id, eventId));
     } catch (error) {
       console.error('Database calendar delete error:', error);
       // Fallback to memory
