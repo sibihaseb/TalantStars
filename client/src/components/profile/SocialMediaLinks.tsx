@@ -41,6 +41,7 @@ interface SocialMediaLink {
   isVisible: boolean;
   iconColor?: string;
   clickCount: number;
+  sortOrder?: number;
 }
 
 interface SocialMediaLinksProps {

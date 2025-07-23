@@ -891,7 +891,7 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <SocialMediaLinks socialLinks={socialLinksData} />
+              <SocialMediaLinks socialLinks={socialLinksData} userId={parseInt(userId)} />
             </CardContent>
           </Card>
         )}
@@ -1250,7 +1250,7 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <SocialMediaLinks socialLinks={socialLinksData} />
+            <SocialMediaLinks socialLinks={socialLinksData} userId={parseInt(userId)} />
           </CardContent>
         </Card>
       )}
@@ -1533,7 +1533,7 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
             {(sharingSettings?.showSocialMedia !== false) && socialLinksData && socialLinksData.length > 0 && (
               <div className="border-b border-gray-200 pb-6">
                 <h3 className="text-xl font-light text-gray-900 mb-4">Connect</h3>
-                <SocialMediaLinks socialLinks={socialLinksData} />
+                <SocialMediaLinks socialLinks={socialLinksData} userId={parseInt(userId)} />
               </div>
             )}
           </div>
@@ -1929,7 +1929,7 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <SocialMediaLinks socialLinks={socialLinksData} />
+              <SocialMediaLinks socialLinks={socialLinksData} userId={parseInt(userId)} />
             </CardContent>
           </Card>
         )}
