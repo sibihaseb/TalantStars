@@ -87,8 +87,8 @@ const SocialMediaLinks: React.FC<SocialMediaLinksProps> = ({
     switch (variant) {
       case 'modern':
         return {
-          container: 'flex flex-wrap gap-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl',
-          button: 'flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-lg hover:bg-white transition-all duration-200 shadow-sm hover:shadow-md',
+          container: 'grid grid-cols-2 gap-4 p-4',
+          button: 'flex items-center gap-3 px-4 py-3 bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-lg hover:bg-white transition-all duration-200 shadow-sm hover:shadow-md',
           icon: 'h-5 w-5',
           text: 'text-sm font-medium text-gray-700 dark:text-gray-300'
         };
@@ -126,7 +126,7 @@ const SocialMediaLinks: React.FC<SocialMediaLinksProps> = ({
   const styles = getVariantStyles();
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       <div className="flex items-center gap-2">
         <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
           Social Media

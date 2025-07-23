@@ -762,7 +762,7 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
       </div>
 
       {/* Profile Details Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {/* Contact & Availability */}
         <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-blue-50">
           <CardHeader>
@@ -859,14 +859,14 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
 
         {/* Social Media Links */}
         {(sharingSettings?.showSocialMedia !== false) && socialLinksData && socialLinksData.length > 0 && (
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-pink-50">
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-pink-50 md:col-span-2 lg:col-span-3">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-pink-600" />
                 Social Media
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="py-6">
               <SocialMediaLinks socialLinks={socialLinksData} userId={parseInt(userId)} />
             </CardContent>
           </Card>
