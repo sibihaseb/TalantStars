@@ -22,6 +22,8 @@ Preferred communication style: Simple, everyday language.
 - **Root Cause Identified**: Platform had two separate social media management systems storing data in different locations - templates were fetching from wrong source
 - **Data Source Issue Resolved**: User added 4 social media links (Instagram, Twitter, Facebook, YouTube) through SocialMediaManager component that stores data in `user_profiles.social_links` JSON field, but profile templates were fetching from `social_media_links` table with old dummy data
 - **Complete Fix Applied**: Updated all 5 profile templates to fetch social media data directly from profile object instead of separate API endpoint:
+  - **Root Cause**: Double nesting issue - data stored at `profile.socialLinks.socialLinks` but templates looking at `profile.socialLinks`
+  - **Fix Applied**: Templates now check both `profile.socialLinks.socialLinks` and `profile.socialLinks` for compatibility
   - **Classic Template**: Added social media fetching with useQuery and profile view tracking with useMutation
   - **Modern Template**: Integrated social media display card in floating cards section with proper API data fetching
   - **Artistic Template**: Added social media section with creative styling matching template design

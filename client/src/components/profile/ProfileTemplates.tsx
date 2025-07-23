@@ -270,9 +270,9 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
 
-  // Convert user profile social links to the expected format
+  // Convert user profile social links to the expected format (handle double nesting)
   const socialLinksData = React.useMemo(() => {
-    const profileSocialLinks = profile?.socialLinks;
+    const profileSocialLinks = profile?.socialLinks?.socialLinks || profile?.socialLinks;
     if (!profileSocialLinks) return [];
     
     return Object.entries(profileSocialLinks).map(([platform, url], index) => ({
@@ -604,9 +604,9 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
 export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const isOwnProfile = user?.id === parseInt(userId);
 
-  // Convert user profile social links to the expected format
+  // Convert user profile social links to the expected format (handle double nesting)
   const socialLinksData = React.useMemo(() => {
-    const profileSocialLinks = profile?.socialLinks;
+    const profileSocialLinks = profile?.socialLinks?.socialLinks || profile?.socialLinks;
     if (!profileSocialLinks) return [];
     
     return Object.entries(profileSocialLinks).map(([platform, url], index) => ({
@@ -950,9 +950,9 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const isOwnProfile = user?.id === parseInt(userId);
 
-  // Convert user profile social links to the expected format
+  // Convert user profile social links to the expected format (handle double nesting)
   const socialLinksData = React.useMemo(() => {
-    const profileSocialLinks = profile?.socialLinks;
+    const profileSocialLinks = profile?.socialLinks?.socialLinks || profile?.socialLinks;
     if (!profileSocialLinks) return [];
     
     return Object.entries(profileSocialLinks).map(([platform, url], index) => ({
@@ -1289,9 +1289,9 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
 export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const isOwnProfile = user?.id === parseInt(userId);
 
-  // Convert user profile social links to the expected format
+  // Convert user profile social links to the expected format (handle double nesting)
   const socialLinksData = React.useMemo(() => {
-    const profileSocialLinks = profile?.socialLinks;
+    const profileSocialLinks = profile?.socialLinks?.socialLinks || profile?.socialLinks;
     if (!profileSocialLinks) return [];
     
     return Object.entries(profileSocialLinks).map(([platform, url], index) => ({
@@ -1592,9 +1592,9 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
 export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const isOwnProfile = user?.id === parseInt(userId);
 
-  // Convert user profile social links to the expected format
+  // Convert user profile social links to the expected format (handle double nesting)
   const socialLinksData = React.useMemo(() => {
-    const profileSocialLinks = profile?.socialLinks;
+    const profileSocialLinks = profile?.socialLinks?.socialLinks || profile?.socialLinks;
     if (!profileSocialLinks) return [];
     
     return Object.entries(profileSocialLinks).map(([platform, url], index) => ({
