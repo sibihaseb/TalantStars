@@ -17,7 +17,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Minimal Profile Template UI Enhancement (July 23, 2025)
+### Minimal Profile Template UI Enhancement and Layout Reorganization (July 23, 2025)
 - **UI IMPROVEMENT**: Enhanced Minimal profile template with significantly better spacing and visual hierarchy
 - **Major Layout Overhaul**: Increased container width to max-w-5xl with px-6 padding for better desktop experience
 - **Dramatic Spacing Improvements**: Changed from space-y-8 to space-y-20 between major sections for substantial breathing room
@@ -26,10 +26,12 @@ Preferred communication style: Simple, everyday language.
 - **Item Spacing Enhancement**: Improved individual item spacing from py-2 to py-3 with better vertical rhythm
 - **Text Size Optimization**: Enhanced labels to text-xl and values to text-lg for optimal readability
 - **Section Padding**: Increased all section padding from pb-8 to pb-10 for consistent visual flow
+- **Layout Reorganization**: Improved column balance by moving Connect section to left column with Contact, Languages to right column with Physical Details
 - **Social Media Cleanup**: Removed duplicate "Social Media 4" label and simplified Connect section display
 - **Languages Section**: Enhanced language list with text-xl size and py-2 padding for better visual presence
-- **User Experience**: Significantly cleaner, more professional appearance with much better information hierarchy and breathing room
-- **Result**: ✅ Minimal template now has dramatically improved spacing, typography, and visual hierarchy for excellent user experience
+- **Balanced Layout**: Left column (Contact + Connect) and right column (Physical Details + Languages) for better visual distribution
+- **User Experience**: Significantly cleaner, more professional appearance with much better information hierarchy and balanced layout
+- **Result**: ✅ Minimal template now has dramatically improved spacing, typography, balanced column layout, and visual hierarchy for excellent user experience
 
 ### MediaModal Audio Controls Fix and Enhanced Media Type Detection (July 23, 2025)
 - **CRITICAL FIX**: Resolved MediaModal displaying audio controls for all media types including images

@@ -1492,6 +1492,16 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
                 </div>
               </div>
             </div>
+
+            {/* Social Media Links for Minimal Template - moved to left column */}
+            {(sharingSettings?.showSocialMedia !== false) && socialLinksData && socialLinksData.length > 0 && (
+              <div className="border-b border-gray-200 pb-10">
+                <h3 className="text-3xl font-light text-gray-900 mb-8">Connect</h3>
+                <div className="space-y-6">
+                  <SocialMediaLinks socialLinks={socialLinksData} userId={parseInt(userId)} />
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="space-y-10">
@@ -1534,16 +1544,6 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
                   {profile.languages.map((lang: string, index: number) => (
                     <div key={index} className="text-gray-700 font-light text-xl py-2">• {lang}</div>
                   ))}
-                </div>
-              </div>
-            )}
-
-            {/* Social Media Links for Minimal Template */}
-            {(sharingSettings?.showSocialMedia !== false) && socialLinksData && socialLinksData.length > 0 && (
-              <div className="border-b border-gray-200 pb-10">
-                <h3 className="text-3xl font-light text-gray-900 mb-8">Connect</h3>
-                <div className="space-y-6">
-                  <SocialMediaLinks socialLinks={socialLinksData} userId={parseInt(userId)} />
                 </div>
               </div>
             )}
