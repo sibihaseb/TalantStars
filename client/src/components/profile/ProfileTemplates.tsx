@@ -1464,65 +1464,63 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
       </div>
 
       {/* Minimal Profile Details */}
-      <div className="max-w-3xl mx-auto space-y-12">
+      <div className="max-w-4xl mx-auto space-y-16">
         {/* Essential Information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div className="space-y-6">
-            <div className="border-b border-gray-200 pb-6">
-              <h3 className="text-xl font-light text-gray-900 mb-4">Contact</h3>
-              <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+          <div className="space-y-8">
+            <div className="border-b border-gray-200 pb-8">
+              <h3 className="text-2xl font-light text-gray-900 mb-6">Contact</h3>
+              <div className="space-y-4">
                 {profile?.phoneNumber && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 font-light">Phone</span>
-                    <span className="font-medium">{profile.phoneNumber}</span>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-600 font-light text-lg">Phone</span>
+                    <span className="font-medium text-gray-900">{profile.phoneNumber}</span>
                   </div>
                 )}
                 {profile?.website && (sharingSettings?.showSocialMedia !== false) && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 font-light">Website</span>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-600 font-light text-lg">Website</span>
                     <a href={profile.website} target="_blank" rel="noopener noreferrer" 
-                       className="text-gray-900 hover:underline font-medium">{profile.website}</a>
+                       className="text-gray-900 hover:underline font-medium break-all max-w-xs text-right">{profile.website}</a>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <span className="text-gray-600 font-light">Status</span>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-gray-600 font-light text-lg">Status</span>
                   <span className={`font-medium ${availabilityDisplay.color}`}>
                     {availabilityDisplay.text}
                   </span>
                 </div>
               </div>
             </div>
-            
-
           </div>
           
-          <div className="space-y-6">
+          <div className="space-y-8">
             {(profile?.height || profile?.weight || profile?.eyeColor || profile?.hairColor) && (
-              <div className="border-b border-gray-200 pb-6">
-                <h3 className="text-xl font-light text-gray-900 mb-4">Physical Details</h3>
-                <div className="space-y-3">
+              <div className="border-b border-gray-200 pb-8">
+                <h3 className="text-2xl font-light text-gray-900 mb-6">Physical Details</h3>
+                <div className="space-y-4">
                   {profile?.height && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 font-light">Height</span>
-                      <span className="font-medium">{profile.height}</span>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-gray-600 font-light text-lg">Height</span>
+                      <span className="font-medium text-gray-900">{profile.height}</span>
                     </div>
                   )}
                   {profile?.weight && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 font-light">Weight</span>
-                      <span className="font-medium">{profile.weight}</span>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-gray-600 font-light text-lg">Weight</span>
+                      <span className="font-medium text-gray-900">{profile.weight}</span>
                     </div>
                   )}
                   {profile?.eyeColor && profile.eyeColor.length > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 font-light">Eyes</span>
-                      <span className="font-medium">{Array.isArray(profile.eyeColor) ? profile.eyeColor.join(', ') : profile.eyeColor}</span>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-gray-600 font-light text-lg">Eyes</span>
+                      <span className="font-medium text-gray-900">{Array.isArray(profile.eyeColor) ? profile.eyeColor.join(', ') : profile.eyeColor}</span>
                     </div>
                   )}
                   {profile?.hairColor && profile.hairColor.length > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 font-light">Hair</span>
-                      <span className="font-medium">{Array.isArray(profile.hairColor) ? profile.hairColor.join(', ') : profile.hairColor}</span>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-gray-600 font-light text-lg">Hair</span>
+                      <span className="font-medium text-gray-900">{Array.isArray(profile.hairColor) ? profile.hairColor.join(', ') : profile.hairColor}</span>
                     </div>
                   )}
                 </div>
@@ -1530,11 +1528,11 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
             )}
             
             {profile?.languages && profile.languages.length > 0 && (
-              <div className="border-b border-gray-200 pb-6">
-                <h3 className="text-xl font-light text-gray-900 mb-4">Languages</h3>
-                <div className="space-y-2">
+              <div className="border-b border-gray-200 pb-8">
+                <h3 className="text-2xl font-light text-gray-900 mb-6">Languages</h3>
+                <div className="space-y-3">
                   {profile.languages.map((lang: string, index: number) => (
-                    <div key={index} className="text-gray-700 font-light">• {lang}</div>
+                    <div key={index} className="text-gray-700 font-light text-lg py-1">• {lang}</div>
                   ))}
                 </div>
               </div>
@@ -1542,9 +1540,17 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
 
             {/* Social Media Links for Minimal Template */}
             {(sharingSettings?.showSocialMedia !== false) && socialLinksData && socialLinksData.length > 0 && (
-              <div className="border-b border-gray-200 pb-6">
-                <h3 className="text-xl font-light text-gray-900 mb-4">Connect</h3>
-                <SocialMediaLinks socialLinks={socialLinksData} userId={parseInt(userId)} />
+              <div className="border-b border-gray-200 pb-8">
+                <h3 className="text-2xl font-light text-gray-900 mb-6">Connect</h3>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-600 font-light text-lg">Social Media</span>
+                    <span className="font-medium text-gray-900">{socialLinksData.length}</span>
+                  </div>
+                  <div className="mt-4">
+                    <SocialMediaLinks socialLinks={socialLinksData} userId={parseInt(userId)} />
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -1552,19 +1558,19 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
         
         {/* Additional Rates */}
         {(profile?.weeklyRate || profile?.projectRate) && (
-          <div className="border-t border-gray-200 pt-8">
-            <h3 className="text-xl font-light text-gray-900 mb-6 text-center">Additional Rates</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-lg mx-auto">
+          <div className="border-t border-gray-200 pt-12">
+            <h3 className="text-2xl font-light text-gray-900 mb-8 text-center">Additional Rates</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-2xl mx-auto">
               {profile?.weeklyRate && (
-                <div className="text-center">
-                  <div className="text-2xl font-light text-gray-900">${profile.weeklyRate}</div>
-                  <div className="text-sm text-gray-500 uppercase tracking-wide">Weekly Rate</div>
+                <div className="text-center py-6">
+                  <div className="text-3xl font-light text-gray-900 mb-2">${profile.weeklyRate}</div>
+                  <div className="text-base text-gray-500 uppercase tracking-wide">Weekly Rate</div>
                 </div>
               )}
               {profile?.projectRate && (
-                <div className="text-center">
-                  <div className="text-2xl font-light text-gray-900">${profile.projectRate}</div>
-                  <div className="text-sm text-gray-500 uppercase tracking-wide">Project Rate</div>
+                <div className="text-center py-6">
+                  <div className="text-3xl font-light text-gray-900 mb-2">${profile.projectRate}</div>
+                  <div className="text-base text-gray-500 uppercase tracking-wide">Project Rate</div>
                 </div>
               )}
             </div>
