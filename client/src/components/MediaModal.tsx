@@ -10,7 +10,8 @@ interface MediaItem {
   title?: string;
   description?: string;
   category: string;
-  fileType: string;
+  fileType?: string;
+  mimeType?: string;
 }
 
 interface MediaModalProps {
@@ -34,9 +35,64 @@ export default function MediaModal({
   if (!mediaItems.length) return null;
 
   const currentMedia = mediaItems[currentIndex];
-  const isVideo = currentMedia?.fileType?.startsWith('video');
-  const isAudio = currentMedia?.fileType?.startsWith('audio');
-  const isImage = currentMedia?.fileType?.startsWith('image');
+  
+  // Enhanced media type detection with fallbacks
+  const detectMediaType = (media: MediaItem) => {
+    if (!media) return 'image';
+    
+    // First try fileType property
+    if (media.fileType) {
+      if (media.fileType.startsWith('video')) return 'video';
+      if (media.fileType.startsWith('audio')) return 'audio';
+      if (media.fileType.startsWith('image')) return 'image';
+    }
+    
+    // Then try mimeType property (from database)
+    if (media.mimeType) {
+      if (media.mimeType.startsWith('video/')) return 'video';
+      if (media.mimeType.startsWith('audio/')) return 'audio';
+      if (media.mimeType.startsWith('image/')) return 'image';
+    }
+    
+    // Fallback to URL extension detection
+    const url = media.url || '';
+    const extension = url.split('.').pop()?.toLowerCase() || '';
+    
+    // Video extensions
+    if (['mp4', 'webm', 'ogg', 'avi', 'mov', 'wmv', 'flv', 'm4v'].includes(extension)) {
+      return 'video';
+    }
+    
+    // Audio extensions
+    if (['mp3', 'wav', 'ogg', 'aac', 'm4a', 'flac', 'wma'].includes(extension)) {
+      return 'audio';
+    }
+    
+    // Image extensions (default)
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(extension)) {
+      return 'image';
+    }
+    
+    // Default to image for unknown types
+    return 'image';
+  };
+  
+  const mediaType = detectMediaType(currentMedia);
+  const isVideo = mediaType === 'video';
+  const isAudio = mediaType === 'audio';
+  const isImage = mediaType === 'image';
+  
+  // Debug logging (remove in production)
+  console.log('MediaModal Debug:', {
+    title: currentMedia?.title,
+    fileType: currentMedia?.fileType,
+    mimeType: currentMedia?.mimeType,
+    url: currentMedia?.url,
+    detectedType: mediaType,
+    isVideo,
+    isAudio,
+    isImage
+  });
 
   const goToPrevious = () => {
     const newIndex = currentIndex > 0 ? currentIndex - 1 : mediaItems.length - 1;
@@ -158,6 +214,22 @@ export default function MediaModal({
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
               />
+            </div>
+          )}
+
+          {/* Fallback display for unhandled cases */}
+          {!isImage && !isVideo && !isAudio && (
+            <div className="flex flex-col items-center justify-center space-y-4 text-white">
+              <div className="text-center">
+                <h3 className="text-xl font-semibold mb-2">Media Preview Unavailable</h3>
+                <p className="text-gray-300 mb-4">Unable to display this media type in preview</p>
+                <Button
+                  onClick={() => window.open(currentMedia.url, '_blank')}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Open in New Tab
+                </Button>
+              </div>
             </div>
           )}
 
