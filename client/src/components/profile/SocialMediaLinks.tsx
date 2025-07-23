@@ -57,13 +57,7 @@ const SocialMediaLinks: React.FC<SocialMediaLinksProps> = ({
   variant = 'classic',
   onLinkClick 
 }) => {
-  // Debug logging to see what data we're receiving
-  console.log('🔗 SocialMediaLinks component received:', { 
-    socialLinks, 
-    userId, 
-    socialLinksCount: socialLinks?.length || 0,
-    linkDetails: socialLinks?.map(link => ({ platform: link.platform, username: link.username, url: link.url }))
-  });
+
 
   // Filter visible links and sort by sortOrder
   const visibleLinks = socialLinks

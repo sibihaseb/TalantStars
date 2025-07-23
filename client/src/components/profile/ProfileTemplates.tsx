@@ -271,21 +271,14 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const { handleContact, handleFollow } = useProfileActions();
 
-  // Fetch social media links for this user with debug logging
+  // Fetch social media links for this user
   const { data: socialLinksData } = useQuery({
     queryKey: [`/api/social-media-links/${userId}`],
     queryFn: async () => {
-      console.log(`🔍 CLASSIC: Fetching social media links for user ${userId}`);
       const response = await fetch(`/api/social-media-links/${userId}`, { credentials: 'include' });
-      if (!response.ok) {
-        console.log(`❌ CLASSIC: API call failed for user ${userId}`);
-        return [];
-      }
-      const data = await response.json();
-      console.log(`✅ CLASSIC: Received ${data.length} social media links for user ${userId}:`, data);
-      return data;
+      if (!response.ok) return [];
+      return response.json();
     },
-    staleTime: 0, // Always fetch fresh data
   });
 
   // Track profile view when component mounts (only for non-own profiles)
@@ -606,21 +599,14 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
   const isOwnProfile = user?.id === parseInt(userId);
   const { handleContact, handleFollow } = useProfileActions();
 
-  // Fetch social media links for this user with debug logging
+  // Fetch social media links for this user
   const { data: socialLinksData } = useQuery({
     queryKey: [`/api/social-media-links/${userId}`],
     queryFn: async () => {
-      console.log(`🔍 MODERN: Fetching social media links for user ${userId}`);
       const response = await fetch(`/api/social-media-links/${userId}`, { credentials: 'include' });
-      if (!response.ok) {
-        console.log(`❌ MODERN: API call failed for user ${userId}`);
-        return [];
-      }
-      const data = await response.json();
-      console.log(`✅ MODERN: Received ${data.length} social media links for user ${userId}:`, data);
-      return data;
+      if (!response.ok) return [];
+      return response.json();
     },
-    staleTime: 0, // Always fetch fresh data
   });
 
   // Track profile view when component mounts (only for non-own profiles)
