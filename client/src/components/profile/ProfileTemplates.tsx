@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -269,17 +269,23 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
   const isOwnProfile = user?.id === parseInt(userId);
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
-  const { handleContact, handleFollow } = useProfileActions();
 
-  // Fetch social media links for this user
-  const { data: socialLinksData } = useQuery({
-    queryKey: [`/api/social-media-links/${userId}`],
-    queryFn: async () => {
-      const response = await fetch(`/api/social-media-links/${userId}`, { credentials: 'include' });
-      if (!response.ok) return [];
-      return response.json();
-    },
-  });
+  // Convert user profile social links to the expected format
+  const socialLinksData = React.useMemo(() => {
+    const profileSocialLinks = profile?.socialLinks;
+    if (!profileSocialLinks) return [];
+    
+    return Object.entries(profileSocialLinks).map(([platform, url], index) => ({
+      id: index + 1,
+      platform,
+      username: String(url).split('/').pop() || '',
+      url: String(url),
+      displayName: platform.charAt(0).toUpperCase() + platform.slice(1),
+      isVisible: true,
+      sortOrder: index,
+      clickCount: 0
+    }));
+  }, [profile?.socialLinks]);
 
   // Track profile view when component mounts (only for non-own profiles)
   const { mutate: trackView } = useMutation({
@@ -597,17 +603,23 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
 // Modern Template - Sleek and Contemporary 
 export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const isOwnProfile = user?.id === parseInt(userId);
-  const { handleContact, handleFollow } = useProfileActions();
 
-  // Fetch social media links for this user
-  const { data: socialLinksData } = useQuery({
-    queryKey: [`/api/social-media-links/${userId}`],
-    queryFn: async () => {
-      const response = await fetch(`/api/social-media-links/${userId}`, { credentials: 'include' });
-      if (!response.ok) return [];
-      return response.json();
-    },
-  });
+  // Convert user profile social links to the expected format
+  const socialLinksData = React.useMemo(() => {
+    const profileSocialLinks = profile?.socialLinks;
+    if (!profileSocialLinks) return [];
+    
+    return Object.entries(profileSocialLinks).map(([platform, url], index) => ({
+      id: index + 1,
+      platform,
+      username: String(url).split('/').pop() || '',
+      url: String(url),
+      displayName: platform.charAt(0).toUpperCase() + platform.slice(1),
+      isVisible: true,
+      sortOrder: index,
+      clickCount: 0
+    }));
+  }, [profile?.socialLinks]);
 
   // Track profile view when component mounts (only for non-own profiles)
   const { mutate: trackView } = useMutation({
@@ -937,17 +949,23 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const isOwnProfile = user?.id === parseInt(userId);
-  const { handleContact, handleFollow } = useProfileActions();
 
-  // Fetch social media links for this user
-  const { data: socialLinksData } = useQuery({
-    queryKey: [`/api/social-media-links/${userId}`],
-    queryFn: async () => {
-      const response = await fetch(`/api/social-media-links/${userId}`, { credentials: 'include' });
-      if (!response.ok) return [];
-      return response.json();
-    },
-  });
+  // Convert user profile social links to the expected format
+  const socialLinksData = React.useMemo(() => {
+    const profileSocialLinks = profile?.socialLinks;
+    if (!profileSocialLinks) return [];
+    
+    return Object.entries(profileSocialLinks).map(([platform, url], index) => ({
+      id: index + 1,
+      platform,
+      username: String(url).split('/').pop() || '',
+      url: String(url),
+      displayName: platform.charAt(0).toUpperCase() + platform.slice(1),
+      isVisible: true,
+      sortOrder: index,
+      clickCount: 0
+    }));
+  }, [profile?.socialLinks]);
 
   // Track profile view when component mounts (only for non-own profiles)
   const { mutate: trackView } = useMutation({
@@ -1270,17 +1288,23 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
 // Minimal Template - Clean and Focused
 export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const isOwnProfile = user?.id === parseInt(userId);
-  const { handleContact, handleFollow } = useProfileActions();
 
-  // Fetch social media links for this user
-  const { data: socialLinksData } = useQuery({
-    queryKey: [`/api/social-media-links/${userId}`],
-    queryFn: async () => {
-      const response = await fetch(`/api/social-media-links/${userId}`, { credentials: 'include' });
-      if (!response.ok) return [];
-      return response.json();
-    },
-  });
+  // Convert user profile social links to the expected format
+  const socialLinksData = React.useMemo(() => {
+    const profileSocialLinks = profile?.socialLinks;
+    if (!profileSocialLinks) return [];
+    
+    return Object.entries(profileSocialLinks).map(([platform, url], index) => ({
+      id: index + 1,
+      platform,
+      username: String(url).split('/').pop() || '',
+      url: String(url),
+      displayName: platform.charAt(0).toUpperCase() + platform.slice(1),
+      isVisible: true,
+      sortOrder: index,
+      clickCount: 0
+    }));
+  }, [profile?.socialLinks]);
 
   // Track profile view when component mounts (only for non-own profiles)
   const { mutate: trackView } = useMutation({
@@ -1567,17 +1591,23 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
 // Cinematic Template - Dramatic and Bold
 export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const isOwnProfile = user?.id === parseInt(userId);
-  const { handleContact, handleFollow } = useProfileActions();
 
-  // Fetch social media links for this user
-  const { data: socialLinksData } = useQuery({
-    queryKey: [`/api/social-media-links/${userId}`],
-    queryFn: async () => {
-      const response = await fetch(`/api/social-media-links/${userId}`, { credentials: 'include' });
-      if (!response.ok) return [];
-      return response.json();
-    },
-  });
+  // Convert user profile social links to the expected format
+  const socialLinksData = React.useMemo(() => {
+    const profileSocialLinks = profile?.socialLinks;
+    if (!profileSocialLinks) return [];
+    
+    return Object.entries(profileSocialLinks).map(([platform, url], index) => ({
+      id: index + 1,
+      platform,
+      username: String(url).split('/').pop() || '',
+      url: String(url),
+      displayName: platform.charAt(0).toUpperCase() + platform.slice(1),
+      isVisible: true,
+      sortOrder: index,
+      clickCount: 0
+    }));
+  }, [profile?.socialLinks]);
 
   // Track profile view when component mounts (only for non-own profiles)
   const { mutate: trackView } = useMutation({
