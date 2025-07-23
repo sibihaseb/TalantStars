@@ -1395,6 +1395,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get social media links for any user (public endpoint for profile viewing)
+  app.get('/api/social-media-links/:userId', async (req: any, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      const links = await simpleStorage.getSocialMediaLinks(userId);
+      res.json(links);
+    } catch (error) {
+      console.error("Error fetching social media links for user:", error);
+      res.status(500).json({ message: "Failed to fetch social media links" });
+    }
+  });
+
+  // Profile view tracking
+  app.post('/api/profile/view/:userId', async (req: any, res) => {
+    try {
+      const viewedUserId = parseInt(req.params.userId);
+      const viewerUserId = req.user?.id; // May be null for anonymous viewers
+      
+      if (isNaN(viewedUserId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      // Don't track views of own profile
+      if (viewerUserId && viewedUserId === viewerUserId) {
+        return res.json({ success: true, message: "Own profile view not tracked" });
+      }
+
+      await simpleStorage.trackProfileView(viewedUserId, viewerUserId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error tracking profile view:", error);
+      res.status(500).json({ message: "Failed to track profile view" });
+    }
+  });
+
   app.post('/api/social-media-links', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;

@@ -143,6 +143,9 @@ export interface IStorage {
   getProfileByCustomUrl(customUrl: string): Promise<any>;
   getProfileSharing(userId: string): Promise<any>; // Legacy method
   updateProfileSharing(userId: string, settings: any): Promise<any>; // Legacy method
+  
+  // Profile view tracking
+  trackProfileView(viewedUserId: number, viewerUserId?: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1815,6 +1818,25 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error updating social media link clicks:", error);
       throw error;
+    }
+  }
+
+  // Profile view tracking
+  async trackProfileView(viewedUserId: number, viewerUserId?: number): Promise<void> {
+    console.log(`👁️ Tracking profile view for user ${viewedUserId} by ${viewerUserId || 'anonymous'}`);
+    
+    try {
+      // Update the profile views count in the user_profiles table
+      await db.update(userProfiles)
+        .set({ 
+          profileViews: sql`COALESCE(${userProfiles.profileViews}, 0) + 1` 
+        })
+        .where(eq(userProfiles.userId, viewedUserId.toString()));
+      
+      console.log(`👁️ Successfully tracked view for user ${viewedUserId}`);
+    } catch (error) {
+      console.error("Error tracking profile view:", error);
+      // Don't throw - view tracking is non-critical
     }
   }
 

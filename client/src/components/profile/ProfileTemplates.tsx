@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
 import MediaModal from '@/components/MediaModal';
 import SkillEndorsement from '@/components/SkillEndorsement';
 import SocialMediaLinks from '@/components/profile/SocialMediaLinks';
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
@@ -271,6 +271,36 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const { handleContact, handleFollow } = useProfileActions();
 
+  // Fetch social media links for this user
+  const { data: socialLinksData } = useQuery({
+    queryKey: [`/api/social-media-links/${userId}`],
+    queryFn: async () => {
+      const response = await fetch(`/api/social-media-links/${userId}`, { credentials: 'include' });
+      if (!response.ok) return [];
+      return response.json();
+    },
+  });
+
+  // Track profile view when component mounts (only for non-own profiles)
+  const { mutate: trackView } = useMutation({
+    mutationFn: async () => {
+      if (!isOwnProfile) {
+        await fetch(`/api/profile/view/${userId}`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+      }
+    },
+    onSuccess: () => {
+      // Silently track view - no user feedback needed
+    },
+  });
+
+  // Track view on mount
+  useEffect(() => {
+    trackView();
+  }, []);
+
   // Query to fetch current availability status from calendar
   const actualUserId = profile?.userId || profile?.id || userId;
   const { data: availabilityEntries = [] } = useQuery({
@@ -480,16 +510,18 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
           )}
           
           {/* Social Media Links */}
-          <Card>
-            <CardHeader><CardTitle>Connect with Me</CardTitle></CardHeader>
-            <CardContent>
-              <SocialMediaLinks
-                socialLinks={[]}
-                userId={parseInt(userId)}
-                variant="classic"
-              />
-            </CardContent>
-          </Card>
+          {(socialLinksData && socialLinksData.length > 0) && (sharingSettings?.showSocialMedia !== false) && (
+            <Card>
+              <CardHeader><CardTitle>Connect with Me</CardTitle></CardHeader>
+              <CardContent>
+                <SocialMediaLinks
+                  socialLinks={socialLinksData || []}
+                  userId={parseInt(userId)}
+                  variant="classic"
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Rates */}
           <Card>
@@ -564,7 +596,39 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
 
 // Modern Template - Sleek and Contemporary 
 export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+  const isOwnProfile = user?.id === parseInt(userId);
   const { handleContact, handleFollow } = useProfileActions();
+
+  // Fetch social media links for this user
+  const { data: socialLinksData } = useQuery({
+    queryKey: [`/api/social-media-links/${userId}`],
+    queryFn: async () => {
+      const response = await fetch(`/api/social-media-links/${userId}`, { credentials: 'include' });
+      if (!response.ok) return [];
+      return response.json();
+    },
+  });
+
+  // Track profile view when component mounts (only for non-own profiles)
+  const { mutate: trackView } = useMutation({
+    mutationFn: async () => {
+      if (!isOwnProfile) {
+        await fetch(`/api/profile/view/${userId}`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+      }
+    },
+    onSuccess: () => {
+      // Silently track view - no user feedback needed
+    },
+  });
+
+  // Track view on mount
+  useEffect(() => {
+    trackView();
+  }, []);
+
   // Query to fetch current availability status from calendar
   const actualUserId = profile?.userId || profile?.id || userId;
   const { data: availabilityEntries = [] } = useQuery({
@@ -816,6 +880,21 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
             )}
           </CardContent>
         </Card>
+
+        {/* Social Media Links */}
+        {(sharingSettings?.showSocialMedia !== false) && socialLinksData && socialLinksData.length > 0 && (
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-pink-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-pink-600" />
+                Social Media
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SocialMediaLinks socialLinks={socialLinksData} />
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Modern Media Grid */}
@@ -857,7 +936,38 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
 export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+  const isOwnProfile = user?.id === parseInt(userId);
   const { handleContact, handleFollow } = useProfileActions();
+
+  // Fetch social media links for this user
+  const { data: socialLinksData } = useQuery({
+    queryKey: [`/api/social-media-links/${userId}`],
+    queryFn: async () => {
+      const response = await fetch(`/api/social-media-links/${userId}`, { credentials: 'include' });
+      if (!response.ok) return [];
+      return response.json();
+    },
+  });
+
+  // Track profile view when component mounts (only for non-own profiles)
+  const { mutate: trackView } = useMutation({
+    mutationFn: async () => {
+      if (!isOwnProfile) {
+        await fetch(`/api/profile/view/${userId}`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+      }
+    },
+    onSuccess: () => {
+      // Silently track view - no user feedback needed
+    },
+  });
+
+  // Track view on mount
+  useEffect(() => {
+    trackView();
+  }, []);
 
   // Query to fetch current availability status from calendar
   const actualUserId = profile?.userId || profile?.id || userId;
@@ -1131,6 +1241,20 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
         </Card>
       )}
 
+      {/* Social Media Links for Artistic Template */}
+      {(sharingSettings?.showSocialMedia !== false) && socialLinksData && socialLinksData.length > 0 && (
+        <Card className="bg-gradient-to-br from-rose-50 to-pink-50 border-2 border-rose-200 rounded-3xl shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-2xl bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
+              Connect With Me
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SocialMediaLinks socialLinks={socialLinksData} />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Media Modal */}
       <MediaModal
         isOpen={isMediaModalOpen}
@@ -1145,7 +1269,38 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
 
 // Minimal Template - Clean and Focused
 export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+  const isOwnProfile = user?.id === parseInt(userId);
   const { handleContact, handleFollow } = useProfileActions();
+
+  // Fetch social media links for this user
+  const { data: socialLinksData } = useQuery({
+    queryKey: [`/api/social-media-links/${userId}`],
+    queryFn: async () => {
+      const response = await fetch(`/api/social-media-links/${userId}`, { credentials: 'include' });
+      if (!response.ok) return [];
+      return response.json();
+    },
+  });
+
+  // Track profile view when component mounts (only for non-own profiles)
+  const { mutate: trackView } = useMutation({
+    mutationFn: async () => {
+      if (!isOwnProfile) {
+        await fetch(`/api/profile/view/${userId}`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+      }
+    },
+    onSuccess: () => {
+      // Silently track view - no user feedback needed
+    },
+  });
+
+  // Track view on mount
+  useEffect(() => {
+    trackView();
+  }, []);
   // Query to fetch current availability status from calendar
   const actualUserId = profile?.userId || profile?.id || userId;
   const { data: availabilityEntries = [] } = useQuery({
@@ -1373,6 +1528,14 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
                 </div>
               </div>
             )}
+
+            {/* Social Media Links for Minimal Template */}
+            {(sharingSettings?.showSocialMedia !== false) && socialLinksData && socialLinksData.length > 0 && (
+              <div className="border-b border-gray-200 pb-6">
+                <h3 className="text-xl font-light text-gray-900 mb-4">Connect</h3>
+                <SocialMediaLinks socialLinks={socialLinksData} />
+              </div>
+            )}
           </div>
         </div>
         
@@ -1403,7 +1566,38 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
 
 // Cinematic Template - Dramatic and Bold
 export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+  const isOwnProfile = user?.id === parseInt(userId);
   const { handleContact, handleFollow } = useProfileActions();
+
+  // Fetch social media links for this user
+  const { data: socialLinksData } = useQuery({
+    queryKey: [`/api/social-media-links/${userId}`],
+    queryFn: async () => {
+      const response = await fetch(`/api/social-media-links/${userId}`, { credentials: 'include' });
+      if (!response.ok) return [];
+      return response.json();
+    },
+  });
+
+  // Track profile view when component mounts (only for non-own profiles)
+  const { mutate: trackView } = useMutation({
+    mutationFn: async () => {
+      if (!isOwnProfile) {
+        await fetch(`/api/profile/view/${userId}`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+      }
+    },
+    onSuccess: () => {
+      // Silently track view - no user feedback needed
+    },
+  });
+
+  // Track view on mount
+  useEffect(() => {
+    trackView();
+  }, []);
   // Query to fetch current availability status from calendar
   const actualUserId = profile?.userId || profile?.id || userId;
   const { data: availabilityEntries = [] } = useQuery({
@@ -1722,6 +1916,20 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
                   </Badge>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Social Media Links for Cinematic Template */}
+        {(sharingSettings?.showSocialMedia !== false) && socialLinksData && socialLinksData.length > 0 && (
+          <Card className="bg-gradient-to-r from-black to-gray-900 border-yellow-500 border-2">
+            <CardHeader className="text-center">
+              <CardTitle className="text-3xl text-yellow-500 font-bold tracking-wider">
+                CONNECT
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SocialMediaLinks socialLinks={socialLinksData} />
             </CardContent>
           </Card>
         )}
