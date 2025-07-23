@@ -20,7 +20,7 @@ import {
   type TalentType,
   type InsertTalentType,
 } from "@shared/simple-schema";
-import { jobHistory, profileSharingSettings, availabilityCalendar, mediaFiles, jobApplications, jobCommunications, socialPosts, jobs, socialMediaLinks } from "@shared/schema";
+import { jobHistory, profileSharingSettings, availabilityCalendar, mediaFiles, jobApplications, jobCommunications, socialPosts, jobs, socialMediaLinks, friendships } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc, desc, sql } from "drizzle-orm";
 
@@ -1293,8 +1293,64 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFeedPosts(userId: number, limit: number, offset: number): Promise<any[]> {
-    // Mock social feed - return empty array
-    return [];
+    try {
+      console.log("🔥 SOCIAL: Getting feed posts for user", { userId, limit, offset });
+      
+      // Get posts from database with user information
+      const posts = await db
+        .select({
+          id: socialPosts.id,
+          userId: socialPosts.userId,
+          content: socialPosts.content,
+          mediaIds: socialPosts.mediaIds,
+          privacy: socialPosts.privacy,
+          taggedUsers: socialPosts.taggedUsers,
+          likes: socialPosts.likes,
+          comments: socialPosts.comments,
+          shares: socialPosts.shares,
+          createdAt: socialPosts.createdAt,
+          updatedAt: socialPosts.updatedAt,
+          // Join user information
+          userFirstName: users.firstName,
+          userLastName: users.lastName,
+          userUsername: users.username,
+          userProfileImageUrl: users.profileImageUrl
+        })
+        .from(socialPosts)
+        .innerJoin(users, eq(socialPosts.userId, users.id))
+        .where(eq(socialPosts.privacy, 'public'))
+        .orderBy(desc(socialPosts.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      // Transform the data to include user object
+      const transformedPosts = posts.map(post => ({
+        id: post.id,
+        userId: post.userId,
+        content: post.content,
+        mediaIds: post.mediaIds,
+        privacy: post.privacy,
+        taggedUsers: post.taggedUsers,
+        likes: post.likes,
+        comments: post.comments,
+        shares: post.shares,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+        user: {
+          id: post.userId,
+          username: post.userUsername,
+          firstName: post.userFirstName,
+          lastName: post.userLastName,
+          profileImageUrl: post.userProfileImageUrl
+        }
+      }));
+
+      console.log("✅ SOCIAL: Retrieved feed posts", { count: transformedPosts.length });
+      return transformedPosts;
+    } catch (error) {
+      console.error('Database social feed error:', error);
+      return [];
+    }
   }
 
   // Job communication operations
@@ -1356,14 +1412,59 @@ export class DatabaseStorage implements IStorage {
 
   // Social stats operations
   async getUserSocialStats(userId: number): Promise<any> {
-    // Return empty stats - no hardcoded data
-    return {
-      totalPosts: 0,
-      totalLikes: 0,
-      totalComments: 0,
-      followers: 0,
-      following: 0
-    };
+    try {
+      console.log("🔥 SOCIAL: Getting user social stats", { userId });
+      
+      // Get total posts by user
+      const postsCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(socialPosts)
+        .where(eq(socialPosts.userId, userId));
+      
+      // Get total likes on user's posts
+      const likesCount = await db
+        .select({ total: sql<number>`sum(${socialPosts.likes})` })
+        .from(socialPosts)
+        .where(eq(socialPosts.userId, userId));
+      
+      // Get total comments on user's posts
+      const commentsCount = await db
+        .select({ total: sql<number>`sum(${socialPosts.comments})` })
+        .from(socialPosts)
+        .where(eq(socialPosts.userId, userId));
+      
+      // Get followers (people who sent friend requests to this user that were accepted)
+      const followersCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(friendships)
+        .where(sql`${friendships.addresseeId} = ${userId} AND ${friendships.status} = 'accepted'`);
+      
+      // Get following (people this user sent friend requests to that were accepted)
+      const followingCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(friendships)
+        .where(sql`${friendships.requesterId} = ${userId} AND ${friendships.status} = 'accepted'`);
+      
+      const stats = {
+        totalPosts: postsCount[0]?.count || 0,
+        totalLikes: likesCount[0]?.total || 0,
+        totalComments: commentsCount[0]?.total || 0,
+        followers: followersCount[0]?.count || 0,
+        following: followingCount[0]?.count || 0
+      };
+      
+      console.log("✅ SOCIAL: Retrieved user stats", { stats });
+      return stats;
+    } catch (error) {
+      console.error('Database social stats error:', error);
+      return {
+        totalPosts: 0,
+        totalLikes: 0,
+        totalComments: 0,
+        followers: 0,
+        following: 0
+      };
+    }
   }
 
   // Opportunities operations
@@ -1481,18 +1582,69 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // Add all the missing social and other methods as mock implementations
+  // Social post operations - Real database implementation
   async createSocialPost(postData: any): Promise<any> {
-    console.log("🔥 SOCIAL: Creating social post", { postData });
-    return { id: Date.now(), ...postData, createdAt: new Date().toISOString() };
+    try {
+      console.log("🔥 SOCIAL: Creating social post", { postData });
+      
+      const [post] = await db
+        .insert(socialPosts)
+        .values({
+          userId: postData.userId,
+          content: postData.content,
+          mediaIds: postData.mediaIds || [],
+          privacy: postData.privacy || 'public',
+          taggedUsers: postData.taggedUsers || [],
+          likes: 0,
+          comments: 0,
+          shares: 0
+        })
+        .returning();
+      
+      console.log("✅ SOCIAL: Created social post", { post });
+      return post;
+    } catch (error) {
+      console.error('Database social post creation error:', error);
+      throw error;
+    }
   }
 
   async likeSocialPost(postId: number, userId: number): Promise<void> {
-    console.log("🔥 SOCIAL: Liking post", { postId, userId });
+    try {
+      console.log("🔥 SOCIAL: Liking post", { postId, userId });
+      
+      // Increment like count in database
+      await db
+        .update(socialPosts)
+        .set({ 
+          likes: sql`${socialPosts.likes} + 1` 
+        })
+        .where(eq(socialPosts.id, postId));
+      
+      console.log("✅ SOCIAL: Post liked successfully");
+    } catch (error) {
+      console.error('Database post like error:', error);
+      throw error;
+    }
   }
 
   async unlikeSocialPost(postId: number, userId: number): Promise<void> {
-    console.log("🔥 SOCIAL: Unliking post", { postId, userId });
+    try {
+      console.log("🔥 SOCIAL: Unliking post", { postId, userId });
+      
+      // Decrement like count in database
+      await db
+        .update(socialPosts)
+        .set({ 
+          likes: sql`GREATEST(${socialPosts.likes} - 1, 0)` 
+        })
+        .where(eq(socialPosts.id, postId));
+      
+      console.log("✅ SOCIAL: Post unliked successfully");
+    } catch (error) {
+      console.error('Database post unlike error:', error);
+      throw error;
+    }
   }
 
   async commentOnPost(commentData: any): Promise<any> {
@@ -1506,18 +1658,83 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFriends(userId: number): Promise<any[]> {
-    console.log("🔥 SOCIAL: Getting friends", { userId });
-    return [];
+    try {
+      console.log("🔥 SOCIAL: Getting friends", { userId });
+      
+      // Get accepted friend relationships where user is either requester or addressee
+      const friendList = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          role: users.role
+        })
+        .from(users)
+        .innerJoin(friendships, 
+          sql`((${friendships.requesterId} = ${userId} AND ${friendships.addresseeId} = ${users.id}) 
+               OR (${friendships.addresseeId} = ${userId} AND ${friendships.requesterId} = ${users.id}))
+               AND ${friendships.status} = 'accepted'`
+        )
+        .where(sql`${users.id} != ${userId}`);
+      
+      console.log("✅ SOCIAL: Retrieved friends", { count: friendList.length });
+      return friendList;
+    } catch (error) {
+      console.error('Database friends retrieval error:', error);
+      return [];
+    }
   }
 
   async getFriendRequests(userId: number): Promise<any[]> {
-    console.log("🔥 SOCIAL: Getting friend requests", { userId });
-    return [];
+    try {
+      console.log("🔥 SOCIAL: Getting friend requests", { userId });
+      
+      // Get pending friend requests sent to this user
+      const requests = await db
+        .select({
+          id: friendships.id,
+          requesterId: friendships.requesterId,
+          status: friendships.status,
+          createdAt: friendships.createdAt,
+          requesterUsername: users.username,
+          requesterFirstName: users.firstName,
+          requesterLastName: users.lastName,
+          requesterProfileImageUrl: users.profileImageUrl
+        })
+        .from(friendships)
+        .innerJoin(users, eq(friendships.requesterId, users.id))
+        .where(sql`${friendships.addresseeId} = ${userId} AND ${friendships.status} = 'pending'`)
+        .orderBy(desc(friendships.createdAt));
+      
+      console.log("✅ SOCIAL: Retrieved friend requests", { count: requests.length });
+      return requests;
+    } catch (error) {
+      console.error('Database friend requests retrieval error:', error);
+      return [];
+    }
   }
 
   async sendFriendRequest(senderId: number, addresseeId: number): Promise<any> {
-    console.log("🔥 SOCIAL: Sending friend request", { senderId, addresseeId });
-    return { id: Date.now(), senderId, addresseeId, status: 'pending' };
+    try {
+      console.log("🔥 SOCIAL: Sending friend request", { senderId, addresseeId });
+      
+      const [request] = await db
+        .insert(friendships)
+        .values({
+          requesterId: senderId,
+          addresseeId,
+          status: 'pending'
+        })
+        .returning();
+      
+      console.log("✅ SOCIAL: Friend request sent", { request });
+      return request;
+    } catch (error) {
+      console.error('Database friend request creation error:', error);
+      throw error;
+    }
   }
 
   async acceptFriendRequest(friendshipId: number): Promise<any> {
@@ -1530,8 +1747,39 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchUsers(query: string, currentUserId: number): Promise<any[]> {
-    console.log("🔥 SEARCH: Searching users", { query, currentUserId });
-    return [];
+    try {
+      console.log("🔥 SEARCH: Searching users", { query, currentUserId });
+      
+      if (!query || query.length < 2) {
+        return [];
+      }
+      
+      // Search users by username, first name, or last name
+      const searchResults = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          role: users.role
+        })
+        .from(users)
+        .where(sql`
+          (${users.id} != ${currentUserId}) AND (
+            LOWER(${users.username}) LIKE LOWER('%${query}%') OR
+            LOWER(${users.firstName}) LIKE LOWER('%${query}%') OR
+            LOWER(${users.lastName}) LIKE LOWER('%${query}%')
+          )
+        `)
+        .limit(20);
+      
+      console.log("✅ SEARCH: Found users", { count: searchResults.length });
+      return searchResults;
+    } catch (error) {
+      console.error('Database user search error:', error);
+      return [];
+    }
   }
 
   async getProfessionalConnections(userId: number): Promise<any[]> {
