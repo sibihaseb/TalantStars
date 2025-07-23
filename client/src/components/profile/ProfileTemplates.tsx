@@ -582,6 +582,8 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
 
 // Modern Template - Sleek and Contemporary 
 export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
+  const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const isOwnProfile = user?.id === parseInt(userId);
 
   // Convert user profile social links to the expected format (handle double nesting)
@@ -881,7 +883,14 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
         <CardContent className="p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {mediaFiles.map((media, index) => (
-              <div key={index} className="group relative aspect-square overflow-hidden rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200">
+              <div 
+                key={index} 
+                className="group relative aspect-square overflow-hidden rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 cursor-pointer"
+                onClick={() => {
+                  setSelectedMediaIndex(index);
+                  setIsMediaModalOpen(true);
+                }}
+              >
                 <img 
                   src={media.url} 
                   alt={media.title} 
@@ -891,6 +900,17 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
                   <div className="absolute bottom-4 left-4">
                     <h3 className="text-white font-semibold">{media.title}</h3>
                     <p className="text-white/80 text-sm">{media.category}</p>
+                  </div>
+                  <div className="absolute top-4 right-4">
+                    <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                      {media.fileType?.startsWith('video') ? (
+                        <Play className="w-5 h-5 text-white" />
+                      ) : media.fileType?.startsWith('audio') ? (
+                        <Music className="w-5 h-5 text-white" />
+                      ) : (
+                        <Eye className="w-5 h-5 text-white" />
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -904,6 +924,15 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
           </div>
         </CardContent>
       </Card>
+
+      {/* Media Modal */}
+      <MediaModal
+        isOpen={isMediaModalOpen}
+        onClose={() => setIsMediaModalOpen(false)}
+        mediaItems={mediaFiles}
+        currentIndex={selectedMediaIndex}
+        onIndexChange={setSelectedMediaIndex}
+      />
     </div>
   );
 }
@@ -1234,6 +1263,8 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
 
 // Minimal Template - Clean and Focused
 export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
+  const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const isOwnProfile = user?.id === parseInt(userId);
 
   // Convert user profile social links to the expected format (handle double nesting)
@@ -1391,13 +1422,31 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
         <h2 className="text-2xl font-light text-gray-900 text-center">Portfolio</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {mediaFiles.map((media, index) => (
-            <div key={index} className="group">
-              <div className="aspect-[4/3] overflow-hidden bg-gray-100">
+            <div 
+              key={index} 
+              className="group cursor-pointer"
+              onClick={() => {
+                setSelectedMediaIndex(index);
+                setIsMediaModalOpen(true);
+              }}
+            >
+              <div className="aspect-[4/3] overflow-hidden bg-gray-100 relative">
                 <img 
                   src={media.url} 
                   alt={media.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                 />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                  <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {media.fileType?.startsWith('video') ? (
+                      <Play className="w-6 h-6 text-gray-900" />
+                    ) : media.fileType?.startsWith('audio') ? (
+                      <Music className="w-6 h-6 text-gray-900" />
+                    ) : (
+                      <Eye className="w-6 h-6 text-gray-900" />
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="mt-4">
                 <h3 className="text-lg font-light text-gray-900">{media.title}</h3>
@@ -1522,12 +1571,23 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
           </div>
         )}
       </div>
+
+      {/* Media Modal */}
+      <MediaModal
+        isOpen={isMediaModalOpen}
+        onClose={() => setIsMediaModalOpen(false)}
+        mediaItems={mediaFiles}
+        currentIndex={selectedMediaIndex}
+        onIndexChange={setSelectedMediaIndex}
+      />
     </div>
   );
 }
 
 // Cinematic Template - Dramatic and Bold
 export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
+  const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const isOwnProfile = user?.id === parseInt(userId);
 
   // Convert user profile social links to the expected format (handle double nesting)
@@ -1700,7 +1760,14 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
             <h2 className="text-5xl font-bold mb-12 text-center">Featured Work</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {mediaFiles.map((media, index) => (
-                <div key={index} className="group relative">
+                <div 
+                  key={index} 
+                  className="group relative cursor-pointer"
+                  onClick={() => {
+                    setSelectedMediaIndex(index);
+                    setIsMediaModalOpen(true);
+                  }}
+                >
                   <div className="aspect-video overflow-hidden">
                     <img 
                       src={media.url} 
@@ -1710,7 +1777,13 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
                   </div>
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <div className="text-center">
-                      <Play className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+                      {media.fileType?.startsWith('video') ? (
+                        <Play className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+                      ) : media.fileType?.startsWith('audio') ? (
+                        <Music className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+                      ) : (
+                        <Eye className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+                      )}
                       <h3 className="text-xl font-bold">{media.title}</h3>
                       <p className="text-yellow-400">{media.category}</p>
                     </div>
@@ -1893,7 +1966,14 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
           <CardContent className="p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {mediaFiles.map((media, index) => (
-                <div key={index} className="group relative overflow-hidden rounded-lg border-2 border-yellow-500/50 hover:border-yellow-500 transition-all">
+                <div 
+                  key={index} 
+                  className="group relative overflow-hidden rounded-lg border-2 border-yellow-500/50 hover:border-yellow-500 transition-all cursor-pointer"
+                  onClick={() => {
+                    setSelectedMediaIndex(index);
+                    setIsMediaModalOpen(true);
+                  }}
+                >
                   <img 
                     src={media.url} 
                     alt={media.title}
@@ -1906,7 +1986,13 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
                     </div>
                   </div>
                   <div className="absolute top-2 right-2">
-                    <Film className="w-6 h-6 text-yellow-500" />
+                    {media.fileType?.startsWith('video') ? (
+                      <Play className="w-6 h-6 text-yellow-500" />
+                    ) : media.fileType?.startsWith('audio') ? (
+                      <Music className="w-6 h-6 text-yellow-500" />
+                    ) : (
+                      <Eye className="w-6 h-6 text-yellow-500" />
+                    )}
                   </div>
                 </div>
               ))}
@@ -1920,6 +2006,15 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
           </CardContent>
         </Card>
       </div>
+
+      {/* Media Modal */}
+      <MediaModal
+        isOpen={isMediaModalOpen}
+        onClose={() => setIsMediaModalOpen(false)}
+        mediaItems={mediaFiles}
+        currentIndex={selectedMediaIndex}
+        onIndexChange={setSelectedMediaIndex}
+      />
     </div>
   );
 }
