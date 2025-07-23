@@ -3812,7 +3812,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/sharing-settings/:userId', async (req: any, res) => {
     try {
       const { userId } = req.params;
-      const sharing = await simpleStorage.getProfileSharingSettings(userId);
+      
+      // Convert username to user ID if necessary
+      let actualUserId = userId;
+      if (isNaN(parseInt(userId))) {
+        // It's a username, convert to ID
+        const user = await simpleStorage.getUserByUsername(userId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        actualUserId = user.id;
+      } else {
+        actualUserId = parseInt(userId);
+      }
+      
+      const sharing = await simpleStorage.getProfileSharingSettings(actualUserId);
       res.json(sharing || { showSocialMedia: true }); // Default to showing social media
     } catch (error) {
       console.error("Error fetching user sharing settings:", error);
@@ -4354,10 +4368,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalStorage = mediaFiles.reduce((sum, file) => sum + (file.size || 0), 0);
       
       const usage = {
-        photos: { current: photos.length, limit: pricingTier.maxPhotos === -1 ? 999 : pricingTier.maxPhotos },
-        videos: { current: videos.length, limit: pricingTier.maxVideos === -1 ? 999 : pricingTier.maxVideos },
-        audio: { current: audio.length, limit: pricingTier.maxAudio === -1 ? 999 : pricingTier.maxAudio },
-        externalLinks: { current: externalLinks.length, limit: pricingTier.maxExternalLinks === -1 ? 999 : pricingTier.maxExternalLinks },
+        photos: { current: photos.length, limit: pricingTier.maxPhotos === -1 ? 999 : (pricingTier.maxPhotos || 10) },
+        videos: { current: videos.length, limit: pricingTier.maxVideos === -1 ? 999 : (pricingTier.maxVideos || 5) },
+        audio: { current: audio.length, limit: pricingTier.maxAudio === -1 ? 999 : (pricingTier.maxAudio || 5) },
+        externalLinks: { current: externalLinks.length, limit: pricingTier.maxExternalLinks === -1 ? 999 : (pricingTier.maxExternalLinks || 3) },
         storage: { current: totalStorage, limit: 1024 * 1024 * 1024, unit: 'bytes' }, // 1GB default
         tierName: pricingTier.name,
         tierCategory: pricingTier.category

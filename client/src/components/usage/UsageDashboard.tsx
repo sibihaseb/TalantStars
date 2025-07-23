@@ -170,11 +170,11 @@ export default function UsageDashboard() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Usage</span>
                   <span className="font-medium">
-                    {Math.round((item.current / item.limit) * 100)}%
+                    {item.limit > 0 ? Math.round((item.current / item.limit) * 100) : 0}%
                   </span>
                 </div>
                 <Progress
-                  value={(item.current / item.limit) * 100}
+                  value={item.limit > 0 ? (item.current / item.limit) * 100 : 0}
                   className="h-2"
                 />
                 <p className="text-xs text-muted-foreground">
@@ -205,11 +205,11 @@ export default function UsageDashboard() {
                 {formatStorageSize(usage.storage.limit, usage.storage.unit)}
               </span>
               <Badge variant="outline">
-                {Math.round((usage.storage.current / usage.storage.limit) * 100)}% used
+                {usage.storage.limit > 0 ? Math.round((usage.storage.current / usage.storage.limit) * 100) : 0}% used
               </Badge>
             </div>
             <Progress
-              value={(usage.storage.current / usage.storage.limit) * 100}
+              value={usage.storage.limit > 0 ? (usage.storage.current / usage.storage.limit) * 100 : 0}
               className="h-3"
             />
             <div className="grid grid-cols-3 gap-4 text-sm">
