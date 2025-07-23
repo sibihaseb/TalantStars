@@ -151,53 +151,17 @@ export default function MediaModal({
           )}
 
           {isVideo && (
-            <div className="relative w-full h-full">
+            <div className="relative">
               <video
                 src={currentMedia.url}
                 controls
-                autoPlay={isPlaying}
-                muted={isMuted}
-                className="w-full h-full object-contain"
+                className="max-w-full max-h-[70vh] object-contain"
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
-              />
-              
-              {/* Video Controls Overlay */}
-              <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      const video = document.querySelector('video');
-                      if (video) {
-                        if (isPlaying) {
-                          video.pause();
-                        } else {
-                          video.play();
-                        }
-                      }
-                    }}
-                    className="text-white hover:bg-white/20"
-                  >
-                    {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      const video = document.querySelector('video');
-                      if (video) {
-                        video.muted = !isMuted;
-                        setIsMuted(!isMuted);
-                      }
-                    }}
-                    className="text-white hover:bg-white/20"
-                  >
-                    {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                  </Button>
-                </div>
-              </div>
+                preload="metadata"
+              >
+                Your browser does not support the video tag.
+              </video>
             </div>
           )}
 
@@ -206,14 +170,20 @@ export default function MediaModal({
               <div className="w-32 h-32 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
                 <Volume2 className="w-16 h-16" />
               </div>
+              <div className="text-center mb-4">
+                <h3 className="text-xl font-semibold mb-2">{currentMedia.title || 'Audio File'}</h3>
+                <p className="text-gray-300 text-sm">{currentMedia.description || 'Audio playback'}</p>
+              </div>
               <audio
                 src={currentMedia.url}
                 controls
-                autoPlay={isPlaying}
-                className="w-96"
+                className="w-96 max-w-full"
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
-              />
+                preload="metadata"
+              >
+                Your browser does not support the audio tag.
+              </audio>
             </div>
           )}
 
@@ -266,31 +236,34 @@ export default function MediaModal({
         {/* Thumbnail Navigation */}
         {mediaItems.length > 1 && (
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 bg-black/50 rounded-lg p-2">
-            {mediaItems.map((item, index) => (
-              <button
-                key={item.id}
-                onClick={() => onIndexChange(index)}
-                className={`w-12 h-12 rounded overflow-hidden border-2 ${
-                  index === currentIndex ? 'border-white' : 'border-transparent'
-                }`}
-              >
-                {item.fileType?.startsWith('image') ? (
-                  <img
-                    src={item.url}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-600 flex items-center justify-center">
-                    {item.fileType?.startsWith('video') ? (
-                      <Play className="w-4 h-4 text-white" />
-                    ) : (
-                      <Volume2 className="w-4 h-4 text-white" />
-                    )}
-                  </div>
-                )}
-              </button>
-            ))}
+            {mediaItems.map((item, index) => {
+              const itemType = detectMediaType(item);
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onIndexChange(index)}
+                  className={`w-12 h-12 rounded overflow-hidden border-2 ${
+                    index === currentIndex ? 'border-white' : 'border-transparent'
+                  }`}
+                >
+                  {itemType === 'image' ? (
+                    <img
+                      src={item.url}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-600 flex items-center justify-center">
+                      {itemType === 'video' ? (
+                        <Play className="w-4 h-4 text-white" />
+                      ) : (
+                        <Volume2 className="w-4 h-4 text-white" />
+                      )}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
         )}
       </DialogContent>
