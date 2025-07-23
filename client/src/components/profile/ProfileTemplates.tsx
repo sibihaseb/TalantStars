@@ -1778,47 +1778,9 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
         </div>
       </div>
 
-      {/* Cinematic Content Sections */}
+      {/* Stats Bar */}
       <div className="bg-black text-white">
-        <div className="max-w-7xl mx-auto py-20 px-8">
-          {/* Media Gallery */}
-          <div className="mb-20">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {mediaFiles.map((media, index) => (
-                <div 
-                  key={index} 
-                  className="group relative cursor-pointer"
-                  onClick={() => {
-                    setSelectedMediaIndex(index);
-                    setIsMediaModalOpen(true);
-                  }}
-                >
-                  <div className="aspect-video overflow-hidden">
-                    <img 
-                      src={media.url} 
-                      alt={media.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <div className="text-center">
-                      {media.fileType?.startsWith('video') ? (
-                        <Play className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
-                      ) : media.fileType?.startsWith('audio') ? (
-                        <Music className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
-                      ) : (
-                        <Eye className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
-                      )}
-                      <h3 className="text-xl font-bold">{media.title}</h3>
-                      <p className="text-yellow-400">{media.category}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          {/* Stats Bar */}
+        <div className="max-w-7xl mx-auto py-12 px-8">
           <div className="border-y border-gray-800 py-12">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               <div>
