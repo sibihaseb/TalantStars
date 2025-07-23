@@ -1085,7 +1085,11 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-6">
           {mediaFiles.slice(0, 2).map((media, index) => (
-            <div key={index} className="group relative overflow-hidden rounded-2xl shadow-xl">
+            <div 
+              key={index} 
+              className="group relative overflow-hidden rounded-2xl shadow-xl cursor-pointer"
+              onClick={() => handleMediaClick(index)}
+            >
               <img 
                 src={media.url} 
                 alt={media.title}
@@ -1096,6 +1100,11 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
                   <h3 className="text-white font-bold">{media.title}</h3>
                   <p className="text-pink-200">{media.category}</p>
                 </div>
+                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                    <Eye className="w-5 h-5 text-white" />
+                  </div>
+                </div>
               </div>
             </div>
           ))}
@@ -1103,7 +1112,10 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
         
         <div className="md:row-span-2">
           {mediaFiles[2] && (
-            <div className="group relative overflow-hidden rounded-2xl shadow-xl h-full">
+            <div 
+              className="group relative overflow-hidden rounded-2xl shadow-xl h-full cursor-pointer"
+              onClick={() => handleMediaClick(2)}
+            >
               <img 
                 src={mediaFiles[2].url} 
                 alt={mediaFiles[2].title}
@@ -1114,6 +1126,11 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
                   <h3 className="text-white font-bold text-xl">{mediaFiles[2].title}</h3>
                   <p className="text-blue-200">{mediaFiles[2].category}</p>
                 </div>
+                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                    <Eye className="w-5 h-5 text-white" />
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -1121,7 +1138,11 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
         
         <div className="space-y-6">
           {mediaFiles.slice(3, 5).map((media, index) => (
-            <div key={index} className="group relative overflow-hidden rounded-2xl shadow-xl">
+            <div 
+              key={index} 
+              className="group relative overflow-hidden rounded-2xl shadow-xl cursor-pointer"
+              onClick={() => handleMediaClick(index + 3)}
+            >
               <img 
                 src={media.url} 
                 alt={media.title}
@@ -1131,6 +1152,11 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
                 <div className="absolute bottom-4 left-4">
                   <h3 className="text-white font-bold">{media.title}</h3>
                   <p className="text-purple-200">{media.category}</p>
+                </div>
+                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                    <Eye className="w-5 h-5 text-white" />
+                  </div>
                 </div>
               </div>
             </div>
