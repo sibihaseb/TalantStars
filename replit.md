@@ -17,6 +17,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Cinematic Template Duplicate Text Fix and Artistic Template Image Click Fix (July 23, 2025)
+- **CRITICAL FIX**: Removed duplicate "Featured Work" heading from Cinematic template - was appearing twice causing visual duplication
+- **Clean Display**: Top "Featured Work" section removed, keeping only the proper "FEATURED WORK" section in the card layout
+- **User Experience**: Cinematic template now displays cleanly without redundant headings
+- **Preserved Functionality**: Maintained all existing Cinematic template media functionality and styling
+
 ### Artistic Template Image Click Fix and Minimal Profile Template UI Enhancement (July 23, 2025)
 - **CRITICAL FIX**: Resolved Artistic template image click functionality - images were not clickable due to missing onClick handlers
 - **Image Click Implementation**: Added proper onClick handlers to all media items in Artistic template:
