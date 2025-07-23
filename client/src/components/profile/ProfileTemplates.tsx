@@ -711,8 +711,7 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
                   Contact
                 </Button>
                 <Button 
-                  variant="outline" 
-                  className="border-white text-white hover:bg-white hover:text-blue-600"
+                  className="bg-white text-blue-600 hover:bg-gray-100 border-0"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1754,8 +1753,7 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
               </Button>
               <Button 
                 size="lg" 
-                variant="outline" 
-                className="border-white text-white hover:bg-white hover:text-black px-12 py-4 text-lg"
+                className="bg-white text-black hover:bg-gray-200 px-12 py-4 text-lg"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
