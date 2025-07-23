@@ -564,27 +564,7 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
             </CardContent>
           </Card>
           
-          {/* Skills Section */}
-          {profile?.skills && profile.skills.length > 0 && (
-            <Card className="mt-6">
-              <CardHeader><CardTitle>Skills & Endorsements</CardTitle></CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {profile.skills.map((skill: string, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <Badge variant="secondary" className="text-sm">{skill}</Badge>
-                      <SkillEndorsement 
-                        skill={skill}
-                        userId={parseInt(userId)}
-                        currentUser={user}
-                        endorsements={[]} // This would come from API in real implementation
-                      />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+
         </div>
       </div>
       
@@ -767,8 +747,8 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
         <Card className="backdrop-blur-xl bg-white/80 border-0 shadow-2xl">
           <CardContent className="p-6 text-center">
             <Award className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-purple-600">{profile?.skills?.length || 0}</div>
-            <div className="text-sm text-gray-500">Skills</div>
+            <div className="text-2xl font-bold text-purple-600">{profile?.languages?.length || 0}</div>
+            <div className="text-sm text-gray-500">Languages</div>
           </CardContent>
         </Card>
         
@@ -858,40 +838,24 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
           </Card>
         )}
 
-        {/* Languages & Skills */}
-        <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-cyan-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Award className="w-5 h-5 text-cyan-600" />
-              Skills & Languages
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {profile?.languages && profile.languages.length > 0 && (
-              <div>
-                <p className="text-sm text-gray-600 mb-2">Languages:</p>
-                <div className="flex flex-wrap gap-1">
-                  {profile.languages.map((lang: string, index: number) => (
-                    <Badge key={index} variant="outline" className="text-xs">{lang}</Badge>
-                  ))}
-                </div>
+        {/* Languages Only */}
+        {profile?.languages && profile.languages.length > 0 && (
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-cyan-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="w-5 h-5 text-cyan-600" />
+                Languages
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-1">
+                {profile.languages.map((lang: string, index: number) => (
+                  <Badge key={index} variant="outline" className="text-xs">{lang}</Badge>
+                ))}
               </div>
-            )}
-            {profile?.skills && profile.skills.length > 0 && (
-              <div>
-                <p className="text-sm text-gray-600 mb-2">Top Skills:</p>
-                <div className="flex flex-wrap gap-1">
-                  {profile.skills.slice(0, 3).map((skill: string, index: number) => (
-                    <Badge key={index} className="text-xs bg-gradient-to-r from-cyan-500 to-blue-500">{skill}</Badge>
-                  ))}
-                  {profile.skills.length > 3 && (
-                    <Badge variant="outline" className="text-xs">+{profile.skills.length - 3} more</Badge>
-                  )}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Social Media Links */}
         {(sharingSettings?.showSocialMedia !== false) && socialLinksData && socialLinksData.length > 0 && (
@@ -1073,13 +1037,15 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
                 </div>
                 <p className="text-gray-700 text-lg italic">{profile?.bio}</p>
                 
-                <div className="mt-6 flex flex-wrap justify-center md:justify-start gap-2">
-                  {profile?.skills?.slice(0, 5).map((skill: string, index: number) => (
-                    <Badge key={index} variant="outline" className="border-pink-300 text-pink-700 hover:bg-pink-50">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
+                {profile?.languages && profile.languages.length > 0 && (
+                  <div className="mt-6 flex flex-wrap justify-center md:justify-start gap-2">
+                    {profile.languages.slice(0, 5).map((lang: string, index: number) => (
+                      <Badge key={index} variant="outline" className="border-pink-300 text-pink-700 hover:bg-pink-50">
+                        {lang}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
@@ -1238,26 +1204,7 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
         </Card>
       </div>
 
-      {/* All Skills */}
-      {profile?.skills && profile.skills.length > 5 && (
-        <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-3xl shadow-xl">
-          <CardHeader>
-            <CardTitle className="text-2xl bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
-              All Skills & Talents
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-3">
-              {profile.skills.map((skill: string, index: number) => (
-                <Badge key={index} 
-                       className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-3 py-1 text-sm font-medium hover:shadow-lg transition-shadow">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+
 
       {/* Social Media Links for Artistic Template */}
       {(sharingSettings?.showSocialMedia !== false) && socialLinksData && socialLinksData.length > 0 && (
@@ -1430,8 +1377,8 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
           <div className="text-sm text-gray-500 uppercase tracking-wide">Daily Rate</div>
         </div>
         <div className="text-center">
-          <div className="text-3xl font-light text-gray-900">{profile?.skills?.length || 0}</div>
-          <div className="text-sm text-gray-500 uppercase tracking-wide">Skills</div>
+          <div className="text-3xl font-light text-gray-900">{profile?.languages?.length || 0}</div>
+          <div className="text-sm text-gray-500 uppercase tracking-wide">Languages</div>
         </div>
         <div className="text-center">
           <div className="text-3xl font-light text-gray-900">{mediaFiles.length}</div>
@@ -1497,16 +1444,7 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
               </div>
             </div>
             
-            {profile?.skills && profile.skills.length > 0 && (
-              <div className="border-b border-gray-200 pb-6">
-                <h3 className="text-xl font-light text-gray-900 mb-4">Skills</h3>
-                <div className="space-y-2">
-                  {profile.skills.map((skill: string, index: number) => (
-                    <div key={index} className="text-gray-700 font-light">• {skill}</div>
-                  ))}
-                </div>
-              </div>
-            )}
+
           </div>
           
           <div className="space-y-6">
@@ -1794,8 +1732,8 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
                 <div className="text-gray-400 uppercase tracking-wide">Profile Views</div>
               </div>
               <div>
-                <div className="text-4xl font-bold text-yellow-400">{profile?.skills?.length || 0}</div>
-                <div className="text-gray-400 uppercase tracking-wide">Skills</div>
+                <div className="text-4xl font-bold text-yellow-400">{profile?.languages?.length || 0}</div>
+                <div className="text-gray-400 uppercase tracking-wide">Languages</div>
               </div>
               <div>
                 <div className="text-4xl font-bold text-yellow-400">{mediaFiles.length}</div>
@@ -1829,8 +1767,8 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
           <Card className="bg-black/80 border-yellow-500 border-2 text-white">
             <CardContent className="p-6 text-center">
               <Award className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-yellow-500">{profile?.skills?.length || 0}</div>
-              <div className="text-sm text-gray-300">SKILLS</div>
+              <div className="text-2xl font-bold text-yellow-500">{profile?.languages?.length || 0}</div>
+              <div className="text-sm text-gray-300">LANGUAGES</div>
             </CardContent>
           </Card>
           
@@ -1875,7 +1813,7 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
             </CardContent>
           </Card>
 
-          {/* Physical & Skills */}
+          {/* Physical Details */}
           <Card className="bg-gradient-to-br from-gray-900 to-black border-white border-2">
             <CardHeader>
               <CardTitle className="text-2xl text-white font-bold tracking-wide">
@@ -1929,26 +1867,7 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
           </Card>
         </div>
 
-        {/* Skills Showcase */}
-        {profile?.skills && profile.skills.length > 0 && (
-          <Card className="bg-gradient-to-r from-yellow-500/10 to-white/5 border-yellow-500 border-2">
-            <CardHeader className="text-center">
-              <CardTitle className="text-4xl text-yellow-500 font-bold tracking-wider">
-                TALENT SHOWCASE
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap justify-center gap-4">
-                {profile.skills.map((skill: string, index: number) => (
-                  <Badge key={index} 
-                         className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-black px-6 py-3 text-lg font-bold uppercase tracking-wide hover:shadow-2xl hover:scale-105 transition-all">
-                    {skill}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+
 
         {/* Social Media Links for Cinematic Template */}
         {(sharingSettings?.showSocialMedia !== false) && socialLinksData && socialLinksData.length > 0 && (
