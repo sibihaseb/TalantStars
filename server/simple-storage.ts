@@ -1589,11 +1589,13 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log("🔥 SOCIAL: Creating social post", { postData });
       
-      // Use raw SQL with proper PostgreSQL array format
-      const mediaUrlsArray = postData.mediaUrls || [];
+      // Use raw SQL with proper PostgreSQL array format using ARRAY constructor
+      const mediaUrls = postData.mediaUrls || [];
+      const mediaUrlsString = mediaUrls.length > 0 ? `ARRAY[${mediaUrls.map(url => `'${url}'`).join(',')}]` : 'ARRAY[]::text[]';
+      
       const result = await db.execute(sql`
         INSERT INTO social_posts (user_id, content, media_urls, privacy)
-        VALUES (${postData.userId}, ${postData.content}, ${mediaUrlsArray}, ${postData.privacy || 'public'})
+        VALUES (${postData.userId}, ${postData.content}, ${sql.raw(mediaUrlsString)}, ${postData.privacy || 'public'})
         RETURNING *
       `);
       
