@@ -482,15 +482,30 @@ export default function SocialModern() {
                   </div>
                   <Separator className="my-4" />
                   <div className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start" size="sm">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start" 
+                      size="sm"
+                      onClick={() => toast({ title: "Discover People", description: "Showing suggested connections below!" })}
+                    >
                       <Search className="w-4 h-4 mr-2" />
                       Discover People
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" size="sm">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start" 
+                      size="sm"
+                      onClick={() => toast({ title: "My Network", description: "Your network connections and friends list!" })}
+                    >
                       <Users className="w-4 h-4 mr-2" />
                       My Network
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" size="sm">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start" 
+                      size="sm"
+                      onClick={() => toast({ title: "Settings", description: "Social media privacy and notification settings!" })}
+                    >
                       <Settings className="w-4 h-4 mr-2" />
                       Settings
                     </Button>
@@ -697,20 +712,40 @@ export default function SocialModern() {
                                   <Heart className={`w-4 h-4 mr-1 ${post.isLiked ? 'fill-current' : ''}`} />
                                   {post.likes}
                                 </Button>
-                                <Button variant="ghost" size="sm" className="text-gray-500 hover:text-blue-500">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-gray-500 hover:text-blue-500"
+                                  onClick={() => toast({ title: "Comments", description: "Comment feature coming soon!" })}
+                                >
                                   <MessageCircle className="w-4 h-4 mr-1" />
-                                  {post.comments}
+                                  {post.comments || 0}
                                 </Button>
-                                <Button variant="ghost" size="sm" className="text-gray-500 hover:text-green-500">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-gray-500 hover:text-green-500"
+                                  onClick={() => toast({ title: "Share", description: "Post shared!" })}
+                                >
                                   <Repeat2 className="w-4 h-4 mr-1" />
-                                  {post.shares}
+                                  {post.shares || 0}
                                 </Button>
                               </div>
                               <div className="flex items-center space-x-2">
-                                <Button variant="ghost" size="sm" className="text-gray-500 hover:text-yellow-500">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-gray-500 hover:text-yellow-500"
+                                  onClick={() => toast({ title: "Bookmarked", description: "Post saved to your bookmarks!" })}
+                                >
                                   <Bookmark className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm" className="text-gray-500 hover:text-blue-500">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-gray-500 hover:text-blue-500"
+                                  onClick={() => toast({ title: "Share", description: "Post sharing options coming soon!" })}
+                                >
                                   <Share2 className="w-4 h-4" />
                                 </Button>
                               </div>
