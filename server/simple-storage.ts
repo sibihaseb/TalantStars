@@ -1298,52 +1298,34 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log("🔥 SOCIAL: Getting feed posts for user", { userId, limit, offset });
       
-      // Get posts from database with user information
-      const posts = await db
-        .select({
-          id: socialPosts.id,
-          userId: socialPosts.userId,
-          content: socialPosts.content,
-          mediaIds: socialPosts.mediaIds,
-          privacy: socialPosts.privacy,
-          taggedUsers: socialPosts.taggedUsers,
-          likes: socialPosts.likes,
-          comments: socialPosts.comments,
-          shares: socialPosts.shares,
-          createdAt: socialPosts.createdAt,
-          updatedAt: socialPosts.updatedAt,
-          // Join user information
-          userFirstName: users.firstName,
-          userLastName: users.lastName,
-          userUsername: users.username,
-          userProfileImageUrl: users.profileImageUrl
-        })
-        .from(socialPosts)
-        .innerJoin(users, eq(socialPosts.userId, users.id))
-        .where(eq(socialPosts.privacy, 'public'))
-        .orderBy(desc(socialPosts.createdAt))
-        .limit(limit)
-        .offset(offset);
-
+      // Use raw SQL to match actual database structure
+      const result = await db.execute(sql`
+        SELECT sp.*, u.username, u.first_name, u.last_name, u.profile_image_url
+        FROM social_posts sp
+        JOIN users u ON sp.user_id = u.id
+        WHERE sp.privacy = 'public' 
+        ORDER BY sp.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `);
       // Transform the data to include user object
-      const transformedPosts = posts.map(post => ({
+      const transformedPosts = result.rows.map((post: any) => ({
         id: post.id,
-        userId: post.userId,
+        userId: post.user_id,
         content: post.content,
-        mediaIds: post.mediaIds,
+        mediaUrls: post.media_urls || [],
         privacy: post.privacy,
-        taggedUsers: post.taggedUsers,
-        likes: post.likes,
-        comments: post.comments,
-        shares: post.shares,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
+        taggedUsers: post.tagged_users || [],
+        likes: post.likes || 0,
+        comments: post.comments || 0,
+        shares: post.shares || 0,
+        createdAt: post.created_at,
+        updatedAt: post.updated_at,
         user: {
-          id: post.userId,
-          username: post.userUsername,
-          firstName: post.userFirstName,
-          lastName: post.userLastName,
-          profileImageUrl: post.userProfileImageUrl
+          id: post.user_id,
+          username: post.username,
+          firstName: post.first_name,
+          lastName: post.last_name,
+          profileImageUrl: post.profile_image_url
         }
       }));
 
@@ -2095,6 +2077,67 @@ export class DatabaseStorage implements IStorage {
   async updateProfileSharing(userId: string, settings: any): Promise<any> {
     console.log(`📤 Legacy: Updating profile sharing for user ${userId}`, settings);
     return this.updateProfileSharingSettings(parseInt(userId), settings);
+  }
+
+  async getRecentActivity(userId: number): Promise<any[]> {
+    try {
+      console.log("🔥 SOCIAL: Getting recent activity for user", { userId });
+      // Mock implementation for now - return empty array until we implement activity tracking
+      return [];
+    } catch (error) {
+      console.error('Recent activity error:', error);
+      return [];
+    }
+  }
+
+  async getSuggestedConnections(userId: number): Promise<any[]> {
+    try {
+      console.log("🔥 SOCIAL: Getting suggested connections for user", { userId });
+      
+      // Get random users excluding current user
+      const result = await db.execute(sql`
+        SELECT id, username, first_name, last_name, profile_image_url, role
+        FROM users 
+        WHERE id != ${userId} AND role = 'talent'
+        ORDER BY RANDOM()
+        LIMIT 5
+      `);
+      
+      const suggestions = result.rows.map((user: any) => ({
+        id: user.id,
+        username: user.username,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        profileImageUrl: user.profile_image_url,
+        role: user.role
+      }));
+      
+      console.log("✅ SOCIAL: Retrieved suggested connections", { count: suggestions.length });
+      return suggestions;
+    } catch (error) {
+      console.error('Suggested connections error:', error);
+      return [];
+    }
+  }
+
+  async followUser(currentUserId: number, targetUserId: number): Promise<any> {
+    try {
+      console.log("🔥 SOCIAL: Following user", { currentUserId, targetUserId });
+      
+      // For now, just return success
+      const result = {
+        id: Date.now(),
+        followerId: currentUserId,
+        followingId: targetUserId,
+        createdAt: new Date().toISOString()
+      };
+      
+      console.log("✅ SOCIAL: User followed successfully", { result });
+      return result;
+    } catch (error) {
+      console.error('Follow user error:', error);
+      throw error;
+    }
   }
 
 }

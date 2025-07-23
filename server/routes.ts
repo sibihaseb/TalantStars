@@ -1672,6 +1672,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Social activity endpoint
+  app.get('/api/social/activity', isAuthenticated, async (req: any, res) => {
+    const userId = req.user.id;
+    
+    try {
+      const activity = await simpleStorage.getRecentActivity(userId);
+      res.json(activity);
+    } catch (error) {
+      console.error('Activity fetch error:', error);
+      res.json([]); // Return empty array on error
+    }
+  });
+
+  // Suggested connections endpoint
+  app.get('/api/social/suggested', isAuthenticated, async (req: any, res) => {
+    const userId = req.user.id;
+    
+    try {
+      const suggestions = await simpleStorage.getSuggestedConnections(userId);
+      res.json(suggestions);
+    } catch (error) {
+      console.error('Suggestions fetch error:', error);
+      res.json([]); // Return empty array on error
+    }
+  });
+
+  // Follow user endpoint
+  app.post('/api/social/follow/:userId', isAuthenticated, async (req: any, res) => {
+    const currentUserId = req.user.id;
+    const targetUserId = parseInt(req.params.userId);
+    
+    try {
+      const result = await simpleStorage.followUser(currentUserId, targetUserId);
+      res.json(result);
+    } catch (error) {
+      console.error('Follow user error:', error);
+      res.status(500).json({ error: 'Failed to follow user' });
+    }
+  });
+
   // Friend Operations
   
   // Get friends

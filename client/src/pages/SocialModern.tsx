@@ -177,6 +177,26 @@ export default function SocialModern() {
     enabled: !!user,
   });
 
+  // Recent activity query
+  const { data: recentActivity } = useQuery({
+    queryKey: ['/api/social/activity'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/social/activity');
+      return response.json();
+    },
+    enabled: !!user,
+  });
+
+  // Suggested connections query
+  const { data: suggestedConnections } = useQuery({
+    queryKey: ['/api/social/suggested'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/social/suggested');
+      return response.json();
+    },
+    enabled: !!user,
+  });
+
   // Media upload handler
   const handleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -314,6 +334,32 @@ export default function SocialModern() {
 
   const handleLikePost = (postId: number) => {
     likePostMutation.mutate(postId);
+  };
+
+  // Send friend request mutation and handler
+  const sendFriendRequestMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      const response = await apiRequest('POST', `/api/social/follow/${userId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/social/suggested'] });
+      toast({
+        title: "Friend request sent! 🤝",
+        description: "Your request has been sent successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to send request",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSendFriendRequest = (userId: number) => {
+    sendFriendRequestMutation.mutate(userId);
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -904,22 +950,23 @@ export default function SocialModern() {
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="space-y-3 text-sm">
-                    <div className="flex items-center space-x-2">
-                      <Heart className="w-4 h-4 text-red-500" />
-                      <p><span className="font-medium">Sarah Johnson</span> liked your post</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <MessageCircle className="w-4 h-4 text-blue-500" />
-                      <p><span className="font-medium">Mike Chen</span> commented on your video</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <UserPlus className="w-4 h-4 text-green-500" />
-                      <p><span className="font-medium">Emma Davis</span> started following you</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Share2 className="w-4 h-4 text-purple-500" />
-                      <p><span className="font-medium">Alex Rodriguez</span> shared your post</p>
-                    </div>
+                    {recentActivity?.length > 0 ? (
+                      recentActivity.map((activity: any, index: number) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          {activity.type === 'like' && <Heart className="w-4 h-4 text-red-500" />}
+                          {activity.type === 'comment' && <MessageCircle className="w-4 h-4 text-blue-500" />}
+                          {activity.type === 'follow' && <UserPlus className="w-4 h-4 text-green-500" />}
+                          {activity.type === 'share' && <Share2 className="w-4 h-4 text-purple-500" />}
+                          <p><span className="font-medium">{activity.userName}</span> {activity.message}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4 text-gray-500">
+                        <Calendar className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p>No recent activity</p>
+                        <p className="text-xs">Your network interactions will appear here</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -934,25 +981,38 @@ export default function SocialModern() {
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <Avatar className="w-10 h-10">
-                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                              U{i}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium text-sm">User {i}</p>
-                            <p className="text-xs text-gray-500">Talent</p>
+                    {suggestedConnections?.length > 0 ? (
+                      suggestedConnections.map((user: any) => (
+                        <div key={user.id} className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <Avatar className="w-10 h-10">
+                              <AvatarImage src={user.profileImageUrl} />
+                              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                                {user.firstName?.[0]}{user.lastName?.[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium text-sm">{user.firstName} {user.lastName}</p>
+                              <p className="text-xs text-gray-500">{user.role}</p>
+                            </div>
                           </div>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleSendFriendRequest(user.id)}
+                          >
+                            <UserPlus className="w-3 h-3 mr-1" />
+                            Follow
+                          </Button>
                         </div>
-                        <Button size="sm" variant="outline">
-                          <UserPlus className="w-3 h-3 mr-1" />
-                          Follow
-                        </Button>
+                      ))
+                    ) : (
+                      <div className="text-center py-4 text-gray-500">
+                        <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p>No suggestions available</p>
+                        <p className="text-xs">Build your network by discovering people</p>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </CardContent>
               </Card>
