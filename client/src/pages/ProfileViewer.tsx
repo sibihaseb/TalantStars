@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { SkillEndorsements } from "@/components/talent/SkillEndorsements";
+
 import { 
   TemplateSelector, 
   ClassicTemplate, 
@@ -140,14 +140,7 @@ export default function ProfileViewer() {
           {/* Render Selected Template */}
           {renderTemplate()}
 
-          {/* Skill Endorsements */}
-          {profile?.userId && (
-            <div className="mt-12">
-              <SkillEndorsements 
-                profile={profile} 
-              />
-            </div>
-          )}
+
         </main>
         <Footer />
       </div>
