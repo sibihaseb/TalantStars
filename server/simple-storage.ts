@@ -997,12 +997,14 @@ export class DatabaseStorage implements IStorage {
   // Social posts operations - Database implementation
   async getUserSocialPosts(userId: number): Promise<any[]> {
     try {
-      const posts = await db
-        .select()
-        .from(socialPosts)
-        .where(eq(socialPosts.userId, userId))
-        .orderBy(desc(socialPosts.createdAt));
-      return posts;
+      // Use raw SQL to match actual database structure
+      const result = await db.execute(sql`
+        SELECT * FROM social_posts 
+        WHERE user_id = ${userId} 
+        ORDER BY created_at DESC
+      `);
+      
+      return result.rows;
     } catch (error) {
       console.error('Database social posts error:', error);
       return [];
@@ -1587,19 +1589,14 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log("🔥 SOCIAL: Creating social post", { postData });
       
-      const [post] = await db
-        .insert(socialPosts)
-        .values({
-          userId: postData.userId,
-          content: postData.content,
-          mediaIds: postData.mediaIds || [],
-          privacy: postData.privacy || 'public',
-          taggedUsers: postData.taggedUsers || [],
-          likes: 0,
-          comments: 0,
-          shares: 0
-        })
-        .returning();
+      // Use raw SQL since the schema file doesn't match actual database structure
+      const result = await db.execute(sql`
+        INSERT INTO social_posts (user_id, content, media_urls, privacy)
+        VALUES (${postData.userId}, ${postData.content}, ${JSON.stringify(postData.mediaUrls || [])}, ${postData.privacy || 'public'})
+        RETURNING *
+      `);
+      
+      const post = result.rows[0];
       
       console.log("✅ SOCIAL: Created social post", { post });
       return post;
@@ -1613,13 +1610,12 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log("🔥 SOCIAL: Liking post", { postId, userId });
       
-      // Increment like count in database
-      await db
-        .update(socialPosts)
-        .set({ 
-          likes: sql`${socialPosts.likes} + 1` 
-        })
-        .where(eq(socialPosts.id, postId));
+      // Use raw SQL for database operations that work with actual schema
+      await db.execute(sql`
+        UPDATE social_posts 
+        SET likes = COALESCE(likes, 0) + 1 
+        WHERE id = ${postId}
+      `);
       
       console.log("✅ SOCIAL: Post liked successfully");
     } catch (error) {
@@ -1632,13 +1628,12 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log("🔥 SOCIAL: Unliking post", { postId, userId });
       
-      // Decrement like count in database
-      await db
-        .update(socialPosts)
-        .set({ 
-          likes: sql`GREATEST(${socialPosts.likes} - 1, 0)` 
-        })
-        .where(eq(socialPosts.id, postId));
+      // Use raw SQL for database operations that work with actual schema
+      await db.execute(sql`
+        UPDATE social_posts 
+        SET likes = GREATEST(COALESCE(likes, 0) - 1, 0)
+        WHERE id = ${postId}
+      `);
       
       console.log("✅ SOCIAL: Post unliked successfully");
     } catch (error) {

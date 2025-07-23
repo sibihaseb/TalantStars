@@ -1528,7 +1528,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload media files (general media upload endpoint)
-  app.post("/api/media/upload", isAuthenticated, upload.array('files', 10), async (req: any, res) => {
+  app.post("/api/media/upload", isAuthenticated, upload.single('file'), async (req: any, res) => {
     try {
       logger.mediaUpload("Media upload request received", {
         userId: req.user.id,
@@ -1537,76 +1537,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         headers: req.headers
       }, req);
 
-      const files = req.files as Express.Multer.File[];
-      if (!files || files.length === 0) {
-        logger.mediaUpload("No files in upload request", { userId: req.user.id }, req);
-        return res.status(400).json({ error: "No files uploaded" });
+      const file = req.file as Express.Multer.File;
+      if (!file) {
+        logger.mediaUpload("No file in upload request", { userId: req.user.id }, req);
+        return res.status(400).json({ error: "No file uploaded" });
       }
 
-      const uploadedFiles = [];
+      logger.mediaUpload(`Processing file: ${file.originalname}`, {
+        userId: req.user.id,
+        filename: file.originalname,
+        size: file.size,
+        mimeType: file.mimetype,
+        bufferLength: file.buffer?.length || 0,
+        hasBuffer: !!file.buffer,
+        bufferType: typeof file.buffer
+      }, req);
+
+      // Upload to Wasabi S3
+      const uploadResult = await uploadFileToWasabi(file, `user-${req.user.id}/media`);
       
-      for (const file of files) {
-        logger.mediaUpload(`Processing file: ${file.originalname}`, {
-          userId: req.user.id,
-          filename: file.originalname,
-          size: file.size,
-          mimeType: file.mimetype,
-          bufferLength: file.buffer?.length || 0,
-          hasBuffer: !!file.buffer,
-          bufferType: typeof file.buffer
-        }, req);
-
-        // Debug: Check file buffer integrity before upload
-        console.log("MULTER FILE DEBUG:", {
-          originalname: file.originalname,
-          size: file.size,
-          mimetype: file.mimetype,
-          bufferLength: file.buffer?.length || 0,
-          hasBuffer: !!file.buffer,
-          bufferType: typeof file.buffer,
-          encoding: file.encoding,
-          fieldname: file.fieldname
-        });
-
-        // Upload to Wasabi S3
-        const uploadResult = await uploadFileToWasabi(file, `user-${req.user.id}/media`);
-        
-        // Store media file in database
-        const mediaFile = await simpleStorage.createMediaFile({
-          userId: req.user.id,
-          filename: uploadResult.originalName,
-          originalName: file.originalname,
-          mimeType: file.mimetype,
-          size: file.size,
-          url: uploadResult.url,
-          mediaType: file.mimetype.startsWith('image/') ? 'image' : 
-                    file.mimetype.startsWith('video/') ? 'video' : 
-                    file.mimetype.startsWith('audio/') ? 'audio' : 'document',
-          isPublic: true,
-          isExternal: false
-        });
-        
-        uploadedFiles.push({
-          id: mediaFile.id,
-          url: uploadResult.url,
-          key: uploadResult.key,
-          type: getFileTypeFromMimeType(file.mimetype),
-          originalName: file.originalname,
-          size: file.size,
-          mediaType: mediaFile.mediaType
-        });
-      }
+      // Store media file in database
+      const mediaFile = await simpleStorage.createMediaFile({
+        userId: req.user.id,
+        filename: uploadResult.originalName,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        size: file.size,
+        url: uploadResult.url,
+        mediaType: file.mimetype.startsWith('image/') ? 'image' : 
+                  file.mimetype.startsWith('video/') ? 'video' : 
+                  file.mimetype.startsWith('audio/') ? 'audio' : 'document',
+        isPublic: true,
+        isExternal: false
+      });
+      
+      const uploadedFile = {
+        id: mediaFile.id,
+        url: uploadResult.url,
+        key: uploadResult.key,
+        type: getFileTypeFromMimeType(file.mimetype),
+        originalName: file.originalname,
+        size: file.size,
+        mediaType: mediaFile.mediaType
+      };
 
       logger.mediaUpload("Media upload completed successfully", {
         userId: req.user.id,
-        uploadedCount: uploadedFiles.length,
-        files: uploadedFiles.map(f => ({ name: f.originalName, type: f.type }))
+        file: { name: uploadedFile.originalName, type: uploadedFile.type }
       }, req);
 
       // Add a small delay to ensure images are fully available from Wasabi S3
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      res.json({ files: uploadedFiles });
+      res.json(uploadedFile);
     } catch (error: any) {
       logger.error("MEDIA_UPLOAD", "Media upload failed", { 
         userId: req.user?.id,
