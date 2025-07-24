@@ -3009,7 +3009,7 @@ export default function AdminDashboard() {
                             {tier.duration} days
                           </div>
                           <div className="space-y-1">
-                            {tier.features.map((feature, index) => (
+                            {(tier.features || []).map((feature, index) => (
                               <div key={index} className="text-sm flex items-center">
                                 <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
                                 {feature}
@@ -4063,7 +4063,7 @@ export default function AdminDashboard() {
                             <strong>Features:</strong>
                           </div>
                           <ul className="text-sm text-gray-600 space-y-1">
-                            {tier.features.map((feature, index) => (
+                            {(tier.features || []).map((feature, index) => (
                               <li key={index} className="flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
                                 {feature}
