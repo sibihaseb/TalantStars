@@ -4518,53 +4518,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get current user's profile data (combined user + profile data)
+  // Get current user's profile data (combined user + profile data)  
   app.get('/api/user/profile', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("🔥 USER PROFILE: Getting profile data for authenticated user");
       const userId = req.user.id;
+      console.log("🔥 USER PROFILE: User ID:", userId);
       console.log('👤 Getting profile for user:', userId);
       
-      // Get user data
+      // Get both user account data and profile data
       const user = await simpleStorage.getUser(userId);
+      console.log('👤 Found user:', !!user);
+      
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-
-      // Get profile data
-      const profile = await simpleStorage.getUserProfile(userId);
       
-      // Combine user and profile data
+      const profile = await simpleStorage.getUserProfile(userId);
+      console.log('👤 Found profile:', !!profile);
+      
+      // Combine user and profile data for complete user view
       const combinedProfile = {
         ...user,
         ...profile,
-        // Ensure key fields are accessible
         displayName: profile?.displayName || `${user.firstName} ${user.lastName}`.trim() || user.username,
         location: profile?.location || 'Location not set',
         bio: profile?.bio || '',
         skills: profile?.skills || [],
-        availabilityStatus: profile?.availabilityStatus || 'not_set',
-        verified: profile?.verified || false,
+        availabilityStatus: profile?.availabilityStatus || 'available',
+        verified: profile?.isVerified || false,
         dailyRate: profile?.dailyRate || 0,
+        weeklyRate: profile?.weeklyRate || 0, 
+        projectRate: profile?.projectRate || 0,
         talentType: profile?.talentType || '',
         languages: profile?.languages || [],
         accents: profile?.accents || [],
         instruments: profile?.instruments || [],
         genres: profile?.genres || [],
-        unionStatus: profile?.unionStatus || profile?.union_status || []
+        unionStatus: profile?.unionStatus || [],
+        profileViews: profile?.profileViews || 0,
+        skillsCount: profile?.skills?.length || 0
       };
       
-      console.log('👤 Returning profile data:', {
-        userId,
-        hasProfile: !!profile,
-        location: combinedProfile.location,
-        languages: combinedProfile.languages,
-        skills: combinedProfile.skills?.length || 0
-      });
-      
+      console.log('👤 Combined profile data prepared, returning to client');
       res.json(combinedProfile);
     } catch (error: any) {
-      console.error('❌ Profile fetch error:', error);
-      res.status(500).json({ message: "Failed to get profile: " + error.message });
+      console.error('❌ USER PROFILE error:', error);
+      res.status(500).json({ message: "Failed to get user profile: " + error.message });
     }
   });
 
@@ -4598,6 +4598,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user profile:", error);
       res.status(500).json({ message: "Failed to fetch user profile" });
+    }
+  });
+
+  // Update user password
+  app.post('/api/user/update-password', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current password and new password are required" });
+      }
+      
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "New password must be at least 6 characters long" });
+      }
+      
+      // Get user and verify current password
+      const user = await simpleStorage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Import password verification function
+      const { verifyPassword, hashPassword } = await import('./auth');
+      const isValid = await verifyPassword(currentPassword, user.password);
+      if (!isValid) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+      
+      // Hash new password and update
+      const hashedNewPassword = await hashPassword(newPassword);
+      const updatedUser = await simpleStorage.updateUser(userId, { 
+        password: hashedNewPassword 
+      });
+      
+      console.log(`Password updated successfully for user: ${user.username}`);
+      res.json({ 
+        success: true, 
+        message: "Password updated successfully" 
+      });
+    } catch (error: any) {
+      console.error("Error updating password:", error);
+      res.status(500).json({ message: "Failed to update password: " + error.message });
+    }
+  });
+
+  // Update profile visibility settings
+  app.post('/api/user/profile-visibility', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { visibility } = req.body;
+      
+      if (!visibility || !['public', 'private', 'connections'].includes(visibility)) {
+        return res.status(400).json({ message: "Valid visibility setting required (public, private, connections)" });
+      }
+      
+      const updatedProfile = await simpleStorage.updateUserProfile(userId, {
+        profileVisibility: visibility
+      });
+      
+      console.log(`Profile visibility updated to ${visibility} for user: ${userId}`);
+      res.json({ 
+        success: true, 
+        visibility,
+        message: "Profile visibility updated successfully" 
+      });
+    } catch (error: any) {
+      console.error("Error updating profile visibility:", error);
+      res.status(500).json({ message: "Failed to update profile visibility: " + error.message });
     }
   });
 

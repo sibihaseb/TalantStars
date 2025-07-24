@@ -61,14 +61,12 @@ function DynamicAvailabilityStatus({ userId }: { userId: number }) {
   
   // Color coding for different statuses
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'busy':
-        return 'text-yellow-600 dark:text-yellow-400';
-      case 'unavailable':
-        return 'text-red-600 dark:text-red-400';
-      default:
-        return 'text-green-600 dark:text-green-400';
-    }
+    const statusColors: { [key: string]: string } = {
+      'busy': 'text-yellow-600 dark:text-yellow-400',
+      'unavailable': 'text-red-600 dark:text-red-400',
+      'available': 'text-green-600 dark:text-green-400'
+    };
+    return statusColors[status] || statusColors['available'];
   };
 
   return (
@@ -510,7 +508,7 @@ export default function TalentDashboard() {
                       <MapPin className="w-4 h-4" />
                       <span>{profile?.location || 'Location not set'}</span>
                     </div>
-                    <DynamicAvailabilityStatus userId={user?.id} />
+                    <DynamicAvailabilityStatus userId={user?.id || 0} />
                   </div>
                 </div>
                 
