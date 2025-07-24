@@ -50,7 +50,7 @@ export function Header() {
               </Button>
             )}
             <Link href="/" className="flex items-center space-x-2">
-              <img src={PNG_FILE_6} alt="Talents & Stars" className="h-12 w-auto ml-[0px] mr-[0px]" />
+              <img src={PNG_FILE_6} alt="Talents & Stars" className="h-8 sm:h-10 md:h-12 w-auto object-contain max-w-[120px] sm:max-w-[140px] md:max-w-none" />
             </Link>
             
             <div className="hidden md:flex space-x-6">

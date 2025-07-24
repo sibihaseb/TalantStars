@@ -26,6 +26,8 @@ import QuestionsManagement from "@/pages/admin/questions-management";
 import FeaturedTalentManagement from "@/pages/admin/featured-talent";
 import PromoCodeManagement from "@/pages/admin/promo-codes";
 import Auth from "@/pages/Auth";
+import Login from "@/pages/Login";
+import ForgotPassword from "@/pages/ForgotPassword";
 import MeetingManagement from "@/pages/MeetingManagement";
 import TalentProfile from "@/pages/TalentProfile";
 import ProfileViewer from "@/pages/ProfileViewer";
@@ -59,6 +61,8 @@ function Router() {
     <Switch>
       {/* Auth route - unified login/registration */}
       <Route path="/auth" component={Auth} />
+      <Route path="/login" component={Login} />
+      <Route path="/forgot-password" component={ForgotPassword} />
       
       {/* Public routes */}
       <Route path="/jobs" component={BrowseJobs} />

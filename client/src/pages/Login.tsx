@@ -149,6 +149,18 @@ export default function Login() {
                 "Sign In"
               )}
             </Button>
+
+            <div className="mt-4 text-center">
+              <Link href="/forgot-password">
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-sm text-gray-600 hover:text-blue-600"
+                >
+                  Forgot your password?
+                </Button>
+              </Link>
+            </div>
           </form>
         </CardContent>
       </Card>
