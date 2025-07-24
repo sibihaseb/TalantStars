@@ -1,7 +1,7 @@
 // Send all 12 email types to verify complete email system functionality
 import axios from 'axios';
 
-const primaryEmail = 'marty@onlinechannel.tv';
+const primaryEmail = 'marty@24flix.com';
 const fallbackEmail = 'marty@24flix.com';
 const baseURL = 'http://localhost:5000';
 
