@@ -624,9 +624,9 @@ export default function SocialModern() {
                     <CardContent className="p-6">
                       <div className="flex items-center space-x-4">
                         <Avatar className="w-12 h-12">
-                          <AvatarImage src={user.profileImageUrl} />
+                          <AvatarImage src={user?.profileImageUrl || ''} />
                           <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                            {user.firstName?.[0]}{user.lastName?.[0]}
+                            {user?.firstName?.[0]}{user?.lastName?.[0]}
                           </AvatarFallback>
                         </Avatar>
                         <Button 
@@ -813,9 +813,9 @@ export default function SocialModern() {
                     <CardContent className="space-y-4">
                       <div className="flex items-start space-x-4">
                         <Avatar className="w-12 h-12">
-                          <AvatarImage src={user.profileImageUrl} />
+                          <AvatarImage src={user?.profileImageUrl || ''} />
                           <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                            {user.firstName?.[0]}{user.lastName?.[0]}
+                            {user?.firstName?.[0]}{user?.lastName?.[0]}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
