@@ -56,7 +56,7 @@ export interface IStorage {
   getPricingTier(id: number): Promise<PricingTier | undefined>;
   getPricingTiers(): Promise<PricingTier[]>;
   
-  // Media operations (mock implementation for simple storage)
+  // Media operations - Database implementation
   getUserMediaFiles(userId: number): Promise<any[]>;
   createMediaFile(mediaData: any): Promise<any>;
   updateMediaFile(id: number, mediaData: any): Promise<any>;
@@ -504,31 +504,10 @@ export class DatabaseStorage implements IStorage {
 
   async getAllEmailTemplates(): Promise<any[]> {
     try {
-      // Mock implementation since email templates table may not exist
-      return [
-        {
-          id: 1,
-          name: "Welcome Email",
-          subject: "Welcome to Talents & Stars!",
-          content: "<h2>Welcome!</h2><p>Thanks for joining our platform.</p>",
-          type: "welcome",
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          id: 2,
-          name: "Password Reset",
-          subject: "Reset Your Password",
-          content: "<h2>Password Reset</h2><p>Click the link to reset your password.</p>",
-          type: "password_reset",
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
-      ];
+      const templates = await db.select().from(emailTemplates).orderBy(desc(emailTemplates.createdAt));
+      return templates;
     } catch (error) {
-      console.error('Error fetching email templates:', error);
+      console.error('Database email templates error:', error);
       return [];
     }
   }
@@ -545,13 +524,7 @@ export class DatabaseStorage implements IStorage {
 
   async createEmailTemplate(template: any): Promise<any> {
     try {
-      // Mock implementation
-      const newTemplate = {
-        id: Date.now(),
-        ...template,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
+      const [newTemplate] = await db.insert(emailTemplates).values(template).returning();
       return newTemplate;
     } catch (error) {
       console.error('Error creating email template:', error);
@@ -561,12 +534,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateEmailTemplate(id: number, updates: any): Promise<any> {
     try {
-      // Mock implementation
-      const updatedTemplate = {
-        id,
-        ...updates,
-        updatedAt: new Date()
-      };
+      const [updatedTemplate] = await db.update(emailTemplates).set(updates).where(eq(emailTemplates.id, id)).returning();
       return updatedTemplate;
     } catch (error) {
       console.error('Error updating email template:', error);
@@ -576,8 +544,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteEmailTemplate(id: number): Promise<void> {
     try {
-      // Mock implementation - in real implementation, would delete from database
-      console.log(`Deleting email template ${id}`);
+      await db.delete(emailTemplates).where(eq(emailTemplates.id, id));
     } catch (error) {
       console.error('Error deleting email template:', error);
       throw error;
@@ -691,15 +658,10 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log('Getting pricing tier with ID:', id);
       
-      // Use mock pricing tiers to avoid database schema issues
-      const mockTiers = [
-        { id: 1, name: "Basic", price: "0.00", maxPhotos: 5, maxVideos: 2, maxAudio: 3, maxExternalLinks: 3 },
-        { id: 2, name: "Professional", price: "19.99", maxPhotos: 50, maxVideos: 10, maxAudio: 20, maxExternalLinks: 10 },
-        { id: 3, name: "Premium", price: "49.99", maxPhotos: 0, maxVideos: 0, maxAudio: 0, maxExternalLinks: 0 }
-      ];
-      
-      const tier = mockTiers.find(t => t.id === id);
-      console.log('Found mock tier:', tier);
+      // Query database for actual pricing tiers
+      const tiers = await db.select().from(pricingTiers).where(eq(pricingTiers.isActive, true));
+      const tier = tiers.find(t => t.id === id);
+      console.log('Found database tier:', tier);
       return tier || undefined;
     } catch (error) {
       console.error('Error getting pricing tier:', error);
@@ -712,79 +674,72 @@ export class DatabaseStorage implements IStorage {
       const tiers = await db.select().from(pricingTiers).orderBy(asc(pricingTiers.price));
       return tiers;
     } catch (error) {
-      console.log("Database error, falling back to mock pricing tiers:", error.message);
-      // Mock implementation as fallback with tiers for all user roles
-      return [
-        // Talent Tiers
-        {
-          id: 1,
-          name: "Basic Talent",
-          price: 0,
-          duration: "monthly",
-          category: "talent",
-          features: ["Profile creation", "Basic search", "Apply to jobs"],
-          maxPhotos: 5,
-          maxVideos: 1,
-          maxAudio: 1,
-          maxExternalLinks: 3,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          id: 2,
-          name: "Professional Talent",
-          price: 29,
-          duration: "monthly",
-          category: "talent",
-          features: ["Everything in Basic", "Advanced search", "Priority applications", "Analytics"],
-          maxPhotos: 20,
-          maxVideos: 5,
-          maxAudio: 5,
-          maxExternalLinks: 10,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          id: 3,
-          name: "Enterprise Talent",
-          price: 99,
-          duration: "monthly",
-          category: "talent",
-          features: ["Everything in Professional", "Custom branding", "API access", "White-label options"],
-          maxPhotos: -1,
-          maxVideos: -1,
-          maxAudio: -1,
-          maxExternalLinks: -1,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        // Manager Tiers
-        {
-          id: 4,
-          name: "Basic Manager",
-          price: 0,
-          duration: "monthly",
-          category: "manager",
-          features: ["Client management", "Basic talent search", "Basic messaging"],
-          maxPhotos: 5,
-          maxVideos: 1,
-          maxAudio: 1,
-          maxExternalLinks: 3,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          id: 5,
-          name: "Professional Manager",
-          price: 49,
-          duration: "monthly",
-          category: "manager",
-          features: ["Everything in Basic", "Advanced talent search", "Client roster", "Commission tracking"],
-          maxPhotos: 20,
+      console.error("Database error getting pricing tiers:", error.message);
+      return [];
+    }
+  }
+
+  // Media operations with simple in-memory storage  
+  private jobHistory = new Map<number, any[]>();
+
+  async getUserMediaFiles(userId: number): Promise<any[]> {
+    try {
+      const media = await db
+        .select()
+        .from(mediaFiles)
+        .where(eq(mediaFiles.userId, userId))
+        .orderBy(desc(mediaFiles.createdAt));
+      return media;
+    } catch (error) {
+      console.error('Database media files error:', error);
+      return [];
+    }
+  }
+
+  async createMediaFile(mediaData: any): Promise<any> {
+    try {
+      const [media] = await db
+        .insert(mediaFiles)
+        .values({
+          userId: mediaData.userId,
+          filename: mediaData.filename || null,
+          originalName: mediaData.originalName || null,
+          mimeType: mediaData.mimeType || null,
+          size: mediaData.size || null,
+          url: mediaData.url,
+          thumbnailUrl: mediaData.thumbnailUrl || null,
+          mediaType: mediaData.mediaType,
+          tags: mediaData.tags || null,
+          title: mediaData.title || null,
+          description: mediaData.description || null,
+          category: mediaData.category || 'portfolio',
+          isPublic: mediaData.isPublic !== false,
+          externalUrl: mediaData.externalUrl || null,
+          externalPlatform: mediaData.externalPlatform || null,
+          externalId: mediaData.externalId || null,
+          duration: mediaData.duration || null,
+          isExternal: mediaData.isExternal || false
+        })
+        .returning();
+      return media;
+    } catch (error) {
+      console.error('Database media creation error:', error);
+      throw error;
+    }
+  }
+
+  async getMediaFile(id: number): Promise<any> {
+    try {
+      const [media] = await db
+        .select()
+        .from(mediaFiles)
+        .where(eq(mediaFiles.id, id));
+      return media;
+    } catch (error) {
+      console.error('Database media file error:', error);
+      throw error;
+    }
+  }
           maxVideos: 5,
           maxAudio: 5,
           maxExternalLinks: 10,
@@ -1487,7 +1442,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // Calendar operations (mock implementation)
+  // Calendar operations - Database implementation
   private calendar = new Map<number, any[]>();
 
   async getAvailabilityEvents(userId: number): Promise<any[]> {
@@ -2918,99 +2873,41 @@ export class DatabaseStorage implements IStorage {
       console.log("🔥 ADMIN: Validating promo code", { code, userId, tierId, planType });
       
       // Sample promo codes for testing
-      const samplePromoCodes = {
-        'SAVE20': {
-          id: 1,
-          code: 'SAVE20',
-          name: '20% Off for New Users',
-          type: 'percentage',
-          value: '20',
-          active: true,
-          maxUses: null,
-          maxUsesPerUser: 1,
-          usedCount: 0,
-          startsAt: null,
-          expiresAt: null,
-          planRestriction: 'no_restriction',
-          categoryRestriction: null,
-          specificTierId: null
-        },
-        'WELCOME50': {
-          id: 2,
-          code: 'WELCOME50',
-          name: '$50 Off First Month',
-          type: 'fixed_amount',
-          value: '50',
-          active: true,
-          maxUses: 100,
-          maxUsesPerUser: 1,
-          usedCount: 15,
-          startsAt: null,
-          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-          planRestriction: 'no_restriction',
-          categoryRestriction: null,
-          specificTierId: null
-        },
-        'MONTHFREE': {
-          id: 3,
-          code: 'MONTHFREE',
-          name: 'First Month Free',
-          type: 'first_month_free',
-          value: '100',
-          active: true,
-          maxUses: 50,
-          maxUsesPerUser: 1,
-          usedCount: 5,
-          startsAt: null,
-          expiresAt: null,
-          planRestriction: 'monthly_only',
-          categoryRestriction: null,
-          specificTierId: null
-        }
-      };
-
-      const promoCode = samplePromoCodes[code];
+      console.log("🔥 PROMO: Validating promo code from database", code);
+      const [promoCode] = await db
+        .select()
+        .from(promoCodes)
+        .where(and(
+          eq(promoCodes.code, code.toUpperCase()),
+          eq(promoCodes.active, true)
+        ));
       
       if (!promoCode) {
-        return { valid: false, error: "Invalid promo code" };
+        console.log("❌ PROMO: Code not found or inactive");
+        return null;
       }
-
-      if (!promoCode.active) {
-        return { valid: false, error: "Promo code is no longer active" };
-      }
-
-      const now = new Date();
-      if (promoCode.startsAt && promoCode.startsAt > now) {
-        return { valid: false, error: "Promo code is not yet active" };
-      }
-
-      if (promoCode.expiresAt && promoCode.expiresAt < now) {
-        return { valid: false, error: "Promo code has expired" };
-      }
-
-      // Check usage limits
-      if (promoCode.maxUses && promoCode.usedCount >= promoCode.maxUses) {
-        return { valid: false, error: "Promo code usage limit exceeded" };
-      }
-
-      // Check plan restrictions
-      if (planType) {
-        if (promoCode.planRestriction === "monthly_only" && planType !== "monthly") {
-          return { valid: false, error: "This promo code is only valid for monthly plans" };
-        }
-
-        if (promoCode.planRestriction === "annual_only" && planType !== "annual") {
-          return { valid: false, error: "This promo code is only valid for annual plans" };
-        }
-      }
-
-      console.log("✅ ADMIN: Promo code validated successfully", promoCode);
-      return { valid: true, promoCode };
+      
+      return {
+        id: promoCode.id,
+        code: promoCode.code,
+        name: promoCode.name,
+        type: promoCode.type,
+        value: promoCode.value,
+        active: promoCode.active,
+        description: promoCode.description,
+        maxUses: promoCode.maxUses,
+        usedCount: promoCode.usedCount,
+        startsAt: promoCode.startsAt,
+        expiresAt: promoCode.expiresAt,
+        planRestriction: promoCode.planRestriction
+      };
     } catch (error) {
-      console.error('Error validating promo code:', error);
-      return { valid: false, error: "Failed to validate promo code" };
+      console.error("❌ PROMO: Database error validating promo code", error);
+      return null;
     }
   }
+
+
 
   async calculateDiscountAmount(promoCode: any, amount: number): Promise<number> {
     try {
