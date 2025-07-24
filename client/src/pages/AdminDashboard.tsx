@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,7 +56,9 @@ import {
   Clock,
   X,
   Gift,
-  ArrowLeft
+  ArrowLeft,
+  Save,
+  Cog
 } from "lucide-react";
 import UserLimitsManagement from '@/components/admin/UserLimitsManagement';
 import EmailCampaigns from "./admin/email-campaigns";
@@ -731,21 +733,21 @@ export default function AdminDashboard() {
               {users.length} Total Users
             </Badge>
             <Button 
-              onClick={() => window.location.href = '/admin/pricing-tiers'}
+              onClick={() => setActiveTab('pricing-tiers')}
               className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white shadow-lg"
             >
               <DollarSign className="w-4 h-4 mr-2" />
               Pricing Tiers
             </Button>
             <Button 
-              onClick={() => window.location.href = '/admin/promo-codes'}
+              onClick={() => setActiveTab('promo-codes')}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
             >
               <Gift className="w-4 h-4 mr-2" />
               Promo Codes
             </Button>
             <Button 
-              onClick={() => setIsMassEmailDialogOpen(true)}
+              onClick={() => setActiveTab('mass-email')}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg"
             >
               <Mail className="w-4 h-4 mr-2" />
@@ -917,15 +919,15 @@ export default function AdminDashboard() {
                     <span>Payments</span>
                   </button>
                   <button
-                    onClick={() => setActiveTab('pricing')}
+                    onClick={() => setActiveTab('pricing-tiers')}
                     className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                      activeTab === 'pricing' 
+                      activeTab === 'pricing-tiers' 
                         ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md' 
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }`}
                   >
                     <DollarSign className="w-4 h-4" />
-                    <span>Pricing</span>
+                    <span>Pricing Tiers</span>
                   </button>
                 </div>
               </div>
@@ -3789,6 +3791,585 @@ export default function AdminDashboard() {
 
           <TabsContent value="limits" className="space-y-6">
             <UserLimitsManagement />
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* API Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    API Keys Configuration
+                  </CardTitle>
+                  <CardDescription>
+                    Manage external service API keys and integrations
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="stripe-key" className="text-sm font-medium">Stripe Secret Key</Label>
+                      <div className="flex gap-2 mt-1">
+                        <Input
+                          id="stripe-key"
+                          type="password"
+                          placeholder="sk_live_..."
+                          defaultValue="••••••••••••••••"
+                          className="font-mono"
+                        />
+                        <Button size="sm" variant="outline">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Used for payment processing and subscriptions</p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="stripe-public-key" className="text-sm font-medium">Stripe Public Key</Label>
+                      <div className="flex gap-2 mt-1">
+                        <Input
+                          id="stripe-public-key"
+                          type="text"
+                          placeholder="pk_live_..."
+                          defaultValue="••••••••••••••••"
+                          className="font-mono"
+                        />
+                        <Button size="sm" variant="outline">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Client-side Stripe integration</p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="openai-key" className="text-sm font-medium">OpenAI API Key</Label>
+                      <div className="flex gap-2 mt-1">
+                        <Input
+                          id="openai-key"
+                          type="password"
+                          placeholder="sk-..."
+                          defaultValue="••••••••••••••••"
+                          className="font-mono"
+                        />
+                        <Button size="sm" variant="outline">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">AI features and content generation</p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="resend-key" className="text-sm font-medium">Resend API Key</Label>
+                      <div className="flex gap-2 mt-1">
+                        <Input
+                          id="resend-key"
+                          type="password"
+                          placeholder="re_..."
+                          defaultValue="••••••••••••••••"
+                          className="font-mono"
+                        />
+                        <Button size="sm" variant="outline">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Email delivery service</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                        <Save className="w-4 h-4 mr-2" />
+                        Update API Keys
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* System Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Cog className="w-5 h-5" />
+                    System Configuration
+                  </CardTitle>
+                  <CardDescription>
+                    Platform-wide settings and configurations
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-sm font-medium">User Registration</Label>
+                        <p className="text-xs text-gray-500">Allow new user signups</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-sm font-medium">Email Verification</Label>
+                        <p className="text-xs text-gray-500">Require email verification for new accounts</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-sm font-medium">Maintenance Mode</Label>
+                        <p className="text-xs text-gray-500">Enable maintenance mode</p>
+                      </div>
+                      <Switch />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="max-upload-size" className="text-sm font-medium">Max Upload Size (MB)</Label>
+                      <Input
+                        id="max-upload-size"
+                        type="number"
+                        defaultValue="50"
+                        className="mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="session-timeout" className="text-sm font-medium">Session Timeout (hours)</Label>
+                      <Input
+                        id="session-timeout"
+                        type="number"
+                        defaultValue="24"
+                        className="mt-1"
+                      />
+                    </div>
+
+                    <div className="pt-2">
+                      <Button className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700">
+                        <Save className="w-4 h-4 mr-2" />
+                        Save Settings
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Additional Settings Cards */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <Database className="w-4 h-4" />
+                    Database Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Connection</span>
+                      <Badge className="bg-green-100 text-green-800">Active</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Total Users</span>
+                      <span className="text-sm font-medium">{users.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Last Backup</span>
+                      <span className="text-sm">2 hours ago</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <Shield className="w-4 h-4" />
+                    Security Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">SSL Certificate</span>
+                      <Badge className="bg-green-100 text-green-800">Valid</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">API Rate Limiting</span>
+                      <Badge className="bg-green-100 text-green-800">Active</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Failed Login Attempts</span>
+                      <span className="text-sm font-medium">3 today</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <Activity className="w-4 h-4" />
+                    Performance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Response Time</span>
+                      <span className="text-sm font-medium">245ms</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">CPU Usage</span>
+                      <span className="text-sm font-medium">23%</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Memory Usage</span>
+                      <span className="text-sm font-medium">67%</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="pricing-tiers" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="w-5 h-5" />
+                  Pricing Tiers Management
+                </CardTitle>
+                <CardDescription>
+                  Configure pricing plans and features for different user tiers
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {pricingTiers.map((tier) => (
+                    <Card key={tier.id} className="border-2 hover:border-blue-300 transition-colors">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg">{tier.name}</CardTitle>
+                          <Badge variant={tier.id === 1 ? "secondary" : tier.id === 2 ? "default" : "outline"}>
+                            ${tier.price}/month
+                          </Badge>
+                        </div>
+                        <CardDescription>{tier.description}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="text-sm">
+                            <strong>Features:</strong>
+                          </div>
+                          <ul className="text-sm text-gray-600 space-y-1">
+                            {tier.features.map((feature, index) => (
+                              <li key={index} className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                                {feature}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="mt-4 flex gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              setEditingTier(tier);
+                              setIsEditingTier(true);
+                            }}
+                          >
+                            <Edit className="w-4 h-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => console.log('View analytics for tier', tier.id)}
+                          >
+                            <BarChart3 className="w-4 h-4 mr-1" />
+                            Analytics
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="promo-codes" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Gift className="w-5 h-5" />
+                      Promo Codes Management
+                    </CardTitle>
+                    <CardDescription>
+                      Create and manage promotional discount codes
+                    </CardDescription>
+                  </div>
+                  <Button onClick={() => console.log('Create new promo code')}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Promo Code
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card className="bg-green-50 border-green-200">
+                      <CardContent className="pt-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-600">12</div>
+                          <div className="text-sm text-green-700">Active Codes</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-blue-50 border-blue-200">
+                      <CardContent className="pt-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-blue-600">347</div>
+                          <div className="text-sm text-blue-700">Total Uses</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-purple-50 border-purple-200">
+                      <CardContent className="pt-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-purple-600">$2,450</div>
+                          <div className="text-sm text-purple-700">Total Savings</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Code</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Discount</TableHead>
+                          <TableHead>Uses</TableHead>
+                          <TableHead>Expires</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="font-mono">WELCOME25</TableCell>
+                          <TableCell>Percentage</TableCell>
+                          <TableCell>25%</TableCell>
+                          <TableCell>124/500</TableCell>
+                          <TableCell>Dec 31, 2025</TableCell>
+                          <TableCell><Badge className="bg-green-100 text-green-800">Active</Badge></TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline">
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-mono">TALENT50</TableCell>
+                          <TableCell>Fixed Amount</TableCell>
+                          <TableCell>$50</TableCell>
+                          <TableCell>87/200</TableCell>
+                          <TableCell>Nov 30, 2025</TableCell>
+                          <TableCell><Badge className="bg-green-100 text-green-800">Active</Badge></TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline">
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="mass-email" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="w-5 h-5" />
+                  Mass Email Campaign
+                </CardTitle>
+                <CardDescription>
+                  Send bulk emails to specific user groups or all users
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="email-subject" className="text-sm font-medium">Email Subject</Label>
+                      <Input
+                        id="email-subject"
+                        value={emailSubject}
+                        onChange={(e) => setEmailSubject(e.target.value)}
+                        placeholder="Enter email subject..."
+                        className="mt-1"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label className="text-sm font-medium mb-3 block">Target Audience</Label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="all-users"
+                              checked={selectedUserGroups.includes("all")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(["all"]);
+                                } else {
+                                  setSelectedUserGroups([]);
+                                }
+                              }}
+                            />
+                            <Label htmlFor="all-users" className="text-sm">All Users</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="talents"
+                              checked={selectedUserGroups.includes("talent")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "talent"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "talent"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="talents" className="text-sm">All Talents</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="managers"
+                              checked={selectedUserGroups.includes("manager")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "manager"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "manager"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="managers" className="text-sm">Managers</Label>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="producers"
+                              checked={selectedUserGroups.includes("producer")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "producer"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "producer"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="producers" className="text-sm">Producers</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="admins"
+                              checked={selectedUserGroups.includes("admin")}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUserGroups(prev => [...prev.filter(g => g !== "all"), "admin"]);
+                                } else {
+                                  setSelectedUserGroups(prev => prev.filter(g => g !== "admin"));
+                                }
+                              }}
+                            />
+                            <Label htmlFor="admins" className="text-sm">Admins</Label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="email-content" className="text-sm font-medium">Message Content</Label>
+                      <Textarea
+                        id="email-content"
+                        value={emailContent}
+                        onChange={(e) => setEmailContent(e.target.value)}
+                        placeholder="Enter your email message..."
+                        className="mt-1 min-h-[200px]"
+                      />
+                    </div>
+
+                    <Button 
+                      onClick={() => console.log('Send mass email')}
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    >
+                      <Mail className="w-4 h-4 mr-2" />
+                      Send Mass Email
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Card className="bg-blue-50 border-blue-200">
+                      <CardHeader>
+                        <CardTitle className="text-sm">Campaign Preview</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 text-sm">
+                          <div><strong>Subject:</strong> {emailSubject || "No subject"}</div>
+                          <div><strong>Recipients:</strong> {selectedUserGroups.length === 0 ? "None selected" : selectedUserGroups.join(", ")}</div>
+                          <div><strong>Estimated Recipients:</strong> ~{selectedUserGroups.includes("all") ? users.length : selectedUserGroups.length * 15} users</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-green-50 border-green-200">
+                      <CardHeader>
+                        <CardTitle className="text-sm">Recent Campaigns</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center justify-between">
+                            <span>Welcome New Users</span>
+                            <Badge variant="outline">Sent</Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span>Platform Updates</span>
+                            <Badge variant="outline">Sent</Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span>Holiday Promotion</span>
+                            <Badge className="bg-green-100 text-green-800">Active</Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
           </div>
