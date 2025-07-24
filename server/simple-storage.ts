@@ -30,6 +30,19 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, user: Partial<InsertUser>): Promise<User>;
+  upsertUser(user: any): Promise<User>;
+  deleteUser(id: number): Promise<void>;
+  updateUserRole(userId: number, role: string): Promise<User>;
+  updateUserVerification(userId: number, verified: boolean): Promise<UserProfile>;
+  createPricingTier(tier: any): Promise<PricingTier>;
+  updatePricingTier(id: number, tier: any): Promise<PricingTier>;
+  deletePricingTier(id: number): Promise<void>;
+  getAllEmailTemplates(): Promise<any[]>;
+  getEmailTemplate(id: number): Promise<any | undefined>;
+  createEmailTemplate(template: any): Promise<any>;
+  updateEmailTemplate(id: number, updates: any): Promise<any>;
+  deleteEmailTemplate(id: number): Promise<void>;
   getAllUsers(): Promise<User[]>;
   
   // Profile operations
@@ -187,6 +200,190 @@ export class DatabaseStorage implements IStorage {
   async getAllUsers(): Promise<User[]> {
     const allUsers = await db.select().from(users);
     return allUsers;
+  }
+
+  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User> {
+    try {
+      const [user] = await db
+        .update(users)
+        .set(userData)
+        .where(eq(users.id, id))
+        .returning();
+      return user;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  }
+
+  async upsertUser(userData: any): Promise<User> {
+    try {
+      // First try to get existing user
+      const existingUser = await this.getUser(userData.id);
+      
+      if (existingUser) {
+        // Update existing user
+        return await this.updateUser(userData.id, userData);
+      } else {
+        // Create new user
+        return await this.createUser(userData);
+      }
+    } catch (error) {
+      console.error('Error upserting user:', error);
+      throw error;
+    }
+  }
+
+  async deleteUser(id: number): Promise<void> {
+    try {
+      await db.delete(users).where(eq(users.id, id));
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
+  }
+
+  async updateUserRole(userId: number, role: string): Promise<User> {
+    try {
+      const [user] = await db
+        .update(users)
+        .set({ role: role as any })
+        .where(eq(users.id, userId))
+        .returning();
+      return user;
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      throw error;
+    }
+  }
+
+  async updateUserVerification(userId: number, verified: boolean): Promise<UserProfile> {
+    try {
+      const [profile] = await db
+        .update(userProfiles)
+        .set({ isVerified: verified })
+        .where(eq(userProfiles.userId, userId.toString()))
+        .returning();
+      return profile;
+    } catch (error) {
+      console.error('Error updating user verification:', error);
+      throw error;
+    }
+  }
+
+  async createPricingTier(tier: any): Promise<PricingTier> {
+    try {
+      const [pricingTier] = await db.insert(pricingTiers).values(tier).returning();
+      return pricingTier;
+    } catch (error) {
+      console.error('Error creating pricing tier:', error);
+      throw error;
+    }
+  }
+
+  async updatePricingTier(id: number, tier: any): Promise<PricingTier> {
+    try {
+      const [pricingTier] = await db
+        .update(pricingTiers)
+        .set({ ...tier, updatedAt: new Date() })
+        .where(eq(pricingTiers.id, id))
+        .returning();
+      return pricingTier;
+    } catch (error) {
+      console.error('Error updating pricing tier:', error);
+      throw error;
+    }
+  }
+
+  async deletePricingTier(id: number): Promise<void> {
+    try {
+      await db.delete(pricingTiers).where(eq(pricingTiers.id, id));
+    } catch (error) {
+      console.error('Error deleting pricing tier:', error);
+      throw error;
+    }
+  }
+
+  async getAllEmailTemplates(): Promise<any[]> {
+    try {
+      // Mock implementation since email templates table may not exist
+      return [
+        {
+          id: 1,
+          name: "Welcome Email",
+          subject: "Welcome to Talents & Stars!",
+          content: "<h2>Welcome!</h2><p>Thanks for joining our platform.</p>",
+          type: "welcome",
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: 2,
+          name: "Password Reset",
+          subject: "Reset Your Password",
+          content: "<h2>Password Reset</h2><p>Click the link to reset your password.</p>",
+          type: "password_reset",
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      ];
+    } catch (error) {
+      console.error('Error fetching email templates:', error);
+      return [];
+    }
+  }
+
+  async getEmailTemplate(id: number): Promise<any | undefined> {
+    try {
+      const templates = await this.getAllEmailTemplates();
+      return templates.find(t => t.id === id);
+    } catch (error) {
+      console.error('Error fetching email template:', error);
+      return undefined;
+    }
+  }
+
+  async createEmailTemplate(template: any): Promise<any> {
+    try {
+      // Mock implementation
+      const newTemplate = {
+        id: Date.now(),
+        ...template,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      return newTemplate;
+    } catch (error) {
+      console.error('Error creating email template:', error);
+      throw error;
+    }
+  }
+
+  async updateEmailTemplate(id: number, updates: any): Promise<any> {
+    try {
+      // Mock implementation
+      const updatedTemplate = {
+        id,
+        ...updates,
+        updatedAt: new Date()
+      };
+      return updatedTemplate;
+    } catch (error) {
+      console.error('Error updating email template:', error);
+      throw error;
+    }
+  }
+
+  async deleteEmailTemplate(id: number): Promise<void> {
+    try {
+      // Mock implementation - in real implementation, would delete from database
+      console.log(`Deleting email template ${id}`);
+    } catch (error) {
+      console.error('Error deleting email template:', error);
+      throw error;
+    }
   }
 
   async getUserProfile(userId: number): Promise<UserProfile | undefined> {

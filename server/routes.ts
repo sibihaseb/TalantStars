@@ -2578,9 +2578,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       console.log("Deleting user:", userId);
-      // Note: In a real application, you might want to implement soft delete
-      // For now, we'll just return success since the storage doesn't have delete user method
-      res.json({ success: true, message: "User deletion requested" });
+      
+      // Check if user exists first
+      const existingUser = await simpleStorage.getUser(parseInt(userId));
+      if (!existingUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Delete the user
+      await simpleStorage.deleteUser(parseInt(userId));
+      console.log("User deleted successfully:", userId);
+      
+      res.json({ success: true, message: "User deleted successfully" });
     } catch (error) {
       console.error("Error deleting user:", error);
       res.status(500).json({ message: "Failed to delete user", error: error.message });
