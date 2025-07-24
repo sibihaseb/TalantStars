@@ -4035,6 +4035,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CRITICAL: Admin manual verification endpoint
+  app.put('/api/admin/users/:userId/verify', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const { verified } = req.body;
+      
+      if (typeof verified !== 'boolean') {
+        return res.status(400).json({ message: "Verified must be a boolean" });
+      }
+      
+      console.log(`🔥 ADMIN VERIFICATION: Admin manually ${verified ? 'verifying' : 'unverifying'} user ${userId}`);
+      const profile = await simpleStorage.updateUserVerification(userId, verified);
+      
+      res.json({ success: true, profile });
+    } catch (error) {
+      console.error('Error updating user verification:', error);
+      res.status(500).json({ message: "Failed to update user verification" });
+    }
+  });
+
+  // CRITICAL: Auto-verify all existing paid users endpoint
+  app.post('/api/admin/auto-verify-paid-users', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      console.log('🔥 AUTO-VERIFICATION: Starting bulk verification of paid users');
+      const allUsers = await simpleStorage.getAllUsers();
+      let verifiedCount = 0;
+      
+      for (const user of allUsers) {
+        // Verify users with paid plans (tier 2+)
+        if (user.pricingTierId && user.pricingTierId >= 2) {
+          try {
+            await simpleStorage.updateUserVerification(user.id, true);
+            verifiedCount++;
+            console.log(`✅ AUTO-VERIFICATION: Verified paid user ${user.id} (${user.username})`);
+          } catch (error) {
+            console.error(`❌ AUTO-VERIFICATION: Failed to verify user ${user.id}:`, error);
+          }
+        }
+      }
+      
+      console.log(`🎉 AUTO-VERIFICATION: Successfully verified ${verifiedCount} paid users`);
+      res.json({ 
+        success: true, 
+        message: `Successfully verified ${verifiedCount} paid users`,
+        verifiedCount 
+      });
+    } catch (error) {
+      console.error('Error auto-verifying paid users:', error);
+      res.status(500).json({ message: "Failed to auto-verify paid users" });
+    }
+  });
+
   // Stripe integration for premium tier upgrades
   app.post('/api/stripe/create-payment-intent', isAuthenticated, async (req: any, res) => {
     try {

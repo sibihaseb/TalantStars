@@ -321,11 +321,14 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserVerification(userId: number, verified: boolean): Promise<UserProfile> {
     try {
+      console.log(`🔥 VERIFICATION: ${verified ? 'Verifying' : 'Unverifying'} user ${userId}`);
       const [profile] = await db
         .update(userProfiles)
         .set({ isVerified: verified })
         .where(eq(userProfiles.userId, userId.toString()))
         .returning();
+      
+      console.log(`✅ VERIFICATION: User ${userId} verification status updated to ${verified}`);
       return profile;
     } catch (error) {
       console.error('Error updating user verification:', error);
@@ -541,6 +544,13 @@ export class DatabaseStorage implements IStorage {
       .set({ pricingTierId: tierId })
       .where(eq(users.id, userId))
       .returning();
+    
+    // CRITICAL: Automatically verify paid users (tier 2 and above are paid plans)
+    if (tierId >= 2) {
+      console.log(`🔥 AUTO-VERIFICATION: Automatically verifying paid user ${userId} with tier ${tierId}`);
+      await this.updateUserVerification(userId, true);
+    }
+    
     return user;
   }
   

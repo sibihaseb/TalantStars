@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   MapPin, Phone, Globe, Star, CheckCircle, MessageCircle, DollarSign, 
   Clock, Play, Eye, Camera, Film, Award, Users, Heart, Share2, 
-  Palette, Layout, Sparkles, Zap, Crown, Music
+  Palette, Layout, Sparkles, Zap, Crown, Music, ShieldCheck
 } from "lucide-react";
 import MediaModal from '@/components/MediaModal';
 import SkillEndorsement from '@/components/SkillEndorsement';
@@ -691,7 +691,10 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 text-white">
-                <h1 className="text-4xl font-bold mb-2">{profile?.displayName}</h1>
+                <div className="flex items-center gap-2 mb-2">
+                  <h1 className="text-4xl font-bold">{profile?.displayName}</h1>
+                  {profile?.isVerified && <ShieldCheck className="w-7 h-7 text-blue-200" />}
+                </div>
                 <div className="flex gap-2 mb-6">
                   <Badge className="bg-white/20 text-white border-0">{profile?.role}</Badge>
                   <Badge className="bg-gradient-to-r from-pink-500 to-orange-500 text-white border-0">{profile?.talentType}</Badge>
@@ -1056,9 +1059,12 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
               </div>
               
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                  {profile?.displayName}
-                </h1>
+                <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                    {profile?.displayName}
+                  </h1>
+                  {profile?.isVerified && <ShieldCheck className="w-7 h-7 text-purple-500" />}
+                </div>
                 <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
                   <Badge className="bg-gradient-to-r from-pink-500 to-rose-500 text-white">{profile?.role}</Badge>
                   <Badge className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white">{profile?.talentType}</Badge>
@@ -1393,7 +1399,10 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
         </Avatar>
         
         <div>
-          <h1 className="text-5xl font-light text-gray-900 mb-2">{profile?.displayName}</h1>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <h1 className="text-5xl font-light text-gray-900">{profile?.displayName}</h1>
+            {profile?.isVerified && <ShieldCheck className="w-8 h-8 text-blue-500" />}
+          </div>
           <p className="text-xl text-gray-600 font-light">{profile?.talentType} • {profile?.location}</p>
         </div>
         
@@ -1727,9 +1736,12 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
               </AvatarFallback>
             </Avatar>
             
-            <h1 className="text-7xl font-bold mb-6 tracking-wide">
-              {profile?.displayName?.toUpperCase()}
-            </h1>
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <h1 className="text-7xl font-bold tracking-wide">
+                {profile?.displayName?.toUpperCase()}
+              </h1>
+              {profile?.isVerified && <ShieldCheck className="w-12 h-12 text-yellow-400" />}
+            </div>
             
             <div className="flex justify-center gap-4 mb-8">
               <Badge className="bg-yellow-500 text-black text-lg px-6 py-2">{profile?.role}</Badge>
