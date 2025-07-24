@@ -3949,6 +3949,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CRITICAL FIX: Add missing profile route for username access
+  app.get('/api/profile/:username', async (req: any, res) => {
+    try {
+      const { username } = req.params;
+      console.log("🔥 PROFILE: Getting profile data for username:", username);
+      
+      // Get user by username
+      const user = await simpleStorage.getUserByUsername(username);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Get profile data
+      const profile = await simpleStorage.getUserProfile(user.id);
+      
+      // Combine user and profile data for complete profile view
+      const combinedProfile = {
+        ...user,
+        ...profile,
+        displayName: profile?.displayName || `${user.firstName} ${user.lastName}`.trim() || user.username,
+        location: profile?.location || 'Location not set',
+        bio: profile?.bio || '',
+        skills: profile?.skills || [],
+        availabilityStatus: profile?.availabilityStatus || 'not_set',
+        verified: profile?.verified || false,
+        dailyRate: profile?.dailyRate || 0,
+        talentType: profile?.talentType || '',
+        languages: profile?.languages || [],
+        accents: profile?.accents || [],
+        instruments: profile?.instruments || [],
+        genres: profile?.genres || [],
+        unionStatus: profile?.unionStatus || profile?.union_status || []
+      };
+      
+      console.log("✅ PROFILE: Returning profile data for", username);
+      res.json(combinedProfile);
+    } catch (error) {
+      console.error("❌ PROFILE: Error fetching profile:", error);
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
   // Profile SEO Meta Data Route - CRITICAL FIX for shared profile links
   app.get('/api/profile/:username/seo', async (req: any, res) => {
     try {

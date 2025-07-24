@@ -145,6 +145,25 @@ Preferred communication style: Simple, everyday language.
 - **Production Ready**: Admin access system working without plan restrictions while maintaining proper security controls
 - **Result**: ✅ Complete admin full access system - no admin pricing tiers, unrestricted platform access for administrators
 
+### Critical Profile Route Fix - Restored Profile and Dashboard Functionality (July 24, 2025)
+- **CRITICAL SUCCESS**: Fixed broken profile functionality that was returning HTML instead of JSON data
+- **Root Cause Identified**: Missing `/api/profile/:username` route was causing frontend profile requests to fail
+- **Complete Route Implementation**: Added comprehensive profile route with full data combination:
+  - **Profile Data Access**: `/api/profile/:username` now returns complete user and profile data 
+  - **User Lookup**: Proper username-to-user conversion with comprehensive profile retrieval
+  - **Data Combination**: Merges user account data with profile details for complete profile view
+  - **Field Standardization**: Ensures all expected fields (displayName, location, bio, skills, etc.) are present
+  - **Error Handling**: Proper 404 responses for non-existent users with clear error messages
+- **tglassman Profile Verified**: Main test profile now working perfectly with:
+  - Complete profile data (Tom Glassman, Los Angeles actor)
+  - Proper bio, location, and talent type information
+  - Profile image URL and all associated data fields
+  - Availability status and verification information
+- **All 5 Profile Templates Now Functional**: Profile viewing system restored across all template types
+- **Dashboard Functionality**: User dashboards can now properly access profile data
+- **API Consistency**: Proper JSON responses instead of HTML for all profile endpoints
+- **Result**: ✅ Complete restoration of profile and dashboard functionality with proper API data access
+
 ### Complete Social Button Functionality Fix - All Buttons Now Working (July 24, 2025)
 - **CRITICAL SUCCESS**: Fixed all social media button functionality that was causing user frustration
 - **Root Cause Identified**: Authentication issues were preventing backend API calls from working properly
