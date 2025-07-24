@@ -290,6 +290,13 @@ export async function setupAuth(app: Express) {
           
           console.log("Login successful for user:", user.username);
           console.log("🔥 LOGIN: Session cookie maxAge set to:", req.session.cookie?.maxAge ? req.session.cookie.maxAge / (60 * 60 * 1000) : 'undefined', "hours");
+          console.log("🔥 LOGIN: Session ID:", req.sessionID);
+          console.log("🔥 LOGIN: Cookie settings:", req.session.cookie);
+          
+          // Ensure response headers for CORS and credentials
+          res.header('Access-Control-Allow-Credentials', 'true');
+          res.header('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:5000');
+          
           res.status(200).json({ ...user, password: undefined });
         });
       });

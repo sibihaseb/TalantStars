@@ -15,18 +15,25 @@ export function useAuth(): AuthContextType {
       try {
         const response = await fetch('/api/user', {
           credentials: 'include',
+          cache: 'no-cache', // Don't cache auth requests
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
         });
         
         if (response.ok) {
-          return await response.json();
+          const userData = await response.json();
+          console.log('Auth success - user data:', userData);
+          return userData;
         } else if (response.status === 401) {
-          // User is not authenticated
+          console.log('Auth failed - user not authenticated');
           return null;
         } else {
+          console.error('Auth error - unexpected status:', response.status);
           throw new Error('Failed to fetch user');
         }
       } catch (error) {
-        console.error('Auth error:', error);
+        console.error('Auth error - network/other:', error);
         return null;
       }
     },
