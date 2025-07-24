@@ -740,141 +740,74 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
   }
-          maxVideos: 5,
-          maxAudio: 5,
-          maxExternalLinks: 10,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          id: 6,
-          name: "Enterprise Manager",
-          price: 149,
-          duration: "monthly",
-          category: "manager",
-          features: ["Everything in Professional", "Team management", "API access", "Custom branding"],
-          maxPhotos: -1,
-          maxVideos: -1,
-          maxAudio: -1,
-          maxExternalLinks: -1,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        // Agent Tiers
-        {
-          id: 7,
-          name: "Basic Agent",
-          price: 0,
-          duration: "monthly",
-          category: "agent",
-          features: ["Client representation", "Basic job matching", "Deal tracking"],
-          maxPhotos: 5,
-          maxVideos: 1,
-          maxAudio: 1,
-          maxExternalLinks: 3,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          id: 8,
-          name: "Professional Agent",
-          price: 59,
-          duration: "monthly",
-          category: "agent",
-          features: ["Everything in Basic", "Advanced deal tracking", "Commission analytics", "Client dashboard"],
-          maxPhotos: 20,
-          maxVideos: 5,
-          maxAudio: 5,
-          maxExternalLinks: 10,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          id: 9,
-          name: "Enterprise Agent",
-          price: 199,
-          duration: "monthly",
-          category: "agent",
-          features: ["Everything in Professional", "Multi-client management", "Custom contracts", "White-label"],
-          maxPhotos: -1,
-          maxVideos: -1,
-          maxAudio: -1,
-          maxExternalLinks: -1,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        // Producer Tiers
-        {
-          id: 10,
-          name: "Basic Producer",
-          price: 0,
-          duration: "monthly",
-          category: "producer",
-          features: ["Project creation", "Basic talent search", "Casting calls"],
-          maxPhotos: 5,
-          maxVideos: 1,
-          maxAudio: 1,
-          maxExternalLinks: 3,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          id: 11,
-          name: "Professional Producer",
-          price: 79,
-          duration: "monthly",
-          category: "producer",
-          features: ["Everything in Basic", "Advanced casting tools", "Project analytics", "Team collaboration"],
-          maxPhotos: 20,
-          maxVideos: 5,
-          maxAudio: 5,
-          maxExternalLinks: 10,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-        {
-          id: 12,
-          name: "Enterprise Producer",
-          price: 249,
-          duration: "monthly",
-          category: "producer",
-          features: ["Everything in Professional", "Multi-project management", "Studio tools", "Custom workflows"],
-          maxPhotos: -1,
-          maxVideos: -1,
-          maxAudio: -1,
-          maxExternalLinks: -1,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
-      ] as PricingTier[];
-    }
-  }
 
-  // Media operations with simple in-memory storage
-  private jobHistory = new Map<number, any[]>();
-
-  async getUserMediaFiles(userId: number): Promise<any[]> {
+  async updateMediaFile(id: number, updates: any): Promise<any> {
     try {
-      const media = await db
-        .select()
-        .from(mediaFiles)
-        .where(eq(mediaFiles.userId, userId))
-        .orderBy(desc(mediaFiles.createdAt));
-      return media;
+      const [updatedMedia] = await db
+        .update(mediaFiles)
+        .set(updates)
+        .where(eq(mediaFiles.id, id))
+        .returning();
+      return updatedMedia;
     } catch (error) {
-      console.error('Database media files error:', error);
-      // Fallback to memory for backwards compatibility
-      return this.mediaFiles.get(userId) || [];
+      console.error('Database media update error:', error);
+      throw error;
     }
   }
+
+  async deleteMediaFile(id: number): Promise<void> {
+    try {
+      await db.delete(mediaFiles).where(eq(mediaFiles.id, id));
+    } catch (error) {
+      console.error('Database media deletion error:', error);
+      throw error;
+    }
+  }
+
+  // User limits operations
+  async getUserLimits(userId: number): Promise<any> {
+    try {
+      const user = await this.getUser(userId);
+      if (!user) return null;
+      
+      const tier = await this.getPricingTier(user.pricingTierId || 1);
+      return tier ? {
+        maxPhotos: tier.maxPhotos || 5,
+        maxVideos: tier.maxVideos || 1,
+        maxAudio: tier.maxAudio || 1,
+        maxExternalLinks: tier.maxExternalLinks || 3
+      } : null;
+    } catch (error) {
+      console.error('Error getting user limits:', error);
+      return null;
+    }
+  }
+
+  // Admin settings operations
+  async getAdminSettings(): Promise<any[]> {
+    try {
+      return [
+        { key: 'OPENAI_API_KEY', value: '***', updatedBy: 'system', updatedAt: new Date() },
+        { key: 'STRIPE_SECRET_KEY', value: '***', updatedBy: 'system', updatedAt: new Date() },
+        { key: 'RESEND_API_KEY', value: '***', updatedBy: 'system', updatedAt: new Date() }
+      ];
+    } catch (error) {
+      console.error('Error getting admin settings:', error);
+      return [];
+    }
+  }
+
+  async updateAdminSetting(key: string, value: string, updatedBy: string): Promise<any> {
+    try {
+      return { key, value: '***', updatedBy, updatedAt: new Date() };
+    } catch (error) {
+      console.error('Error updating admin setting:', error);
+      throw error;
+    }
+  }
+
+  // Job history operations
+  private jobHistory = new Map<number, any[]>();
 
   async createMediaFile(mediaData: any): Promise<any> {
     try {
