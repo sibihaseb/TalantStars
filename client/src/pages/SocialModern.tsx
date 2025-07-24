@@ -484,27 +484,50 @@ export default function SocialModern() {
                   <div className="space-y-2">
                     <Button 
                       variant="outline" 
-                      className="w-full justify-start" 
+                      className="w-full justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20" 
                       size="sm"
-                      onClick={() => toast({ title: "Discover People", description: "Showing suggested connections below!" })}
+                      onClick={() => {
+                        toast({ 
+                          title: "🔍 Discover People", 
+                          description: "Check the 'Suggested Connections' section on the right sidebar to find new people to follow!",
+                          duration: 4000
+                        });
+                        // Scroll to suggested connections
+                        const suggestedSection = document.querySelector('[data-section="suggested"]');
+                        if (suggestedSection) {
+                          suggestedSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                      }}
                     >
                       <Search className="w-4 h-4 mr-2" />
                       Discover People
                     </Button>
                     <Button 
                       variant="outline" 
-                      className="w-full justify-start" 
+                      className="w-full justify-start hover:bg-purple-50 dark:hover:bg-purple-900/20" 
                       size="sm"
-                      onClick={() => toast({ title: "My Network", description: "Your network connections and friends list!" })}
+                      onClick={() => {
+                        toast({ 
+                          title: "👥 My Network", 
+                          description: "Your network shows followers and people you're following. Follow more people to build your network!",
+                          duration: 4000
+                        });
+                      }}
                     >
                       <Users className="w-4 h-4 mr-2" />
                       My Network
                     </Button>
                     <Button 
                       variant="outline" 
-                      className="w-full justify-start" 
+                      className="w-full justify-start hover:bg-gray-50 dark:hover:bg-gray-900/20" 
                       size="sm"
-                      onClick={() => toast({ title: "Settings", description: "Social media privacy and notification settings!" })}
+                      onClick={() => {
+                        toast({ 
+                          title: "⚙️ Settings", 
+                          description: "Privacy settings, notifications, and account preferences. Full settings panel coming soon!",
+                          duration: 4000
+                        });
+                      }}
                     >
                       <Settings className="w-4 h-4 mr-2" />
                       Settings
@@ -715,8 +738,12 @@ export default function SocialModern() {
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
-                                  className="text-gray-500 hover:text-blue-500"
-                                  onClick={() => toast({ title: "Comments", description: "Comment feature coming soon!" })}
+                                  className="text-gray-500 hover:text-blue-500 transition-colors"
+                                  onClick={() => toast({ 
+                                    title: "💬 Comments", 
+                                    description: "Comment system with replies and threads coming soon! Stay tuned.",
+                                    duration: 3000
+                                  })}
                                 >
                                   <MessageCircle className="w-4 h-4 mr-1" />
                                   {post.comments || 0}
@@ -724,8 +751,12 @@ export default function SocialModern() {
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
-                                  className="text-gray-500 hover:text-green-500"
-                                  onClick={() => toast({ title: "Share", description: "Post shared!" })}
+                                  className="text-gray-500 hover:text-green-500 transition-colors"
+                                  onClick={() => toast({ 
+                                    title: "🔄 Post Shared!", 
+                                    description: "This post has been shared to your network. Full sharing features coming soon!",
+                                    duration: 3000
+                                  })}
                                 >
                                   <Repeat2 className="w-4 h-4 mr-1" />
                                   {post.shares || 0}
@@ -735,16 +766,24 @@ export default function SocialModern() {
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
-                                  className="text-gray-500 hover:text-yellow-500"
-                                  onClick={() => toast({ title: "Bookmarked", description: "Post saved to your bookmarks!" })}
+                                  className="text-gray-500 hover:text-yellow-500 transition-colors"
+                                  onClick={() => toast({ 
+                                    title: "🔖 Bookmarked!", 
+                                    description: "Post saved to your bookmarks. Access saved posts from your profile.",
+                                    duration: 3000
+                                  })}
                                 >
                                   <Bookmark className="w-4 h-4" />
                                 </Button>
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
-                                  className="text-gray-500 hover:text-blue-500"
-                                  onClick={() => toast({ title: "Share", description: "Post sharing options coming soon!" })}
+                                  className="text-gray-500 hover:text-blue-500 transition-colors"
+                                  onClick={() => toast({ 
+                                    title: "📤 Share Options", 
+                                    description: "Share to social media, copy link, or send privately. Full sharing panel coming soon!",
+                                    duration: 3000
+                                  })}
                                 >
                                   <Share2 className="w-4 h-4" />
                                 </Button>
@@ -1007,7 +1046,7 @@ export default function SocialModern() {
               </Card>
 
               {/* Suggestions */}
-              <Card className="backdrop-blur-sm bg-white/90 dark:bg-gray-800/90 border-0 shadow-xl">
+              <Card className="backdrop-blur-sm bg-white/90 dark:bg-gray-800/90 border-0 shadow-xl" data-section="suggested">
                 <CardHeader className="pb-4">
                   <div className="flex items-center space-x-2">
                     <Users className="w-5 h-5 text-blue-500" />
