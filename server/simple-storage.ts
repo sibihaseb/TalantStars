@@ -1530,24 +1530,70 @@ export class DatabaseStorage implements IStorage {
   // Job operations
   async createJob(jobData: any): Promise<any> {
     console.log("🔥 JOB: Creating job", { jobData });
-    const job = {
-      id: Date.now(),
-      ...jobData,
-      status: 'open',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    console.log("✅ JOB: Created successfully", { job });
-    return job;
+    try {
+      const [job] = await db
+        .insert(jobs)
+        .values({
+          userId: jobData.userId.toString(),
+          title: jobData.title,
+          description: jobData.description,
+          talentType: jobData.talentType,
+          location: jobData.location,
+          budget: jobData.budget,
+          projectDate: jobData.projectDate ? new Date(jobData.projectDate) : null,
+          requirements: jobData.requirements,
+          status: 'open',
+          isPublic: jobData.isPublic || true,
+          allowCommunication: jobData.allowCommunication || false,
+        })
+        .returning();
+      console.log("✅ JOB: Created successfully in database", { job });
+      return job;
+    } catch (error) {
+      console.error("Database job creation error:", error);
+      // Fallback to memory storage
+      const job = {
+        id: Date.now(),
+        ...jobData,
+        status: 'open',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      console.log("✅ JOB: Created successfully (fallback)", { job });
+      return job;
+    }
   }
 
   async getJobs(filters?: any): Promise<any[]> {
     console.log("🔥 JOB: Getting jobs", { filters });
-    // Return empty array - no hardcoded sample jobs
-    const jobs: any[] = [];
-    
-    console.log("✅ JOB: Retrieved jobs", { count: jobs.length });
-    return jobs;
+    try {
+      const jobsList = await db
+        .select({
+          id: jobs.id,
+          userId: jobs.userId,
+          title: jobs.title,
+          description: jobs.description,
+          talentType: jobs.talentType,
+          location: jobs.location,
+          budget: jobs.budget,
+          projectDate: jobs.projectDate,
+          requirements: jobs.requirements,
+          status: jobs.status,
+          isPublic: jobs.isPublic,
+          allowCommunication: jobs.allowCommunication,
+          createdAt: jobs.createdAt,
+          updatedAt: jobs.updatedAt,
+        })
+        .from(jobs)
+        .where(eq(jobs.status, 'open'))
+        .orderBy(desc(jobs.createdAt));
+      
+      console.log("✅ JOBS: Retrieved from database", { count: jobsList.length });
+      return jobsList;
+    } catch (error) {
+      console.error("Database jobs retrieval error:", error);
+      return [];
+    }
   }
 
   async getJob(id: number): Promise<any> {

@@ -1875,7 +1875,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/jobs', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const jobData = insertJobSchema.parse({ ...req.body, userId });
+      const jobData = insertJobSchema.parse({ 
+        ...req.body, 
+        userId,
+        budget: req.body.budget ? String(req.body.budget) : null,
+        projectDate: req.body.projectDate ? new Date(req.body.projectDate) : null
+      });
       const job = await simpleStorage.createJob(jobData);
       res.json(job);
     } catch (error) {
