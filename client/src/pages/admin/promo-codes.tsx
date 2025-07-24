@@ -47,19 +47,13 @@ import { format } from "date-fns";
 interface PromoCode {
   id: number;
   code: string;
-  name: string;
   description: string;
-  type: "percentage" | "fixed_amount" | "first_month_free" | "first_month_discount";
-  value: string;
-  active: boolean;
-  maxUses: number | null;
-  maxUsesPerUser: number;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  maxUses: number;
   usedCount: number;
-  startsAt: string | null;
+  isActive: boolean;
   expiresAt: string | null;
-  planRestriction: "monthly_only" | "annual_only" | "no_restriction" | "specific_tier" | null;
-  categoryRestriction: "talent" | "manager" | "producer" | "agent" | null;
-  specificTierId: number | null;
   createdBy: number;
   createdAt: string;
   updatedAt: string;
@@ -265,16 +259,15 @@ const PromoCodeManagement = () => {
     resetForm();
   };
 
-  const filteredPromoCodes = promoCodes.filter((promoCode: PromoCode) => {
+  const filteredPromoCodes = (promoCodes || []).filter((promoCode: PromoCode) => {
     const matchesSearch = promoCode.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         promoCode.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === "all" || promoCode.type === filterType;
+                         promoCode.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = filterType === "all" || promoCode.discountType === filterType;
     const matchesStatus = filterStatus === "all" || 
-                         (filterStatus === "active" && promoCode.active) ||
-                         (filterStatus === "inactive" && !promoCode.active);
-    const matchesCategory = filterCategory === "all" || promoCode.categoryRestriction === filterCategory;
+                         (filterStatus === "active" && promoCode.isActive) ||
+                         (filterStatus === "inactive" && !promoCode.isActive);
 
-    return matchesSearch && matchesType && matchesStatus && matchesCategory;
+    return matchesSearch && matchesType && matchesStatus;
   });
 
   const getTypeIcon = (type: string) => {

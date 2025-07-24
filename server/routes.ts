@@ -2897,8 +2897,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/pricing-tiers', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      console.log("Creating pricing tier:", req.body);
-      const tier = await simpleStorage.createPricingTier(req.body);
+      const { permissions, ...tierData } = req.body; // Remove permissions field that doesn't exist in schema
+      console.log("Creating pricing tier:", tierData);
+      const tier = await simpleStorage.createPricingTier(tierData);
       res.json(tier);
     } catch (error) {
       console.error("Error creating pricing tier:", error);
@@ -2909,7 +2910,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/pricing-tiers/:tierId', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const tierId = parseInt(req.params.tierId);
-      const tier = await simpleStorage.updatePricingTier(tierId, req.body);
+      const { permissions, ...tierData } = req.body; // Remove permissions field that doesn't exist in schema
+      const tier = await simpleStorage.updatePricingTier(tierId, tierData);
       res.json(tier);
     } catch (error) {
       console.error("Error updating pricing tier:", error);

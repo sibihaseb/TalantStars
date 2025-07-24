@@ -382,7 +382,37 @@ export class DatabaseStorage implements IStorage {
 
   async createPricingTier(tier: any): Promise<PricingTier> {
     try {
-      const [pricingTier] = await db.insert(pricingTiers).values(tier).returning();
+      // Map field names to match database schema
+      const tierData = {
+        name: tier.name,
+        price: tier.price?.toString() || tier.price,
+        duration: tier.duration,
+        features: tier.features || [],
+        isActive: tier.isActive ?? tier.active ?? true,
+        category: tier.category || 'talent',
+        // Resource limits
+        maxPhotos: tier.maxPhotos || 0,
+        maxVideos: tier.maxVideos || 0,
+        maxAudio: tier.maxAudio || 0,
+        maxExternalLinks: tier.maxExternalLinks || 0,
+        maxStorageGB: tier.maxStorageGB || 1,
+        maxProjects: tier.maxProjects || 0,
+        maxApplications: tier.maxApplications || 0,
+        // Feature flags
+        hasAnalytics: tier.hasAnalytics || false,
+        hasMessaging: tier.hasMessaging || false,
+        hasAIFeatures: tier.hasAIFeatures || false,
+        hasPrioritySupport: tier.hasPrioritySupport || false,
+        // Permissions
+        canCreateJobs: tier.canCreateJobs || false,
+        canViewProfiles: tier.canViewProfiles ?? true,
+        canExportData: tier.canExportData || false,
+        hasSocialFeatures: tier.hasSocialFeatures ?? true,
+        annualPrice: tier.annualPrice || '0'
+      };
+      
+      console.log('Mapped tier data for insertion:', tierData);
+      const [pricingTier] = await db.insert(pricingTiers).values(tierData).returning();
       return pricingTier;
     } catch (error) {
       console.error('Error creating pricing tier:', error);
@@ -392,9 +422,37 @@ export class DatabaseStorage implements IStorage {
 
   async updatePricingTier(id: number, tier: any): Promise<PricingTier> {
     try {
+      // Map field names to match database schema, only include provided fields
+      const updateData: any = { updatedAt: new Date() };
+      
+      if (tier.name !== undefined) updateData.name = tier.name;
+      if (tier.price !== undefined) updateData.price = tier.price?.toString() || tier.price;
+      if (tier.duration !== undefined) updateData.duration = tier.duration;
+      if (tier.features !== undefined) updateData.features = tier.features;
+      if (tier.isActive !== undefined) updateData.isActive = tier.isActive;
+      if (tier.active !== undefined) updateData.isActive = tier.active;
+      if (tier.category !== undefined) updateData.category = tier.category;
+      if (tier.maxPhotos !== undefined) updateData.maxPhotos = tier.maxPhotos;
+      if (tier.maxVideos !== undefined) updateData.maxVideos = tier.maxVideos;
+      if (tier.maxAudio !== undefined) updateData.maxAudio = tier.maxAudio;
+      if (tier.maxExternalLinks !== undefined) updateData.maxExternalLinks = tier.maxExternalLinks;
+      if (tier.maxStorageGB !== undefined) updateData.maxStorageGB = tier.maxStorageGB;
+      if (tier.maxProjects !== undefined) updateData.maxProjects = tier.maxProjects;
+      if (tier.maxApplications !== undefined) updateData.maxApplications = tier.maxApplications;
+      if (tier.hasAnalytics !== undefined) updateData.hasAnalytics = tier.hasAnalytics;
+      if (tier.hasMessaging !== undefined) updateData.hasMessaging = tier.hasMessaging;
+      if (tier.hasAIFeatures !== undefined) updateData.hasAIFeatures = tier.hasAIFeatures;
+      if (tier.hasPrioritySupport !== undefined) updateData.hasPrioritySupport = tier.hasPrioritySupport;
+      if (tier.canCreateJobs !== undefined) updateData.canCreateJobs = tier.canCreateJobs;
+      if (tier.canViewProfiles !== undefined) updateData.canViewProfiles = tier.canViewProfiles;
+      if (tier.canExportData !== undefined) updateData.canExportData = tier.canExportData;
+      if (tier.hasSocialFeatures !== undefined) updateData.hasSocialFeatures = tier.hasSocialFeatures;
+      if (tier.annualPrice !== undefined) updateData.annualPrice = tier.annualPrice;
+      
+      console.log('Mapped update data:', updateData);
       const [pricingTier] = await db
         .update(pricingTiers)
-        .set({ ...tier, updatedAt: new Date() })
+        .set(updateData)
         .where(eq(pricingTiers.id, id))
         .returning();
       return pricingTier;
