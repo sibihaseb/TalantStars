@@ -63,6 +63,9 @@ interface PromoCode {
   planRestriction?: string;
   categoryRestriction?: string;
   specificTierId?: number;
+  // NEW: Time-based discount duration fields
+  discountDurationMonths?: number | null;
+  autoDowngradeOnExpiry?: boolean;
   createdBy: number;
   createdAt: string;
   updatedAt: string;
@@ -110,7 +113,10 @@ const PromoCodeManagement = () => {
     expiresAt: "",
     planRestriction: "no_restriction" as const,
     categoryRestriction: "",
-    specificTierId: ""
+    specificTierId: "",
+    // NEW: Time-based discount duration fields
+    discountDurationMonths: "",
+    autoDowngradeOnExpiry: false
   });
 
   const { toast } = useToast();
@@ -252,7 +258,10 @@ const PromoCodeManagement = () => {
       expiresAt: "",
       planRestriction: "no_restriction",
       categoryRestriction: "",
-      specificTierId: ""
+      specificTierId: "",
+      // NEW: Time-based discount duration fields
+      discountDurationMonths: "",
+      autoDowngradeOnExpiry: false
     });
   };
 
@@ -271,7 +280,10 @@ const PromoCodeManagement = () => {
       expiresAt: promoCode.expiresAt ? format(new Date(promoCode.expiresAt), "yyyy-MM-dd'T'HH:mm") : "",
       planRestriction: promoCode.planRestriction || "no_restriction",
       categoryRestriction: promoCode.categoryRestriction || "",
-      specificTierId: promoCode.specificTierId?.toString() || ""
+      specificTierId: promoCode.specificTierId?.toString() || "",
+      // NEW: Time-based discount duration fields
+      discountDurationMonths: promoCode.discountDurationMonths?.toString() || "",
+      autoDowngradeOnExpiry: promoCode.autoDowngradeOnExpiry || false
     });
     setIsDialogOpen(true);
   };
@@ -287,7 +299,10 @@ const PromoCodeManagement = () => {
       expiresAt: formData.expiresAt ? new Date(formData.expiresAt).toISOString() : null,
       planRestriction: formData.planRestriction === "no_restriction" ? null : formData.planRestriction,
       categoryRestriction: formData.categoryRestriction || null,
-      specificTierId: formData.specificTierId ? parseInt(formData.specificTierId) : null
+      specificTierId: formData.specificTierId ? parseInt(formData.specificTierId) : null,
+      // NEW: Time-based discount duration fields
+      discountDurationMonths: formData.discountDurationMonths ? parseInt(formData.discountDurationMonths) : null,
+      autoDowngradeOnExpiry: formData.autoDowngradeOnExpiry
     };
 
     if (editingPromoCode) {
@@ -560,6 +575,45 @@ const PromoCodeManagement = () => {
                   </Select>
                 </div>
               )}
+
+              {/* NEW: Time-based discount duration section */}
+              <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
+                <h4 className="font-semibold text-blue-900">Time-Based Discount Duration</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="discountDurationMonths">Discount Duration (Months)</Label>
+                    <Input
+                      id="discountDurationMonths"
+                      value={formData.discountDurationMonths}
+                      onChange={(e) => setFormData({ ...formData, discountDurationMonths: e.target.value })}
+                      placeholder="e.g., 1, 24, etc. (leave empty for permanent)"
+                      type="number"
+                      min="1"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Discount automatically expires after this many months. Leave empty for permanent discount.
+                    </p>
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="autoDowngradeOnExpiry"
+                        checked={formData.autoDowngradeOnExpiry}
+                        onCheckedChange={(checked) => setFormData({ ...formData, autoDowngradeOnExpiry: checked })}
+                      />
+                      <Label htmlFor="autoDowngradeOnExpiry">Auto-downgrade to Free on Expiry</Label>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      For 100% discounts, automatically downgrade users to free version when discount expires.
+                    </p>
+                  </div>
+                </div>
+                <div className="text-sm text-blue-700 bg-blue-100 p-3 rounded">
+                  <strong>Example:</strong> Set duration to "1" month for a 1-month discount, or "24" months for a 2-year discount. 
+                  When the period expires, users are automatically moved back to their original pricing tier 
+                  (or free version if auto-downgrade is enabled for 100% discounts).
+                </div>
+              </div>
 
               <div className="flex items-center space-x-2">
                 <Switch

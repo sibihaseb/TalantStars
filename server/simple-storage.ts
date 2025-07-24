@@ -20,7 +20,7 @@ import {
   type TalentType,
   type InsertTalentType,
 } from "@shared/simple-schema";
-import { jobHistory, profileSharingSettings, availabilityCalendar, mediaFiles, jobApplications, jobCommunications, socialPosts, jobs, socialMediaLinks, friendships } from "@shared/schema";
+import { jobHistory, profileSharingSettings, availabilityCalendar, mediaFiles, jobApplications, jobCommunications, socialPosts, jobs, socialMediaLinks, friendships, promoCodes, promoCodeUsage, userDiscountPeriods } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc, desc, sql } from "drizzle-orm";
 
@@ -134,6 +134,11 @@ export interface IStorage {
   getPromoCodeUsage(id: number): Promise<any>;
   validatePromoCode(code: string): Promise<any>;
   calculateDiscountAmount(promoCode: any, amount: number): Promise<number>;
+  
+  // NEW: Time-based discount duration methods
+  applyTimeBasedDiscount(userId: number, promoCodeId: number, discountDurationMonths: number, autoDowngradeOnExpiry: boolean): Promise<any>;
+  checkExpiredDiscounts(): Promise<void>;
+  downgradeExpiredUsers(): Promise<void>;
   
   // Email campaign operations - MISSING METHODS THAT ARE BREAKING ADMIN FUNCTIONALITY
   getEmailCampaigns(): Promise<any[]>;
@@ -2713,83 +2718,181 @@ export class DatabaseStorage implements IStorage {
   // ==================== CRITICAL ADMIN FUNCTIONALITY IMPLEMENTATIONS ====================
   // These methods were missing and causing all admin functionality to be broken
 
-  // Promo code operations - CRITICAL FOR ADMIN DASHBOARD
+  // Promo code operations - REAL DATABASE IMPLEMENTATION WITH TIME-BASED DISCOUNTS
   async getPromoCodes(): Promise<any[]> {
     try {
-      console.log("🔥 ADMIN: Getting promo codes");
-      return [
-        {
-          id: 1,
-          code: "WELCOME10",
-          description: "10% off for new users",
-          discountType: "percentage",
-          discountValue: 10,
-          maxUses: 100,
-          usedCount: 15,
-          isActive: true,
-          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-          createdAt: new Date()
-        },
-        {
-          id: 2,
-          code: "SPRING2025",
-          description: "$25 off premium plans",
-          discountType: "fixed",
-          discountValue: 25,
-          maxUses: 50,
-          usedCount: 8,
-          isActive: true,
-          expiresAt: new Date("2025-06-01"),
-          createdAt: new Date()
-        }
-      ];
+      console.log("🔥 ADMIN: Getting promo codes from database");
+      const results = await db
+        .select()
+        .from(promoCodes)
+        .orderBy(desc(promoCodes.createdAt));
+      
+      console.log("✅ ADMIN: Retrieved promo codes from database", results.length);
+      return results;
     } catch (error) {
-      console.error('Error getting promo codes:', error);
+      console.error('Database promo codes retrieval error:', error);
       return [];
     }
   }
 
   async createPromoCode(promoCode: any): Promise<any> {
     try {
-      console.log("🔥 ADMIN: Creating promo code", promoCode);
-      const newPromoCode = {
-        id: Date.now(),
-        ...promoCode,
-        usedCount: 0,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      console.log("✅ ADMIN: Promo code created", newPromoCode);
-      return newPromoCode;
+      console.log("🔥 ADMIN: Creating promo code with time-based discount", promoCode);
+      
+      // Convert date strings to Date objects if they exist
+      const insertData: any = { ...promoCode };
+      if (insertData.startsAt && typeof insertData.startsAt === 'string') {
+        insertData.startsAt = new Date(insertData.startsAt);
+      }
+      if (insertData.expiresAt && typeof insertData.expiresAt === 'string') {
+        insertData.expiresAt = new Date(insertData.expiresAt);
+      }
+      
+      // Set defaults for required fields
+      insertData.usedCount = 0;
+      insertData.createdBy = insertData.createdBy || 1; // Default admin user
+      insertData.createdAt = new Date();
+      insertData.updatedAt = new Date();
+      
+      const [result] = await db
+        .insert(promoCodes)
+        .values(insertData)
+        .returning();
+        
+      console.log("✅ ADMIN: Promo code created with database", result);
+      return result;
     } catch (error) {
-      console.error('Error creating promo code:', error);
+      console.error('Database promo code creation error:', error);
       throw error;
     }
   }
 
   async updatePromoCode(id: number, promoCode: any): Promise<any> {
     try {
-      console.log("🔥 ADMIN: Updating promo code", { id, promoCode });
-      const updatedPromoCode = {
-        id,
-        ...promoCode,
-        updatedAt: new Date()
-      };
-      console.log("✅ ADMIN: Promo code updated", updatedPromoCode);
-      return updatedPromoCode;
+      console.log("🔥 ADMIN: Updating promo code with time-based discount", { id, promoCode });
+      
+      // Convert date strings to Date objects if they exist
+      const updateData: any = { ...promoCode };
+      if (updateData.startsAt && typeof updateData.startsAt === 'string') {
+        updateData.startsAt = new Date(updateData.startsAt);
+      }
+      if (updateData.expiresAt && typeof updateData.expiresAt === 'string') {
+        updateData.expiresAt = new Date(updateData.expiresAt);
+      }
+      updateData.updatedAt = new Date();
+      
+      const [result] = await db
+        .update(promoCodes)
+        .set(updateData)
+        .where(eq(promoCodes.id, id))
+        .returning();
+        
+      console.log("✅ ADMIN: Promo code updated with database", result);
+      return result;
     } catch (error) {
-      console.error('Error updating promo code:', error);
+      console.error('Database promo code update error:', error);
       throw error;
     }
   }
 
   async deletePromoCode(id: number): Promise<void> {
     try {
-      console.log("🔥 ADMIN: Deleting promo code", { id });
-      console.log("✅ ADMIN: Promo code deleted successfully");
+      console.log("🔥 ADMIN: Deleting promo code from database", { id });
+      await db.delete(promoCodes).where(eq(promoCodes.id, id));
+      console.log("✅ ADMIN: Promo code deleted from database successfully");
     } catch (error) {
-      console.error('Error deleting promo code:', error);
+      console.error('Database promo code deletion error:', error);
       throw error;
+    }
+  }
+
+  // NEW: Time-based discount duration implementation
+  async applyTimeBasedDiscount(userId: number, promoCodeId: number, discountDurationMonths: number, autoDowngradeOnExpiry: boolean): Promise<any> {
+    try {
+      console.log("🔥 ADMIN: Applying time-based discount", { userId, promoCodeId, discountDurationMonths, autoDowngradeOnExpiry });
+      
+      const expiresAt = new Date();
+      expiresAt.setMonth(expiresAt.getMonth() + discountDurationMonths);
+      
+      const discountPeriod = {
+        userId,
+        promoCodeId,
+        startDate: new Date(),
+        expiresAt,
+        autoDowngradeOnExpiry,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const [result] = await db
+        .insert(userDiscountPeriods)
+        .values(discountPeriod)
+        .returning();
+        
+      console.log("✅ ADMIN: Time-based discount applied", result);
+      return result;
+    } catch (error) {
+      console.error('Database time-based discount application error:', error);
+      throw error;
+    }
+  }
+
+  async checkExpiredDiscounts(): Promise<void> {
+    try {
+      console.log("🔥 ADMIN: Checking for expired discounts");
+      
+      const expiredDiscounts = await db
+        .select()
+        .from(userDiscountPeriods)
+        .where(eq(userDiscountPeriods.isActive, true))
+        .where(sql`${userDiscountPeriods.expiresAt} <= NOW()`);
+        
+      console.log(`✅ ADMIN: Found ${expiredDiscounts.length} expired discounts`);
+      
+      for (const discount of expiredDiscounts) {
+        // Mark discount as expired
+        await db
+          .update(userDiscountPeriods)
+          .set({ isActive: false, updatedAt: new Date() })
+          .where(eq(userDiscountPeriods.id, discount.id));
+          
+        // If auto-downgrade is enabled, downgrade user to free tier
+        if (discount.autoDowngradeOnExpiry) {
+          await this.updateUserTier(discount.userId, 1); // Assume tier 1 is free
+          console.log(`✅ ADMIN: Auto-downgraded user ${discount.userId} to free tier`);
+        }
+      }
+    } catch (error) {
+      console.error('Database expired discount check error:', error);
+    }
+  }
+
+  async downgradeExpiredUsers(): Promise<void> {
+    try {
+      console.log("🔥 ADMIN: Processing expired user downgrades");
+      
+      const expiredUsersToDowngrade = await db
+        .select()
+        .from(userDiscountPeriods)
+        .where(eq(userDiscountPeriods.isActive, true))
+        .where(eq(userDiscountPeriods.autoDowngradeOnExpiry, true))
+        .where(sql`${userDiscountPeriods.expiresAt} <= NOW()`);
+        
+      for (const discount of expiredUsersToDowngrade) {
+        // Downgrade to free tier
+        await this.updateUserTier(discount.userId, 1);
+        
+        // Mark discount as processed
+        await db
+          .update(userDiscountPeriods)
+          .set({ isActive: false, updatedAt: new Date() })
+          .where(eq(userDiscountPeriods.id, discount.id));
+          
+        console.log(`✅ ADMIN: Downgraded expired user ${discount.userId} to free tier`);
+      }
+    } catch (error) {
+      console.error('Database user downgrade error:', error);
     }
   }
 

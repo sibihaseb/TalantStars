@@ -418,6 +418,10 @@ export const promoCodes = pgTable("promo_codes", {
   startsAt: timestamp("startsAt"),
   expiresAt: timestamp("expiresAt"),
   
+  // NEW: Discount duration criteria
+  discountDurationMonths: integer("discount_duration_months"), // null = permanent, number = duration in months (1, 24, etc.)
+  autoDowngradeOnExpiry: boolean("auto_downgrade_on_expiry").default(false), // auto downgrade to free when 100% discount expires
+  
   // Status
   active: boolean("active").default(true),
   
@@ -438,6 +442,22 @@ export const promoCodeUsage = pgTable("promo_code_usage", {
   finalAmount: decimal("final_amount", { precision: 10, scale: 2 }).notNull(),
   planType: varchar("plan_type").notNull(), // "monthly" or "annual"
   usedAt: timestamp("used_at").defaultNow(),
+});
+
+// NEW: Track active user discount periods for time-based expiration
+export const userDiscountPeriods = pgTable("user_discount_periods", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  promoCodeId: integer("promo_code_id").references(() => promoCodes.id).notNull(),
+  originalTierId: integer("original_tier_id").references(() => pricingTiers.id), // tier before discount
+  discountTierId: integer("discount_tier_id").references(() => pricingTiers.id), // tier during discount
+  discountPercentage: decimal("discount_percentage", { precision: 5, scale: 2 }), // actual discount applied
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date").notNull(), // when discount expires
+  isActive: boolean("is_active").default(true),
+  autoDowngradeScheduled: boolean("auto_downgrade_scheduled").default(false), // flag for 100% discount auto-downgrade
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Job/Gig history for talents and their managers
