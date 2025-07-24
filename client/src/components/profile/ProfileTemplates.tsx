@@ -184,7 +184,9 @@ function useProfileActions() {
         }),
       });
 
-      if (response.ok) {
+      const result = await response.json();
+      
+      if (result.success) {
         toast({
           title: "Message Sent",
           description: `Your message has been sent to ${targetProfile.displayName}.`,
@@ -195,8 +197,17 @@ function useProfileActions() {
         setTimeout(() => {
           setLocation('/messages');
         }, 1500);
+      } else if (result.requiresAuth) {
+        toast({
+          title: "Login Required",
+          description: result.message,
+          variant: "default"
+        });
+        setTimeout(() => {
+          setLocation('/auth');
+        }, 2000);
       } else {
-        throw new Error('Failed to send message');
+        throw new Error(result.message || 'Failed to send message');
       }
     } catch (error) {
       console.error('Contact error:', error);
@@ -238,14 +249,25 @@ function useProfileActions() {
         }),
       });
 
-      if (response.ok) {
+      const result = await response.json();
+      
+      if (result.success) {
         toast({
           title: "Follow Request Sent",
           description: `You are now following ${targetProfile.displayName}!`,
           variant: "default"
         });
+      } else if (result.requiresAuth) {
+        toast({
+          title: "Login Required",
+          description: result.message,
+          variant: "default"
+        });
+        setTimeout(() => {
+          setLocation('/auth');
+        }, 2000);
       } else {
-        throw new Error('Failed to follow user');
+        throw new Error(result.message || 'Failed to follow user');
       }
     } catch (error) {
       console.error('Follow error:', error);
@@ -268,6 +290,7 @@ function useProfileActions() {
 export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const isOwnProfile = user?.id === parseInt(userId);
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
+  const { handleContact, handleFollow } = useProfileActions();
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
 
   // Convert user profile social links to the expected format (handle double nesting)
@@ -584,6 +607,7 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
 export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+  const { handleContact, handleFollow } = useProfileActions();
   const isOwnProfile = user?.id === parseInt(userId);
 
   // Convert user profile social links to the expected format (handle double nesting)
@@ -943,6 +967,7 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
 export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+  const { handleContact, handleFollow } = useProfileActions();
   const isOwnProfile = user?.id === parseInt(userId);
 
   // Convert user profile social links to the expected format (handle double nesting)
@@ -1296,6 +1321,7 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
 export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+  const { handleContact, handleFollow } = useProfileActions();
   const isOwnProfile = user?.id === parseInt(userId);
 
   // Convert user profile social links to the expected format (handle double nesting)
@@ -1622,6 +1648,7 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
 export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSettings }: Omit<ProfileTemplatesProps, 'selectedTemplate' | 'onTemplateChange'>) {
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+  const { handleContact, handleFollow } = useProfileActions();
   const isOwnProfile = user?.id === parseInt(userId);
 
   // Convert user profile social links to the expected format (handle double nesting)

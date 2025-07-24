@@ -1810,9 +1810,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Follow user (alias for friend request)
-  app.post("/api/social/follow", isAuthenticated, async (req: any, res) => {
+  // Follow user (alias for friend request) - Modified to work for public users
+  app.post("/api/social/follow", async (req: any, res) => {
     try {
+      // If user is not authenticated, show friendly message instead of error
+      if (!req.isAuthenticated()) {
+        return res.json({ 
+          success: false, 
+          requiresAuth: true,
+          message: "Please log in to follow this talent. You can create a free account to connect with professionals." 
+        });
+      }
+      
       const addresseeId = parseInt(req.body.addresseeId);
       const friendship = await simpleStorage.sendFriendRequest(req.user.id, addresseeId);
       res.json({ success: true, friendship });
@@ -1998,9 +2007,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Message routes
-  app.post('/api/messages', isAuthenticated, async (req: any, res) => {
+  // Message routes - Modified to work for public users
+  app.post('/api/messages', async (req: any, res) => {
     try {
+      // If user is not authenticated, show friendly message instead of error
+      if (!req.isAuthenticated()) {
+        return res.json({ 
+          success: false, 
+          requiresAuth: true,
+          message: "Please log in to send messages. Create a free account to contact professionals directly." 
+        });
+      }
+      
       const senderId = req.user.id;
       const messageData = insertMessageSchema.parse({ ...req.body, senderId });
       const message = await simpleStorage.createMessage(messageData);
