@@ -1093,7 +1093,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   organizedMeetings: many(meetings, { relationName: "organizedMeetings" }),
   attendedMeetings: many(meetings, { relationName: "attendedMeetings" }),
   passwordResetTokens: many(passwordResetTokens),
-  permissions: many(userPermissions),
+  // permissions: many(userPermissions), // Temporarily disabled due to schema mismatch
   notifications: many(notifications),
   paymentTransactions: many(paymentTransactions),
   refundedPayments: many(paymentTransactions, { relationName: "refundedPayments" }),

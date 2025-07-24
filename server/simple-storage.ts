@@ -412,7 +412,33 @@ export class DatabaseStorage implements IStorage {
       };
       
       console.log('Mapped tier data for insertion:', tierData);
-      const [pricingTier] = await db.insert(pricingTiers).values(tierData).returning();
+      
+      // Try direct Drizzle insertion with explicit field mapping
+      const [pricingTier] = await db.insert(pricingTiers).values({
+        name: tierData.name,
+        price: tierData.price,
+        duration: tierData.duration,
+        features: tierData.features,
+        isActive: tierData.isActive,
+        category: tierData.category,
+        maxPhotos: tierData.maxPhotos,
+        maxVideos: tierData.maxVideos,
+        maxAudio: tierData.maxAudio,
+        maxExternalLinks: tierData.maxExternalLinks,
+        maxStorageGB: tierData.maxStorageGB,
+        maxProjects: tierData.maxProjects,
+        maxApplications: tierData.maxApplications,
+        hasAnalytics: tierData.hasAnalytics,
+        hasMessaging: tierData.hasMessaging,
+        hasAIFeatures: tierData.hasAIFeatures,
+        hasPrioritySupport: tierData.hasPrioritySupport,
+        canCreateJobs: tierData.canCreateJobs,
+        canViewProfiles: tierData.canViewProfiles,
+        canExportData: tierData.canExportData,
+        hasSocialFeatures: tierData.hasSocialFeatures,
+        annualPrice: tierData.annualPrice
+      }).returning();
+      
       return pricingTier;
     } catch (error) {
       console.error('Error creating pricing tier:', error);
