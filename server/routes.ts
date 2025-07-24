@@ -4556,5 +4556,260 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add missing email test endpoints
+  app.post('/api/test-welcome-email', async (req, res) => {
+    try {
+      const { email, role } = req.body;
+      const targetEmail = email || 'marty@24flix.com';
+      const userRole = role || 'talent';
+      
+      console.log(`Sending welcome email for ${userRole} role to: ${targetEmail}`);
+      
+      const testUser = {
+        email: targetEmail,
+        firstName: 'Test',
+        role: userRole,
+        lastName: 'User'
+      };
+      
+      const success = await sendWelcomeEmail(testUser);
+      
+      if (success) {
+        res.json({ success: true, message: `Welcome email for ${userRole} sent successfully` });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to send welcome email' });
+      }
+    } catch (error) {
+      console.error('Error sending welcome email:', error);
+      res.status(500).json({ success: false, message: 'Error sending welcome email', error: error.message });
+    }
+  });
+
+  app.post('/api/test-password-reset', async (req, res) => {
+    try {
+      const { email } = req.body;
+      const targetEmail = email || 'marty@24flix.com';
+      
+      console.log(`Sending password reset email to: ${targetEmail}`);
+      
+      const resetToken = 'test-reset-token-123456';
+      const success = await sendPasswordResetEmail(targetEmail, resetToken);
+      
+      if (success) {
+        res.json({ success: true, message: 'Password reset email sent successfully' });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to send password reset email' });
+      }
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      res.status(500).json({ success: false, message: 'Error sending password reset email', error: error.message });
+    }
+  });
+
+  app.post('/api/test-job-notification', async (req, res) => {
+    try {
+      const { email } = req.body;
+      const targetEmail = email || 'marty@24flix.com';
+      
+      console.log(`Sending job application notification to: ${targetEmail}`);
+      
+      const html = getEmailTemplate(`
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #667eea; font-size: 32px; margin: 0;">📋 New Job Application</h2>
+          <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">Someone applied to your job posting</p>
+        </div>
+        
+        <div style="background-color: #f8f9fa; padding: 25px; border-radius: 10px; margin: 25px 0;">
+          <h3 style="color: #333; margin-top: 0;">Application Details</h3>
+          <p style="color: #6c757d; font-size: 16px; margin: 10px 0;">
+            <strong>Job:</strong> Lead Actor - Feature Film<br>
+            <strong>Applicant:</strong> Sarah Johnson<br>
+            <strong>Experience:</strong> 8 years<br>
+            <strong>Applied:</strong> ${new Date().toLocaleDateString()}
+          </p>
+          
+          <div style="text-align: center; margin-top: 25px;">
+            <a href="#" style="display: inline-block; background-color: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+              Review Application
+            </a>
+          </div>
+        </div>
+      `);
+
+      const success = await sendEmail({
+        to: targetEmail,
+        subject: '📋 New Job Application - Lead Actor Position',
+        html,
+        text: 'You have received a new job application. Please review the application in your dashboard.',
+      });
+
+      if (success) {
+        res.json({ success: true, message: 'Job application notification sent successfully' });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to send job notification' });
+      }
+    } catch (error) {
+      console.error('Error sending job notification:', error);
+      res.status(500).json({ success: false, message: 'Error sending job notification', error: error.message });
+    }
+  });
+
+  app.post('/api/test-meeting-email', async (req, res) => {
+    try {
+      const { email } = req.body;
+      const targetEmail = email || 'marty@24flix.com';
+      
+      console.log(`Sending meeting invitation to: ${targetEmail}`);
+      
+      const meetingDetails = {
+        title: 'Casting Meeting - Lead Role Discussion',
+        date: 'March 20, 2025',
+        time: '2:00 PM PST',
+        location: 'Studio City, Los Angeles',
+        virtualLink: 'https://zoom.us/j/123456789',
+        organizer: 'Michael Productions',
+        description: 'Discussion about the lead role in upcoming feature film production.'
+      };
+      
+      const success = await sendMeetingInvitation(targetEmail, meetingDetails);
+      
+      if (success) {
+        res.json({ success: true, message: 'Meeting invitation sent successfully' });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to send meeting invitation' });
+      }
+    } catch (error) {
+      console.error('Error sending meeting invitation:', error);
+      res.status(500).json({ success: false, message: 'Error sending meeting invitation', error: error.message });
+    }
+  });
+
+  app.post('/api/test-verification-email', async (req, res) => {
+    try {
+      const { email } = req.body;
+      const targetEmail = email || 'marty@24flix.com';
+      
+      console.log(`Sending profile verification email to: ${targetEmail}`);
+      
+      const html = getEmailTemplate(`
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #667eea; font-size: 32px; margin: 0;">✅ Profile Verified!</h2>
+          <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">Your profile has been successfully verified</p>
+        </div>
+        
+        <div style="background-color: #d4edda; padding: 25px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #28a745;">
+          <h3 style="color: #155724; margin-top: 0;">🎉 Verification Complete</h3>
+          <p style="color: #155724; font-size: 16px; margin: 10px 0;">
+            Congratulations! Your profile has been reviewed and verified by our team.
+          </p>
+          <p style="color: #155724; font-size: 14px; margin: 10px 0;">
+            <strong>Benefits of verification:</strong>
+          </p>
+          <ul style="color: #155724; font-size: 14px; margin: 10px 0; padding-left: 20px;">
+            <li>Increased visibility in search results</li>
+            <li>Verified badge on your profile</li>
+            <li>Access to premium job opportunities</li>
+            <li>Higher trust from casting directors</li>
+          </ul>
+        </div>
+        
+        <div style="text-align: center;">
+          <a href="#" style="display: inline-block; background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            View Your Profile
+          </a>
+        </div>
+      `);
+
+      const success = await sendEmail({
+        to: targetEmail,
+        subject: '✅ Profile Verification Complete - Talents & Stars',
+        html,
+        text: 'Congratulations! Your profile has been verified. You now have access to premium features and increased visibility.',
+      });
+
+      if (success) {
+        res.json({ success: true, message: 'Profile verification email sent successfully' });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to send verification email' });
+      }
+    } catch (error) {
+      console.error('Error sending verification email:', error);
+      res.status(500).json({ success: false, message: 'Error sending verification email', error: error.message });
+    }
+  });
+
+  // Add basic test email endpoint
+  app.post('/api/admin/test-email', async (req, res) => {
+    try {
+      const { email } = req.body;
+      const targetEmail = email || 'marty@24flix.com';
+      
+      console.log(`Sending basic test email to: ${targetEmail}`);
+      
+      const success = await sendTestEmail(targetEmail);
+      
+      if (success) {
+        res.json({ success: true, message: 'Basic test email sent successfully' });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to send basic test email' });
+      }
+    } catch (error) {
+      console.error('Error sending basic test email:', error);
+      res.status(500).json({ success: false, message: 'Error sending basic test email', error: error.message });
+    }
+  });
+
+  app.post('/api/test-message-email', async (req, res) => {
+    try {
+      const { email } = req.body;
+      const targetEmail = email || 'marty@24flix.com';
+      
+      console.log(`Sending new message notification to: ${targetEmail}`);
+      
+      const html = getEmailTemplate(`
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #667eea; font-size: 32px; margin: 0;">💬 New Message</h2>
+          <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">You have received a new message</p>
+        </div>
+        
+        <div style="background-color: #f8f9fa; padding: 25px; border-radius: 10px; margin: 25px 0;">
+          <h3 style="color: #333; margin-top: 0;">Message from Alex Rodriguez</h3>
+          <p style="color: #6c757d; font-size: 16px; margin: 10px 0;">
+            <strong>Subject:</strong> Collaboration Opportunity<br>
+            <strong>Received:</strong> ${new Date().toLocaleString()}
+          </p>
+          
+          <div style="background-color: #ffffff; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 3px solid #667eea;">
+            <p style="color: #333; font-style: italic; margin: 0;">
+              "Hi! I saw your profile and I'm impressed with your work. I have an exciting project coming up and would love to discuss a potential collaboration..."
+            </p>
+          </div>
+          
+          <div style="text-align: center; margin-top: 25px;">
+            <a href="#" style="display: inline-block; background-color: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+              Read Full Message
+            </a>
+          </div>
+        </div>
+      `);
+
+      const success = await sendEmail({
+        to: targetEmail,
+        subject: '💬 New Message from Alex Rodriguez - Talents & Stars',
+        html,
+        text: 'You have received a new message from Alex Rodriguez about a collaboration opportunity. Check your messages to read the full conversation.',
+      });
+
+      if (success) {
+        res.json({ success: true, message: 'New message notification sent successfully' });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to send message notification' });
+      }
+    } catch (error) {
+      console.error('Error sending message notification:', error);
+      res.status(500).json({ success: false, message: 'Error sending message notification', error: error.message });
+    }
+  });
+
   return httpServer;
 }

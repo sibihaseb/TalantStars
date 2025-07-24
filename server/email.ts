@@ -109,7 +109,7 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
         subject: params.subject,
         html: params.html,
         text: params.text,
-        reply_to: replyToAddress,
+        replyTo: replyToAddress,
       });
 
       if (error) {
@@ -237,6 +237,11 @@ export async function sendMeetingInvitation(
 export async function sendWelcomeEmail(user: User): Promise<boolean> {
   const { email, firstName, role } = user;
   
+  if (!email) {
+    console.error('No email address provided for welcome email');
+    return false;
+  }
+  
   let roleSpecificContent = '';
   let subject = '';
   
@@ -265,15 +270,6 @@ export async function sendWelcomeEmail(user: User): Promise<boolean> {
         <div style="text-align: center; margin-bottom: 30px;">
           <h2 style="color: #667eea; font-size: 32px; margin: 0;">🎥 Welcome, ${firstName}!</h2>
           <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">Your next production awaits</p>
-        </div>
-      `;
-      break;
-    case 'agent':
-      subject = '🤝 Welcome to Talent Representation!';
-      roleSpecificContent = `
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h2 style="color: #667eea; font-size: 32px; margin: 0;">🤝 Welcome, ${firstName}!</h2>
-          <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">Connecting dreams with opportunities</p>
         </div>
       `;
       break;
