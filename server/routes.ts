@@ -30,7 +30,7 @@ import { db } from "./db";
 import { eq, asc } from "drizzle-orm";
 import { z } from "zod";
 import { requestPasswordReset, validatePasswordResetToken, resetPassword } from "./passwordUtils";
-import { sendMeetingInvitation, sendWelcomeEmail, sendEmail, sendTestEmail, sendPasswordResetEmail } from "./email";
+import { sendMeetingInvitation, sendWelcomeEmail, sendEmail, sendTestEmail, sendPasswordResetEmail, getEmailTemplate } from "./email";
 import { scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
 import { uploadFileToWasabi, deleteFileFromWasabi, getFileTypeFromMimeType } from "./wasabi-config";

@@ -1,7 +1,7 @@
 // Comprehensive email system testing - test all email types including password reset, job communications, etc.
 import axios from 'axios';
 
-const testEmail = 'marty@onlinechannel.tv';
+const testEmail = 'marty@24flix.com';
 const baseURL = 'http://localhost:5000';
 
 async function testAllEmailTypes() {
