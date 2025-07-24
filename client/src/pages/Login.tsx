@@ -65,11 +65,9 @@ export default function Login() {
         description: `Welcome back, ${user.username}!`,
       });
 
-      // Small delay to ensure session is properly set, then navigate
-      setTimeout(() => {
-        // Force a complete page navigation to ensure session cookies are handled properly
-        window.location.href = "/admin";
-      }, 500);
+      // Force a complete page navigation to ensure cookies are properly set
+      // The issue is that Vite development server has cookie handling issues
+      window.location.href = "/admin";
     } catch (error) {
       console.error("Login error:", error);
       setError("Network error. Please try again.");

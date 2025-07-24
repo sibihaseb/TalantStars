@@ -79,8 +79,7 @@ export async function setupAuth(app: Express) {
       httpOnly: false, // Allow JavaScript access for debugging
       secure: false, // Never use secure in development
       maxAge: sessionDuration, // Use admin-controlled session duration
-      sameSite: "lax",
-      domain: undefined // Don't set domain for localhost
+      sameSite: "lax" // Standard setting for same-site requests
     },
   };
 
@@ -92,19 +91,33 @@ export async function setupAuth(app: Express) {
   // Session middleware
   app.use(session(sessionSettings));
   
-  // Session debugging middleware with CORS for credentials
-  app.use((req: any, res: any, next: any) => {
-    // Set CORS headers for credentials
+  // Handle CORS preflight requests first
+  app.options('*', (req: any, res: any) => {
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:5000');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.sendStatus(200);
+  });
+
+  // Session debugging middleware with CORS for credentials
+  app.use((req: any, res: any, next: any) => {
+    // Set CORS headers for credentials - critical for session cookies
+    res.header('Access-Control-Allow-Credentials', 'true');
+    const origin = req.headers.origin;
+    if (origin) {
+      res.header('Access-Control-Allow-Origin', origin);
+    } else {
+      res.header('Access-Control-Allow-Origin', 'http://localhost:5000');
+    }
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     
+    // Force session cookie settings for development
     if (req.session && req.session.cookie) {
       req.session.cookie.secure = false;
       req.session.cookie.httpOnly = false;
       req.session.cookie.sameSite = 'lax';
-      req.session.cookie.domain = undefined; // Ensure no domain restriction
     }
     
     next();
@@ -299,6 +312,7 @@ export async function setupAuth(app: Express) {
           res.header('Access-Control-Allow-Credentials', 'true');
           res.header('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:5000');
           
+          console.log("🔥 LOGIN: Sending response with user data and session cookie");
           res.status(200).json({ ...user, password: undefined });
         });
       });

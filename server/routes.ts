@@ -227,12 +227,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auth routes
-  app.get('/api/user', isAuthenticated, async (req: any, res) => {
-    try {
-      console.log("=== USER REQUEST ===");
-      const userId = req.user.id;
-      console.log("User ID:", userId);
-      console.log("Session ID:", req.sessionID);
+  app.get('/api/user', (req: any, res) => {
+    console.log("=== USER REQUEST DEBUG ===");
+    console.log("Session ID:", req.sessionID);
+    console.log("Session data:", req.session);
+    console.log("User object:", req.user);
+    console.log("Is authenticated:", req.isAuthenticated?.());
+    console.log("Session cookie:", req.session?.cookie);
+    console.log("Headers origin:", req.headers.origin);
+    console.log("Headers cookie:", req.headers.cookie);
+    console.log("========================");
+    
+    if (!req.isAuthenticated || !req.isAuthenticated()) {
+      console.log("User endpoint - isAuthenticated: false user: undefined");
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    // User is authenticated, proceed with original logic
+    (async () => {
+      try {
+        const userId = req.user.id;
+        console.log("User ID:", userId);
       
       const user = await simpleStorage.getUser(userId);
       console.log("User found:", !!user);
@@ -253,16 +268,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Tier limits found:", !!tierLimits);
       }
       
-      console.log("Sending user response");
-      res.json({ ...user, profile, tierLimits });
-    } catch (error) {
-      console.error("=== USER ERROR ===");
-      console.error("Error:", error);
-      console.error("Error message:", error instanceof Error ? error.message : "Unknown error");
-      console.error("User context:", req.user?.id, req.user?.username);
-      console.error("==================");
-      res.status(500).json({ message: "Failed to fetch user", error: error instanceof Error ? error.message : "Unknown error" });
-    }
+        console.log("Sending user response");
+        res.json({ ...user, profile, tierLimits });
+      } catch (error) {
+        console.error("=== USER ERROR ===");
+        console.error("Error:", error);
+        console.error("Error message:", error instanceof Error ? error.message : "Unknown error");
+        console.error("User context:", req.user?.id, req.user?.username);
+        console.error("==================");
+        res.status(500).json({ message: "Failed to fetch user", error: error instanceof Error ? error.message : "Unknown error" });
+      }
+    })();
   });
 
   // Registration endpoint - removed duplicate from routes.ts as it's handled in auth.ts
