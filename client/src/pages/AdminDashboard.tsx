@@ -4315,8 +4315,8 @@ export default function AdminDashboard() {
                       <Label htmlFor="email-content" className="text-sm font-medium">Message Content</Label>
                       <Textarea
                         id="email-content"
-                        value={emailContent}
-                        onChange={(e) => setEmailContent(e.target.value)}
+                        value={emailTemplate}
+                        onChange={(e) => setEmailTemplate(e.target.value)}
                         placeholder="Enter your email message..."
                         className="mt-1 min-h-[200px]"
                       />
