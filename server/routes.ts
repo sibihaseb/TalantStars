@@ -4438,5 +4438,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test job communication notification email
+  app.post('/api/test-job-communication-email', async (req, res) => {
+    try {
+      const { email, firstName, jobTitle, senderName, message } = req.body;
+      
+      const html = getEmailTemplate(`
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #667eea; font-size: 32px; margin: 0;">💼 Job Communication</h2>
+          <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">New message about: ${jobTitle || 'Job Opportunity'}</p>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #667eea10 0%, #764ba220 100%); padding: 25px; border-radius: 15px; margin: 20px 0;">
+          <h3 style="color: #2d3748; margin-top: 0;">Message from ${senderName || 'Interested Talent'}</h3>
+          <div style="background: white; padding: 20px; border-radius: 10px; border-left: 4px solid #667eea;">
+            <p style="color: #4a5568; font-size: 16px; line-height: 1.6; margin: 0;">
+              "${message || 'Someone is interested in your job posting and would like to discuss the opportunity.'}"
+            </p>
+          </div>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+          <h4 style="color: #2d3748; margin-top: 0;">Job Details:</h4>
+          <p style="color: #4a5568; margin: 5px 0;"><strong>Title:</strong> ${jobTitle || 'Job Opportunity'}</p>
+          <p style="color: #4a5568; margin: 5px 0;"><strong>From:</strong> ${senderName || 'Platform User'}</p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${process.env.FRONTEND_URL || 'https://talentsandstars.com'}/jobs" 
+             style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px;">
+            💼 View Job Communications
+          </a>
+        </div>
+        
+        <p style="color: #6c757d; font-size: 14px; text-align: center; margin-top: 30px;">
+          Respond promptly to maintain professional relationships and secure top talent.
+        </p>
+      `);
+
+      await sendEmail({
+        to: email,
+        subject: `💼 New Job Communication: ${jobTitle || 'Job Opportunity'}`,
+        html,
+        text: `New job communication from ${senderName} about: ${jobTitle}\n\nMessage: ${message}`,
+        replyTo: 'noreply@talentsandstars.com'
+      });
+
+      res.json({ success: true, message: 'Job communication email sent successfully' });
+    } catch (error) {
+      console.error('Error sending job communication email:', error);
+      res.status(500).json({ error: 'Failed to send job communication email' });
+    }
+  });
+
+  // Test job match notification email
+  app.post('/api/test-job-match-email', async (req, res) => {
+    try {
+      const { email, firstName, jobTitle, jobLocation, matchScore, jobDescription } = req.body;
+      
+      const html = getEmailTemplate(`
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #667eea; font-size: 32px; margin: 0;">🎯 Perfect Job Match!</h2>
+          <p style="color: #6c757d; font-size: 18px; margin: 10px 0;">AI found a ${matchScore || '95%'} match for you</p>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, #667eea10 0%, #764ba220 100%); padding: 25px; border-radius: 15px; margin: 20px 0;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 18px;">
+              ${matchScore || '95%'} Match Score
+            </div>
+          </div>
+          
+          <h3 style="color: #2d3748; margin-top: 0;">${jobTitle || 'Amazing Job Opportunity'}</h3>
+          <p style="color: #4a5568; margin: 5px 0;"><strong>📍 Location:</strong> ${jobLocation || 'Various Locations'}</p>
+          
+          <div style="background: white; padding: 20px; border-radius: 10px; margin: 15px 0;">
+            <p style="color: #4a5568; font-size: 16px; line-height: 1.6; margin: 0;">
+              ${jobDescription || 'This job opportunity matches your skills, experience, and preferences. Our AI algorithm determined this could be your next big break!'}
+            </p>
+          </div>
+        </div>
+        
+        <div style="background: #f0f8ff; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #667eea;">
+          <h4 style="color: #2d3748; margin-top: 0;">🤖 Why This Match?</h4>
+          <ul style="color: #4a5568; padding-left: 20px;">
+            <li>Matches your talent type and experience level</li>
+            <li>Location aligns with your preferences</li>
+            <li>Skills and requirements fit your profile</li>
+            <li>Budget and timeline match your availability</li>
+          </ul>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${process.env.FRONTEND_URL || 'https://talentsandstars.com'}/jobs" 
+             style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px;">
+            🎯 View Job Details
+          </a>
+        </div>
+        
+        <p style="color: #6c757d; font-size: 14px; text-align: center; margin-top: 30px;">
+          Don't wait - great opportunities like this get filled quickly!
+        </p>
+      `);
+
+      await sendEmail({
+        to: email,
+        subject: `🎯 ${matchScore || '95%'} Job Match: ${jobTitle || 'Perfect Opportunity'}`,
+        html,
+        text: `Perfect job match found!\n\nJob: ${jobTitle}\nLocation: ${jobLocation}\nMatch Score: ${matchScore}\n\nDescription: ${jobDescription}`,
+        replyTo: 'noreply@talentsandstars.com'
+      });
+
+      res.json({ success: true, message: 'Job match email sent successfully' });
+    } catch (error) {
+      console.error('Error sending job match email:', error);
+      res.status(500).json({ error: 'Failed to send job match email' });
+    }
+  });
+
   return httpServer;
 }

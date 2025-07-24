@@ -87,7 +87,8 @@ export async function sendEmailWithTemplate(templateName: string, to: string, va
       subject,
       html: htmlContent,
       text: textContent,
-      from: fromAddress
+      from: fromAddress,
+      replyTo: 'noreply@talentsandstars.com'
     });
   } catch (error) {
     console.error(`Error sending email with template '${templateName}':`, error);
@@ -137,6 +138,7 @@ interface EmailParams {
   subject: string;
   html: string;
   text?: string;
+  replyTo?: string;
 }
 
 export async function sendEmail(params: EmailParams): Promise<boolean> {
@@ -154,13 +156,20 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
     const fromAddress = params.from || `${settings.fromName} <${settings.fromAddress}>`;
 
     if (settings.provider === 'resend' && resend) {
-      const { data, error } = await resend.emails.send({
+      const emailData: any = {
         from: fromAddress,
         to: params.to,
         subject: params.subject,
         html: params.html,
         text: params.text,
-      });
+      };
+      
+      // Add reply-to if specified
+      if (params.replyTo) {
+        emailData.reply_to = params.replyTo;
+      }
+      
+      const { data, error } = await resend.emails.send(emailData);
 
       if (error) {
         console.error('Resend email error:', error);
@@ -170,13 +179,20 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
       console.log('Email sent successfully via Resend:', data?.id);
       return true;
     } else if (settings.provider === 'smtp' && smtpTransporter) {
-      const info = await smtpTransporter.sendMail({
+      const mailOptions: any = {
         from: fromAddress,
         to: params.to,
         subject: params.subject,
         html: params.html,
         text: params.text,
-      });
+      };
+      
+      // Add reply-to if specified
+      if (params.replyTo) {
+        mailOptions.replyTo = params.replyTo;
+      }
+      
+      const info = await smtpTransporter.sendMail(mailOptions);
 
       console.log('Email sent successfully via SMTP:', info.messageId);
       return true;
