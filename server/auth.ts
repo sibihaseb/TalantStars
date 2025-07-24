@@ -158,7 +158,7 @@ export async function setupAuth(app: Express) {
   });
 
   // Auth routes
-  app.post("/api/register", async (req, res, next) => {
+  app.post("/api/auth/register", async (req, res, next) => {
     try {
       const { username, password, email, firstName, lastName, role, termsAccepted, privacyAccepted } = req.body;
       
@@ -231,7 +231,7 @@ export async function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", (req, res, next) => {
+  app.post("/api/auth/login", (req, res, next) => {
     console.log("Login attempt with:", req.body);
     const { rememberMe } = req.body;
     console.log("🔥 LOGIN: Remember me option:", rememberMe);

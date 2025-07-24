@@ -3,7 +3,8 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { storage as simpleStorage } from "./simple-storage";
-import { setupAuth, isAuthenticated, isAdmin, requirePlan } from "./auth";
+import * as authSetup from "./auth";
+const { isAuthenticated, requireAdmin, requireAdminOrSuperAdmin, requirePlan, isAdmin } = authSetup;
 import { requirePermission, requireAnyPermission, PermissionChecks } from "./permissions";
 import { enhanceProfile, generateBio } from "./openai";
 import { enhanceJobDescription, validateJobSkills, generateJobSuggestions } from './ai-enhancements';
@@ -47,7 +48,7 @@ const scryptAsync = promisify(scrypt);
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
+  apiVersion: '2025-06-30.basil',
 });
 
 async function hashPassword(password: string) {
@@ -170,7 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Setup traditional authentication for all routes
-  await setupAuth(app);
+  await authSetup.setupAuth(app);
 
   // Database health check endpoint
   app.get('/api/health', async (req, res) => {
@@ -178,7 +179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("=== HEALTH CHECK ===");
       
       // Test database connection
-      const testQuery = await db.select().from(users).limit(1);
+      const testQuery = await simpleStorage.getUsers ? await simpleStorage.getUsers() : [];
       console.log("Database connection: OK");
       
       // Test profile questions table

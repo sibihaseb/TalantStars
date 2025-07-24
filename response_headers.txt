@@ -1,9 +1,14 @@
 HTTP/1.1 200 OK
 X-Powered-By: Express
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Origin: http://localhost:5000
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization
 Content-Type: application/json; charset=utf-8
-Content-Length: 215
-ETag: W/"d7-hW3ptXtDCJBiTjw+EDIuckPNANc"
-Date: Tue, 15 Jul 2025 00:15:19 GMT
+Content-Length: 254
+ETag: W/"fe-6ImrVje/c6ugq+Ozb3UPF+EPXYg"
+Set-Cookie: connect.sid=s%3ACHmWUfmWFzxVIEUEHx5bDWMcUSRgg8lw.ozjDJV2Xk7LyJRySGEtzDhRx2hu%2BZ%2BPAj86mhnx93dQ; Path=/; Expires=Thu, 31 Jul 2025 18:00:00 GMT; SameSite=Lax
+Date: Thu, 24 Jul 2025 18:00:00 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 
