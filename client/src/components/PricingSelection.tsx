@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, Crown, Star, Zap, ArrowRight, CreditCard } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { CheckCircle, Crown, Star, Zap, ArrowRight, CreditCard, Tag, Percent } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -45,6 +47,9 @@ interface PricingSelectionProps {
 export function PricingSelection({ userRole, onComplete }: PricingSelectionProps) {
   const [isAnnual, setIsAnnual] = useState(false);
   const [selectedTier, setSelectedTier] = useState<PricingTier | null>(null);
+  const [promoCode, setPromoCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<any>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -121,6 +126,41 @@ export function PricingSelection({ userRole, onComplete }: PricingSelectionProps
     },
   });
 
+  const validatePromoCodeMutation = useMutation({
+    mutationFn: async (data: { code: string, tierId: number, planType: string }) => {
+      const response = await apiRequest('POST', '/api/validate-promo-code', data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setAppliedPromo(data);
+      toast({
+        title: "Promo Code Applied!",
+        description: `You saved $${data.savings.toFixed(2)} with code ${data.promoCode.code}`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Invalid Promo Code",
+        description: error.message,
+        variant: "destructive",
+      });
+      setAppliedPromo(null);
+    },
+  });
+
+  const handleApplyPromoCode = () => {
+    if (!promoCode.trim() || !selectedTier) return;
+    
+    setPromoLoading(true);
+    const planType = isAnnual ? "annual" : "monthly";
+    validatePromoCodeMutation.mutate({ 
+      code: promoCode.trim(), 
+      tierId: selectedTier.id, 
+      planType 
+    });
+    setPromoLoading(false);
+  };
+
   const handleSelectTier = (tier: PricingTier) => {
     setSelectedTier(tier);
     const price = isAnnual ? parseFloat(tier.annualPrice) : parseFloat(tier.price);
@@ -129,7 +169,7 @@ export function PricingSelection({ userRole, onComplete }: PricingSelectionProps
       // Free tier - select directly
       selectTierMutation.mutate(tier.id);
     } else {
-      // Paid tier - create payment intent
+      // Paid tier - create payment intent (with promo if applied)
       createPaymentMutation.mutate(tier.id);
     }
   };
@@ -140,25 +180,59 @@ export function PricingSelection({ userRole, onComplete }: PricingSelectionProps
     return <Zap className="w-5 h-5 text-green-500" />;
   };
 
-  const formatPrice = (price: string, annualPrice: string) => {
-    if (parseFloat(price) === 0) return 'Free';
+  const formatPrice = (price: string, annualPrice: string, tier: PricingTier) => {
+    const originalPrice = parseFloat(price) || 0;
+    const originalAnnual = parseFloat(annualPrice) || 0;
     
-    const monthly = parseFloat(price);
-    const annual = parseFloat(annualPrice);
+    if (originalPrice === 0) return 'Free';
     
-    if (isAnnual && annual > 0) {
-      const monthlySavings = ((monthly * 12 - annual) / (monthly * 12) * 100).toFixed(0);
+    // Apply promo discount if available for this tier
+    let discountedPrice = originalPrice;
+    let discountedAnnual = originalAnnual;
+    
+    if (appliedPromo && selectedTier?.id === tier.id) {
+      const planAmount = isAnnual ? originalAnnual : originalPrice;
+      const discountAmount = appliedPromo.discountAmount || 0;
+      
+      if (isAnnual) {
+        discountedAnnual = Math.max(0, planAmount - discountAmount);
+      } else {
+        discountedPrice = Math.max(0, planAmount - discountAmount);
+      }
+    }
+    
+    if (isAnnual && originalAnnual > 0) {
+      const monthlySavings = originalPrice > 0 && (originalPrice * 12) > 0 
+        ? Math.max(0, Math.min(100, ((originalPrice * 12 - originalAnnual) / (originalPrice * 12) * 100)))
+        : 0;
+      
       return (
         <div className="text-center">
-          <div className="text-3xl font-bold text-blue-600">${annual.toFixed(2)}</div>
+          {appliedPromo && selectedTier?.id === tier.id ? (
+            <div>
+              <div className="text-lg line-through text-gray-400">${originalAnnual.toFixed(2)}</div>
+              <div className="text-3xl font-bold text-green-600">${discountedAnnual.toFixed(2)}</div>
+            </div>
+          ) : (
+            <div className="text-3xl font-bold text-blue-600">${originalAnnual.toFixed(2)}</div>
+          )}
           <div className="text-sm text-gray-600">per year</div>
-          <div className="text-xs text-green-600 font-medium">Save {monthlySavings}%</div>
+          {monthlySavings > 0 && (
+            <div className="text-xs text-green-600 font-medium">Save {monthlySavings.toFixed(0)}%</div>
+          )}
         </div>
       );
     } else {
       return (
         <div className="text-center">
-          <div className="text-3xl font-bold text-blue-600">${monthly.toFixed(2)}</div>
+          {appliedPromo && selectedTier?.id === tier.id ? (
+            <div>
+              <div className="text-lg line-through text-gray-400">${originalPrice.toFixed(2)}</div>
+              <div className="text-3xl font-bold text-green-600">${discountedPrice.toFixed(2)}</div>
+            </div>
+          ) : (
+            <div className="text-3xl font-bold text-blue-600">${originalPrice.toFixed(2)}</div>
+          )}
           <div className="text-sm text-gray-600">per month</div>
         </div>
       );
@@ -214,7 +288,7 @@ export function PricingSelection({ userRole, onComplete }: PricingSelectionProps
       </div>
 
       {/* Billing Toggle */}
-      <div className="flex items-center justify-center mb-8">
+      <div className="flex items-center justify-center mb-6">
         <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
           <button
             onClick={() => setIsAnnual(false)}
@@ -240,6 +314,52 @@ export function PricingSelection({ userRole, onComplete }: PricingSelectionProps
         </div>
       </div>
 
+      {/* Promo Code Section */}
+      <div className="flex items-center justify-center mb-8">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-4">
+            <div className="space-y-3">
+              <Label htmlFor="promo-code" className="flex items-center gap-2 text-sm font-medium">
+                <Tag className="w-4 h-4" />
+                Have a promo code?
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="promo-code"
+                  placeholder="Enter promo code"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                  className="flex-1"
+                />
+                <Button 
+                  onClick={handleApplyPromoCode}
+                  disabled={!promoCode.trim() || !selectedTier || promoLoading || validatePromoCodeMutation.isPending}
+                  size="sm"
+                >
+                  {promoLoading || validatePromoCodeMutation.isPending ? (
+                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                  ) : (
+                    <>
+                      <Percent className="w-4 h-4 mr-1" />
+                      Apply
+                    </>
+                  )}
+                </Button>
+              </div>
+              {appliedPromo && (
+                <div className="text-sm text-green-600 font-medium flex items-center gap-1">
+                  <CheckCircle className="w-4 h-4" />
+                  {appliedPromo.promoCode.code} applied! Save ${appliedPromo.savings.toFixed(2)}
+                </div>
+              )}
+              <p className="text-xs text-gray-500">
+                Select a plan first, then apply your promo code for instant savings
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Pricing Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {filteredTiers.map((tier: PricingTier) => (
@@ -257,7 +377,7 @@ export function PricingSelection({ userRole, onComplete }: PricingSelectionProps
               </div>
               
               <div className="mb-4">
-                {formatPrice(tier.price, tier.annualPrice)}
+                {formatPrice(tier.price, tier.annualPrice, tier)}
               </div>
 
               <Badge variant="secondary" className="mx-auto">

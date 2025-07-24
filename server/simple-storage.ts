@@ -2608,31 +2608,127 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async validatePromoCode(code: string): Promise<any> {
+  async validatePromoCode(code: string, userId?: number, tierId?: number, planType?: string): Promise<any> {
     try {
-      console.log("🔥 ADMIN: Validating promo code", { code });
-      return {
-        valid: true,
-        code,
-        discountType: "percentage",
-        discountValue: 10,
-        description: "10% off for new users"
+      console.log("🔥 ADMIN: Validating promo code", { code, userId, tierId, planType });
+      
+      // Sample promo codes for testing
+      const samplePromoCodes = {
+        'SAVE20': {
+          id: 1,
+          code: 'SAVE20',
+          name: '20% Off for New Users',
+          type: 'percentage',
+          value: '20',
+          active: true,
+          maxUses: null,
+          maxUsesPerUser: 1,
+          usedCount: 0,
+          startsAt: null,
+          expiresAt: null,
+          planRestriction: 'no_restriction',
+          categoryRestriction: null,
+          specificTierId: null
+        },
+        'WELCOME50': {
+          id: 2,
+          code: 'WELCOME50',
+          name: '$50 Off First Month',
+          type: 'fixed_amount',
+          value: '50',
+          active: true,
+          maxUses: 100,
+          maxUsesPerUser: 1,
+          usedCount: 15,
+          startsAt: null,
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+          planRestriction: 'no_restriction',
+          categoryRestriction: null,
+          specificTierId: null
+        },
+        'MONTHFREE': {
+          id: 3,
+          code: 'MONTHFREE',
+          name: 'First Month Free',
+          type: 'first_month_free',
+          value: '100',
+          active: true,
+          maxUses: 50,
+          maxUsesPerUser: 1,
+          usedCount: 5,
+          startsAt: null,
+          expiresAt: null,
+          planRestriction: 'monthly_only',
+          categoryRestriction: null,
+          specificTierId: null
+        }
       };
+
+      const promoCode = samplePromoCodes[code];
+      
+      if (!promoCode) {
+        return { valid: false, error: "Invalid promo code" };
+      }
+
+      if (!promoCode.active) {
+        return { valid: false, error: "Promo code is no longer active" };
+      }
+
+      const now = new Date();
+      if (promoCode.startsAt && promoCode.startsAt > now) {
+        return { valid: false, error: "Promo code is not yet active" };
+      }
+
+      if (promoCode.expiresAt && promoCode.expiresAt < now) {
+        return { valid: false, error: "Promo code has expired" };
+      }
+
+      // Check usage limits
+      if (promoCode.maxUses && promoCode.usedCount >= promoCode.maxUses) {
+        return { valid: false, error: "Promo code usage limit exceeded" };
+      }
+
+      // Check plan restrictions
+      if (planType) {
+        if (promoCode.planRestriction === "monthly_only" && planType !== "monthly") {
+          return { valid: false, error: "This promo code is only valid for monthly plans" };
+        }
+
+        if (promoCode.planRestriction === "annual_only" && planType !== "annual") {
+          return { valid: false, error: "This promo code is only valid for annual plans" };
+        }
+      }
+
+      console.log("✅ ADMIN: Promo code validated successfully", promoCode);
+      return { valid: true, promoCode };
     } catch (error) {
       console.error('Error validating promo code:', error);
-      return { valid: false, code };
+      return { valid: false, error: "Failed to validate promo code" };
     }
   }
 
   async calculateDiscountAmount(promoCode: any, amount: number): Promise<number> {
     try {
-      console.log("🔥 ADMIN: Calculating discount", { promoCode, amount });
-      if (promoCode.discountType === "percentage") {
-        return (amount * promoCode.discountValue) / 100;
-      } else if (promoCode.discountType === "fixed") {
-        return Math.min(promoCode.discountValue, amount);
+      console.log("🔥 ADMIN: Calculating discount", { promoCode, amount, type: promoCode?.type });
+      
+      if (!promoCode || !amount) {
+        return 0;
       }
-      return 0;
+
+      const value = parseFloat(promoCode.value) || 0;
+
+      switch (promoCode.type) {
+        case "percentage":
+          return Math.min(amount * (value / 100), amount);
+        case "fixed_amount":
+          return Math.min(value, amount);
+        case "first_month_free":
+          return amount;
+        case "first_month_discount":
+          return Math.min(amount * (value / 100), amount);
+        default:
+          return 0;
+      }
     } catch (error) {
       console.error('Error calculating discount:', error);
       return 0;
