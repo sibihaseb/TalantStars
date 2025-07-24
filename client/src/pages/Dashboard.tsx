@@ -65,11 +65,14 @@ export default function Dashboard() {
   // Route to appropriate dashboard based on role
   switch (userRole) {
     case "admin":
+    case "super_admin":
       return <AdminDashboard />;
     case "producer":
       return <ProducerDashboard />;
     case "manager":
       return <ManagerDashboard />;
+    case "agent":
+      return <ManagerDashboard />;  // Agents use manager dashboard for now
     case "talent":
     default:
       return <TalentDashboard />;

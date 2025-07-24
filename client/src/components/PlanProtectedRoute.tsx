@@ -3,6 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { PlanRequiredModal } from "./PlanRequiredModal";
 import { Loader2 } from "lucide-react";
 
+interface User {
+  id: number;
+  role: string;
+  pricingTierId?: number;
+  username: string;
+  email?: string;
+}
+
 interface PlanProtectedRouteProps {
   children: React.ReactNode;
 }
@@ -10,7 +18,7 @@ interface PlanProtectedRouteProps {
 export function PlanProtectedRoute({ children }: PlanProtectedRouteProps) {
   const [showPlanModal, setShowPlanModal] = useState(false);
   
-  const { data: user, isLoading, error } = useQuery({
+  const { data: user, isLoading, error } = useQuery<User>({
     queryKey: ["/api/user"],
     retry: (failureCount, error: any) => {
       // Don't retry on 401 errors
@@ -22,6 +30,12 @@ export function PlanProtectedRoute({ children }: PlanProtectedRouteProps) {
   });
 
   useEffect(() => {
+    // Super admins bypass plan selection entirely
+    if (user && user.role === 'super_admin') {
+      setShowPlanModal(false);
+      return;
+    }
+    
     if (user && !user.pricingTierId) {
       setShowPlanModal(true);
     } else if (user && user.pricingTierId) {
@@ -40,6 +54,11 @@ export function PlanProtectedRoute({ children }: PlanProtectedRouteProps) {
 
   // If user is not authenticated, let other components handle the redirect
   if (error || !user) {
+    return <>{children}</>;
+  }
+
+  // Super admins bypass plan selection entirely
+  if (user.role === 'super_admin') {
     return <>{children}</>;
   }
 

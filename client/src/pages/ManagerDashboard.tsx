@@ -39,8 +39,10 @@ import {
   HandShake,
   Network,
   Building,
-  Compass
+  Compass,
+  CreditCard
 } from 'lucide-react';
+import { TierUpgradeManager } from '@/components/billing/TierUpgradeManager';
 
 export default function ManagerDashboard() {
   const { user } = useAuth();
@@ -184,13 +186,17 @@ export default function ManagerDashboard() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6 mb-8">
+          <TabsList className="grid w-full grid-cols-7 mb-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="talents">My Talents</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
             <TabsTrigger value="meetings">Meetings</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="billing">
+              <CreditCard className="w-4 h-4 mr-2" />
+              Billing
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -548,6 +554,18 @@ export default function ManagerDashboard() {
                     </CardContent>
                   </Card>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="billing">
+            <Card>
+              <CardHeader>
+                <CardTitle>Billing & Subscription</CardTitle>
+                <CardDescription>Manage your Manager plan and billing preferences</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TierUpgradeManager />
               </CardContent>
             </Card>
           </TabsContent>

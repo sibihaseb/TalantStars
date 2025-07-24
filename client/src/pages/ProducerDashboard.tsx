@@ -38,8 +38,10 @@ import {
   Zap,
   Building,
   Calendar1,
-  UserPlus
+  UserPlus,
+  CreditCard
 } from 'lucide-react';
+import { TierUpgradeManager } from '@/components/billing/TierUpgradeManager';
 
 export default function ProducerDashboard() {
   const { user } = useAuth();
@@ -183,13 +185,17 @@ export default function ProducerDashboard() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6 mb-8">
+          <TabsList className="grid w-full grid-cols-7 mb-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="projects">Projects</TabsTrigger>
             <TabsTrigger value="castings">Castings</TabsTrigger>
             <TabsTrigger value="talent">Talent Pool</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="billing">
+              <CreditCard className="w-4 h-4 mr-2" />
+              Billing
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -540,6 +546,18 @@ export default function ProducerDashboard() {
                     </CardContent>
                   </Card>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="billing">
+            <Card>
+              <CardHeader>
+                <CardTitle>Billing & Subscription</CardTitle>
+                <CardDescription>Manage your Producer plan and billing preferences</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TierUpgradeManager />
               </CardContent>
             </Card>
           </TabsContent>
