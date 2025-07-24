@@ -31,6 +31,7 @@ import {
   Settings,
   Crown
 } from "lucide-react";
+import { Link } from "wouter";
 import { LegalAcceptanceSection } from '@/components/legal/LegalAcceptanceSection';
 
 const loginSchema = z.object({
@@ -379,6 +380,18 @@ export default function Auth() {
                       >
                         {isSubmitting ? "Signing in..." : "Sign In"}
                       </Button>
+
+                      <div className="mt-4 text-center">
+                        <Link href="/forgot-password">
+                          <Button
+                            type="button"
+                            variant="link"
+                            className="text-sm text-gray-600 hover:text-blue-600"
+                          >
+                            Forgot your password?
+                          </Button>
+                        </Link>
+                      </div>
                     </form>
                   </TabsContent>
                   
