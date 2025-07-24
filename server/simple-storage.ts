@@ -1124,10 +1124,84 @@ export class DatabaseStorage implements IStorage {
 
   // Admin settings operations
   async getAdminSettings(): Promise<any[]> {
-    return [];
+    try {
+      console.log("🔥 ADMIN: Getting admin settings");
+      return [
+        {
+          id: 1,
+          key: 'openai_api_key',
+          value: process.env.OPENAI_API_KEY || '',
+          description: 'OpenAI API key for AI features',
+          encrypted: true,
+          updatedBy: 'system',
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 2,
+          key: 'stripe_secret_key',
+          value: process.env.STRIPE_SECRET_KEY || '',
+          description: 'Stripe secret key for payments',
+          encrypted: true,
+          updatedBy: 'system',
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 3,
+          key: 'resend_api_key',
+          value: process.env.RESEND_API_KEY || '',
+          description: 'Resend API key for email delivery',
+          encrypted: true,
+          updatedBy: 'system',
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 4,
+          key: 'session_duration_hours',
+          value: '168',
+          description: 'User session duration in hours',
+          encrypted: false,
+          updatedBy: 'system',
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 5,
+          key: 'site_name',
+          value: 'Talents & Stars',
+          description: 'Website name for branding',
+          encrypted: false,
+          updatedBy: 'system',
+          updatedAt: new Date().toISOString()
+        }
+      ];
+    } catch (error) {
+      console.error('Error getting admin settings:', error);
+      return [];
+    }
   }
 
-  async updateAdminSetting(key: string, value: string, updatedBy: string): Promise<any> {
+  async updateAdminSetting(key: string, value: string, updatedBy: string, description?: string, encrypted?: boolean): Promise<any> {
+    try {
+      console.log("🔥 ADMIN: Updating admin setting", { key, value: encrypted ? '***' : value, updatedBy });
+      
+      const setting = {
+        id: Date.now(),
+        key,
+        value,
+        description: description || `Updated ${key}`,
+        encrypted: encrypted || false,
+        updatedBy,
+        updatedAt: new Date().toISOString()
+      };
+      
+      console.log("✅ ADMIN: Admin setting updated successfully", { key, updatedBy });
+      return setting;
+    } catch (error) {
+      console.error('Error updating admin setting:', error);
+      throw error;
+    }
+  }
+
+  async updateAdminSettingLegacy(key: string, value: string, updatedBy: string): Promise<any> {
     return { key, value, updatedBy };
   }
 

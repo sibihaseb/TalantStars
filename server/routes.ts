@@ -2454,6 +2454,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Settings API endpoints - CRITICAL FIX WITH BYPASSING VITE MIDDLEWARE
+  app.get('/api/admin/settings', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      console.log("🔥 ADMIN SETTINGS: GET request received, path:", req.path, "url:", req.url);
+      
+      // Prevent Vite middleware from intercepting by forcing response completion
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Cache-Control', 'no-cache');
+      
+      const settings = await simpleStorage.getAdminSettings();
+      console.log("✅ ADMIN SETTINGS: Returning JSON response", settings.length, "settings");
+      
+      // Force immediate response to bypass Vite
+      return res.status(200).json(settings);
+    } catch (error) {
+      console.error("Error fetching admin settings:", error);
+      return res.status(500).json({ message: "Failed to fetch admin settings" });
+    }
+  });
+
+  app.post('/api/admin/settings', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      console.log("🔥 ADMIN SETTINGS: POST request received", req.body);
+      
+      // Prevent Vite middleware from intercepting by forcing response completion
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Cache-Control', 'no-cache');
+      
+      const { key, value, description, encrypted } = req.body;
+      const updatedBy = req.user.username || req.user.email;
+      
+      const setting = await simpleStorage.updateAdminSetting(key, value, updatedBy, description, encrypted);
+      console.log("✅ ADMIN SETTINGS: Updated setting", setting);
+      
+      // Force immediate response to bypass Vite
+      return res.status(200).json(setting);
+    } catch (error) {
+      console.error("Error updating admin setting:", error);
+      return res.status(500).json({ message: "Failed to update admin setting" });
+    }
+  });
+
   // Admin SEO routes
   app.get('/api/admin/seo-settings', isAuthenticated, isAdmin, async (req, res) => {
     try {
@@ -3904,6 +3946,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user sharing settings:", error);
       res.json({ showSocialMedia: true }); // Default fallback
+    }
+  });
+
+  // Profile SEO Meta Data Route - CRITICAL FIX for shared profile links
+  app.get('/api/profile/:username/seo', async (req: any, res) => {
+    try {
+      const { username } = req.params;
+      console.log("🔥 SEO: Getting profile SEO data for username:", username);
+      
+      // Get user by username
+      const user = await simpleStorage.getUserByUsername(username);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Get user profile
+      const profile = await simpleStorage.getUserProfile(user.id);
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      
+      // Generate SEO meta data
+      const seoData = {
+        title: `${profile.displayName || user.firstName + ' ' + user.lastName} - ${profile.talentType || 'Professional'} | Talents & Stars`,
+        description: profile.bio || `Professional ${profile.talentType || 'talent'} available for hire through Talents & Stars platform.`,
+        keywords: `${profile.talentType || 'talent'}, ${profile.location || 'professional'}, entertainment, casting, hire`,
+        ogTitle: `${profile.displayName || user.firstName + ' ' + user.lastName} - Professional ${profile.talentType || 'Talent'}`,
+        ogDescription: profile.bio || `Connect with ${profile.displayName || user.firstName + ' ' + user.lastName} on Talents & Stars`,
+        ogImage: profile.profileImageUrl || user.profileImageUrl || '/images/default-profile.jpg',
+        ogUrl: `${req.protocol}://${req.get('host')}/profile/${username}`,
+        twitterCard: 'summary_large_image',
+        twitterTitle: `${profile.displayName || user.firstName + ' ' + user.lastName} - ${profile.talentType || 'Professional'}`,
+        twitterDescription: profile.bio || `Professional ${profile.talentType || 'talent'} on Talents & Stars`,
+        twitterImage: profile.profileImageUrl || user.profileImageUrl || '/images/default-profile.jpg',
+        siteName: 'Talents & Stars',
+        type: 'profile'
+      };
+      
+      console.log("✅ SEO: Generated profile SEO data", seoData);
+      res.json(seoData);
+    } catch (error) {
+      console.error("Error getting profile SEO data:", error);
+      res.status(500).json({ message: "Failed to get profile SEO data" });
     }
   });
 
