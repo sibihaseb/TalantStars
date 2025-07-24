@@ -383,7 +383,8 @@ export const isAdmin = (req: any, res: any, next: any) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
   
-  if (req.user?.role !== "admin") {
+  // Allow both "admin" and "super_admin" roles
+  if (req.user?.role !== "admin" && req.user?.role !== "super_admin") {
     return res.status(403).json({ message: "Forbidden - Not an admin" });
   }
   
