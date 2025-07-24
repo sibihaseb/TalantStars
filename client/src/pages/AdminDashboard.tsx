@@ -4113,9 +4113,9 @@ export default function AdminDashboard() {
                       Create and manage promotional discount codes
                     </CardDescription>
                   </div>
-                  <Button onClick={() => console.log('Create new promo code')}>
+                  <Button onClick={() => window.location.href = '/admin/promo-codes'}>
                     <Plus className="w-4 h-4 mr-2" />
-                    Create Promo Code
+                    Manage Promo Codes
                   </Button>
                 </div>
               </CardHeader>

@@ -77,22 +77,22 @@ function Router() {
       
       {/* Protected admin routes */}
       <Route path="/admin">
-        {isAuthenticated && user?.role === 'admin' ? <Admin /> : <Auth />}
+        {isAuthenticated && (user?.role === 'admin' || user?.role === 'super_admin') ? <Admin /> : <Auth />}
       </Route>
       <Route path="/admin/dashboard">
-        {isAuthenticated && user?.role === 'admin' ? <AdminDashboard /> : <Auth />}
+        {isAuthenticated && (user?.role === 'admin' || user?.role === 'super_admin') ? <AdminDashboard /> : <Auth />}
       </Route>
       <Route path="/admin/permissions">
-        {isAuthenticated && user?.role === 'admin' ? <PermissionsPage /> : <Auth />}
+        {isAuthenticated && (user?.role === 'admin' || user?.role === 'super_admin') ? <PermissionsPage /> : <Auth />}
       </Route>
       <Route path="/admin/pricing-tiers">
-        {isAuthenticated && user?.role === 'admin' ? <PricingTiersPage /> : <Auth />}
+        {isAuthenticated && (user?.role === 'admin' || user?.role === 'super_admin') ? <PricingTiersPage /> : <Auth />}
       </Route>
       <Route path="/admin/questions">
-        {isAuthenticated && user?.role === 'admin' ? <QuestionsManagement /> : <Auth />}
+        {isAuthenticated && (user?.role === 'admin' || user?.role === 'super_admin') ? <QuestionsManagement /> : <Auth />}
       </Route>
       <Route path="/admin/promo-codes">
-        {isAuthenticated && user?.role === 'admin' ? <PromoCodeManagement /> : <Auth />}
+        {isAuthenticated && (user?.role === 'admin' || user?.role === 'super_admin') ? <PromoCodeManagement /> : <Auth />}
       </Route>
       <Route path="/admin/questions-management">
         {isAuthenticated && user?.role === 'admin' ? <QuestionsManagement /> : <Auth />}
