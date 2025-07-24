@@ -65,8 +65,10 @@ export default function Login() {
         description: `Welcome back, ${user.username}!`,
       });
 
-      // Reload the page to update authentication state
-      window.location.href = "/admin";
+      // Force a page reload to update authentication state and ensure cookies are properly set
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.error("Login error:", error);
       setError("Network error. Please try again.");
