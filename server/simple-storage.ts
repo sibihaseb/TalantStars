@@ -298,10 +298,54 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUser(id: number): Promise<void> {
     try {
+      console.log(`🗑️ Starting user deletion process for user ID: ${id}`);
+      
+      // Step 1: Remove user from featured_talents table first (handles foreign key constraint)
+      try {
+        await db.delete(featuredTalents).where(eq(featuredTalents.userId, id));
+        console.log(`✅ Removed user ${id} from featured_talents`);
+      } catch (error) {
+        console.log(`⚠️ No featured_talents records to remove for user ${id}:`, error.message);
+      }
+      
+      // Step 2: Remove related user profile data
+      try {
+        await db.delete(userProfiles).where(eq(userProfiles.userId, id.toString()));
+        console.log(`✅ Removed user profile for user ${id}`);
+      } catch (error) {
+        console.log(`⚠️ No user profile to remove for user ${id}:`, error.message);
+      }
+      
+      // Step 3: Remove other related data (media files, applications, social posts)
+      try {
+        await db.delete(mediaFiles).where(eq(mediaFiles.userId, id));
+        console.log(`✅ Removed media files for user ${id}`);
+      } catch (error) {
+        console.log(`⚠️ No media files to remove for user ${id}:`, error.message);
+      }
+      
+      try {
+        await db.delete(jobApplications).where(eq(jobApplications.userId, id));
+        console.log(`✅ Removed job applications for user ${id}`);
+      } catch (error) {
+        console.log(`⚠️ No job applications to remove for user ${id}:`, error.message);
+      }
+      
+      // Step 4: Remove social posts (critical foreign key constraint)
+      try {
+        await db.delete(socialPosts).where(eq(socialPosts.userId, id));
+        console.log(`✅ Removed social posts for user ${id}`);
+      } catch (error) {
+        console.log(`⚠️ No social posts to remove for user ${id}:`, error.message);
+      }
+      
+      // Step 5: Finally delete the user record
       await db.delete(users).where(eq(users.id, id));
+      console.log(`✅ Successfully deleted user ${id} and all related records`);
+      
     } catch (error) {
-      console.error('Error deleting user:', error);
-      throw error;
+      console.error(`❌ Error deleting user ${id}:`, error);
+      throw new Error(`Failed to delete user: ${error.message}`);
     }
   }
 

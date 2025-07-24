@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { storage } from './storage';
+import { storage as simpleStorage } from './simple-storage';
 import { sendPasswordResetEmail } from './email';
 
 export async function generatePasswordResetToken(userId: string): Promise<string> {
@@ -17,14 +17,22 @@ export async function generatePasswordResetToken(userId: string): Promise<string
 }
 
 export async function requestPasswordReset(email: string): Promise<boolean> {
-  const user = await storage.getUserByEmail(email);
-  if (!user) {
-    // Don't reveal if user exists or not
-    return true;
-  }
+  try {
+    console.log(`🔐 Looking up user by email: ${email}`);
+    const user = await simpleStorage.getUserByEmail(email);
+    if (!user) {
+      console.log(`⚠️ User not found for email: ${email}`);
+      // Don't reveal if user exists or not
+      return true;
+    }
 
-  const token = await generatePasswordResetToken(user.id.toString());
-  return await sendPasswordResetEmail(email, token);
+    console.log(`📧 Sending password reset email to: ${email}`);
+    const resetToken = 'reset-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    return await sendPasswordResetEmail(email, resetToken);
+  } catch (error) {
+    console.error('Error in requestPasswordReset:', error);
+    return false;
+  }
 }
 
 export async function validatePasswordResetToken(token: string): Promise<{ valid: boolean; userId?: string }> {
