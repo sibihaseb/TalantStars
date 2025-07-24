@@ -400,6 +400,12 @@ export const requirePlan = (req: any, res: any, next: any) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
   
+  // Admins and super admins bypass all plan requirements - full access
+  if (req.user?.role === "admin" || req.user?.role === "super_admin") {
+    console.log("Admin/Super admin detected - bypassing plan requirement");
+    return next();
+  }
+  
   // Check if user has selected a pricing tier
   if (!req.user.pricingTierId) {
     return res.status(403).json({ 

@@ -30,8 +30,8 @@ export function PlanProtectedRoute({ children }: PlanProtectedRouteProps) {
   });
 
   useEffect(() => {
-    // Super admins bypass plan selection entirely
-    if (user && user.role === 'super_admin') {
+    // Admins and super admins bypass plan selection entirely
+    if (user && (user.role === 'admin' || user.role === 'super_admin')) {
       setShowPlanModal(false);
       return;
     }
@@ -57,8 +57,8 @@ export function PlanProtectedRoute({ children }: PlanProtectedRouteProps) {
     return <>{children}</>;
   }
 
-  // Super admins bypass plan selection entirely
-  if (user.role === 'super_admin') {
+  // Admins and super admins bypass plan selection entirely - full access without pricing restrictions
+  if (user.role === 'admin' || user.role === 'super_admin') {
     return <>{children}</>;
   }
 
