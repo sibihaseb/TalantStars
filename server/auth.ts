@@ -79,7 +79,8 @@ export async function setupAuth(app: Express) {
       httpOnly: false, // Allow JavaScript access for debugging
       secure: false, // Never use secure in development
       maxAge: sessionDuration, // Use admin-controlled session duration
-      sameSite: "lax"
+      sameSite: "lax",
+      domain: undefined // Don't set domain for localhost
     },
   };
 
@@ -103,6 +104,7 @@ export async function setupAuth(app: Express) {
       req.session.cookie.secure = false;
       req.session.cookie.httpOnly = false;
       req.session.cookie.sameSite = 'lax';
+      req.session.cookie.domain = undefined; // Ensure no domain restriction
     }
     
     next();
