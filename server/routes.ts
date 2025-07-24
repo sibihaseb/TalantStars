@@ -1672,6 +1672,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bookmark post
+  app.post("/api/social/posts/:postId/bookmark", isAuthenticated, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.postId);
+      const userId = req.user.id;
+      
+      await simpleStorage.bookmarkPost(postId, userId);
+      res.json({ success: true, message: "Post bookmarked successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Error bookmarking post: " + error.message });
+    }
+  });
+
+  // Share post
+  app.post("/api/social/posts/:postId/share", isAuthenticated, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.postId);
+      const userId = req.user.id;
+      
+      await simpleStorage.sharePost(postId, userId);
+      res.json({ success: true, message: "Post shared successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Error sharing post: " + error.message });
+    }
+  });
+
   // Social activity endpoint
   app.get('/api/social/activity', isAuthenticated, async (req: any, res) => {
     const userId = req.user.id;

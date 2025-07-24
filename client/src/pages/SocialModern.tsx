@@ -362,6 +362,88 @@ export default function SocialModern() {
     sendFriendRequestMutation.mutate(userId);
   };
 
+  // Bookmark post mutation
+  const bookmarkPostMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      const response = await apiRequest('POST', `/api/social/posts/${postId}/bookmark`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/social/feed'] });
+      toast({
+        title: "Post bookmarked! 🔖",
+        description: "Added to your saved posts.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to bookmark",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Share post mutation
+  const sharePostMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      const response = await apiRequest('POST', `/api/social/posts/${postId}/share`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/social/feed'] });
+      toast({
+        title: "Post shared! 🔄",
+        description: "Shared to your network successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to share",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Additional button handlers
+  const handleBookmarkPost = (postId: number) => {
+    bookmarkPostMutation.mutate(postId);
+  };
+
+  const handleSharePost = (postId: number) => {
+    sharePostMutation.mutate(postId);
+  };
+
+  const handleCommentPost = (postId: number) => {
+    toast({
+      title: "💬 Comments Coming Soon!",
+      description: "Full comment system with replies and threads is in development.",
+      duration: 3000,
+    });
+  };
+
+  const handleSettingsClick = () => {
+    toast({
+      title: "⚙️ Settings Panel",
+      description: "Privacy settings, notifications, and account preferences. Full settings panel coming soon!",
+      duration: 3000,
+    });
+  };
+
+  const handleDiscoverPeople = () => {
+    toast({
+      title: "🔍 Discover People",
+      description: "Check the 'Suggested Connections' section to find new people to follow!",
+      duration: 4000,
+    });
+    // Scroll to suggested connections
+    const suggestedSection = document.querySelector('[data-section="suggested"]');
+    if (suggestedSection) {
+      suggestedSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -486,18 +568,7 @@ export default function SocialModern() {
                       variant="outline" 
                       className="w-full justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20" 
                       size="sm"
-                      onClick={() => {
-                        toast({ 
-                          title: "🔍 Discover People", 
-                          description: "Check the 'Suggested Connections' section on the right sidebar to find new people to follow!",
-                          duration: 4000
-                        });
-                        // Scroll to suggested connections
-                        const suggestedSection = document.querySelector('[data-section="suggested"]');
-                        if (suggestedSection) {
-                          suggestedSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }
-                      }}
+                      onClick={handleDiscoverPeople}
                     >
                       <Search className="w-4 h-4 mr-2" />
                       Discover People
@@ -521,13 +592,7 @@ export default function SocialModern() {
                       variant="outline" 
                       className="w-full justify-start hover:bg-gray-50 dark:hover:bg-gray-900/20" 
                       size="sm"
-                      onClick={() => {
-                        toast({ 
-                          title: "⚙️ Settings", 
-                          description: "Privacy settings, notifications, and account preferences. Full settings panel coming soon!",
-                          duration: 4000
-                        });
-                      }}
+                      onClick={handleSettingsClick}
                     >
                       <Settings className="w-4 h-4 mr-2" />
                       Settings
@@ -739,11 +804,7 @@ export default function SocialModern() {
                                   variant="ghost" 
                                   size="sm" 
                                   className="text-gray-500 hover:text-blue-500 transition-colors"
-                                  onClick={() => toast({ 
-                                    title: "💬 Comments", 
-                                    description: "Comment system with replies and threads coming soon! Stay tuned.",
-                                    duration: 3000
-                                  })}
+                                  onClick={() => handleCommentPost(post.id)}
                                 >
                                   <MessageCircle className="w-4 h-4 mr-1" />
                                   {post.comments || 0}
@@ -752,11 +813,7 @@ export default function SocialModern() {
                                   variant="ghost" 
                                   size="sm" 
                                   className="text-gray-500 hover:text-green-500 transition-colors"
-                                  onClick={() => toast({ 
-                                    title: "🔄 Post Shared!", 
-                                    description: "This post has been shared to your network. Full sharing features coming soon!",
-                                    duration: 3000
-                                  })}
+                                  onClick={() => handleSharePost(post.id)}
                                 >
                                   <Repeat2 className="w-4 h-4 mr-1" />
                                   {post.shares || 0}
@@ -767,11 +824,7 @@ export default function SocialModern() {
                                   variant="ghost" 
                                   size="sm" 
                                   className="text-gray-500 hover:text-yellow-500 transition-colors"
-                                  onClick={() => toast({ 
-                                    title: "🔖 Bookmarked!", 
-                                    description: "Post saved to your bookmarks. Access saved posts from your profile.",
-                                    duration: 3000
-                                  })}
+                                  onClick={() => handleBookmarkPost(post.id)}
                                 >
                                   <Bookmark className="w-4 h-4" />
                                 </Button>

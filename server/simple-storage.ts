@@ -1627,6 +1627,42 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async bookmarkPost(postId: number, userId: number): Promise<void> {
+    try {
+      console.log("🔥 SOCIAL: Bookmarking post", { postId, userId });
+      
+      // Update the bookmarks count in the social_posts table
+      await db.execute(sql`
+        UPDATE social_posts 
+        SET bookmarks = COALESCE(bookmarks, 0) + 1 
+        WHERE id = ${postId}
+      `);
+      
+      console.log("✅ SOCIAL: Post bookmarked successfully");
+    } catch (error) {
+      console.error('Database post bookmark error:', error);
+      throw error;
+    }
+  }
+
+  async sharePost(postId: number, userId: number): Promise<void> {
+    try {
+      console.log("🔥 SOCIAL: Sharing post", { postId, userId });
+      
+      // Update the shares count in the social_posts table
+      await db.execute(sql`
+        UPDATE social_posts 
+        SET shares = COALESCE(shares, 0) + 1 
+        WHERE id = ${postId}
+      `);
+      
+      console.log("✅ SOCIAL: Post shared successfully");
+    } catch (error) {
+      console.error('Database post share error:', error);
+      throw error;
+    }
+  }
+
   async commentOnPost(commentData: any): Promise<any> {
     console.log("🔥 SOCIAL: Commenting on post", { commentData });
     return { id: Date.now(), ...commentData, createdAt: new Date().toISOString() };
