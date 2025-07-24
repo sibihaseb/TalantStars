@@ -2980,7 +2980,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Enhanced email template management routes
   app.get('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const templates = await simpleStorage.getEmailTemplates();
+      const templates = await simpleStorage.getAllEmailTemplates();
       res.json(templates);
     } catch (error) {
       console.error('Error fetching email templates:', error);
@@ -3255,7 +3255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const templates = await simpleStorage.getEmailTemplates();
+      const templates = await simpleStorage.getAllEmailTemplates();
       res.json(templates);
     } catch (error) {
       console.error("Error fetching email templates:", error);
