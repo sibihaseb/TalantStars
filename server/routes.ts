@@ -765,10 +765,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // For simple storage, we'll use a simplified approach
       // In a real implementation, you'd track media uploads in the database
-      const photoCount = 0; // TODO: Implement actual media counting
-      const videoCount = 0; // TODO: Implement actual media counting
-      const audioCount = 0; // TODO: Implement actual media counting
-      const externalLinkCount = 0; // TODO: Implement actual media counting
+      // Get actual media counts from database
+      const userMedia = await simpleStorage.getUserMediaFiles(userId);
+      const photoCount = userMedia.filter(m => m.mediaType === 'image').length;
+      const videoCount = userMedia.filter(m => m.mediaType === 'video').length;
+      const audioCount = userMedia.filter(m => m.mediaType === 'audio').length;
+      const externalLinkCount = userMedia.filter(m => m.isExternal === true).length;
 
       // Handle single file upload
       if (file) {
@@ -2038,30 +2040,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  // Talent categories routes - temporarily returning mock data until tables are created
+  // Talent categories routes - Database implementation
   app.get('/api/talent-categories', async (req, res) => {
     try {
-      // Temporary mock data
-      const categories = [
-        {
-          id: 1,
-          name: "Featured Performer",
-          description: "Top-rated performers showcased on our platform",
-          icon: "🌟",
-          color: "gold",
-          isActive: true,
-          talentCount: 12
-        },
-        {
-          id: 2,
-          name: "Rising Star",
-          description: "Up-and-coming talent making waves",
-          icon: "⭐",
-          color: "silver",
-          isActive: true,
-          talentCount: 8
-        }
-      ];
+      const categories = await simpleStorage.getTalentCategories();
       res.json(categories);
     } catch (error) {
       console.error("Error fetching talent categories:", error);

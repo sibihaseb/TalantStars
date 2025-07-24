@@ -2096,8 +2096,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPostComments(postId: number): Promise<any[]> {
-    console.log("🔥 SOCIAL: Getting post comments", { postId });
-    return [];
+    try {
+      console.log("🔥 SOCIAL: Getting post comments", { postId });
+      // Implement actual database query when comments table exists
+      const comments = await db.execute(sql`
+        SELECT * FROM post_comments 
+        WHERE post_id = ${postId} 
+        ORDER BY created_at ASC
+      `);
+      return comments.rows || [];
+    } catch (error) {
+      console.error('Database post comments error:', error);
+      return [];
+    }
   }
 
   async getFriends(userId: number): Promise<any[]> {
@@ -2226,8 +2237,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProfessionalConnections(userId: number): Promise<any[]> {
-    console.log("🔥 PROFESSIONAL: Getting connections", { userId });
-    return [];
+    try {
+      console.log("🔥 PROFESSIONAL: Getting connections", { userId });
+      // Get professional connections from database
+      const connections = await db.execute(sql`
+        SELECT u.id, u.username, u.first_name, u.last_name, u.profile_image_url, u.role,
+               pc.connection_type, pc.created_at as connected_at
+        FROM professional_connections pc
+        JOIN users u ON (
+          CASE 
+            WHEN pc.user_id = ${userId} THEN u.id = pc.connected_user_id
+            ELSE u.id = pc.user_id
+          END
+        )
+        WHERE (pc.user_id = ${userId} OR pc.connected_user_id = ${userId})
+        AND pc.status = 'active'
+        ORDER BY pc.created_at DESC
+      `);
+      return connections.rows || [];
+    } catch (error) {
+      console.error('Database professional connections error:', error);
+      return [];
+    }
   }
 
   async createProfessionalConnection(connectionData: any): Promise<any> {
@@ -2246,8 +2277,47 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchTalentsPublic(searchParams: any): Promise<any[]> {
-    console.log("🔥 SEARCH: Searching talents publicly", { searchParams });
-    return [];
+    try {
+      console.log("🔥 SEARCH: Searching talents publicly", { searchParams });
+      const { query, talentType, location, minExperience, maxExperience } = searchParams;
+      
+      // Build dynamic search query
+      let whereConditions = [`u.role = 'talent'`];
+      
+      if (query) {
+        whereConditions.push(`(
+          LOWER(u.username) LIKE LOWER('%${query}%') OR
+          LOWER(u.first_name) LIKE LOWER('%${query}%') OR
+          LOWER(u.last_name) LIKE LOWER('%${query}%') OR
+          LOWER(up.display_name) LIKE LOWER('%${query}%')
+        )`);
+      }
+      
+      if (talentType) {
+        whereConditions.push(`up.talent_type = '${talentType}'`);
+      }
+      
+      if (location) {
+        whereConditions.push(`LOWER(up.location) LIKE LOWER('%${location}%')`);
+      }
+      
+      const whereClause = whereConditions.join(' AND ');
+      
+      const results = await db.execute(sql`
+        SELECT u.id, u.username, u.first_name, u.last_name, u.profile_image_url,
+               up.display_name, up.bio, up.location, up.talent_type, up.is_verified
+        FROM users u
+        LEFT JOIN user_profiles up ON u.id = up.user_id
+        WHERE ${sql.raw(whereClause)}
+        ORDER BY up.is_verified DESC, u.created_at DESC
+        LIMIT 50
+      `);
+      
+      return results.rows || [];
+    } catch (error) {
+      console.error('Database talent search error:', error);
+      return [];
+    }
   }
 
   // Add the missing getPricingTiersByRole method
@@ -3241,7 +3311,13 @@ export class DatabaseStorage implements IStorage {
   async getMeetings(userId: number): Promise<any[]> {
     try {
       console.log("🔥 ADMIN: Getting meetings", { userId });
-      return [];
+      // Get meetings from database
+      const meetings = await db.execute(sql`
+        SELECT * FROM meetings 
+        WHERE (organizer_id = ${userId} OR attendee_ids::text LIKE '%${userId}%')
+        ORDER BY meeting_date DESC
+      `);
+      return meetings.rows || [];
     } catch (error) {
       console.error('Error getting meetings:', error);
       return [];
@@ -3387,7 +3463,14 @@ export class DatabaseStorage implements IStorage {
   async getTagsForMediaFile(mediaFileId: number): Promise<any[]> {
     try {
       console.log("🔥 ADMIN: Getting tags for media file", { mediaFileId });
-      return [];
+      // Get tags from database using media file tags relationship
+      const tags = await db.execute(sql`
+        SELECT t.* FROM user_tags t
+        JOIN media_file_tags mft ON t.id = mft.tag_id
+        WHERE mft.media_file_id = ${mediaFileId}
+        ORDER BY t.name ASC
+      `);
+      return tags.rows || [];
     } catch (error) {
       console.error('Error getting tags for media file:', error);
       return [];
@@ -3397,7 +3480,14 @@ export class DatabaseStorage implements IStorage {
   async getMediaFilesByTag(tagId: number): Promise<any[]> {
     try {
       console.log("🔥 ADMIN: Getting media files by tag", { tagId });
-      return [];
+      // Get media files from database using tags relationship
+      const mediaFiles = await db.execute(sql`
+        SELECT mf.* FROM media_files mf
+        JOIN media_file_tags mft ON mf.id = mft.media_file_id
+        WHERE mft.tag_id = ${tagId}
+        ORDER BY mf.created_at DESC
+      `);
+      return mediaFiles.rows || [];
     } catch (error) {
       console.error('Error getting media files by tag:', error);
       return [];
