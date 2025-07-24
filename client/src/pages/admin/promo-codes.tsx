@@ -47,13 +47,22 @@ import { format } from "date-fns";
 interface PromoCode {
   id: number;
   code: string;
+  name?: string;
   description: string;
+  type?: "percentage" | "fixed";
   discountType: "percentage" | "fixed";
+  value?: number;
   discountValue: number;
   maxUses: number;
+  maxUsesPerUser?: number;
   usedCount: number;
+  active?: boolean;
   isActive: boolean;
+  startsAt?: string | null;
   expiresAt: string | null;
+  planRestriction?: string;
+  categoryRestriction?: string;
+  specificTierId?: number;
   createdBy: number;
   createdAt: string;
   updatedAt: string;
@@ -109,21 +118,62 @@ const PromoCodeManagement = () => {
 
   const { data: promoCodes = [], isLoading } = useQuery({
     queryKey: ["/api/admin/promo-codes"],
+    queryFn: async () => {
+      console.log("🔥 FRONTEND: Fetching promo codes");
+      const response = await fetch('/api/admin/promo-codes', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'same-origin'
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Please log in as an admin to access promo codes');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("✅ FRONTEND: Successfully fetched promo codes", data);
+      return data;
+    }
   });
 
   const { data: pricingTiers = [] } = useQuery<PricingTier[]>({
     queryKey: ["/api/admin/pricing-tiers"],
   });
 
-  const { data: promoCodeUsage = [] } = useQuery({
+  const { data: promoCodeUsage = [] } = useQuery<PromoCodeUsage[]>({
     queryKey: ["/api/admin/promo-codes", showUsage, "usage"],
     enabled: showUsage !== null,
   });
 
   const createPromoCodeMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await apiRequest("POST", "/api/admin/promo-codes", data);
-      return response.json();
+      console.log("🔥 FRONTEND: Creating promo code", data);
+      const response = await fetch('/api/admin/promo-codes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Please log in as an admin to create promo codes');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      console.log("✅ FRONTEND: Promo code created successfully", result);
+      return result;
     },
     onSuccess: () => {
       toast({
@@ -210,13 +260,13 @@ const PromoCodeManagement = () => {
     setEditingPromoCode(promoCode);
     setFormData({
       code: promoCode.code,
-      name: promoCode.name,
+      name: promoCode.name || promoCode.code,
       description: promoCode.description,
-      type: promoCode.type,
-      value: promoCode.value,
-      active: promoCode.active,
+      type: promoCode.type || promoCode.discountType,
+      value: (promoCode.value || promoCode.discountValue)?.toString() || "",
+      active: promoCode.active !== undefined ? promoCode.active : promoCode.isActive,
       maxUses: promoCode.maxUses?.toString() || "",
-      maxUsesPerUser: promoCode.maxUsesPerUser.toString(),
+      maxUsesPerUser: (promoCode.maxUsesPerUser || 1)?.toString(),
       startsAt: promoCode.startsAt ? format(new Date(promoCode.startsAt), "yyyy-MM-dd'T'HH:mm") : "",
       expiresAt: promoCode.expiresAt ? format(new Date(promoCode.expiresAt), "yyyy-MM-dd'T'HH:mm") : "",
       planRestriction: promoCode.planRestriction || "no_restriction",
