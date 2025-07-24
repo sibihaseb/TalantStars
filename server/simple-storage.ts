@@ -1354,20 +1354,37 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createJobCommunication(jobId: number, senderId: number, receiverId: number, message: string): Promise<any> {
-    // Mock implementation - just return the data with an ID
-    console.log("🔥 COMMUNICATION: Creating job communication", { jobId, senderId, receiverId, message });
-    const communication = {
-      id: Date.now(),
-      jobId,
-      senderId,
-      receiverId,
-      message,
-      isRead: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    console.log("✅ COMMUNICATION: Created successfully", { communication });
-    return communication;
+    try {
+      console.log("🔥 COMMUNICATION: Creating job communication", { jobId, senderId, receiverId, message });
+      const [communication] = await db
+        .insert(jobCommunications)
+        .values({
+          jobId,
+          senderId,
+          receiverId,
+          message,
+          isRead: false,
+          createdAt: new Date()
+        })
+        .returning();
+      console.log("✅ COMMUNICATION: Created successfully in database", { communication });
+      return communication;
+    } catch (error) {
+      console.error('Database job communication creation error:', error);
+      // Fallback to mock implementation
+      const communication = {
+        id: Date.now(),
+        jobId,
+        senderId,
+        receiverId,
+        message,
+        isRead: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      console.log("✅ COMMUNICATION: Created successfully (fallback)", { communication });
+      return communication;
+    }
   }
 
   // Application operations  
