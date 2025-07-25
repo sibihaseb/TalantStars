@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -96,6 +96,8 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
   const [verificationInProgress, setVerificationInProgress] = useState(false);
   const [uploadedMediaId, setUploadedMediaId] = useState<number | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<string>('');
+  const [editingMedia, setEditingMedia] = useState<any>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   
   const [mediaFormData, setMediaFormData] = useState<MediaFormData>({
     title: '',
@@ -283,6 +285,50 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
       });
     },
   });
+
+  // Edit mutation
+  const editMutation = useMutation({
+    mutationFn: async ({ mediaId, updateData }: { mediaId: number; updateData: any }) => {
+      const response = await apiRequest("PUT", `/api/media/${mediaId}`, updateData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/media"] });
+      setShowEditDialog(false);
+      setEditingMedia(null);
+      toast({
+        title: "Success",
+        description: "Media updated successfully"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.response?.text || "Failed to update media",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Handle edit media
+  const handleEditMedia = (media: any) => {
+    setEditingMedia(media);
+    setShowEditDialog(true);
+  };
+
+  // Handle save edit
+  const handleSaveEdit = () => {
+    if (!editingMedia) return;
+    
+    editMutation.mutate({
+      mediaId: editingMedia.id,
+      updateData: {
+        title: editingMedia.title,
+        description: editingMedia.description,
+        category: editingMedia.category
+      }
+    });
+  };
 
   const resetForm = () => {
     setMediaFormData({
@@ -629,6 +675,14 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
             className="bg-white/90 hover:bg-white text-gray-900 border-0"
           >
             <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => handleEditMedia(media)}
+            className="bg-blue-500/90 hover:bg-blue-600 text-white border-0"
+          >
+            <Edit className="h-4 w-4" />
           </Button>
           <Button
             variant="destructive"
@@ -1087,6 +1141,76 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
           onCropComplete={handleCropComplete}
         />
       )}
+
+      {/* Edit Media Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Media</DialogTitle>
+            <DialogDescription>
+              Update the details for this media file.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingMedia && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-title">Title</Label>
+                <Input
+                  id="edit-title"
+                  value={editingMedia.title || ''}
+                  onChange={(e) => setEditingMedia({ ...editingMedia, title: e.target.value })}
+                  placeholder="Enter title"
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editingMedia.description || ''}
+                  onChange={(e) => setEditingMedia({ ...editingMedia, description: e.target.value })}
+                  placeholder="Enter description"
+                  className="mt-1"
+                  rows={3}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-category">Category</Label>
+                <Select 
+                  value={editingMedia.category || 'portfolio'} 
+                  onValueChange={(value) => setEditingMedia({ ...editingMedia, category: value })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(cat => (
+                      <SelectItem key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveEdit}
+              disabled={editMutation.isPending}
+            >
+              {editMutation.isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
