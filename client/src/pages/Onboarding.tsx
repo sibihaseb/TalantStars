@@ -1596,7 +1596,10 @@ function Onboarding() {
               </p>
             </div>
 
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={(e) => {
+              console.log("🔥 FORM SUBMIT EVENT TRIGGERED");
+              form.handleSubmit(onSubmit)(e);
+            }} className="space-y-6">
               {/* Content wrapper with smooth transitions */}
               <div className={`transition-all duration-300 ${
                 isStepChanging ? 'opacity-50 transform translate-x-4' : 'opacity-100 transform translate-x-0'
@@ -2352,6 +2355,13 @@ function Onboarding() {
                       type="submit"
                       disabled={createProfileMutation.isPending || !watchedDisplayName || !watchedBio || !watchedLocation || (watchedBio && (watchedBio as string).length < 10)}
                       className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      onClick={(e) => {
+                        console.log("🔥 SUBMIT BUTTON CLICKED - Direct click handler");
+                        console.log("Form errors:", form.formState.errors);
+                        console.log("Form values:", form.getValues());
+                        console.log("Button disabled?", createProfileMutation.isPending || !watchedDisplayName || !watchedBio || !watchedLocation || (watchedBio && (watchedBio as string).length < 10));
+                        // Let the form submission handle the rest
+                      }}
                     >
                       <span>
                         {createProfileMutation.isPending ? "Creating Profile..." : 
