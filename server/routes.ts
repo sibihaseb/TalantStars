@@ -47,7 +47,7 @@ const scryptAsync = promisify(scrypt);
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-06-30.basil',
+  apiVersion: '2023-10-16',
 });
 
 async function hashPassword(password: string) {
@@ -5541,6 +5541,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // For normal browsers, continue to React app
     next();
+  });
+
+  // ===== FRESH STRIPE PAYMENT INTEGRATION =====
+  
+  // Create payment intent for tier upgrade
+  app.post('/api/payments/create-intent', isAuthenticated, async (req: any, res) => {
+    try {
+      const { tierId, amount, currency = 'usd', isAnnual = false } = req.body;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ error: 'Invalid amount' });
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount), // amount should already be in cents
+        currency,
+        metadata: {
+          userId: req.user.id.toString(),
+          tierId: tierId.toString(),
+          isAnnual: isAnnual.toString(),
+        },
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+
+      res.json({
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+      });
+    } catch (error: any) {
+      console.error('Error creating payment intent:', error);
+      res.status(500).json({ error: 'Failed to create payment intent' });
+    }
+  });
+
+  // Update user tier after successful payment
+  app.post('/api/user/update-tier', isAuthenticated, async (req: any, res) => {
+    try {
+      const { tierId, paymentIntentId } = req.body;
+      
+      if (!tierId) {
+        return res.status(400).json({ error: 'Tier ID is required' });
+      }
+
+      // Update user's pricing tier
+      await simpleStorage.updateUserTier(req.user.id, tierId);
+      
+      // Get updated user data
+      const updatedUser = await simpleStorage.getUser(req.user.id);
+      
+      res.json({ 
+        success: true, 
+        message: 'Tier updated successfully',
+        user: updatedUser 
+      });
+    } catch (error: any) {
+      console.error('Error updating user tier:', error);
+      res.status(500).json({ error: 'Failed to update tier' });
+    }
+  });
+
+  // Get pricing tiers (public endpoint)
+  app.get('/api/pricing-tiers', async (req: any, res) => {
+    try {
+      const tiers = await simpleStorage.getPricingTiers();
+      res.json(tiers);
+    } catch (error: any) {
+      console.error('Error fetching pricing tiers:', error);
+      res.status(500).json({ error: 'Failed to fetch pricing tiers' });
+    }
   });
 
   return httpServer;

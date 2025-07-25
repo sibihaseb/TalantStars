@@ -44,6 +44,7 @@ import TestUpload from "@/pages/TestUpload";
 import DebugLogs from "@/pages/DebugLogs";
 import VerificationDemo from "@/pages/verification-demo";
 import ProfileSharingPage from "@/pages/ProfileSharingPage";
+import PricingPage from "@/pages/PricingPage";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -73,6 +74,7 @@ function Router() {
       <Route path="/test-upload" component={TestUpload} />
       <Route path="/debug-logs" component={DebugLogs} />
       <Route path="/verification-demo" component={VerificationDemo} />
+      <Route path="/pricing" component={PricingPage} />
       <Route path="/talent/:userId" component={ProfileViewer} />
       
       {/* Protected admin routes */}
