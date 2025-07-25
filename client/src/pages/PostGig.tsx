@@ -268,7 +268,6 @@ export default function PostGig() {
                           <SelectValue placeholder="Select project type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Select project type</SelectItem>
                           <SelectItem value="feature-film">Feature Film</SelectItem>
                           <SelectItem value="short-film">Short Film</SelectItem>
                           <SelectItem value="tv-series">TV Series</SelectItem>
@@ -329,7 +328,6 @@ export default function PostGig() {
                           <SelectValue placeholder="Any" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any</SelectItem>
                           <SelectItem value="male">Male</SelectItem>
                           <SelectItem value="female">Female</SelectItem>
                           <SelectItem value="non-binary">Non-Binary</SelectItem>
@@ -344,7 +342,6 @@ export default function PostGig() {
                           <SelectValue placeholder="Any" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any</SelectItem>
                           <SelectItem value="caucasian">Caucasian</SelectItem>
                           <SelectItem value="african-american">African American</SelectItem>
                           <SelectItem value="hispanic">Hispanic/Latino</SelectItem>
@@ -366,7 +363,6 @@ export default function PostGig() {
                         <SelectValue placeholder="Any level" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Any level</SelectItem>
                         <SelectItem value="beginner">Beginner</SelectItem>
                         <SelectItem value="intermediate">Intermediate</SelectItem>
                         <SelectItem value="advanced">Advanced</SelectItem>
