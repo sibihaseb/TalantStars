@@ -46,12 +46,12 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
       
       toast({
         title: "Plan Selected",
-        description: "Your plan has been activated successfully. Let's complete your profile.",
+        description: "Your plan has been activated successfully. Redirecting to your dashboard.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       onClose();
-      // Redirect to onboarding for profile questions
-      setTimeout(() => setLocation("/onboarding"), 500);
+      // Redirect to dashboard since plan is now active
+      setTimeout(() => setLocation("/dashboard"), 500);
     },
     onError: (error: any) => {
       toast({
@@ -63,15 +63,21 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
   });
 
   const handlePaymentRedirect = (paymentData: any) => {
-    // Redirect to pricing page for payment processing
+    // Create payment intent and show payment dialog for immediate processing
     toast({
       title: "Payment Required",
-      description: `Redirecting to secure payment for $${paymentData.finalPrice} plan.`,
+      description: `Processing payment for $${paymentData.finalPrice} plan.`,
       variant: "default",
     });
     
-    // Redirect to pricing page where payment is fully functional
-    setLocation("/pricing");
+    // Start payment intent creation for immediate processing
+    const tier = pricingTiers.find((t: any) => t.id === paymentData.tier.id);
+    if (tier) {
+      createPaymentMutation.mutate({ 
+        tierId: tier.id, 
+        isAnnual: false 
+      });
+    }
   };
 
   const createPaymentMutation = useMutation({
@@ -88,13 +94,14 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
       return response.json();
     },
     onSuccess: (data) => {
-      // Redirect to checkout page with payment intent
-      const params = new URLSearchParams({
-        client_secret: data.clientSecret,
-        tier_id: data.tierId.toString(),
-        annual: data.isAnnual.toString()
+      // Close modal and redirect to dashboard after successful payment processing
+      toast({
+        title: "Payment Setup Complete",
+        description: "Redirecting to complete your payment...",
       });
-      setLocation(`/checkout?${params.toString()}`);
+      onClose();
+      // Redirect to dashboard instead of checkout
+      setLocation("/dashboard");
     },
     onError: (error: any) => {
       toast({

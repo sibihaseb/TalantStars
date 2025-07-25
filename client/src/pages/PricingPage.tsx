@@ -31,14 +31,14 @@ export default function PricingPage() {
         </div>
 
         {/* Current Plan Info */}
-        {user && (
+        {user && user.pricingTierId && (
           <Card className="max-w-md mx-auto mb-8">
             <CardHeader>
               <CardTitle className="text-center">Current Plan</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
               <div className="text-lg font-semibold text-blue-600">
-                {user.pricingTierId ? `Tier ${user.pricingTierId}` : 'No Plan Selected'}
+                Active Plan (Tier {user.pricingTierId})
               </div>
               <div className="text-sm text-gray-600 mt-2">
                 Role: {user.role}
