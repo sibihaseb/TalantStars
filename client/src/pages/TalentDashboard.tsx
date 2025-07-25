@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
+import { UserJobManager } from "@/components/UserJobManager";
 
 // Dynamic Availability Status Component
 function DynamicAvailabilityStatus({ userId }: { userId: number }) {
@@ -585,10 +586,11 @@ export default function TalentDashboard() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-10 mb-8">
+          <TabsList className="grid w-full grid-cols-11 mb-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
+            <TabsTrigger value="job-management">My Jobs</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="experience">Experience</TabsTrigger>
@@ -867,6 +869,29 @@ export default function TalentDashboard() {
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="job-management">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Job Management</CardTitle>
+                    <CardDescription>Manage your posted jobs, edit details, and track status</CardDescription>
+                  </div>
+                  <Button 
+                    onClick={() => setLocation('/post-gig')}
+                    className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Post New Job
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <UserJobManager />
               </CardContent>
             </Card>
           </TabsContent>

@@ -1946,6 +1946,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User job management routes - edit, delete, mark as booked
+  app.put('/api/jobs/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      // First check if job exists and user owns it
+      const existingJob = await simpleStorage.getJob(jobId);
+      if (!existingJob) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+      
+      if (existingJob.userId !== userId && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "You can only edit your own jobs" });
+      }
+      
+      // Parse and validate the update data
+      const updateData = {
+        ...req.body,
+        budget: req.body.budget ? String(req.body.budget) : null,
+        projectDate: req.body.projectDate ? new Date(req.body.projectDate) : null,
+        applicationDeadline: req.body.applicationDeadline ? new Date(req.body.applicationDeadline) : null,
+        updatedAt: new Date()
+      };
+      
+      const updatedJob = await simpleStorage.updateJob(jobId, updateData);
+      console.log("✅ JOB: User updated job successfully", { jobId, userId });
+      res.json(updatedJob);
+    } catch (error) {
+      console.error("❌ JOB: Error updating job:", error);
+      res.status(500).json({ message: "Failed to update job" });
+    }
+  });
+
+  app.delete('/api/jobs/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      // First check if job exists and user owns it
+      const existingJob = await simpleStorage.getJob(jobId);
+      if (!existingJob) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+      
+      if (existingJob.userId !== userId && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "You can only delete your own jobs" });
+      }
+      
+      await simpleStorage.deleteJob(jobId);
+      console.log("✅ JOB: User deleted job successfully", { jobId, userId });
+      res.json({ success: true, message: "Job deleted successfully" });
+    } catch (error) {
+      console.error("❌ JOB: Error deleting job:", error);
+      res.status(500).json({ message: "Failed to delete job" });
+    }
+  });
+
+  app.patch('/api/jobs/:id/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      const userId = req.user.id;
+      const { status } = req.body;
+      
+      // Validate status
+      if (!['open', 'in_progress', 'completed', 'cancelled', 'booked'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status. Must be: open, in_progress, completed, cancelled, or booked" });
+      }
+      
+      // First check if job exists and user owns it
+      const existingJob = await simpleStorage.getJob(jobId);
+      if (!existingJob) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+      
+      if (existingJob.userId !== userId && req.user.role !== 'admin') {
+        return res.status(403).json({ message: "You can only update status of your own jobs" });
+      }
+      
+      const updatedJob = await simpleStorage.updateJob(jobId, { status, updatedAt: new Date() });
+      console.log("✅ JOB: User updated job status successfully", { jobId, userId, status });
+      res.json(updatedJob);
+    } catch (error) {
+      console.error("❌ JOB: Error updating job status:", error);
+      res.status(500).json({ message: "Failed to update job status" });
+    }
+  });
+
+  // Get user's own jobs
+  app.get('/api/user/jobs', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const jobs = await simpleStorage.getUserJobs(userId);
+      console.log("✅ JOB: Retrieved user jobs successfully", { userId, count: jobs.length });
+      res.json(jobs);
+    } catch (error) {
+      console.error("❌ JOB: Error fetching user jobs:", error);
+      res.status(500).json({ message: "Failed to fetch your jobs" });
+    }
+  });
+
   // Job application routes
   app.post('/api/jobs/:id/apply', isAuthenticated, async (req: any, res) => {
     try {

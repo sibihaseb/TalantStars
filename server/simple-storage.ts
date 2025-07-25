@@ -1771,13 +1771,24 @@ export class DatabaseStorage implements IStorage {
 
   async updateJob(id: number, updates: any): Promise<any> {
     console.log("🔥 JOB: Updating job", { id, updates });
-    const job = await this.getJob(id);
-    if (job) {
-      const updatedJob = { ...job, ...updates, updatedAt: new Date().toISOString() };
-      console.log("✅ JOB: Updated successfully", { id });
+    try {
+      // Update the job in the database
+      const [updatedJob] = await db
+        .update(jobs)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(jobs.id, id))
+        .returning();
+      
+      if (!updatedJob) {
+        throw new Error("Job not found");
+      }
+      
+      console.log("✅ JOB: Updated successfully in database", { id });
       return updatedJob;
+    } catch (error) {
+      console.error("❌ JOB: Database update error:", error);
+      throw new Error("Failed to update job");
     }
-    throw new Error("Job not found");
   }
 
   async deleteJob(id: number): Promise<void> {
@@ -1789,6 +1800,19 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("❌ JOB: Database deletion error:", error);
       throw new Error("Failed to delete job");
+    }
+  }
+
+  async getUserJobs(userId: number): Promise<any[]> {
+    console.log("🔥 JOB: Getting jobs for user", { userId });
+    try {
+      // Get all jobs created by this user
+      const userJobs = await db.select().from(jobs).where(eq(jobs.userId, userId));
+      console.log("✅ JOB: Found user jobs", { userId, count: userJobs.length });
+      return userJobs;
+    } catch (error) {
+      console.error("❌ JOB: Error fetching user jobs:", error);
+      throw new Error("Failed to fetch user jobs");
     }
   }
 
