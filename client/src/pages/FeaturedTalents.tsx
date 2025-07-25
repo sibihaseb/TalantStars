@@ -338,7 +338,7 @@ export default function FeaturedTalents() {
                   <div className="flex items-center gap-2 text-sm text-purple-300">
                     <div className="flex items-center gap-1">
                       {getTalentIcon(talent.user.role)}
-                      <span>{talent.user.role}</span>
+                      <span>{talent.user.role ? talent.user.role.charAt(0).toUpperCase() + talent.user.role.slice(1).toLowerCase() : ''}</span>
                     </div>
                   </div>
                   

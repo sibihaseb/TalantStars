@@ -5261,7 +5261,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Use real data if available, otherwise fallback
         const displayName = profileData?.displayName || username.charAt(0).toUpperCase() + username.slice(1);
-        const talentType = profileData?.talentType || 'Professional Talent';
+        const talentType = profileData?.talentType ? 
+          profileData.talentType.charAt(0).toUpperCase() + profileData.talentType.slice(1).toLowerCase() : 
+          'Professional Talent';
         const bio = profileData?.bio || `${displayName} is a professional talent available for hire through Talents & Stars platform.`;
         const location = profileData?.location || 'Professional';
         

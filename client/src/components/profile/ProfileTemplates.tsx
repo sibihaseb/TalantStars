@@ -16,6 +16,12 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
+// Utility function to properly capitalize talent types and other text
+const capitalizeText = (text: string): string => {
+  if (!text) return '';
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+};
+
 export type ProfileTemplate = 'classic' | 'modern' | 'artistic' | 'minimal' | 'cinematic';
 
 interface ProfileTemplatesProps {
@@ -449,8 +455,8 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
       <Card className="bg-white shadow-lg">
         <CardContent className="pt-6">
           <div className="flex flex-wrap justify-center md:justify-start gap-2" style={{ marginBottom: '15px' }}>
-            <Badge className="bg-blue-100 text-blue-800">{profile?.role}</Badge>
-            {profile?.talentType && <Badge variant="outline">{profile?.talentType}</Badge>}
+            <Badge className="bg-blue-100 text-blue-800">{capitalizeText(profile?.role)}</Badge>
+            {profile?.talentType && <Badge variant="outline">{capitalizeText(profile?.talentType)}</Badge>}
           </div>
           <p className="text-gray-600 max-w-4xl text-center md:text-left">{profile?.bio}</p>
         </CardContent>
@@ -720,8 +726,8 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
                   {profile?.isVerified && <ShieldCheck className="w-7 h-7 text-blue-200" />}
                 </div>
                 <div className="flex gap-2 mb-6">
-                  <Badge className="bg-white/20 text-white border-0">{profile?.role}</Badge>
-                  <Badge className="bg-gradient-to-r from-pink-500 to-orange-500 text-white border-0">{profile?.talentType}</Badge>
+                  <Badge className="bg-white/20 text-white border-0">{capitalizeText(profile?.role)}</Badge>
+                  <Badge className="bg-gradient-to-r from-pink-500 to-orange-500 text-white border-0">{capitalizeText(profile?.talentType)}</Badge>
                 </div>
                 <p className="text-lg opacity-90">{profile?.bio}</p>
               </div>
@@ -1091,8 +1097,8 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
                   {profile?.isVerified && <ShieldCheck className="w-7 h-7 text-purple-500" />}
                 </div>
                 <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
-                  <Badge className="bg-gradient-to-r from-pink-500 to-rose-500 text-white">{profile?.role}</Badge>
-                  <Badge className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white">{profile?.talentType}</Badge>
+                  <Badge className="bg-gradient-to-r from-pink-500 to-rose-500 text-white">{capitalizeText(profile?.role)}</Badge>
+                  <Badge className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white">{capitalizeText(profile?.talentType)}</Badge>
                 </div>
                 <p className="text-gray-700 text-lg italic">{profile?.bio}</p>
                 
@@ -1429,7 +1435,7 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
             <h1 className="text-5xl font-light text-gray-900">{profile?.displayName}</h1>
             {profile?.isVerified && <ShieldCheck className="w-8 h-8 text-blue-500" />}
           </div>
-          <p className="text-xl text-gray-600 font-light">{profile?.talentType} • {profile?.location}</p>
+          <p className="text-xl text-gray-600 font-light">{capitalizeText(profile?.talentType)} • {profile?.location}</p>
         </div>
         
         <div className="max-w-2xl mx-auto">
@@ -1771,8 +1777,8 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
             </div>
             
             <div className="flex justify-center gap-4 mb-8">
-              <Badge className="bg-yellow-500 text-black text-lg px-6 py-2">{profile?.role}</Badge>
-              <Badge className="bg-white text-black text-lg px-6 py-2">{profile?.talentType}</Badge>
+              <Badge className="bg-yellow-500 text-black text-lg px-6 py-2">{capitalizeText(profile?.role)}</Badge>
+              <Badge className="bg-white text-black text-lg px-6 py-2">{capitalizeText(profile?.talentType)}</Badge>
             </div>
             
             <p className="text-2xl mb-12 font-light opacity-90">{profile?.bio}</p>
