@@ -1374,10 +1374,12 @@ export default function AdminDashboard() {
                               <Button
                                 size="sm"
                                 variant="outline"
+                                className={user.profile?.isVerified ? "bg-green-100 border-green-200 text-green-700 hover:bg-green-200" : ""}
                                 onClick={() => verifyUserMutation.mutate({ 
-                                  userId: user.id, 
+                                  userId: user.id.toString(), 
                                   verified: !user.profile?.isVerified 
                                 })}
+                                title={user.profile?.isVerified ? "Unverify user" : "Verify user"}
                               >
                                 <UserCheck className="w-4 h-4" />
                               </Button>
