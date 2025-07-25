@@ -68,10 +68,25 @@ export default function PostGig() {
 
   const createJobMutation = useMutation({
     mutationFn: async (jobData: any) => {
-      const response = await apiRequest("POST", "/api/jobs", jobData);
-      return await response.json();
+      console.log("API REQUEST: Starting job creation with data:", jobData);
+      try {
+        const response = await apiRequest("POST", "/api/jobs", jobData);
+        console.log("API RESPONSE: Status:", response.status);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("API ERROR: Response not ok:", errorText);
+          throw new Error(`API Error: ${response.status} - ${errorText}`);
+        }
+        const result = await response.json();
+        console.log("API SUCCESS: Job created:", result);
+        return result;
+      } catch (error) {
+        console.error("API REQUEST FAILED:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
+      console.log("MUTATION SUCCESS:", data);
       toast({
         title: "Gig posted successfully!",
         description: "Your gig has been published and is now visible to talent.",
@@ -79,7 +94,8 @@ export default function PostGig() {
       queryClient.invalidateQueries({ queryKey: ["/api/jobs"] });
       setLocation("/dashboard");
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("MUTATION ERROR:", error);
       toast({
         title: "Error posting gig",
         description: error.message || "Failed to post gig. Please try again.",
@@ -91,7 +107,14 @@ export default function PostGig() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log("FORM SUBMIT: Started");
+    console.log("FORM DATA:", formData);
+    console.log("USER:", user);
+    console.log("IS AUTHENTICATED:", isAuthenticated);
+    console.log("IS LOADING:", isLoading);
+    
     if (!isAuthenticated) {
+      console.log("SUBMIT ERROR: Not authenticated");
       toast({
         title: "Authentication required",
         description: "Please log in to post a gig.",
@@ -102,6 +125,10 @@ export default function PostGig() {
     }
     
     if (!formData.title || !formData.description || !formData.talentType) {
+      console.log("SUBMIT ERROR: Missing required fields");
+      console.log("Title:", formData.title);
+      console.log("Description:", formData.description);
+      console.log("TalentType:", formData.talentType);
       toast({
         title: "Missing required fields",
         description: "Please fill in all required fields.",
@@ -110,12 +137,16 @@ export default function PostGig() {
       return;
     }
 
-    createJobMutation.mutate({
+    const submitData = {
       ...formData,
       userId: user?.id,
       status: 'open',
       isPublic: true,
-    });
+    };
+    
+    console.log("SUBMIT DATA:", submitData);
+    console.log("CALLING MUTATION...");
+    createJobMutation.mutate(submitData);
   };
 
   const addSkill = () => {
