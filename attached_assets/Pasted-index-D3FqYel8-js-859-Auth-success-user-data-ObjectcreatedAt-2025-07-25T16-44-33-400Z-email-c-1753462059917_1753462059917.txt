@@ -1,0 +1,79 @@
+index-D3FqYel8.js:859 Auth success - user data: ObjectcreatedAt: "2025-07-25T16:44:33.400Z"email: "carldempski@gmail.com"firstName: "Carl"id: 98lastName: "Dempski"pricingTierId: nullprofileImageUrl: nullrole: "talent"updatedAt: "2025-07-25T16:44:33.400Z"username: "carldempski"[[Prototype]]: Object
+index-D3FqYel8.js:859 === FRONTEND API RESPONSE ===
+index-D3FqYel8.js:859 Status: 200, URL: /api/create-payment-intent
+index-D3FqYel8.js:859 === FRONTEND API RESPONSE ===
+index-D3FqYel8.js:859 Status: 200, URL: /api/create-payment-intent
+index-D3FqYel8.js:859 === FRONTEND API RESPONSE ===
+index-D3FqYel8.js:859 Status: 200, URL: /api/create-payment-intent
+index-D3FqYel8.js:859 === FRONTEND API RESPONSE ===
+index-D3FqYel8.js:859 Status: 200, URL: /api/create-payment-intent
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
+index-D3FqYel8.js:859 === FRONTEND API RESPONSE ===
+index-D3FqYel8.js:859 Status: 200, URL: /api/user/select-tier
+index-D3FqYel8.js:859 === FRONTEND API RESPONSE ===
+index-D3FqYel8.js:859 Status: 200, URL: /api/opportunities
+index-D3FqYel8.js:859 === FRONTEND API RESPONSE ===
+index-D3FqYel8.js:859 Status: 200, URL: /api/applications
+index-D3FqYel8.js:859 === FRONTEND API RESPONSE ===
+index-D3FqYel8.js:859 Status: 200, URL: /api/social/stats
+index-D3FqYel8.js:859 === FRONTEND API RESPONSE ===
+index-D3FqYel8.js:859 Status: 200, URL: /api/job-history/98
+index-D3FqYel8.js:859 === FRONTEND API RESPONSE ===
+index-D3FqYel8.js:859 Status: 200, URL: /api/user/profile
+index-D3FqYel8.js:859 🔄 Profile pre-population check:
+index-D3FqYel8.js:859   existingProfile: undefined
+index-D3FqYel8.js:859   user: {id: 98, username: 'carldempski', email: 'carldempski@gmail.com', firstName: 'Carl', lastName: 'Dempski', …}createdAt: "2025-07-25T16:44:33.400Z"email: "carldempski@gmail.com"firstName: "Carl"id: 98lastName: "Dempski"pricingTierId: 1profileImageUrl: nullrole: "talent"updatedAt: "2025-07-25T16:44:33.400Z"username: "carldempski"[[Prototype]]: Object
+index-D3FqYel8.js:859   existingProfile keys: none
+index-D3FqYel8.js:859 ❌ No profile data to populate - existingProfile: false user: true
+index-D3FqYel8.js:48 
+            
+            
+           GET https://www.talentsandstars.com/api/profile 404 (Not Found)
+(anonymous) @ index-D3FqYel8.js:48
+i @ index-D3FqYel8.js:48
+y @ index-D3FqYel8.js:48
+start @ index-D3FqYel8.js:48
+fetch @ index-D3FqYel8.js:48
+hu @ index-D3FqYel8.js:48
+onSubscribe @ index-D3FqYel8.js:48
+subscribe @ index-D3FqYel8.js:48
+(anonymous) @ index-D3FqYel8.js:48
+bA @ index-D3FqYel8.js:38
+pf @ index-D3FqYel8.js:40
+_c @ index-D3FqYel8.js:40
+I7 @ index-D3FqYel8.js:40
+ro @ index-D3FqYel8.js:40
+p1 @ index-D3FqYel8.js:40
+ql @ index-D3FqYel8.js:38
+(anonymous) @ index-D3FqYel8.js:40
+setTimeout
+onSuccess @ index-D3FqYel8.js:797
+execute @ index-D3FqYel8.js:48
+await in execute
+mutate @ index-D3FqYel8.js:48
+(anonymous) @ index-D3FqYel8.js:48
+m @ index-D3FqYel8.js:797
+onClick @ index-D3FqYel8.js:797
+t9 @ index-D3FqYel8.js:37
+r9 @ index-D3FqYel8.js:37
+n9 @ index-D3FqYel8.js:37
+VN @ index-D3FqYel8.js:37
+aA @ index-D3FqYel8.js:37
+(anonymous) @ index-D3FqYel8.js:37
+Pj @ index-D3FqYel8.js:40
+AP @ index-D3FqYel8.js:37
+Eg @ index-D3FqYel8.js:37
+sj @ index-D3FqYel8.js:37
+j9 @ index-D3FqYel8.js:37
+index-D3FqYel8.js:859 🚨 API ERROR: 404 - {"message":"Profile not found"}
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
