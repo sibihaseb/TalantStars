@@ -24,6 +24,25 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Dynamic Promo Codes Statistics Fix - Replaced Hardcoded Data with Database Integration (July 25, 2025)
+- **CRITICAL SUCCESS**: Fixed AdminDashboard Promo Codes Management section to display dynamic data from database instead of hardcoded values
+- **Root Cause**: Promo codes statistics (Active Codes: 12, Total Uses: 347, Total Savings: $2,450) were hardcoded around lines 4128-4144
+- **Complete Solution**: Added comprehensive promo codes data integration with real-time calculations:
+  - **Added PromoCode Interface**: Complete TypeScript interface matching database schema with type safety
+  - **Dynamic Query Integration**: Added useQuery hook to fetch promo codes data from `/api/admin/promo-codes` endpoint
+  - **Real-time Statistics Calculation**: Implemented live calculations for Active Codes, Total Uses, and Total Savings
+  - **Smart Savings Calculation**: Sophisticated calculation handling both percentage and fixed amount discounts with estimated order values
+  - **Dynamic Table Integration**: Replaced hardcoded WELCOME25/TALENT50 table rows with live database data showing first 5 promo codes
+  - **Enhanced UX**: Added loading states, empty states, and proper formatting for dates, currencies, and usage limits
+- **Professional Features**: 
+  - Active/inactive status badges with proper color coding
+  - Properly formatted expiry dates and usage limits (e.g., "124/500" or "87/∞")
+  - Comma-separated currency formatting for savings display (e.g., "$2,450" becomes "$X,XXX")
+  - Click-through functionality from overview table to full promo codes management page
+- **Data Integrity**: All statistics now reflect real database state instead of misleading hardcoded values
+- **User Experience**: Admins now see actual promo code performance data for informed decision making
+- **Result**: ✅ Complete promo codes statistics system showing dynamic data from promo management database with real-time calculations
+
 ### Complete "Post a Gig" System Integration with Comprehensive Entertainment Industry Fields (July 25, 2025)
 - **CRITICAL SUCCESS**: Fixed blank "Post a Gig" page and implemented comprehensive entertainment industry job creation form
 - **Landing Page Fix**: Updated "Post a Gig" button to properly route to `/post-gig` instead of `/auth` for seamless user flow

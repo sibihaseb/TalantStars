@@ -162,6 +162,23 @@ interface Analytics {
   createdAt: string;
 }
 
+interface PromoCode {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  type: 'percentage' | 'fixed_amount';
+  value: string;
+  active: boolean;
+  maxUses: number | null;
+  usedCount: number;
+  maxUsesPerUser: number;
+  startsAt: string | null;
+  expiresAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function AdminDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -232,6 +249,10 @@ export default function AdminDashboard() {
 
   const { data: analyticsSummary = { totalUsers: 0, totalJobs: 0, totalApplications: 0, totalPayments: 0 }, isLoading: summaryLoading } = useQuery<{totalUsers: number; totalJobs: number; totalApplications: number; totalPayments: number}>({
     queryKey: ["/api/admin/analytics/summary"],
+  });
+
+  const { data: promoCodes = [], isLoading: promoCodesLoading } = useQuery<PromoCode[]>({
+    queryKey: ["/api/admin/promo-codes"],
   });
 
   // Mutations
@@ -571,6 +592,20 @@ export default function AdminDashboard() {
   const activeTiers = pricingTiers.filter(t => t.active).length;
   const activeJobs = jobs.filter(j => j.status === "open").length;
   const completedJobs = jobs.filter(j => j.status === "completed").length;
+  
+  // Promo Codes Statistics
+  const activePromoCodes = promoCodes.filter(p => p.active).length;
+  const totalPromoCodeUses = promoCodes.reduce((sum, p) => sum + p.usedCount, 0);
+  const totalPromoCodeSavings = promoCodes.reduce((sum, p) => {
+    if (p.type === 'fixed_amount') {
+      return sum + (parseFloat(p.value) * p.usedCount);
+    } else if (p.type === 'percentage') {
+      // For percentage discounts, we'll estimate average order value at $100
+      // This is a simplified calculation - in production you'd want actual order data
+      return sum + ((parseFloat(p.value) / 100) * 100 * p.usedCount);
+    }
+    return sum;
+  }, 0);
 
   // Filter users
   const filteredUsers = users.filter(user => {
@@ -4125,7 +4160,7 @@ export default function AdminDashboard() {
                     <Card className="bg-green-50 border-green-200">
                       <CardContent className="pt-4">
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-green-600">12</div>
+                          <div className="text-2xl font-bold text-green-600">{promoCodesLoading ? "..." : activePromoCodes}</div>
                           <div className="text-sm text-green-700">Active Codes</div>
                         </div>
                       </CardContent>
@@ -4133,7 +4168,7 @@ export default function AdminDashboard() {
                     <Card className="bg-blue-50 border-blue-200">
                       <CardContent className="pt-4">
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-blue-600">347</div>
+                          <div className="text-2xl font-bold text-blue-600">{promoCodesLoading ? "..." : totalPromoCodeUses}</div>
                           <div className="text-sm text-blue-700">Total Uses</div>
                         </div>
                       </CardContent>
@@ -4141,7 +4176,7 @@ export default function AdminDashboard() {
                     <Card className="bg-purple-50 border-purple-200">
                       <CardContent className="pt-4">
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-purple-600">$2,450</div>
+                          <div className="text-2xl font-bold text-purple-600">{promoCodesLoading ? "..." : `$${totalPromoCodeSavings.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`}</div>
                           <div className="text-sm text-purple-700">Total Savings</div>
                         </div>
                       </CardContent>
@@ -4162,42 +4197,57 @@ export default function AdminDashboard() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        <TableRow>
-                          <TableCell className="font-mono">WELCOME25</TableCell>
-                          <TableCell>Percentage</TableCell>
-                          <TableCell>25%</TableCell>
-                          <TableCell>124/500</TableCell>
-                          <TableCell>Dec 31, 2025</TableCell>
-                          <TableCell><Badge className="bg-green-100 text-green-800">Active</Badge></TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline">
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button size="sm" variant="outline">
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-mono">TALENT50</TableCell>
-                          <TableCell>Fixed Amount</TableCell>
-                          <TableCell>$50</TableCell>
-                          <TableCell>87/200</TableCell>
-                          <TableCell>Nov 30, 2025</TableCell>
-                          <TableCell><Badge className="bg-green-100 text-green-800">Active</Badge></TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline">
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button size="sm" variant="outline">
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
+                        {promoCodesLoading ? (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-4">
+                              Loading promo codes...
+                            </TableCell>
+                          </TableRow>
+                        ) : promoCodes.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">
+                              No promo codes found. Click "Manage Promo Codes" to create some.
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          promoCodes.slice(0, 5).map((promoCode) => (
+                            <TableRow key={promoCode.id}>
+                              <TableCell className="font-mono">{promoCode.code}</TableCell>
+                              <TableCell className="capitalize">{promoCode.type.replace('_', ' ')}</TableCell>
+                              <TableCell>
+                                {promoCode.type === 'percentage' ? `${promoCode.value}%` : `$${promoCode.value}`}
+                              </TableCell>
+                              <TableCell>
+                                {promoCode.usedCount}/{promoCode.maxUses || '∞'}
+                              </TableCell>
+                              <TableCell>
+                                {promoCode.expiresAt 
+                                  ? new Date(promoCode.expiresAt).toLocaleDateString('en-US', { 
+                                      month: 'short', 
+                                      day: 'numeric', 
+                                      year: 'numeric' 
+                                    })
+                                  : 'No expiry'
+                                }
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={promoCode.active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
+                                  {promoCode.active ? "Active" : "Inactive"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  <Button size="sm" variant="outline" onClick={() => window.location.href = '/admin/promo-codes'}>
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button size="sm" variant="outline" onClick={() => window.location.href = '/admin/promo-codes'}>
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
                       </TableBody>
                     </Table>
                   </div>
