@@ -137,10 +137,10 @@ export async function setupAuth(app: Express) {
           console.log("LocalStrategy attempt for usernameOrEmail:", usernameOrEmail);
           
           // Try to find user by username first, then by email
-          let user = await simpleStorage.getUserByUsername(usernameOrEmail);
+          let user = await storage.getUserByUsername(usernameOrEmail);
           if (!user) {
             console.log("Not found by username, trying email...");
-            user = await simpleStorage.getUserByEmail(usernameOrEmail);
+            user = await storage.getUserByEmail(usernameOrEmail);
           }
           
           console.log("User found:", user ? "YES" : "NO");
@@ -176,7 +176,7 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser(async (id: number, done) => {
     try {
       console.log("Deserializing user ID:", id);
-      const user = await simpleStorage.getUser(id);
+      const user = await storage.getUser(id);
       console.log("Deserialized user:", user);
       done(null, user);
     } catch (error) {
@@ -198,18 +198,18 @@ export async function setupAuth(app: Express) {
       }
       
       // Check if username already exists
-      const existingUser = await simpleStorage.getUserByUsername(username);
+      const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
       }
       
       // Check if email already exists
-      const existingEmail = await simpleStorage.getUserByEmail(email);
+      const existingEmail = await storage.getUserByEmail(email);
       if (existingEmail) {
         return res.status(400).json({ message: "Email already exists" });
       }
 
-      const user = await simpleStorage.createUser({
+      const user = await storage.createUser({
         username,
         password: await hashPassword(password),
         email,
@@ -220,7 +220,7 @@ export async function setupAuth(app: Express) {
 
       // Record legal document acceptance
       try {
-        await simpleStorage.recordLegalAcceptance(user.id, {
+        await storage.recordLegalAcceptance(user.id, {
           termsAccepted: termsAccepted,
           privacyAccepted: privacyAccepted,
           termsVersion: 1, // Default version
@@ -285,7 +285,7 @@ export async function setupAuth(app: Express) {
         if (req.session && req.session.cookie) {
           if (rememberMe) {
             // Get remember me duration from admin settings or default to 30 days
-            simpleStorage.getAdminSettings().then(settings => {
+            storage.getAdminSettings().then(settings => {
               const rememberMeDurationDays = settings.find(s => s.key === 'remember_me_duration_days')?.value || '30';
               const durationMs = parseInt(rememberMeDurationDays) * 24 * 60 * 60 * 1000;
               req.session.cookie.maxAge = durationMs;

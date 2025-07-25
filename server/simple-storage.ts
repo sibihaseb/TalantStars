@@ -276,7 +276,7 @@ export class DatabaseStorage implements IStorage {
           firstName: users.firstName,
           lastName: users.lastName,
           role: users.role,
-          isVerified: users.isVerified,
+          isVerified: userProfiles.isVerified,
           profileImageUrl: users.profileImageUrl,
           pricingTierId: users.pricingTierId,
           createdAt: users.createdAt,
@@ -286,7 +286,7 @@ export class DatabaseStorage implements IStorage {
           bio: userProfiles.bio
         })
         .from(users)
-        .leftJoin(userProfiles, eq(users.id.toString(), userProfiles.userId));
+        .leftJoin(userProfiles, eq(users.id, sql`CAST(${userProfiles.userId} AS INTEGER)`));
       
       return usersWithProfiles;
     } catch (error) {
@@ -404,7 +404,7 @@ export class DatabaseStorage implements IStorage {
       const existingProfile = await db
         .select()
         .from(userProfiles)
-        .where(eq(userProfiles.userId, userId));
+        .where(eq(userProfiles.userId, userId.toString()));
       
       if (existingProfile.length === 0) {
         // Create a basic profile if none exists
@@ -412,7 +412,7 @@ export class DatabaseStorage implements IStorage {
         const [newProfile] = await db
           .insert(userProfiles)
           .values({ 
-            userId: userId,
+            userId: userId.toString(),
             isVerified: verified,
             location: 'Not specified',
             talentType: 'Not specified'
@@ -425,7 +425,7 @@ export class DatabaseStorage implements IStorage {
         const [profile] = await db
           .update(userProfiles)
           .set({ isVerified: verified })
-          .where(eq(userProfiles.userId, userId))
+          .where(eq(userProfiles.userId, userId.toString()))
           .returning();
         
         console.log(`✅ VERIFICATION: User ${userId} verification status updated to ${verified}`);
