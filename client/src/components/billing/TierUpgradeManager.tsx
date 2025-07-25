@@ -27,10 +27,17 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || '');
 interface PricingTier {
   id: number;
   name: string;
+  category: string;
   price: string;
-  duration: string;
-  features: string[];
-  isCurrentTier?: boolean;
+  annualPrice: string;
+  isActive: boolean;
+  maxPhotos: number;
+  maxVideos: number;
+  maxAudio: number;
+  maxExternalLinks: number;
+  permissions: string[] | null;
+  description?: string;
+  features?: string[];
 }
 
 function TierUpgradeManagerContent() {
@@ -46,16 +53,26 @@ function TierUpgradeManagerContent() {
   });
 
   // Filter tiers by user's category (talent, manager, producer, agent)
-  const pricingTiers = allPricingTiers.filter((tier: any) => {
-    // If user doesn't have a role, show talent tiers as default
+  const pricingTiers = allPricingTiers.filter((tier: PricingTier) => {
+    // Admins can see all tiers
+    if (user?.role === 'admin' || user?.role === 'super_admin') {
+      return true;
+    }
+    
+    // Regular users see tiers for their role
     const userCategory = user?.role || 'talent';
     return tier.category === userCategory;
   });
 
   // Create payment intent mutation for paid tiers
   const createPaymentIntentMutation = useMutation({
-    mutationFn: async ({ tierId, amount }: { tierId: number; amount: number }) => {
-      const response = await apiRequest('POST', '/api/stripe/create-payment-intent', { tierId, amount });
+    mutationFn: async ({ tierId, amount, isAnnual }: { tierId: number; amount: number; isAnnual?: boolean }) => {
+      const response = await apiRequest('POST', '/api/payments/create-intent', { 
+        tierId, 
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: 'usd',
+        isAnnual: isAnnual || false
+      });
       return response.json();
     }
   });
@@ -63,7 +80,7 @@ function TierUpgradeManagerContent() {
   // Update user tier mutation (for free tiers)
   const updateTierMutation = useMutation({
     mutationFn: async (tierId: number) => {
-      const response = await apiRequest('POST', '/api/user/tier', { tierId });
+      const response = await apiRequest('POST', '/api/user/update-tier', { tierId });
       return response.json();
     },
     onSuccess: () => {
@@ -175,7 +192,11 @@ function TierUpgradeManagerContent() {
       // Paid tier, create payment intent
       setSelectedTier(tier);
       setIsUpgradeDialogOpen(true);
-      createPaymentIntentMutation.mutate({ tierId: tier.id, amount: price });
+      createPaymentIntentMutation.mutate({ 
+        tierId: tier.id, 
+        amount: price,
+        isAnnual: false
+      });
     }
   };
 
@@ -269,19 +290,29 @@ function TierUpgradeManagerContent() {
                     <div className="text-2xl font-bold">
                       ${tier.price}
                       <span className="text-sm font-normal text-gray-600 dark:text-gray-400">
-                        /{tier.duration || 'month'}
+                        /month
                       </span>
                     </div>
                   </CardHeader>
                   
                   <CardContent className="pt-0">
                     <ul className="space-y-2 mb-6">
-                      {(tier.features || []).slice(0, 4).map((feature: string, idx: number) => (
-                        <li key={idx} className="flex items-center text-sm">
-                          <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
+                      <li className="flex items-center text-sm">
+                        <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                        <span>{tier.maxPhotos} photos</span>
+                      </li>
+                      <li className="flex items-center text-sm">
+                        <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                        <span>{tier.maxVideos} videos</span>
+                      </li>
+                      <li className="flex items-center text-sm">
+                        <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                        <span>{tier.maxAudio} audio files</span>
+                      </li>
+                      <li className="flex items-center text-sm">
+                        <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                        <span>{tier.maxExternalLinks} external links</span>
+                      </li>
                     </ul>
                     
                     {!isCurrentTier && (

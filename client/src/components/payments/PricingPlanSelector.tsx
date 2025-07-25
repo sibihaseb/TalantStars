@@ -48,7 +48,7 @@ export default function PricingPlanSelector() {
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(null);
 
-  const { data: pricingTiers, isLoading } = useQuery({
+  const { data: pricingTiers = [], isLoading } = useQuery<PricingTier[]>({
     queryKey: ['/api/pricing-tiers'],
   });
 
@@ -114,7 +114,7 @@ export default function PricingPlanSelector() {
   }
 
   // Filter pricing tiers based on user role (admins see all)
-  const filteredTiers = pricingTiers?.filter((tier: PricingTier) => {
+  const filteredTiers = pricingTiers.filter((tier: PricingTier) => {
     if (!user) return false;
     
     // Admins and super_admins can see all tiers
