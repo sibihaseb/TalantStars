@@ -302,13 +302,13 @@ export default function PricingTierManager() {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">
-                  {pricingTiers.filter(t => t.price === 0).length}
+                  {pricingTiers.filter(t => parseFloat(t.price) === 0).length}
                 </div>
                 <div className="text-sm text-gray-600">Free Tiers</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600">
-                  ${Math.max(...pricingTiers.map(t => t.price)).toFixed(2)}
+                  ${Math.max(...pricingTiers.map(t => parseFloat(t.price))).toFixed(2)}
                 </div>
                 <div className="text-sm text-gray-600">Highest Price</div>
               </div>

@@ -82,7 +82,7 @@ export default function PricingTiersPage() {
     duration: 30,
     features: [] as string[],
     active: true,
-    category: "talent" as const,
+    category: "talent" as 'talent' | 'manager' | 'producer' | 'agent',
     maxPhotos: 10,
     maxVideos: 5,
     maxAudio: 5,
@@ -202,6 +202,7 @@ export default function PricingTiersPage() {
       maxPhotos: 10,
       maxVideos: 5,
       maxAudio: 5,
+      maxExternalLinks: 3,
       maxStorageGB: 1,
       maxProjects: 3,
       maxApplications: 10,
@@ -225,7 +226,7 @@ export default function PricingTiersPage() {
       duration: tier.duration,
       features: tier.features,
       active: tier.active,
-      category: tier.category,
+      category: tier.category as 'talent' | 'manager' | 'producer' | 'agent',
       maxPhotos: tier.maxPhotos,
       maxVideos: tier.maxVideos,
       maxAudio: tier.maxAudio,
@@ -298,7 +299,7 @@ export default function PricingTiersPage() {
     if (parseFloat(price) === 0) return 'Free';
     const monthly = parseFloat(price);
     const annual = parseFloat(annualPrice);
-    const annualSavings = annual > 0 ? ((monthly * 12 - annual) / (monthly * 12) * 100).toFixed(0) : 0;
+    const annualSavings = annual > 0 ? ((monthly * 12 - annual) / (monthly * 12) * 100).toFixed(0) : "0";
     
     return (
       <div className="space-y-1">
@@ -306,7 +307,7 @@ export default function PricingTiersPage() {
         {annual > 0 && (
           <div className="text-sm text-gray-600">
             ${annual.toFixed(2)}/year 
-            {annualSavings > 0 && <span className="text-green-600 ml-1">({annualSavings}% off)</span>}
+            {parseInt(annualSavings) > 0 && <span className="text-green-600 ml-1">({annualSavings}% off)</span>}
           </div>
         )}
       </div>
