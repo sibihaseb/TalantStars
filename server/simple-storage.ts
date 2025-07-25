@@ -22,7 +22,7 @@ import {
 } from "@shared/simple-schema";
 import { jobHistory, profileSharingSettings, availabilityCalendar, mediaFiles, jobApplications, jobCommunications, socialPosts, jobs, socialMediaLinks, friendships, promoCodes, promoCodeUsage, userDiscountPeriods, emailTemplates } from "@shared/schema";
 import { db } from "./db";
-import { eq, asc, desc, sql } from "drizzle-orm";
+import { eq, asc, desc, sql, and } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (for traditional auth)
@@ -341,7 +341,7 @@ export class DatabaseStorage implements IStorage {
       try {
         await db.delete(featuredTalents).where(eq(featuredTalents.userId, id));
         console.log(`✅ Removed user ${id} from featured_talents`);
-      } catch (error) {
+      } catch (error: any) {
         console.log(`⚠️ No featured_talents records to remove for user ${id}:`, error.message);
       }
       
@@ -349,7 +349,7 @@ export class DatabaseStorage implements IStorage {
       try {
         await db.delete(userProfiles).where(eq(userProfiles.userId, id.toString()));
         console.log(`✅ Removed user profile for user ${id}`);
-      } catch (error) {
+      } catch (error: any) {
         console.log(`⚠️ No user profile to remove for user ${id}:`, error.message);
       }
       
@@ -357,14 +357,14 @@ export class DatabaseStorage implements IStorage {
       try {
         await db.delete(mediaFiles).where(eq(mediaFiles.userId, id));
         console.log(`✅ Removed media files for user ${id}`);
-      } catch (error) {
+      } catch (error: any) {
         console.log(`⚠️ No media files to remove for user ${id}:`, error.message);
       }
       
       try {
         await db.delete(jobApplications).where(eq(jobApplications.userId, id));
         console.log(`✅ Removed job applications for user ${id}`);
-      } catch (error) {
+      } catch (error: any) {
         console.log(`⚠️ No job applications to remove for user ${id}:`, error.message);
       }
       
@@ -372,7 +372,7 @@ export class DatabaseStorage implements IStorage {
       try {
         await db.delete(socialPosts).where(eq(socialPosts.userId, id));
         console.log(`✅ Removed social posts for user ${id}`);
-      } catch (error) {
+      } catch (error: any) {
         console.log(`⚠️ No social posts to remove for user ${id}:`, error.message);
       }
       
@@ -380,7 +380,7 @@ export class DatabaseStorage implements IStorage {
       await db.delete(users).where(eq(users.id, id));
       console.log(`✅ Successfully deleted user ${id} and all related records`);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error(`❌ Error deleting user ${id}:`, error);
       throw new Error(`Failed to delete user: ${error.message}`);
     }
@@ -710,14 +710,14 @@ export class DatabaseStorage implements IStorage {
       
       // Join users with their profiles, handling database column name mismatch
       const usersWithProfiles = allUsers.map(user => {
-        const profile = allProfiles.find(p => p.user_id === user.id.toString());
+        const profile = allProfiles.find(p => p.userId === user.id.toString());
         
         // Create normalized profile data that matches frontend expectations
         const profileData = profile ? {
           ...profile,
-          userId: profile.user_id, // Map snake_case to camelCase for frontend
-          talentType: profile.talent_type || (user.role === 'talent' ? 'Not specified' : user.role),
-          isVerified: profile.is_verified || false,
+          userId: profile.userId, // Already camelCase
+          talentType: profile.talentType || (user.role === 'talent' ? 'Not specified' : user.role),
+          isVerified: profile.isVerified || false,
           location: profile.location || 'Not specified'
         } : {
           userId: user.id.toString(),
@@ -968,7 +968,7 @@ export class DatabaseStorage implements IStorage {
           isVisible: linkData.isVisible,
           iconColor: linkData.iconColor,
           sortOrder: linkData.sortOrder,
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date()
         })
         .where(eq(socialMediaLinks.id, id))
         .returning();
@@ -1090,7 +1090,7 @@ export class DatabaseStorage implements IStorage {
       return user;
     } catch (error) {
       console.error('❌ Failed to update profile template:', error);
-      throw new Error(`Failed to update profile template: ${error?.message || 'Unknown error'}`);
+      throw new Error(`Failed to update profile template: ${(error as any)?.message || 'Unknown error'}`);
     }
   }
 
@@ -1122,7 +1122,7 @@ export class DatabaseStorage implements IStorage {
       return user;
     } catch (error) {
       console.error('❌ Failed to update skills:', error);
-      throw new Error(`Failed to update skills: ${error?.message || 'Unknown error'}`);
+      throw new Error(`Failed to update skills: ${(error as any)?.message || 'Unknown error'}`);
     }
   }
 
@@ -2431,91 +2431,15 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // Social Media Links operations
-  async getSocialMediaLinks(userId: number): Promise<any[]> {
-    console.log(`🔗 Getting social media links for user ${userId}`);
-    
-    try {
-      const links = await db.select().from(socialMediaLinks)
-        .where(eq(socialMediaLinks.userId, userId))
-        .orderBy(asc(socialMediaLinks.sortOrder));
-      
-      console.log(`🔗 Found ${links.length} social media links for user ${userId}`);
-      return links;
-    } catch (error) {
-      console.error("Error getting social media links:", error);
-      return [];
-    }
-  }
 
-  async createSocialMediaLink(linkData: any): Promise<any> {
-    console.log(`🔗 Creating social media link:`, linkData);
-    
-    try {
-      const [newLink] = await db.insert(socialMediaLinks)
-        .values({
-          ...linkData,
-          createdAt: new Date(),
-          clickCount: 0,
-          sortOrder: linkData.sortOrder || 0
-        })
-        .returning();
-      
-      console.log(`🔗 Created social media link:`, newLink);
-      return newLink;
-    } catch (error) {
-      console.error("Error creating social media link:", error);
-      throw error;
-    }
-  }
 
-  async updateSocialMediaLink(id: number, linkData: any): Promise<any> {
-    console.log(`🔗 Updating social media link ${id}:`, linkData);
-    
-    try {
-      const [updatedLink] = await db.update(socialMediaLinks)
-        .set(linkData)
-        .where(eq(socialMediaLinks.id, id))
-        .returning();
-      
-      console.log(`🔗 Updated social media link:`, updatedLink);
-      return updatedLink;
-    } catch (error) {
-      console.error("Error updating social media link:", error);
-      throw error;
-    }
-  }
 
-  async deleteSocialMediaLink(id: number): Promise<void> {
-    console.log(`🔗 Deleting social media link ${id}`);
-    
-    try {
-      await db.delete(socialMediaLinks)
-        .where(eq(socialMediaLinks.id, id));
-      
-      console.log(`🔗 Deleted social media link ${id}`);
-    } catch (error) {
-      console.error("Error deleting social media link:", error);
-      throw error;
-    }
-  }
 
-  async updateSocialMediaLinkClicks(id: number): Promise<void> {
-    console.log(`🔗 Updating click count for social media link ${id}`);
-    
-    try {
-      await db.update(socialMediaLinks)
-        .set({ 
-          clickCount: sql`${socialMediaLinks.clickCount} + 1` 
-        })
-        .where(eq(socialMediaLinks.id, id));
-      
-      console.log(`🔗 Updated click count for social media link ${id}`);
-    } catch (error) {
-      console.error("Error updating social media link clicks:", error);
-      throw error;
-    }
-  }
+
+
+
+
+
 
   // Profile view tracking
   async trackProfileView(viewedUserId: number, viewerUserId?: number): Promise<void> {
@@ -2748,8 +2672,10 @@ export class DatabaseStorage implements IStorage {
       const expiredDiscounts = await db
         .select()
         .from(userDiscountPeriods)
-        .where(eq(userDiscountPeriods.isActive, true))
-        .where(sql`${userDiscountPeriods.expiresAt} <= NOW()`);
+        .where(and(
+          eq(userDiscountPeriods.isActive, true),
+          sql`end_date <= NOW()`
+        ));
         
       console.log(`✅ ADMIN: Found ${expiredDiscounts.length} expired discounts`);
       
@@ -2778,9 +2704,11 @@ export class DatabaseStorage implements IStorage {
       const expiredUsersToDowngrade = await db
         .select()
         .from(userDiscountPeriods)
-        .where(eq(userDiscountPeriods.isActive, true))
-        .where(eq(userDiscountPeriods.autoDowngradeOnExpiry, true))
-        .where(sql`${userDiscountPeriods.expiresAt} <= NOW()`);
+        .where(and(
+          eq(userDiscountPeriods.isActive, true),
+          eq(userDiscountPeriods.autoDowngradeOnExpiry, true),
+          sql`end_date <= NOW()`
+        ));
         
       for (const discount of expiredUsersToDowngrade) {
         // Downgrade to free tier
