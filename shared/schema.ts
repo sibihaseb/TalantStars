@@ -123,6 +123,29 @@ export const userProfiles = pgTable("user_profiles", {
   credits: jsonb("credits"), // Past work credits
   representations: jsonb("representations"), // Manager/agency info
   
+  // Acting-specific questionnaire fields
+  primarySpecialty: text("primary_specialty").array(), // film, theater, commercial, etc.
+  yearsExperience: varchar("years_experience"), // Number of years acting
+  actingMethod: text("acting_method").array(), // meisner, method, stanislavski, etc.
+  improvisationComfort: varchar("improvisation_comfort"), // comfortable, somewhat, not_comfortable
+  stageCombat: varchar("stage_combat"), // experienced, basic, none
+  intimateScenesComfort: varchar("intimate_scenes_comfort"), // comfortable, somewhat, not_comfortable
+  roleTypes: text("role_types").array(), // leading, supporting, background, etc.
+  motionCapture: varchar("motion_capture"), // experienced, some, none
+  animalWork: varchar("animal_work"), // comfortable, some_experience, not_comfortable
+  cryingOnCue: varchar("crying_on_cue"), // easily, with_preparation, difficult
+  periodPieces: varchar("period_pieces"), // experienced, some, none
+  physicalComedy: varchar("physical_comedy"), // strong, some, limited
+  accentExperience: varchar("accent_experience"), // multiple, some, minimal
+  greenScreen: varchar("green_screen"), // experienced, some, none
+  stuntComfort: varchar("stunt_comfort"), // comfortable, basic, not_comfortable
+  shakespeareExperience: varchar("shakespeare_experience"), // extensive, some, none
+  musicalTheater: varchar("musical_theater"), // experienced, some, none
+  horrorThriller: text("horror_thriller").array(), // psychological, gore, supernatural, etc.
+  currentAgent: varchar("current_agent"), // Agent/representation info
+  currentPublicist: varchar("current_publicist"), // Publicist info
+  representationStatus: varchar("representation_status"), // seeking, represented, not_seeking
+  
   // Analytics
   profileViews: integer("profile_views").default(0),
   

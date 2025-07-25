@@ -678,10 +678,96 @@ function Onboarding() {
       if (existingProfile.weeklyRate) form.setValue("weeklyRate", existingProfile.weeklyRate);
       if (existingProfile.projectRate) form.setValue("projectRate", existingProfile.projectRate);
       
+      // Acting-specific questionnaire fields pre-population
+      if (existingProfile.primarySpecialty) {
+        console.log("  Setting primarySpecialty:", existingProfile.primarySpecialty);
+        form.setValue("primarySpecialty", existingProfile.primarySpecialty);
+      }
+      if (existingProfile.yearsExperience) {
+        console.log("  Setting yearsExperience:", existingProfile.yearsExperience);
+        form.setValue("yearsExperience", existingProfile.yearsExperience);
+      }
+      if (existingProfile.actingMethod) {
+        console.log("  Setting actingMethod:", existingProfile.actingMethod);
+        form.setValue("actingMethod", existingProfile.actingMethod);
+      }
+      if (existingProfile.improvisationComfort) {
+        console.log("  Setting improvisationComfort:", existingProfile.improvisationComfort);
+        form.setValue("improvisationComfort", existingProfile.improvisationComfort);
+      }
+      if (existingProfile.stageCombat) {
+        console.log("  Setting stageCombat:", existingProfile.stageCombat);
+        form.setValue("stageCombat", existingProfile.stageCombat);
+      }
+      if (existingProfile.shakespeareExperience) {
+        console.log("  Setting shakespeareExperience:", existingProfile.shakespeareExperience);
+        form.setValue("shakespeareExperience", existingProfile.shakespeareExperience);
+      }
+      if (existingProfile.musicalTheater) {
+        console.log("  Setting musicalTheater:", existingProfile.musicalTheater);
+        form.setValue("musicalTheater", existingProfile.musicalTheater);
+      }
+      if (existingProfile.intimateScenesComfort) {
+        console.log("  Setting intimateScenesComfort:", existingProfile.intimateScenesComfort);
+        form.setValue("intimateScenesComfort", existingProfile.intimateScenesComfort);
+      }
+      if (existingProfile.roleTypes) {
+        console.log("  Setting roleTypes:", existingProfile.roleTypes);
+        form.setValue("roleTypes", existingProfile.roleTypes);
+      }
+      if (existingProfile.motionCapture) {
+        console.log("  Setting motionCapture:", existingProfile.motionCapture);
+        form.setValue("motionCapture", existingProfile.motionCapture);
+      }
+      if (existingProfile.animalWork) {
+        console.log("  Setting animalWork:", existingProfile.animalWork);
+        form.setValue("animalWork", existingProfile.animalWork);
+      }
+      if (existingProfile.cryingOnCue) {
+        console.log("  Setting cryingOnCue:", existingProfile.cryingOnCue);
+        form.setValue("cryingOnCue", existingProfile.cryingOnCue);
+      }
+      if (existingProfile.periodPieces) {
+        console.log("  Setting periodPieces:", existingProfile.periodPieces);
+        form.setValue("periodPieces", existingProfile.periodPieces);
+      }
+      if (existingProfile.physicalComedy) {
+        console.log("  Setting physicalComedy:", existingProfile.physicalComedy);
+        form.setValue("physicalComedy", existingProfile.physicalComedy);
+      }
+      if (existingProfile.accentExperience) {
+        console.log("  Setting accentExperience:", existingProfile.accentExperience);
+        form.setValue("accentExperience", existingProfile.accentExperience);
+      }
+      if (existingProfile.greenScreen) {
+        console.log("  Setting greenScreen:", existingProfile.greenScreen);
+        form.setValue("greenScreen", existingProfile.greenScreen);
+      }
+      if (existingProfile.stuntComfort) {
+        console.log("  Setting stuntComfort:", existingProfile.stuntComfort);
+        form.setValue("stuntComfort", existingProfile.stuntComfort);
+      }
+      if (existingProfile.horrorThriller) {
+        console.log("  Setting horrorThriller:", existingProfile.horrorThriller);
+        form.setValue("horrorThriller", existingProfile.horrorThriller);
+      }
+      if (existingProfile.currentAgent) {
+        console.log("  Setting currentAgent:", existingProfile.currentAgent);
+        form.setValue("currentAgent", existingProfile.currentAgent);
+      }
+      if (existingProfile.currentPublicist) {
+        console.log("  Setting currentPublicist:", existingProfile.currentPublicist);
+        form.setValue("currentPublicist", existingProfile.currentPublicist);
+      }
+      if (existingProfile.representationStatus) {
+        console.log("  Setting representationStatus:", existingProfile.representationStatus);
+        form.setValue("representationStatus", existingProfile.representationStatus);
+      }
+      
       // Additional fields
       if (existingProfile.availabilityStatus) form.setValue("availabilityStatus", existingProfile.availabilityStatus);
       
-      console.log("✅ Form populated with existing data");
+      console.log("✅ Form populated with existing data (including acting questionnaire fields)");
       console.log("📋 Current form values:", form.getValues());
     } else {
       console.log("❌ No profile data to populate - existingProfile:", !!existingProfile, "user:", !!user);
