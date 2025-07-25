@@ -495,20 +495,44 @@ function Onboarding() {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const totalSteps = 7;
 
-  // Redirect if not authenticated
+  // Enhanced authentication check with session refresh
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
+      console.log("🚨 AUTH FAILED - Redirecting to login");
       toast({
-        title: "Authentication required",
-        description: "Please log in to continue with onboarding.",
+        title: "Session Expired",
+        description: "Please log in again to continue with onboarding.",
         variant: "destructive",
       });
+      // Clear any existing form data to prevent confusion
+      localStorage.removeItem('onboarding-form-data');
       setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
+        window.location.href = "/auth";
+      }, 1000);
       return;
     }
-  }, [isAuthenticated, isLoading]); // Remove toast from dependencies
+    
+    // Session refresh every 5 minutes during onboarding
+    if (isAuthenticated) {
+      console.log("✅ AUTH OK - User authenticated:", user?.username);
+      const sessionRefresh = setInterval(() => {
+        fetch('/api/user', { credentials: 'include' })
+          .then(response => {
+            if (!response.ok) {
+              console.log("🚨 Session expired during onboarding");
+              clearInterval(sessionRefresh);
+              window.location.href = "/auth";
+            }
+          })
+          .catch(() => {
+            console.log("🚨 Session check failed");
+            clearInterval(sessionRefresh);
+          });
+      }, 300000); // 5 minutes
+      
+      return () => clearInterval(sessionRefresh);
+    }
+  }, [isAuthenticated, isLoading, user]);
 
   // Redirect if user already has a profile
   useEffect(() => {
@@ -517,32 +541,49 @@ function Onboarding() {
     }
   }, [user, setLocation]);
 
+  // Load saved form data from localStorage if available
+  const loadSavedFormData = () => {
+    try {
+      const saved = localStorage.getItem('onboarding-form-data');
+      if (saved) {
+        const parsedData = JSON.parse(saved);
+        console.log("📱 LOADING SAVED FORM DATA:", parsedData);
+        return parsedData;
+      }
+    } catch (error) {
+      console.log("❌ Failed to load saved form data:", error);
+    }
+    return null;
+  };
+
+  const savedData = loadSavedFormData();
+  
   const form = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
     defaultValues: {
-      role: "talent",
-      talentType: "actor",
-      displayName: user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "",
-      bio: "",
-      location: "",
-      profileImageUrl: "",
-      website: "",
-      phoneNumber: "",
-      availabilityStatus: "available",
-      languages: [],
-      accents: [],
-      instruments: [],
-      genres: [],
-      affiliations: [],
-      stunts: [],
-      activities: [],
-      awards: [],
-      experiences: [],
-      skills: [],
-      wardrobe: [],
-      dancingStyles: [],
-      sportingActivities: [],
-      drivingLicenses: [],
+      role: savedData?.role || "talent",
+      talentType: savedData?.talentType || "actor",
+      displayName: savedData?.displayName || (user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : ""),
+      bio: savedData?.bio || "",
+      location: savedData?.location || "",
+      profileImageUrl: savedData?.profileImageUrl || "",
+      website: savedData?.website || "",
+      phoneNumber: savedData?.phoneNumber || "",
+      availabilityStatus: savedData?.availabilityStatus || "available",
+      languages: savedData?.languages || [],
+      accents: savedData?.accents || [],
+      instruments: savedData?.instruments || [],
+      genres: savedData?.genres || [],
+      affiliations: savedData?.affiliations || [],
+      stunts: savedData?.stunts || [],
+      activities: savedData?.activities || [],
+      awards: savedData?.awards || [],
+      experiences: savedData?.experiences || [],
+      skills: savedData?.skills || [],
+      wardrobe: savedData?.wardrobe || [],
+      dancingStyles: savedData?.dancingStyles || [],
+      sportingActivities: savedData?.sportingActivities || [],
+      drivingLicenses: savedData?.drivingLicenses || [],
       height: "",
       weight: "",
       eyeColor: [],
@@ -807,6 +848,33 @@ function Onboarding() {
   // Optimize form watching to prevent excessive re-renders
   const watchedValues = form.watch(["role", "talentType", "displayName", "location", "bio", "website", "phoneNumber"]);
   const [watchedRole, watchedTalentType, watchedDisplayName, watchedLocation, watchedBio, watchedWebsite, watchedPhoneNumber] = watchedValues;
+  
+  // Auto-save form data on field changes and periodically
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const currentValues = form.getValues();
+      // Only save if we have some meaningful data
+      if (currentValues.displayName || currentValues.bio || currentValues.location) {
+        console.log("💾 AUTO-SAVING form data on field change");
+        localStorage.setItem('onboarding-form-data', JSON.stringify(currentValues));
+      }
+    }
+  }, [watchedDisplayName, watchedBio, watchedLocation, form, isAuthenticated, user]);
+  
+  // Periodic auto-save every 15 seconds
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const autoSaveInterval = setInterval(() => {
+        const currentValues = form.getValues();
+        if (currentValues.displayName || currentValues.bio || currentValues.location) {
+          localStorage.setItem('onboarding-form-data', JSON.stringify(currentValues));
+          console.log("🔄 Periodic auto-save completed");
+        }
+      }, 15000); // Every 15 seconds
+      
+      return () => clearInterval(autoSaveInterval);
+    }
+  }, [form, isAuthenticated, user]);
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -1443,11 +1511,27 @@ function Onboarding() {
     }
   };
 
-  const onSubmit = (data: OnboardingFormData) => {
+  const onSubmit = async (data: OnboardingFormData) => {
     console.log("=== FORM SUBMISSION START ===");
     console.log("Form data:", data);
     console.log("Form errors:", form.formState.errors);
     console.log("Form is valid:", form.formState.isValid);
+    console.log("User authenticated:", isAuthenticated);
+    console.log("Current user:", user);
+    
+    // Critical: Check authentication before any processing
+    if (!isAuthenticated || !user) {
+      console.log("🚨 SUBMIT BLOCKED - User not authenticated");
+      toast({
+        title: "Session Expired", 
+        description: "Please log in again to save your profile.",
+        variant: "destructive",
+      });
+      // Save form data before redirect
+      localStorage.setItem('onboarding-form-data', JSON.stringify(data));
+      setTimeout(() => window.location.href = "/auth", 1000);
+      return;
+    }
     
     // CRITICAL DEBUG: Check the exact values of the acting fields that are failing
     console.log("🚨 ACTING FIELDS DEBUG - RAW FORM DATA:");
@@ -1596,9 +1680,27 @@ function Onboarding() {
               </p>
             </div>
 
-            <form onSubmit={(e) => {
+            <form onSubmit={async (e) => {
               console.log("🔥 FORM SUBMIT EVENT TRIGGERED");
-              form.handleSubmit(onSubmit)(e);
+              e.preventDefault();
+              
+              // Final auth check before submission
+              try {
+                const response = await fetch('/api/user', { credentials: 'include' });
+                if (!response.ok) {
+                  console.log("🚨 Auth failed in form submit");
+                  toast({
+                    title: "Session Expired", 
+                    description: "Please log in again to save your data.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+                console.log("✅ Auth OK in form submit - processing...");
+                form.handleSubmit(onSubmit)(e);
+              } catch (error) {
+                console.log("🚨 Form submit auth error:", error);
+              }
             }} className="space-y-6">
               {/* Content wrapper with smooth transitions */}
               <div className={`transition-all duration-300 ${
@@ -2355,12 +2457,49 @@ function Onboarding() {
                       type="submit"
                       disabled={createProfileMutation.isPending || !watchedDisplayName || !watchedBio || !watchedLocation || (watchedBio && (watchedBio as string).length < 10)}
                       className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         console.log("🔥 SUBMIT BUTTON CLICKED - Direct click handler");
                         console.log("Form errors:", form.formState.errors);
                         console.log("Form values:", form.getValues());
-                        console.log("Button disabled?", createProfileMutation.isPending || !watchedDisplayName || !watchedBio || !watchedLocation || (watchedBio && (watchedBio as string).length < 10));
-                        // Let the form submission handle the rest
+                        console.log("Auth status:", isAuthenticated, user?.username);
+                        
+                        // Check session before submission
+                        try {
+                          const response = await fetch('/api/user', { credentials: 'include' });
+                          if (!response.ok) {
+                            console.log("🚨 Session expired on submit");
+                            toast({
+                              title: "Session Expired",
+                              description: "Your session expired. Please log in again.",
+                              variant: "destructive",
+                            });
+                            localStorage.setItem('onboarding-form-data', JSON.stringify(form.getValues()));
+                            setTimeout(() => window.location.href = "/auth", 1000);
+                            return;
+                          }
+                          console.log("✅ Session valid - proceeding with submit");
+                        } catch (error) {
+                          console.log("🚨 Auth check failed:", error);
+                          return;
+                        }
+                        
+                        // Force form submission if validation passes
+                        const formData = form.getValues();
+                        const hasErrors = Object.keys(form.formState.errors).length > 0;
+                        console.log("Has form errors:", hasErrors);
+                        
+                        if (!hasErrors && watchedDisplayName && watchedBio && watchedLocation && watchedBio.length >= 10) {
+                          console.log("🚀 FORCING FORM SUBMISSION");
+                          form.handleSubmit(onSubmit)();
+                        } else {
+                          console.log("❌ Form validation failed - cannot submit");
+                          console.log("Missing fields:", {
+                            displayName: !watchedDisplayName,
+                            bio: !watchedBio,
+                            location: !watchedLocation,
+                            bioLength: watchedBio?.length
+                          });
+                        }
                       }}
                     >
                       <span>
