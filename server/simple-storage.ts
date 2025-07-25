@@ -583,7 +583,7 @@ export class DatabaseStorage implements IStorage {
       const [profile] = await db
         .select()
         .from(userProfiles)
-        .where(eq(userProfiles.user_id, userId.toString()));
+        .where(eq(userProfiles.userId, userId.toString()));
         
       if (profile) {
         console.log('👤 Complete profile found - has bio:', !!profile.bio);

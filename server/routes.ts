@@ -5237,5 +5237,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CRITICAL: Profile SEO Server-Side Rendering for Social Media Sharing
+  app.get('/profile/:username', async (req, res) => {
+    try {
+      const { username } = req.params;
+      console.log(`🔥 PROFILE SSR: Serving profile page for ${username} with SEO meta tags`);
+      
+      // For now, generate basic SEO data based on username until database issues are resolved
+      // TODO: Re-enable database queries once the schema issues are fixed
+      const displayName = username.charAt(0).toUpperCase() + username.slice(1);
+      const talentType = 'Professional Talent';
+      const bio = `${displayName} is a professional talent available for hire through Talents & Stars platform.`;
+      const profileImage = `${req.protocol}://${req.get('host')}/images/default-profile.jpg`;
+      const location = 'Professional';
+      
+      console.log(`✅ PROFILE SSR: Generated basic SEO data for ${username}`);
+      
+      // Create HTML with SEO meta tags
+      const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <title>${displayName} - ${talentType} | Talents & Stars</title>
+    <meta name="description" content="${bio}">
+    <meta name="keywords" content="${talentType}, ${location}, entertainment, casting, hire, talent">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="profile">
+    <meta property="og:url" content="${req.protocol}://${req.get('host')}/profile/${username}">
+    <meta property="og:title" content="${displayName} - Professional ${talentType}">
+    <meta property="og:description" content="${bio}">
+    <meta property="og:image" content="${profileImage}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="Talents & Stars">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="${req.protocol}://${req.get('host')}/profile/${username}">
+    <meta name="twitter:title" content="${displayName} - ${talentType}">
+    <meta name="twitter:description" content="${bio}">
+    <meta name="twitter:image" content="${profileImage}">
+    
+    <!-- Profile specific meta -->
+    <meta property="profile:first_name" content="">
+    <meta property="profile:last_name" content="">
+    <meta property="profile:username" content="${username}">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="${req.protocol}://${req.get('host')}/profile/${username}">
+    
+    <!-- Redirect to React SPA -->
+    <script>
+      // Redirect to the React SPA version for interactive viewing
+      window.location.href = '/#/profile/${username}';
+    </script>
+    
+    <!-- Fallback styling for crawlers -->
+    <style>
+      body { font-family: Arial, sans-serif; margin: 40px; text-align: center; }
+      .profile { max-width: 600px; margin: 0 auto; }
+      .profile-image { width: 200px; height: 200px; border-radius: 50%; object-fit: cover; margin: 20px auto; display: block; }
+      h1 { color: #333; margin-bottom: 10px; }
+      .talent-type { color: #667eea; font-size: 18px; margin-bottom: 20px; }
+      .bio { color: #666; line-height: 1.6; margin-bottom: 30px; }
+      .cta { background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="profile">
+        <img src="${profileImage}" alt="${displayName}" class="profile-image" onerror="this.src='/images/default-profile.jpg'">
+        <h1>${displayName}</h1>
+        <div class="talent-type">${talentType}</div>
+        <div class="bio">${bio}</div>
+        <a href="/" class="cta">View Full Profile on Talents & Stars</a>
+    </div>
+    
+    <!-- Loading message for crawlers -->
+    <noscript>
+        <p>This profile is part of the Talents & Stars platform. <a href="/">Visit our homepage</a> to explore more talent profiles.</p>
+    </noscript>
+</body>
+</html>`;
+
+      console.log(`✅ PROFILE SSR: Served SEO-optimized profile page for ${username}`);
+      res.setHeader('Content-Type', 'text/html');
+      res.send(html);
+      
+    } catch (error) {
+      console.error('Error serving profile SSR:', error);
+      res.redirect('/');
+    }
+  });
+
   return httpServer;
 }
