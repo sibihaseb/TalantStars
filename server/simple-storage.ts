@@ -35,6 +35,8 @@ export interface IStorage {
   deleteUser(id: number): Promise<void>;
   updateUserRole(userId: number, role: string): Promise<User>;
   updateUserVerification(userId: number, verified: boolean): Promise<UserProfile>;
+  updateUserPricingTier(userId: number, tierId: number): Promise<User>;
+  createPaymentTransaction(transactionData: any): Promise<any>;
   createPricingTier(tier: any): Promise<PricingTier>;
   updatePricingTier(id: number, tier: any): Promise<PricingTier>;
   deletePricingTier(id: number): Promise<void>;
@@ -2618,6 +2620,59 @@ export class DatabaseStorage implements IStorage {
       return result;
     } catch (error) {
       console.error('Database promo code update error:', error);
+      throw error;
+    }
+  }
+
+  // Payment transaction methods for Stripe integration
+  async createPaymentTransaction(transactionData: any): Promise<any> {
+    try {
+      console.log("🔥 PAYMENT: Creating payment transaction in database:", transactionData);
+      
+      const insertData = {
+        ...transactionData,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      // Use raw SQL to insert into payment_transactions table 
+      const result = await db.execute(sql`
+        INSERT INTO payment_transactions (
+          user_id, stripe_payment_intent_id, amount, currency, status, 
+          payment_method, tier_id, is_annual, description, created_at, updated_at
+        ) VALUES (
+          ${insertData.userId}, ${insertData.stripePaymentIntentId}, ${insertData.amount}, 
+          ${insertData.currency}, ${insertData.status}, ${insertData.paymentMethod}, 
+          ${insertData.tierId}, ${insertData.isAnnual}, ${insertData.description}, 
+          ${insertData.createdAt}, ${insertData.updatedAt}
+        ) RETURNING *
+      `);
+      
+      console.log("✅ PAYMENT: Transaction created successfully");
+      return result.rows[0];
+    } catch (error) {
+      console.error("❌ PAYMENT: Failed to create transaction:", error);
+      throw error;
+    }
+  }
+
+  async updateUserPricingTier(userId: number, tierId: number): Promise<User> {
+    try {
+      console.log("🔥 PAYMENT: Updating user pricing tier:", { userId, tierId });
+      
+      const [updatedUser] = await db
+        .update(users)
+        .set({ 
+          pricingTierId: tierId,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId))
+        .returning();
+      
+      console.log("✅ PAYMENT: User tier updated successfully");
+      return updatedUser;
+    } catch (error) {
+      console.error("❌ PAYMENT: Failed to update user tier:", error);
       throw error;
     }
   }

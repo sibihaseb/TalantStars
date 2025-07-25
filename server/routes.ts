@@ -5619,5 +5619,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== MISSING PAYMENT CONFIRMATION ENDPOINTS =====
+  
+  // Record payment transaction in database
+  app.post('/api/payments/record-transaction', isAuthenticated, async (req: any, res) => {
+    try {
+      const { stripePaymentIntentId, tierId, amount, isAnnual } = req.body;
+      const userId = req.user.id;
+      
+      console.log("🔥 PAYMENT: Recording transaction:", {
+        stripePaymentIntentId,
+        tierId,
+        amount,
+        isAnnual,
+        userId
+      });
+      
+      // Record transaction in storage
+      const transaction = await simpleStorage.createPaymentTransaction({
+        userId,
+        stripePaymentIntentId,
+        amount: amount.toString(),
+        currency: 'usd',
+        status: 'succeeded',
+        paymentMethod: 'card',
+        tierId,
+        isAnnual,
+        description: `Tier ${tierId} ${isAnnual ? 'Annual' : 'Monthly'} Subscription`
+      });
+      
+      console.log("✅ PAYMENT: Transaction recorded successfully:", transaction);
+      res.json({ success: true, transaction });
+    } catch (error) {
+      console.error("❌ PAYMENT: Failed to record transaction:", error);
+      res.status(500).json({ error: "Failed to record payment transaction" });
+    }
+  });
+
+  // Confirm payment and update user tier
+  app.post('/api/confirm-payment', isAuthenticated, async (req: any, res) => {
+    try {
+      const { paymentIntentId } = req.body;
+      const userId = req.user.id;
+      
+      console.log("🔥 PAYMENT: Confirming payment:", { paymentIntentId, userId });
+      
+      // Retrieve payment intent from Stripe to verify payment
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      if (paymentIntent.status !== 'succeeded') {
+        return res.status(400).json({ error: "Payment not successful" });
+      }
+      
+      // Extract tier information from metadata
+      const tierId = parseInt(paymentIntent.metadata?.tierId || '1');
+      const isAnnual = paymentIntent.metadata?.isAnnual === 'true';
+      
+      // Update user's pricing tier
+      const updatedUser = await simpleStorage.updateUserPricingTier(userId, tierId);
+      
+      // Mark user as verified for paid tiers
+      if (tierId > 1) {
+        await simpleStorage.updateUserVerification(userId, true);
+      }
+      
+      console.log("✅ PAYMENT: Payment confirmed and user tier updated:", {
+        userId,
+        newTierId: tierId,
+        isVerified: tierId > 1
+      });
+      
+      res.json({ 
+        success: true, 
+        user: updatedUser,
+        verified: tierId > 1,
+        message: "Payment confirmed and tier updated successfully"
+      });
+    } catch (error) {
+      console.error("❌ PAYMENT: Failed to confirm payment:", error);
+      res.status(500).json({ error: "Failed to confirm payment" });
+    }
+  });
+
   return httpServer;
 }

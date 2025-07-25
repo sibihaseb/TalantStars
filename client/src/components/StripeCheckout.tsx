@@ -73,18 +73,22 @@ function CheckoutForm({ tier, isAnnual }: { tier: any; isAnnual: boolean }) {
           variant: "destructive",
         });
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Record payment transaction in database
+        console.log("🔥 PAYMENT: Payment succeeded, processing confirmation:", paymentIntent.id);
+        
+        // Record payment transaction in database first
         try {
-          await apiRequest('POST', '/api/payments/record-transaction', {
+          const recordResponse = await apiRequest('POST', '/api/payments/record-transaction', {
             stripePaymentIntentId: paymentIntent.id,
             tierId: tier.id,
             amount: paymentIntent.amount / 100, // Convert from cents
             isAnnual: isAnnual
           });
+          console.log("✅ PAYMENT: Transaction recorded successfully:", recordResponse);
         } catch (recordError) {
-          console.error('Failed to record payment transaction:', recordError);
+          console.error('❌ PAYMENT: Failed to record payment transaction:', recordError);
         }
         
+        // Confirm payment and update user tier
         confirmPaymentMutation.mutate(paymentIntent.id);
       }
     } catch (err) {
