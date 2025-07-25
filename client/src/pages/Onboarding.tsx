@@ -2332,31 +2332,39 @@ function Onboarding() {
                   ))}
                 </div>
 
-                {currentStep < getMaxSteps() ? (
-                  <Button
-                    type="button"
-                    onClick={nextStep}
-                    className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    <span>Next</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    disabled={createProfileMutation.isPending || !watchedDisplayName || !watchedBio || !watchedLocation || (watchedBio && (watchedBio as string).length < 10)}
-                    className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                  >
-                    <span>
-                      {createProfileMutation.isPending ? "Creating Profile..." : "Complete Setup"}
-                    </span>
-                    {createProfileMutation.isPending ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                    ) : (
-                      <Rocket className="h-4 w-4" />
-                    )}
-                  </Button>
-                )}
+                <div className="flex space-x-3">
+                  {/* Next Button */}
+                  {currentStep < getMaxSteps() && (
+                    <Button
+                      type="button"
+                      onClick={nextStep}
+                      className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    >
+                      <span>Next</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  )}
+                  
+                  {/* Submit Button - Available at final step OR when basic info is complete */}
+                  {(currentStep === getMaxSteps() || 
+                    (watchedDisplayName && watchedBio && watchedLocation && watchedBio.length >= 10)) && (
+                    <Button
+                      type="submit"
+                      disabled={createProfileMutation.isPending || !watchedDisplayName || !watchedBio || !watchedLocation || (watchedBio && (watchedBio as string).length < 10)}
+                      className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    >
+                      <span>
+                        {createProfileMutation.isPending ? "Creating Profile..." : 
+                          currentStep === getMaxSteps() ? "Complete Setup" : "Save & Complete"}
+                      </span>
+                      {createProfileMutation.isPending ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                      ) : (
+                        <Rocket className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
+                </div>
               </div>
               </div>
             </form>
