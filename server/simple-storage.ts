@@ -266,8 +266,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllUsers(): Promise<User[]> {
-    const allUsers = await db.select().from(users);
-    return allUsers;
+    // Get users with their profile data for complete admin view
+    const usersWithProfiles = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        role: users.role,
+        isVerified: users.isVerified,
+        profileImageUrl: users.profileImageUrl,
+        pricingTierId: users.pricingTierId,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        talentType: userProfiles.talentType,
+        location: userProfiles.location,
+        bio: userProfiles.bio
+      })
+      .from(users)
+      .leftJoin(userProfiles, eq(users.id, userProfiles.userId));
+    
+    return usersWithProfiles;
   }
 
   async updateUser(id: number, userData: Partial<InsertUser>): Promise<User> {
@@ -377,7 +397,7 @@ export class DatabaseStorage implements IStorage {
       const existingProfile = await db
         .select()
         .from(userProfiles)
-        .where(eq(userProfiles.user_id, userId.toString()));
+        .where(eq(userProfiles.userId, userId));
       
       if (existingProfile.length === 0) {
         // Create a basic profile if none exists
@@ -385,10 +405,10 @@ export class DatabaseStorage implements IStorage {
         const [newProfile] = await db
           .insert(userProfiles)
           .values({ 
-            user_id: userId.toString(),
-            is_verified: verified,
+            userId: userId,
+            isVerified: verified,
             location: 'Not specified',
-            talent_type: 'Not specified'
+            talentType: 'Not specified'
           })
           .returning();
         console.log(`✅ VERIFICATION: Created profile and set verification status to ${verified} for user ${userId}`);
@@ -397,8 +417,8 @@ export class DatabaseStorage implements IStorage {
         // Update existing profile
         const [profile] = await db
           .update(userProfiles)
-          .set({ is_verified: verified })
-          .where(eq(userProfiles.user_id, userId.toString()))
+          .set({ isVerified: verified })
+          .where(eq(userProfiles.userId, userId))
           .returning();
         
         console.log(`✅ VERIFICATION: User ${userId} verification status updated to ${verified}`);

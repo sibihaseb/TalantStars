@@ -1,0 +1,41 @@
+[Info] Successfully preconnected to https://api.stripe.com/
+[Log] Auth success - user data: – Object (index-CrfgBHP1.js, line 859)
+Object
+[Error] Failed to load resource: the server responded with a status of 500 () (verify, line 0)
+[Log] === FRONTEND API RESPONSE === (index-CrfgBHP1.js, line 859)
+[Log] Status: 500, URL: /api/admin/users/89/verify (index-CrfgBHP1.js, line 859)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to update user verification"} (index-CrfgBHP1.js, line 859)
+[Error] Error updating user verification: – Error: 500: {"message":"Failed to update user verification"}
+Error: 500: {"message":"Failed to update user verification"}
+	(anonymous function) (index-CrfgBHP1.js:859:72610)
+	onError (index-CrfgBHP1.js:836:53491)
+	(anonymous function) (index-CrfgBHP1.js:48:21073)
+[Error] Failed to load resource: the server responded with a status of 500 () (verify, line 0)
+[Log] === FRONTEND API RESPONSE === (index-CrfgBHP1.js, line 859)
+[Log] Status: 500, URL: /api/admin/users/89/verify (index-CrfgBHP1.js, line 859)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to update user verification"} (index-CrfgBHP1.js, line 859)
+[Error] Error updating user verification: – Error: 500: {"message":"Failed to update user verification"}
+Error: 500: {"message":"Failed to update user verification"}
+	(anonymous function) (index-CrfgBHP1.js:859:72610)
+	onError (index-CrfgBHP1.js:836:53491)
+	(anonymous function) (index-CrfgBHP1.js:48:21073)
+[Error] Failed to load resource: the server responded with a status of 500 () (verify, line 0)
+[Log] === FRONTEND API RESPONSE === (index-CrfgBHP1.js, line 859)
+[Log] Status: 500, URL: /api/admin/users/89/verify (index-CrfgBHP1.js, line 859)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to update user verification"} (index-CrfgBHP1.js, line 859)
+[Error] Error updating user verification: – Error: 500: {"message":"Failed to update user verification"}
+Error: 500: {"message":"Failed to update user verification"}
+	(anonymous function) (index-CrfgBHP1.js:859:72610)
+	onError (index-CrfgBHP1.js:836:53491)
+	(anonymous function) (index-CrfgBHP1.js:48:21073)
+[Error] Failed to load resource: the server responded with a status of 500 () (verify, line 0)
+[Log] === FRONTEND API RESPONSE === (index-CrfgBHP1.js, line 859)
+[Log] Status: 500, URL: /api/admin/users/78/verify (index-CrfgBHP1.js, line 859)
+[Log] 🚨 API ERROR: 500 - {"message":"Failed to update user verification"} (index-CrfgBHP1.js, line 859)
+[Error] Error updating user verification: – Error: 500: {"message":"Failed to update user verification"}
+Error: 500: {"message":"Failed to update user verification"}
+	(anonymous function) (index-CrfgBHP1.js:859:72610)
+	onError (index-CrfgBHP1.js:836:53491)
+	(anonymous function) (index-CrfgBHP1.js:48:21073)
+> Selected Element
+< <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-800 dark:to-gray-900">…</div>
