@@ -5254,6 +5254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`✅ PROFILE SSR: Generated basic SEO data for ${username}`);
       
       // Create HTML with SEO meta tags
+      const redirectScript = `window.location.replace('/profile/${username}');`;
       const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5292,8 +5293,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     <!-- Redirect to React SPA -->
     <script>
-      // Redirect to the React SPA version for interactive viewing
-      window.location.href = '/#/profile/${username}';
+      // Redirect to the React SPA version for interactive viewing  
+      setTimeout(function() {
+        ${redirectScript}
+      }, 100);
     </script>
     
     <!-- Fallback styling for crawlers -->
