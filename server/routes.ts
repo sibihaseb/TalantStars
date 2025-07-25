@@ -4330,6 +4330,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Select tier endpoint (frontend uses this)
+  app.post('/api/user/select-tier', isAuthenticated, async (req: any, res) => {
+    try {
+      console.log("🔥 API: User selecting tier...", { userId: req.user.id, body: req.body });
+      
+      const { tierId } = req.body;
+      
+      if (!tierId) {
+        return res.status(400).json({ message: "Tier ID is required" });
+      }
+      
+      const updatedUser = await simpleStorage.updateUserTier(req.user.id, parseInt(tierId));
+      
+      console.log("✅ API: User tier selected successfully", updatedUser);
+      res.json({ success: true, user: updatedUser });
+    } catch (error) {
+      console.error("❌ API: Error selecting user tier:", error);
+      res.status(500).json({ message: "Failed to select tier" });
+    }
+  });
+
   // CRITICAL: Admin manual verification endpoint
   app.put('/api/admin/users/:userId/verify', isAuthenticated, isAdmin, async (req: any, res) => {
     try {

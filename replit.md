@@ -45,24 +45,25 @@ Preferred communication style: Simple, everyday language.
 - **User Experience**: Profile URLs generate rich, professional previews when shared on social media with actual user data and images
 - **Result**: ✅ Complete profile SEO sharing system operational - social media sharing displays rich previews with real profile data while maintaining full user functionality
 
-### Dynamic Promo Codes Statistics Fix - Replaced Hardcoded Data with Database Integration (July 25, 2025)
-- **CRITICAL SUCCESS**: Fixed AdminDashboard Promo Codes Management section to display dynamic data from database instead of hardcoded values
-- **Root Cause**: Promo codes statistics (Active Codes: 12, Total Uses: 347, Total Savings: $2,450) were hardcoded around lines 4128-4144
-- **Complete Solution**: Added comprehensive promo codes data integration with real-time calculations:
-  - **Added PromoCode Interface**: Complete TypeScript interface matching database schema with type safety
-  - **Dynamic Query Integration**: Added useQuery hook to fetch promo codes data from `/api/admin/promo-codes` endpoint
-  - **Real-time Statistics Calculation**: Implemented live calculations for Active Codes, Total Uses, and Total Savings
-  - **Smart Savings Calculation**: Sophisticated calculation handling both percentage and fixed amount discounts with estimated order values
-  - **Dynamic Table Integration**: Replaced hardcoded WELCOME25/TALENT50 table rows with live database data showing first 5 promo codes
-  - **Enhanced UX**: Added loading states, empty states, and proper formatting for dates, currencies, and usage limits
-- **Professional Features**: 
-  - Active/inactive status badges with proper color coding
-  - Properly formatted expiry dates and usage limits (e.g., "124/500" or "87/∞")
-  - Comma-separated currency formatting for savings display (e.g., "$2,450" becomes "$X,XXX")
-  - Click-through functionality from overview table to full promo codes management page
-- **Data Integrity**: All statistics now reflect real database state instead of misleading hardcoded values
-- **User Experience**: Admins now see actual promo code performance data for informed decision making
-- **Result**: ✅ Complete promo codes statistics system showing dynamic data from promo management database with real-time calculations
+### Critical Plan Selection and Admin Issues Fix (July 25, 2025)
+- **CRITICAL SUCCESS**: Fixed plan selection "unexpected error" and admin verification issues
+- **Plan Selection Root Cause**: Frontend was calling `/api/user/select-tier` but backend only had `/api/user/tier` endpoint
+- **Complete Plan Selection Fix**: Added missing `/api/user/select-tier` endpoint that frontend components expect:
+  - **PlanRequiredModal**: Now properly communicates with backend for tier selection
+  - **TierUpgradeManager**: Tier changes work correctly for upgrades/downgrades
+  - **PricingSelection**: Component can successfully update user pricing tiers
+  - **Database Integration**: Uses existing `updateUserTier` method with automatic verification for paid plans
+- **Admin User List Fix**: Resolved 500 error in getAllUsers method caused by VARCHAR/INTEGER type mismatch:
+  - **Database Join Fix**: Fixed userProfiles.userId (VARCHAR) to users.id (INTEGER) join using toString() conversion
+  - **Fallback Handling**: Added try/catch with fallback to basic user data if profile join fails
+  - **Error Prevention**: Admin dashboard no longer crashes when accessing user management
+- **Admin Verification Enhancement**: Fixed updateUserVerification method parameter handling:
+  - **Correct Field Names**: Uses proper userId and isVerified field mapping
+  - **Database Safety**: Proper error handling and type conversion for verification toggles
+  - **User Experience**: Admin can now successfully verify/unverify users without errors
+- **API Endpoint Consistency**: Both `/api/user/tier` and `/api/user/select-tier` now work for different frontend components
+- **Production Ready**: All plan selection flows and admin user management fully operational
+- **Result**: ✅ Plan selection works without errors, admin user list loads properly, and verification toggles function correctly
 
 ### Complete "Post a Gig" System Integration with Comprehensive Entertainment Industry Fields (July 25, 2025)
 - **CRITICAL SUCCESS**: Fixed blank "Post a Gig" page and implemented comprehensive entertainment industry job creation form
