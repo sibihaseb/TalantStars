@@ -1782,11 +1782,13 @@ export class DatabaseStorage implements IStorage {
 
   async deleteJob(id: number): Promise<void> {
     console.log("🔥 JOB: Deleting job", { id });
-    const job = await this.getJob(id);
-    if (job) {
-      console.log("✅ JOB: Deleted successfully", { id });
-    } else {
-      throw new Error("Job not found");
+    try {
+      // Actually delete the job from the database
+      await db.delete(jobs).where(eq(jobs.id, id));
+      console.log("✅ JOB: Deleted successfully from database", { id });
+    } catch (error) {
+      console.error("❌ JOB: Database deletion error:", error);
+      throw new Error("Failed to delete job");
     }
   }
 

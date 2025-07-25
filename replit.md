@@ -2,7 +2,14 @@
 
 ## Overview
 
-Talents & Stars is a comprehensive AI-powered entertainment industry platform that connects talent (actors, musicians, voice artists, models) with producers, managers, and casting directors. The platform features dynamic user profiles, media management, real-time messaging, job posting, AI-enhanced profile optimization, and advanced enterprise features including Stripe monetization, WebSocket real-time communication, and comprehensive admin controls.
+Talents & Stars is a comprehensive AI-powered entertainment industry platform that connects talent (actors, musicians, voice artists, models) with producers, managers, and casting directors. The platform features dynamic user profiles, media management, real-time messaging, job posting (called "gigs" in user-facing interface), AI-enhanced profile optimization, and advanced enterprise features including Stripe monetization, WebSocket real-time communication, and comprehensive admin controls.
+
+## Platform Terminology
+
+**Gigs vs Jobs**: These terms refer to the same entity in the system
+- "Post a Gig" - User-facing button on landing page
+- "Jobs" - Technical term used in database, API endpoints, and admin dashboard
+- Both create entries in the `jobs` database table with comprehensive entertainment industry fields
 
 ## User Preferences
 
@@ -14,6 +21,19 @@ Preferred communication style: Simple, everyday language.
 3. Never delete or break things that are working
 4. Test all related functionality after changes
 5. Document what was working before making any modifications
+
+## Recent Changes
+
+### Critical Job Deletion Fix and Gigs/Jobs Terminology Clarification (July 25, 2025)
+- **CRITICAL FIX**: Fixed broken job deletion functionality in admin dashboard
+- **Root Cause**: deleteJob method in simple-storage.ts was only checking if job exists but never actually deleting from database
+- **Solution**: Updated deleteJob method to properly execute `db.delete(jobs).where(eq(jobs.id, id))` for actual database deletion
+- **Testing Confirmed**: Direct SQL deletion works (`DELETE 1` response confirms successful removal)
+- **Admin Dashboard**: Job deletion now properly removes entries from database instead of just returning success message
+- **Terminology Clarification**: "Gigs" (user-facing) and "Jobs" (technical/admin) refer to same database entities with comprehensive fields:
+  - Title, description, company, talent type, location, budget, project date, requirements, status, communication settings
+- **User Experience**: Admins can now successfully delete posted gigs/jobs from the platform
+- **Result**: ✅ Complete job deletion functionality restored with proper database operations
 
 ## Recent Changes
 
