@@ -129,18 +129,18 @@ export async function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(
       {
-        usernameField: 'usernameOrEmail', // Support both username and email
+        usernameField: 'username', // Standard username field
         passwordField: 'password'
       },
-      async (usernameOrEmail, password, done) => {
+      async (username, password, done) => {
         try {
-          console.log("LocalStrategy attempt for usernameOrEmail:", usernameOrEmail);
+          console.log("LocalStrategy attempt for username:", username);
           
           // Try to find user by username first, then by email
-          let user = await storage.getUserByUsername(usernameOrEmail);
+          let user = await storage.getUserByUsername(username);
           if (!user) {
             console.log("Not found by username, trying email...");
-            user = await storage.getUserByEmail(usernameOrEmail);
+            user = await storage.getUserByEmail(username);
           }
           
           console.log("User found:", user ? "YES" : "NO");

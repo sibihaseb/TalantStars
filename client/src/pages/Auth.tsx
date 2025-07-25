@@ -178,7 +178,7 @@ export default function Auth() {
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({
-            usernameOrEmail: data.username,
+            username: data.username,
             password: data.password,
           }),
         });
