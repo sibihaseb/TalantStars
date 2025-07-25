@@ -73,31 +73,29 @@ export default function Landing() {
             </p>
             
             <div className="flex flex-col md:flex-row gap-6 justify-center items-center animate-fade-in">
-              <Button 
-                size="lg"
-                className="bg-white text-blue-900 hover:bg-gray-100 px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all duration-300"
-                onClick={() => window.location.href = "/auth"}
-              >
-                <UserPlus className="h-5 w-5 mr-2" />
-                <TranslatedText text="Join Now" />
-              </Button>
-              <Button 
-                size="lg"
-                variant="outline" 
-                className="border-2 border-white bg-white/10 text-white hover:bg-white hover:text-blue-900 px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all duration-300"
-                onClick={() => window.location.href = "/find-talent"}
-              >
-                <Search className="h-5 w-5 mr-2" />
-                <TranslatedText text="Find Talent" />
-              </Button>
-              <Button 
-                size="lg"
-                className="bg-emerald-600 text-white hover:bg-emerald-700 px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all duration-300"
-                onClick={() => window.location.href = "/post-gig"}
-              >
-                <Briefcase className="h-5 w-5 mr-2" />
-                <TranslatedText text="Post a Gig" />
-              </Button>
+              <Link href="/auth">
+                <Button size="lg" className="px-8 py-4 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-xl">
+                  <TranslatedText text="Join Now" />
+                </Button>
+              </Link>
+              
+              <Link href="/pricing">
+                <Button size="lg" variant="outline" className="px-8 py-4 text-lg font-semibold border-2 border-white text-white hover:bg-white hover:text-gray-900 shadow-xl">
+                  View Pricing Plans
+                </Button>
+              </Link>
+
+              <Link href="/find-talent">
+                <Button size="lg" variant="secondary" className="px-8 py-4 text-lg font-semibold bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 shadow-xl">
+                  <TranslatedText text="Find Talent" />
+                </Button>
+              </Link>
+
+              <Link href="/post-gig">
+                <Button size="lg" className="px-8 py-4 text-lg font-semibold bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white shadow-xl">
+                  <TranslatedText text="Post a Gig" />
+                </Button>
+              </Link>
             </div>
             
 
