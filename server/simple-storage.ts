@@ -371,14 +371,38 @@ export class DatabaseStorage implements IStorage {
   async updateUserVerification(userId: number, verified: boolean): Promise<UserProfile> {
     try {
       console.log(`🔥 VERIFICATION: ${verified ? 'Verifying' : 'Unverifying'} user ${userId}`);
-      const [profile] = await db
-        .update(userProfiles)
-        .set({ isVerified: verified })
-        .where(eq(userProfiles.userId, userId.toString()))
-        .returning();
       
-      console.log(`✅ VERIFICATION: User ${userId} verification status updated to ${verified}`);
-      return profile;
+      // First check if profile exists
+      const existingProfile = await db
+        .select()
+        .from(userProfiles)
+        .where(eq(userProfiles.user_id, userId.toString()));
+      
+      if (existingProfile.length === 0) {
+        // Create a basic profile if none exists
+        console.log(`📝 Creating profile for user ${userId} to enable verification`);
+        const [newProfile] = await db
+          .insert(userProfiles)
+          .values({ 
+            user_id: userId.toString(),
+            is_verified: verified,
+            location: 'Not specified',
+            talent_type: 'Not specified'
+          })
+          .returning();
+        console.log(`✅ VERIFICATION: Created profile and set verification status to ${verified} for user ${userId}`);
+        return newProfile;
+      } else {
+        // Update existing profile
+        const [profile] = await db
+          .update(userProfiles)
+          .set({ is_verified: verified })
+          .where(eq(userProfiles.user_id, userId.toString()))
+          .returning();
+        
+        console.log(`✅ VERIFICATION: User ${userId} verification status updated to ${verified}`);
+        return profile;
+      }
     } catch (error) {
       console.error('Error updating user verification:', error);
       throw error;
@@ -559,7 +583,7 @@ export class DatabaseStorage implements IStorage {
       const [profile] = await db
         .select()
         .from(userProfiles)
-        .where(eq(userProfiles.userId, userId.toString()));
+        .where(eq(userProfiles.user_id, userId.toString()));
         
       if (profile) {
         console.log('👤 Complete profile found - has bio:', !!profile.bio);
@@ -592,7 +616,7 @@ export class DatabaseStorage implements IStorage {
     const [userProfile] = await db
       .update(userProfiles)
       .set(profile)
-      .where(eq(userProfiles.userId, userId.toString()))
+      .where(eq(userProfiles.user_id, userId.toString()))
       .returning();
     
     console.log('📝 Updated profile:', !!userProfile);
@@ -611,10 +635,25 @@ export class DatabaseStorage implements IStorage {
       const allProfiles = await db.select().from(userProfiles);
       console.log('Found profiles:', allProfiles.length);
       
-      // Join users with their profiles
+      // Join users with their profiles, handling database column name mismatch
       const usersWithProfiles = allUsers.map(user => {
-        const profile = allProfiles.find(p => p.userId === user.id.toString());
-        return { ...user, profile };
+        const profile = allProfiles.find(p => p.user_id === user.id.toString());
+        
+        // Create normalized profile data that matches frontend expectations
+        const profileData = profile ? {
+          ...profile,
+          userId: profile.user_id, // Map snake_case to camelCase for frontend
+          talentType: profile.talent_type || (user.role === 'talent' ? 'Not specified' : user.role),
+          isVerified: profile.is_verified || false,
+          location: profile.location || 'Not specified'
+        } : {
+          userId: user.id.toString(),
+          talentType: user.role === 'talent' ? 'Not specified' : user.role,
+          isVerified: false,
+          location: 'Not specified'
+        };
+        
+        return { ...user, profile: profileData };
       });
       
       console.log('Users with profiles:', usersWithProfiles.length);
