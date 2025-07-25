@@ -4308,14 +4308,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (role) {
         console.log(`Filtering by role/category: ${role}`);
         filteredTiers = enhancedTiers.filter(tier => {
+          // Admins and super_admins can see all tiers
+          if (role === 'admin' || role === 'super_admin') {
+            return true;
+          }
+          
           const tierCategory = tier.category?.toLowerCase();
           const requestedRole = role.toLowerCase();
+          
           return tierCategory === requestedRole || 
-                 (requestedRole === 'talent' && !tierCategory) ||
-                 (requestedRole === 'producer' && tierCategory === 'producer') ||
-                 (requestedRole === 'manager' && tierCategory === 'manager') ||
-                 (requestedRole === 'agent' && tierCategory === 'agent');
+                 (requestedRole === 'talent' && tierCategory === 'talent');
         });
+        
+        console.log(`Returning ${filteredTiers.length} filtered tiers`);
       }
       
       console.log(`Returning ${filteredTiers.length} filtered tiers`);
