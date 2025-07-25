@@ -614,158 +614,75 @@ function Onboarding() {
     if (existingProfile && user) {
       console.log("✅ Pre-populating form with existing profile:", existingProfile);
       
-      // Basic user info
-      if (existingProfile.displayName) {
-        console.log("  Setting displayName:", existingProfile.displayName);
-        form.setValue("displayName", existingProfile.displayName);
-      }
-      if (existingProfile.bio) {
-        console.log("  Setting bio:", existingProfile.bio);
-        form.setValue("bio", existingProfile.bio);
-      }
-      if (existingProfile.location) {
-        console.log("  Setting location:", existingProfile.location);
-        form.setValue("location", existingProfile.location);
-      }
-      if (existingProfile.website) {
-        console.log("  Setting website:", existingProfile.website);
-        form.setValue("website", existingProfile.website);
-      }
-      if (existingProfile.phoneNumber) {
-        console.log("  Setting phoneNumber:", existingProfile.phoneNumber);
-        form.setValue("phoneNumber", existingProfile.phoneNumber);
-      }
-      if (user.profileImageUrl) {
-        console.log("  Setting profileImageUrl:", user.profileImageUrl);
-        form.setValue("profileImageUrl", user.profileImageUrl);
-      }
+      // CRITICAL: Use form.reset instead of individual setValue calls to prevent form state conflicts
+      const currentFormValues = form.getValues() as OnboardingFormData;
+      const profileDefaults: OnboardingFormData = {
+        // Keep current form values as base - preserve user input
+        ...currentFormValues,
+        // Basic user info - only override if data exists in profile
+        displayName: existingProfile.displayName || currentFormValues.displayName,
+        bio: existingProfile.bio || currentFormValues.bio,
+        location: existingProfile.location || currentFormValues.location,
+        website: existingProfile.website || currentFormValues.website,
+        phoneNumber: existingProfile.phoneNumber || currentFormValues.phoneNumber,
+        profileImageUrl: user.profileImageUrl || existingProfile.profileImageUrl || currentFormValues.profileImageUrl,
+        
+        // Actor-specific fields
+        height: existingProfile.height || currentFormValues.height,
+        weight: existingProfile.weight || currentFormValues.weight,
+        eyeColor: existingProfile.eyeColor || currentFormValues.eyeColor,
+        hairColor: existingProfile.hairColor || currentFormValues.hairColor,
+        
+        // Arrays and multi-select fields
+        languages: existingProfile.languages || currentFormValues.languages,
+        accents: existingProfile.accents || currentFormValues.accents,
+        instruments: existingProfile.instruments || currentFormValues.instruments,
+        genres: existingProfile.genres || currentFormValues.genres,
+        unionStatus: existingProfile.unionStatus || currentFormValues.unionStatus,
+        skills: existingProfile.skills || currentFormValues.skills,
+        
+        // Rates
+        dailyRate: existingProfile.dailyRate || currentFormValues.dailyRate,
+        weeklyRate: existingProfile.weeklyRate || currentFormValues.weeklyRate,
+        projectRate: existingProfile.projectRate || currentFormValues.projectRate,
+        
+        // CRITICAL: Acting-specific questionnaire fields - preserve user input over empty defaults
+        primarySpecialty: existingProfile.primarySpecialty || currentFormValues.primarySpecialty,
+        yearsExperience: existingProfile.yearsExperience || currentFormValues.yearsExperience,
+        actingMethod: existingProfile.actingMethod || currentFormValues.actingMethod,
+        improvisationComfort: existingProfile.improvisationComfort || currentFormValues.improvisationComfort,
+        stageCombat: existingProfile.stageCombat || currentFormValues.stageCombat,
+        shakespeareExperience: existingProfile.shakespeareExperience || currentFormValues.shakespeareExperience,
+        musicalTheater: existingProfile.musicalTheater || currentFormValues.musicalTheater,
+        intimateScenesComfort: existingProfile.intimateScenesComfort || currentFormValues.intimateScenesComfort,
+        roleTypes: existingProfile.roleTypes || currentFormValues.roleTypes,
+        motionCapture: existingProfile.motionCapture || currentFormValues.motionCapture,
+        animalWork: existingProfile.animalWork || currentFormValues.animalWork,
+        cryingOnCue: existingProfile.cryingOnCue || currentFormValues.cryingOnCue,
+        periodPieces: existingProfile.periodPieces || currentFormValues.periodPieces,
+        physicalComedy: existingProfile.physicalComedy || currentFormValues.physicalComedy,
+        accentExperience: existingProfile.accentExperience || currentFormValues.accentExperience,
+        greenScreen: existingProfile.greenScreen || currentFormValues.greenScreen,
+        stuntComfort: existingProfile.stuntComfort || currentFormValues.stuntComfort,
+        horrorThriller: existingProfile.horrorThriller || currentFormValues.horrorThriller,
+        currentAgent: existingProfile.currentAgent || currentFormValues.currentAgent,
+        currentPublicist: existingProfile.currentPublicist || currentFormValues.currentPublicist,
+        representationStatus: existingProfile.representationStatus || currentFormValues.representationStatus,
+        
+        // Additional fields
+        availabilityStatus: existingProfile.availabilityStatus || currentFormValues.availabilityStatus,
+      };
       
-      // Actor-specific fields
-      if (existingProfile.height) form.setValue("height", existingProfile.height);
-      if (existingProfile.weight) form.setValue("weight", existingProfile.weight);
-      if (existingProfile.eyeColor) form.setValue("eyeColor", existingProfile.eyeColor);
-      if (existingProfile.hairColor) form.setValue("hairColor", existingProfile.hairColor);
+      console.log("🔄 Resetting form with merged data - preserving user input over empty defaults");
+      console.log("Critical fields check:", {
+        improvisationComfort: profileDefaults.improvisationComfort,
+        intimateScenesComfort: profileDefaults.intimateScenesComfort,
+        motionCapture: profileDefaults.motionCapture,
+        cryingOnCue: profileDefaults.cryingOnCue,
+        stuntComfort: profileDefaults.stuntComfort
+      });
       
-      // Arrays and multi-select fields
-      if (existingProfile.languages) {
-        console.log("  Setting languages:", existingProfile.languages);
-        form.setValue("languages", existingProfile.languages);
-      }
-      if (existingProfile.accents) {
-        console.log("  Setting accents:", existingProfile.accents);
-        form.setValue("accents", existingProfile.accents);
-      }
-      if (existingProfile.instruments) {
-        console.log("  Setting instruments:", existingProfile.instruments);
-        form.setValue("instruments", existingProfile.instruments);
-      }
-      if (existingProfile.genres) {
-        console.log("  Setting genres:", existingProfile.genres);
-        form.setValue("genres", existingProfile.genres);
-      }
-      if (existingProfile.unionStatus) {
-        console.log("  Setting unionStatus:", existingProfile.unionStatus);
-        form.setValue("unionStatus", existingProfile.unionStatus);
-      }
-      if (existingProfile.skills) {
-        console.log("  Setting skills count:", existingProfile.skills.length);
-        console.log("  Setting skills sample:", existingProfile.skills.slice(0, 5));
-        form.setValue("skills", existingProfile.skills);
-      }
-      
-      // Rates
-      if (existingProfile.dailyRate) form.setValue("dailyRate", existingProfile.dailyRate);
-      if (existingProfile.weeklyRate) form.setValue("weeklyRate", existingProfile.weeklyRate);
-      if (existingProfile.projectRate) form.setValue("projectRate", existingProfile.projectRate);
-      
-      // Acting-specific questionnaire fields pre-population
-      if (existingProfile.primarySpecialty) {
-        console.log("  Setting primarySpecialty:", existingProfile.primarySpecialty);
-        form.setValue("primarySpecialty", existingProfile.primarySpecialty);
-      }
-      if (existingProfile.yearsExperience) {
-        console.log("  Setting yearsExperience:", existingProfile.yearsExperience);
-        form.setValue("yearsExperience", existingProfile.yearsExperience);
-      }
-      if (existingProfile.actingMethod) {
-        console.log("  Setting actingMethod:", existingProfile.actingMethod);
-        form.setValue("actingMethod", existingProfile.actingMethod);
-      }
-      if (existingProfile.improvisationComfort) {
-        console.log("  Setting improvisationComfort:", existingProfile.improvisationComfort);
-        form.setValue("improvisationComfort", existingProfile.improvisationComfort);
-      }
-      if (existingProfile.stageCombat) {
-        console.log("  Setting stageCombat:", existingProfile.stageCombat);
-        form.setValue("stageCombat", existingProfile.stageCombat);
-      }
-      if (existingProfile.shakespeareExperience) {
-        console.log("  Setting shakespeareExperience:", existingProfile.shakespeareExperience);
-        form.setValue("shakespeareExperience", existingProfile.shakespeareExperience);
-      }
-      if (existingProfile.musicalTheater) {
-        console.log("  Setting musicalTheater:", existingProfile.musicalTheater);
-        form.setValue("musicalTheater", existingProfile.musicalTheater);
-      }
-      if (existingProfile.intimateScenesComfort) {
-        console.log("  Setting intimateScenesComfort:", existingProfile.intimateScenesComfort);
-        form.setValue("intimateScenesComfort", existingProfile.intimateScenesComfort);
-      }
-      if (existingProfile.roleTypes) {
-        console.log("  Setting roleTypes:", existingProfile.roleTypes);
-        form.setValue("roleTypes", existingProfile.roleTypes);
-      }
-      if (existingProfile.motionCapture) {
-        console.log("  Setting motionCapture:", existingProfile.motionCapture);
-        form.setValue("motionCapture", existingProfile.motionCapture);
-      }
-      if (existingProfile.animalWork) {
-        console.log("  Setting animalWork:", existingProfile.animalWork);
-        form.setValue("animalWork", existingProfile.animalWork);
-      }
-      if (existingProfile.cryingOnCue) {
-        console.log("  Setting cryingOnCue:", existingProfile.cryingOnCue);
-        form.setValue("cryingOnCue", existingProfile.cryingOnCue);
-      }
-      if (existingProfile.periodPieces) {
-        console.log("  Setting periodPieces:", existingProfile.periodPieces);
-        form.setValue("periodPieces", existingProfile.periodPieces);
-      }
-      if (existingProfile.physicalComedy) {
-        console.log("  Setting physicalComedy:", existingProfile.physicalComedy);
-        form.setValue("physicalComedy", existingProfile.physicalComedy);
-      }
-      if (existingProfile.accentExperience) {
-        console.log("  Setting accentExperience:", existingProfile.accentExperience);
-        form.setValue("accentExperience", existingProfile.accentExperience);
-      }
-      if (existingProfile.greenScreen) {
-        console.log("  Setting greenScreen:", existingProfile.greenScreen);
-        form.setValue("greenScreen", existingProfile.greenScreen);
-      }
-      if (existingProfile.stuntComfort) {
-        console.log("  Setting stuntComfort:", existingProfile.stuntComfort);
-        form.setValue("stuntComfort", existingProfile.stuntComfort);
-      }
-      if (existingProfile.horrorThriller) {
-        console.log("  Setting horrorThriller:", existingProfile.horrorThriller);
-        form.setValue("horrorThriller", existingProfile.horrorThriller);
-      }
-      if (existingProfile.currentAgent) {
-        console.log("  Setting currentAgent:", existingProfile.currentAgent);
-        form.setValue("currentAgent", existingProfile.currentAgent);
-      }
-      if (existingProfile.currentPublicist) {
-        console.log("  Setting currentPublicist:", existingProfile.currentPublicist);
-        form.setValue("currentPublicist", existingProfile.currentPublicist);
-      }
-      if (existingProfile.representationStatus) {
-        console.log("  Setting representationStatus:", existingProfile.representationStatus);
-        form.setValue("representationStatus", existingProfile.representationStatus);
-      }
-      
-      // Additional fields
-      if (existingProfile.availabilityStatus) form.setValue("availabilityStatus", existingProfile.availabilityStatus);
+      form.reset(profileDefaults);
       
       console.log("✅ Form populated with existing data (including acting questionnaire fields)");
       console.log("📋 Current form values:", form.getValues());
