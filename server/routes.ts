@@ -354,9 +354,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/profile', isAuthenticated, requirePlan, async (req: any, res) => {
+  app.post('/api/profile', isAuthenticated, async (req: any, res) => {
+    console.log("🔥 ENTERING /api/profile POST endpoint");
     try {
       const userId = req.user.id;
+      console.log("🔥 CRITICAL DEBUG - USER OBJECT CHECK:");
+      console.log("  req.user:", req.user);
+      console.log("  req.user.id:", req.user.id);
+      console.log("  req.user.role:", req.user.role);
+      console.log("  req.user keys:", Object.keys(req.user || {}));
       console.log("Creating profile for user:", userId);
       console.log("Request body:", req.body);
       
@@ -366,8 +372,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User ID is required" });
       }
       
-      // Add userId to the request body before validation - convert to string
-      const dataWithUserId = { ...req.body, userId: userId.toString() };
+      // Add userId and role to the request body before validation
+      // Map super_admin to admin for schema compatibility
+      const userRole = req.user.role === 'super_admin' ? 'admin' : (req.user.role || 'talent');
+      const dataWithUserId = { 
+        ...req.body, 
+        userId: userId.toString(),
+        role: userRole // Add the user's role from session with super_admin mapping
+      };
       console.log("Data with userId:", dataWithUserId);
       
       // Clean empty strings to null for numeric fields
@@ -379,18 +391,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileViews: dataWithUserId.profileViews === '' ? null : dataWithUserId.profileViews,
       };
       
-      // Debug the cleanedData before parsing
-      console.log("🔍 About to parse cleanedData:");
+      // Enhanced debugging for critical data loss investigation
+      console.log("🚨 CRITICAL DEBUG - ONBOARDING DATA PERSISTENCE:");
+      console.log("🔍 Raw request body keys:", Object.keys(req.body));
+      console.log("🔍 Raw request body size:", JSON.stringify(req.body).length, "characters");
       console.log("🔍 cleanedData userId:", cleanedData.userId, "type:", typeof cleanedData.userId);
-      console.log("🔍 cleanedData full:", JSON.stringify(cleanedData, null, 2));
+      console.log("🔍 CRITICAL FIELDS CHECK:");
+      console.log("  ✅ displayName:", cleanedData.displayName);
+      console.log("  ✅ bio:", cleanedData.bio);
+      console.log("  ✅ location:", cleanedData.location);
+      console.log("  📊 languages:", cleanedData.languages?.length || 0, "items");
+      console.log("  🎯 skills:", cleanedData.skills?.length || 0, "items");
+      console.log("  📅 yearsExperience:", cleanedData.yearsExperience);
+      console.log("  🎭 talentType:", cleanedData.talentType);
+      console.log("  🔢 profileImageUrl:", !!cleanedData.profileImageUrl);
+      console.log("🔍 Full data sample:", {
+        displayName: cleanedData.displayName,
+        bio: cleanedData.bio,
+        location: cleanedData.location,
+        talentType: cleanedData.talentType,
+        languages: cleanedData.languages,
+        skills: cleanedData.skills
+      });
       
       const profileData = insertUserProfileSchema.parse(cleanedData);
       console.log("Parsed profile data:", profileData);
       
       const profile = await simpleStorage.createUserProfile(profileData);
-      console.log("Created profile:", profile);
+      console.log("🎯 DATABASE INSERT RESULT:");
+      console.log("  ✅ Profile created with ID:", profile?.id);
+      console.log("  ✅ Stored displayName:", profile?.displayName);
+      console.log("  ✅ Stored bio:", profile?.bio?.substring(0, 50) + "...");
+      console.log("  ✅ Stored location:", profile?.location);
+      console.log("  ✅ Stored languages count:", profile?.languages?.length || 0);
+      console.log("  ✅ Stored skills count:", profile?.skills?.length || 0);
       
-      res.json(profile);
+      // Immediately verify the data was actually saved by reading it back
+      const verificationProfile = await simpleStorage.getUserProfile(userId);
+      console.log("🔍 VERIFICATION READ-BACK:");
+      console.log("  ✅ Can retrieve profile:", !!verificationProfile);
+      console.log("  ✅ Retrieved displayName:", verificationProfile?.displayName);
+      console.log("  ✅ Retrieved bio:", verificationProfile?.bio?.substring(0, 50) + "...");
+      console.log("  ✅ Retrieved languages count:", verificationProfile?.languages?.length || 0);
+      console.log("  ✅ Retrieved skills count:", verificationProfile?.skills?.length || 0);
+      
+      // After creating profile, return combined user+profile data like TalentDashboard expects
+      const user = await simpleStorage.getUser(userId);
+      const combinedProfile = {
+        ...user,
+        ...profile,
+        displayName: profile?.displayName || `${user.firstName} ${user.lastName}`.trim() || user.username,
+        location: profile?.location || '',
+        bio: profile?.bio || '',
+        skills: profile?.skills || [],
+        availabilityStatus: profile?.availabilityStatus || 'available',
+        verified: profile?.isVerified || false,
+        talentType: profile?.talentType || '',
+        languages: profile?.languages || [],
+        accents: profile?.accents || [],
+        instruments: profile?.instruments || [],
+        genres: profile?.genres || [],
+        unionStatus: profile?.unionStatus || []
+      };
+      
+      console.log("Returning combined profile data for consistency with dashboard");
+      res.json(combinedProfile);
     } catch (error) {
       console.error("Error creating profile:", error);
       if (error instanceof Error) {
