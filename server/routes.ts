@@ -3191,6 +3191,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin jobs management routes
+  app.get('/api/admin/jobs', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      console.log("🔥 ADMIN: Getting all jobs from database");
+      const jobs = await simpleStorage.getJobs();
+      console.log("✅ ADMIN: Retrieved jobs from database", jobs.length);
+      res.json(jobs);
+    } catch (error) {
+      console.error("Error fetching admin jobs:", error);
+      res.status(500).json({ message: "Failed to fetch jobs" });
+    }
+  });
+
+  app.delete('/api/admin/jobs/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      console.log("🔥 ADMIN: Deleting job", jobId);
+      await simpleStorage.deleteJob(jobId);
+      console.log("✅ ADMIN: Job deleted successfully", jobId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting job:", error);
+      res.status(500).json({ message: "Failed to delete job" });
+    }
+  });
+
+  app.put('/api/admin/jobs/:id/status', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      const { status } = req.body;
+      console.log("🔥 ADMIN: Updating job status", { jobId, status });
+      const updatedJob = await simpleStorage.updateJobStatus(jobId, status);
+      console.log("✅ ADMIN: Job status updated successfully", updatedJob);
+      res.json(updatedJob);
+    } catch (error) {
+      console.error("Error updating job status:", error);
+      res.status(500).json({ message: "Failed to update job status" });
+    }
+  });
+
   // Talent type management routes
   app.get('/api/admin/talent-types', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
