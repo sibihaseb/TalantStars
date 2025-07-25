@@ -630,29 +630,46 @@ export class DatabaseStorage implements IStorage {
     console.log('👤 Getting complete profile for userId:', userId);
     
     try {
-      // Get ALL profile data for form pre-population
-      const [profile] = await db
-        .select()
-        .from(userProfiles)
-        .where(eq(userProfiles.userId, userId.toString()));
-        
-      if (profile) {
-        console.log('👤 Complete profile found - has bio:', !!profile.bio);
+      // Use raw SQL to ensure all fields are returned including acting questionnaire data
+      const result = await db.execute(sql`
+        SELECT * FROM user_profiles WHERE user_id = ${userId.toString()}
+      `);
+      
+      if (result.rows && result.rows.length > 0) {
+        const profile = result.rows[0] as any;
+        console.log('👤 Raw SQL Profile found - has bio:', !!profile.bio);
         console.log('👤 Profile location:', profile.location);
-        console.log('👤 Profile skills count:', profile.skills ? profile.skills.length : 0);
-        console.log('👤 Profile rates:', { daily: profile.dailyRate, weekly: profile.weeklyRate });
+        console.log('🎭 Acting Fields from Raw SQL:');
+        console.log('  primarySpecialty:', profile.primary_specialty);
+        console.log('  yearsExperience:', profile.years_experience);
+        console.log('  actingMethod:', profile.acting_method);
+        console.log('  improvisationComfort:', profile.improvisation_comfort);
         
-        // DEBUG: Check if acting fields are in the raw database response
-        console.log('🎭 Acting Fields Debug:');
-        console.log('  primarySpecialty:', profile.primarySpecialty);
-        console.log('  yearsExperience:', profile.yearsExperience);
-        console.log('  actingMethod:', profile.actingMethod);
-        console.log('  improvisationComfort:', profile.improvisationComfort);
-        console.log('  stageCombat:', profile.stageCombat);
-        console.log('  shakespeareExperience:', profile.shakespeareExperience);
-        console.log('  musicalTheater:', profile.musicalTheater);
+        // Convert snake_case to camelCase for frontend compatibility
+        const convertedProfile = {
+          ...profile,
+          primarySpecialty: profile.primary_specialty,
+          yearsExperience: profile.years_experience,
+          actingMethod: profile.acting_method,
+          improvisationComfort: profile.improvisation_comfort,
+          stageCombat: profile.stage_combat,
+          intimateScenesComfort: profile.intimate_scenes_comfort,
+          roleTypes: profile.role_types,
+          motionCapture: profile.motion_capture,
+          animalWork: profile.animal_work,
+          cryingOnCue: profile.crying_on_cue,
+          periodPieces: profile.period_pieces,
+          physicalComedy: profile.physical_comedy,
+          accentExperience: profile.accent_experience,
+          greenScreen: profile.green_screen,
+          stuntComfort: profile.stunt_comfort,
+          shakespeareExperience: profile.shakespeare_experience,
+          musicalTheater: profile.musical_theater,
+          horrorThriller: profile.horror_thriller,
+          currentAgent: profile.current_agent
+        };
         
-        return profile as any;
+        return convertedProfile;
       }
       
       console.log('👤 No profile found');
