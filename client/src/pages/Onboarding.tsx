@@ -86,8 +86,8 @@ const onboardingSchema = insertUserProfileSchema.extend({
     .min(2, "Location must be at least 2 characters")
     .max(100, "Location must be less than 100 characters"),
   
-  // Profile image URL - required for onboarding
-  profileImageUrl: z.string().min(1, "Profile image is required"),
+  // Profile image URL - make optional since users can skip
+  profileImageUrl: z.string().optional(),
   
   // Optional fields with validation
   website: z.string().url("Must be a valid URL").optional().or(z.literal("")),
@@ -1467,7 +1467,7 @@ function Onboarding() {
       // Convert empty strings to null for optional fields
       website: data.website?.trim() || null,
       phoneNumber: data.phoneNumber?.trim() || null,
-      profileImageUrl: data.profileImageUrl?.trim() || user?.profileImageUrl || '',
+      profileImageUrl: data.profileImageUrl?.trim() || user?.profileImageUrl || null,
       // Acting experience fields
       yearsExperience: data.yearsExperience?.toString() || null,
       improvisationComfort: data.improvisationComfort?.trim() || null,
@@ -2301,35 +2301,18 @@ function Onboarding() {
                   </Button>
                 ) : (
                   <Button
-                    type="button"
+                    type="submit"
                     disabled={createProfileMutation.isPending || !watchedDisplayName || !watchedBio || !watchedLocation || (watchedBio && (watchedBio as string).length < 10)}
                     className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     onClick={async (e) => {
-                      e.preventDefault();
+                      console.log("Submit button clicked - using form.handleSubmit for proper validation");
                       
-                      console.log("Submit button clicked");
-                      
-                      // Get all form values including questionnaire fields
+                      // Get all form values including questionnaire fields for debugging
                       const allFormValues = form.getValues();
-                      console.log("All form values:", allFormValues);
+                      console.log("All form values before validation:", allFormValues);
                       
-                      // Specifically log acting fields
-                      const actingFields = [
-                        'primarySpecialty', 'yearsExperience', 'actingMethod', 'improvisationComfort',
-                        'stageCombat', 'intimateScenesComfort', 'roleTypes', 'motionCapture',
-                        'animalWork', 'cryingOnCue', 'periodPieces', 'physicalComedy',
-                        'accentExperience', 'greenScreen', 'stuntComfort', 'shakespeareExperience',
-                        'musicalTheater', 'horrorThriller', 'currentAgent', 'currentPublicist', 'representationStatus'
-                      ];
-                      
-                      console.log("Acting field values:");
-                      actingFields.forEach(field => {
-                        console.log(`${field}:`, (allFormValues as any)[field]);
-                      });
-                      
-                      // Force submission with current form values
-                      console.log("=== TRIGGERING SUBMISSION ===");
-                      onSubmit(allFormValues);
+                      // Let React Hook Form handle validation and submission
+                      // This will trigger form.handleSubmit(onSubmit) properly
                     }}
                   >
                     <span>
