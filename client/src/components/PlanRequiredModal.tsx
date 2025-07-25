@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Crown, Star, Users, Briefcase, CreditCard } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Check, Crown, Star, Users, Briefcase, CreditCard, Tag, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -17,6 +18,8 @@ interface PlanRequiredModalProps {
 
 export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredModalProps) {
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
+  const [promoCode, setPromoCode] = useState<string>('');
+  const [showPromoInput, setShowPromoInput] = useState<boolean>(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -27,14 +30,23 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
   });
 
   const selectTierMutation = useMutation({
-    mutationFn: async (tierId: number) => {
-      const response = await apiRequest("POST", "/api/user/select-tier", { tierId });
+    mutationFn: async ({ tierId, promoCode }: { tierId: number; promoCode?: string }) => {
+      const response = await apiRequest("POST", "/api/user/select-tier", { 
+        tierId, 
+        promoCode: promoCode || undefined 
+      });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (data.requiresPayment) {
+        // Handle paid tier - redirect to payment
+        handlePaymentRedirect(data);
+        return;
+      }
+      
       toast({
         title: "Plan Selected",
-        description: "Your free plan has been activated successfully. Let's complete your profile.",
+        description: "Your plan has been activated successfully. Let's complete your profile.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       onClose();
@@ -42,10 +54,6 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
       setTimeout(() => setLocation("/onboarding"), 500);
     },
     onError: (error: any) => {
-      // If it's a paid tier, don't show error, just proceed to payment
-      if (error.requiresPayment) {
-        return;
-      }
       toast({
         title: "Error",
         description: error.message || "Failed to select plan. Please try again.",
@@ -53,6 +61,18 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
       });
     },
   });
+
+  const handlePaymentRedirect = (paymentData: any) => {
+    // For now, show a message about payment requirement
+    toast({
+      title: "Payment Required",
+      description: `This plan costs $${paymentData.finalPrice}. Payment integration coming soon!`,
+      variant: "default",
+    });
+    
+    // In a real implementation, redirect to Stripe checkout
+    console.log("Payment data:", paymentData);
+  };
 
   const createPaymentMutation = useMutation({
     mutationFn: async ({ tierId, isAnnual }: { tierId: number; isAnnual: boolean }) => {
@@ -93,10 +113,10 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
     
     if (price === 0) {
       // Free tier - direct selection
-      selectTierMutation.mutate(tierId);
+      selectTierMutation.mutate({ tierId, promoCode });
     } else {
-      // Paid tier - create payment intent
-      createPaymentMutation.mutate({ tierId, isAnnual });
+      // Paid tier - attempt selection with promo code
+      selectTierMutation.mutate({ tierId, promoCode });
     }
   };
 
@@ -163,6 +183,51 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
             <p className="text-lg opacity-90">Choose the perfect plan to unlock your potential</p>
             <p className="text-sm opacity-75 mt-2">Select a plan to continue - this step is required to access the platform</p>
           </div>
+        </div>
+
+        {/* Promo Code Section */}
+        <div className="mb-6">
+          <Button
+            onClick={() => setShowPromoInput(!showPromoInput)}
+            variant="outline"
+            className="mx-auto flex items-center gap-2"
+          >
+            <Tag className="h-4 w-4" />
+            Have a promo code?
+            {showPromoInput ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
+          
+          {showPromoInput && (
+            <div className="mt-4 max-w-md mx-auto">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Enter promo code"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                  className="flex-1"
+                />
+                <Button
+                  onClick={() => {
+                    if (promoCode.trim()) {
+                      toast({
+                        title: "Promo Code Applied",
+                        description: `Code "${promoCode}" will be applied during plan selection.`,
+                      });
+                    }
+                  }}
+                  variant="outline"
+                  disabled={!promoCode.trim()}
+                >
+                  Apply
+                </Button>
+              </div>
+              {promoCode && (
+                <p className="text-sm text-green-600 mt-2 text-center">
+                  ✓ Code "{promoCode}" ready to apply
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Plans Grid */}

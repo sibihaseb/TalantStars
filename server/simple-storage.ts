@@ -76,6 +76,10 @@ export interface IStorage {
     privacyVersion?: number;
   }): Promise<User>;
 
+  // Promo code operations
+  validatePromoCode(code: string, userId: number, tierId: number, category?: string): Promise<any>;
+  calculateDiscountAmount(promoData: any, originalPrice: number): Promise<number>;
+
   // SEO operations
   getSeoSettings(): Promise<SeoSettings | undefined>;
   updateSeoSettings(settings: Partial<InsertSeoSettings>): Promise<SeoSettings>;
@@ -3446,6 +3450,54 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Promo code functionality
+  async validatePromoCode(code: string, userId: number, tierId: number, category?: string): Promise<any> {
+    try {
+      console.log("🔥 PROMO: Validating promo code", { code, userId, tierId, category });
+      
+      // Sample promo codes for demonstration
+      const validPromoCodes = [
+        { code: 'WELCOME50', discount: 50, type: 'percentage', category: 'all', active: true },
+        { code: 'FIRST25', discount: 25, type: 'percentage', category: 'talent', active: true },
+        { code: 'SAVE10', discount: 10, type: 'fixed', category: 'all', active: true },
+        { code: 'TALENT20', discount: 20, type: 'percentage', category: 'talent', active: true }
+      ];
+
+      const promo = validPromoCodes.find(p => 
+        p.code === code && 
+        p.active && 
+        (p.category === 'all' || p.category === category)
+      );
+
+      if (promo) {
+        console.log("✅ PROMO: Valid promo code found", promo);
+        return promo;
+      }
+
+      console.log("❌ PROMO: Invalid or expired promo code");
+      return null;
+    } catch (error) {
+      console.error("Error validating promo code:", error);
+      return null;
+    }
+  }
+
+  async calculateDiscountAmount(promoData: any, originalPrice: number): Promise<number> {
+    try {
+      if (!promoData) return 0;
+
+      if (promoData.type === 'percentage') {
+        return (originalPrice * promoData.discount) / 100;
+      } else if (promoData.type === 'fixed') {
+        return Math.min(promoData.discount, originalPrice);
+      }
+
+      return 0;
+    } catch (error) {
+      console.error("Error calculating discount:", error);
+      return 0;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

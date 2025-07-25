@@ -4276,6 +4276,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allTiers = await simpleStorage.getPricingTiers();
       console.log(`Found ${allTiers.length} pricing tiers`);
       
+      // Enhance tiers with detailed features and descriptions
+      const enhancedTiers = allTiers.map(tier => ({
+        ...tier,
+        description: getDescriptionForTier(tier.name, tier.category),
+        features: getFeaturesForTier(tier.name, tier.category, tier),
+        permissions: tier.permissions || ['basic_access']
+      }));
+      
       // Filter based on role/category if provided
       let role = req.query.role as string;
       
@@ -4285,11 +4293,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`No role provided, using user role: ${role}`);
       }
       
-      let filteredTiers = allTiers;
+      let filteredTiers = enhancedTiers;
       
       if (role) {
         console.log(`Filtering by role/category: ${role}`);
-        filteredTiers = allTiers.filter(tier => {
+        filteredTiers = enhancedTiers.filter(tier => {
           const tierCategory = tier.category?.toLowerCase();
           const requestedRole = role.toLowerCase();
           return tierCategory === requestedRole || 
@@ -4307,6 +4315,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to get pricing tiers" });
     }
   });
+
+  // Helper functions for tier enhancement
+  function getDescriptionForTier(name: string, category: string): string {
+    if (name === 'Basic') return 'Perfect for getting started with essential features';
+    if (name === 'Professional') return 'Advanced features for serious professionals';
+    if (name === 'Enterprise') return 'Complete solution with unlimited access and premium support';
+    return `Comprehensive ${category} plan with professional features`;
+  }
+
+  function getFeaturesForTier(name: string, category: string, tier: any): string[] {
+    const baseFeatures = [
+      'Professional profile creation',
+      'Basic job applications',
+      'Message system access'
+    ];
+
+    if (name === 'Basic') {
+      return [
+        ...baseFeatures,
+        `${tier.maxPhotos || 5} profile photos`,
+        `${tier.maxVideos || 1} video uploads`,
+        `${tier.maxAudio || 2} audio files`,
+        'Basic search visibility',
+        'Email notifications'
+      ];
+    }
+
+    if (name === 'Professional') {
+      return [
+        ...baseFeatures,
+        `${tier.maxPhotos || 25} profile photos`,
+        `${tier.maxVideos || 10} video uploads`, 
+        `${tier.maxAudio || 15} audio files`,
+        'Priority search ranking',
+        'Advanced analytics',
+        'Direct messaging',
+        'AI-powered profile enhancement',
+        'Portfolio showcase',
+        'Social media integration'
+      ];
+    }
+
+    if (name === 'Enterprise') {
+      return [
+        ...baseFeatures,
+        'Unlimited photo uploads',
+        'Unlimited video uploads',
+        'Unlimited audio files',
+        'Premium search placement',
+        'Advanced analytics dashboard',
+        'Priority customer support',
+        'AI-powered job matching',
+        'Custom branding options',
+        'Export data capability',
+        'Team collaboration tools',
+        'API access'
+      ];
+    }
+
+    return baseFeatures;
+  }
 
   // Update user tier endpoint
   app.post('/api/user/tier', isAuthenticated, async (req: any, res) => {
@@ -4334,16 +4403,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("🔥 API: User selecting tier...", { userId: req.user.id, body: req.body });
       
-      const { tierId } = req.body;
+      const { tierId, promoCode } = req.body;
       
       if (!tierId) {
         return res.status(400).json({ message: "Tier ID is required" });
       }
+
+      // Get the tier to check if it's free or paid
+      const allTiers = await simpleStorage.getPricingTiers();
+      const selectedTier = allTiers.find(t => t.id === parseInt(tierId));
       
-      const updatedUser = await simpleStorage.updateUserTier(req.user.id, parseInt(tierId));
+      if (!selectedTier) {
+        return res.status(404).json({ message: "Tier not found" });
+      }
+
+      const tierPrice = parseFloat(selectedTier.price || '0');
+      const isFree = tierPrice === 0;
+
+      // If it's a free tier, update immediately
+      if (isFree) {
+        const updatedUser = await simpleStorage.updateUserTier(req.user.id, parseInt(tierId));
+        console.log("✅ API: Free tier selected successfully", updatedUser);
+        return res.json({ success: true, user: updatedUser });
+      }
+
+      // For paid tiers, validate promo code if provided
+      let discount = 0;
+      let promoData = null;
+
+      if (promoCode) {
+        promoData = await simpleStorage.validatePromoCode(promoCode, req.user.id, parseInt(tierId), selectedTier.category);
+        if (promoData) {
+          discount = await simpleStorage.calculateDiscountAmount(promoData, tierPrice);
+          console.log("🔥 PROMO: Applied promo code", { code: promoCode, discount });
+        }
+      }
+
+      // For paid tiers, require payment processing
+      res.json({ 
+        requiresPayment: true, 
+        tier: selectedTier,
+        originalPrice: tierPrice,
+        discount: discount,
+        finalPrice: Math.max(0, tierPrice - discount),
+        promoCode: promoData ? promoData.code : null
+      });
       
-      console.log("✅ API: User tier selected successfully", updatedUser);
-      res.json({ success: true, user: updatedUser });
     } catch (error) {
       console.error("❌ API: Error selecting user tier:", error);
       res.status(500).json({ message: "Failed to select tier" });
@@ -4399,6 +4504,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error auto-verifying paid users:', error);
       res.status(500).json({ message: "Failed to auto-verify paid users" });
+    }
+  });
+
+  // Enhanced create payment intent endpoint  
+  app.post("/api/create-payment-intent", async (req, res) => {
+    try {
+      const { amount, tierId, description, promoCode } = req.body;
+      console.log("🔥 PAYMENT: Creating payment intent", { amount, tierId, description });
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        description: description || `Tier upgrade payment`,
+        metadata: {
+          tierId: tierId?.toString() || '',
+          promoCode: promoCode || '',
+          userId: req.user?.id?.toString() || ''
+        }
+      });
+      
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        tierId: tierId,
+        amount: amount
+      });
+    } catch (error: any) {
+      console.error("❌ PAYMENT: Error creating payment intent:", error);
+      res.status(500).json({ message: "Error creating payment intent: " + error.message });
     }
   });
 
