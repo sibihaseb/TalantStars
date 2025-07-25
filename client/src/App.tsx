@@ -75,6 +75,7 @@ function Router() {
       <Route path="/debug-logs" component={DebugLogs} />
       <Route path="/verification-demo" component={VerificationDemo} />
       <Route path="/pricing" component={PricingPage} />
+      <Route path="/checkout" component={Checkout} />
       <Route path="/talent/:userId" component={ProfileViewer} />
       
       {/* Protected admin routes */}

@@ -70,6 +70,9 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
       variant: "default",
     });
     
+    // Set the selected tier for proper parameter passing
+    setSelectedTier(paymentData.tier.id);
+    
     // Start payment intent creation for immediate processing
     const tier = pricingTiers.find((t: any) => t.id === paymentData.tier.id);
     if (tier) {
@@ -94,14 +97,25 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
       return response.json();
     },
     onSuccess: (data) => {
-      // Close modal and redirect to dashboard after successful payment processing
-      toast({
-        title: "Payment Setup Complete",
-        description: "Redirecting to complete your payment...",
-      });
+      // Close modal first, then redirect to checkout
       onClose();
-      // Redirect to dashboard instead of checkout
-      setLocation("/dashboard");
+      
+      // Redirect to checkout page with client secret for Stripe payment
+      const params = new URLSearchParams({
+        client_secret: data.clientSecret,
+        tier_id: selectedTier?.toString() || '',
+        annual: 'false'
+      });
+      
+      toast({
+        title: "Payment Setup Complete", 
+        description: "Redirecting to secure payment page...",
+      });
+      
+      // Use setTimeout to ensure modal closes before redirect
+      setTimeout(() => {
+        setLocation(`/checkout?${params.toString()}`);
+      }, 100);
     },
     onError: (error: any) => {
       toast({
