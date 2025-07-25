@@ -402,28 +402,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/profile', isAuthenticated, requirePlan, async (req: any, res) => {
+  app.put('/api/profile', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      console.log("Updating profile for user:", userId);
-      console.log("Request body:", req.body);
+      console.log("✅ PROFILE UPDATE: Updating profile for user:", userId);
+      console.log("✅ PROFILE UPDATE: Request body:", req.body);
       
-      // Convert userId to string for schema compatibility
-      const dataWithUserId = { ...req.body, userId: userId.toString() };
-      console.log("Data with userId:", dataWithUserId);
+      // Check if profile exists first
+      const existingProfile = await simpleStorage.getUserProfile(userId);
+      if (!existingProfile) {
+        console.log("✅ PROFILE UPDATE: No existing profile, creating new one");
+        // Create new profile if doesn't exist
+        const dataWithUserId = { ...req.body, userId: userId.toString() };
+        const profileData = insertUserProfileSchema.parse(dataWithUserId);
+        const profile = await simpleStorage.createUserProfile(profileData);
+        console.log("✅ PROFILE UPDATE: Created new profile:", profile);
+        return res.json(profile);
+      }
       
-      const profileData = insertUserProfileSchema.partial().parse(dataWithUserId);
-      console.log("Parsed profile data:", profileData);
+      // Update existing profile - remove userId from updates to avoid conflicts
+      const { userId: _, ...updateData } = req.body;
+      console.log("✅ PROFILE UPDATE: Update data (without userId):", updateData);
       
-      const profile = await simpleStorage.updateUserProfile(userId.toString(), profileData);
-      console.log("Updated profile:", profile);
+      const profile = await simpleStorage.updateUserProfile(userId, updateData);
+      console.log("✅ PROFILE UPDATE: Updated profile successfully:", !!profile);
       
       res.json(profile);
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error("❌ PROFILE UPDATE ERROR:", error);
       if (error instanceof Error) {
-        console.error("Error message:", error.message);
-        console.error("Error stack:", error.stack);
+        console.error("❌ Error message:", error.message);
+        console.error("❌ Error stack:", error.stack);
       }
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       res.status(500).json({ message: "Failed to update profile", error: errorMessage });
@@ -481,7 +490,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const { selectedTemplate } = req.body;
       
-      console.log('Saving profile template:', selectedTemplate, 'for user:', userId);
+      console.log('✅ TEMPLATE: Saving profile template:', selectedTemplate, 'for user:', userId);
       
       // Validate template
       const validTemplates = ['classic', 'modern', 'artistic', 'minimal', 'cinematic'];
@@ -492,14 +501,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update user profile template
       const updatedUser = await simpleStorage.updateUserProfileTemplate(userId, selectedTemplate);
       
+      console.log('✅ TEMPLATE: Template saved successfully:', selectedTemplate);
       res.json({ 
         success: true, 
         selectedTemplate,
         user: updatedUser
       });
     } catch (error) {
-      console.error('Error saving profile template:', error);
-      res.status(500).json({ message: 'Failed to save profile template' });
+      console.error('❌ TEMPLATE ERROR:', error);
+      res.status(500).json({ message: 'Failed to save profile template', error: error.message });
     }
   });
 

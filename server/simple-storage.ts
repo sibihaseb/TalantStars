@@ -664,14 +664,19 @@ export class DatabaseStorage implements IStorage {
     console.log('📝 Updating user profile for userId:', userId);
     console.log('📝 Profile updates:', profile);
     
-    const [userProfile] = await db
-      .update(userProfiles)
-      .set(profile)
-      .where(eq(userProfiles.user_id, userId.toString()))
-      .returning();
-    
-    console.log('📝 Updated profile:', !!userProfile);
-    return userProfile;
+    try {
+      const [userProfile] = await db
+        .update(userProfiles)
+        .set(profile)
+        .where(eq(userProfiles.userId, userId.toString()))
+        .returning();
+      
+      console.log('📝 Updated profile:', !!userProfile);
+      return userProfile;
+    } catch (error) {
+      console.error('📝 Profile update error:', error);
+      throw error;
+    }
   }
 
   async getUsersWithProfiles(filters?: { isFeatured?: boolean }): Promise<Array<User & { profile?: UserProfile }>> {
