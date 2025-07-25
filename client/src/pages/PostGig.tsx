@@ -63,33 +63,8 @@ export default function PostGig() {
 
   const [newSkill, setNewSkill] = useState("");
 
-  // Redirect if not authenticated
-  if (!isLoading && !isAuthenticated) {
-    return (
-      <ThemeProvider>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900 flex items-center justify-center">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle className="text-center text-gray-900 dark:text-white">
-                Authentication Required
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Please log in to post a gig
-              </p>
-              <Button 
-                onClick={() => window.location.href = "/api/login"}
-                className="w-full"
-              >
-                Log In
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </ThemeProvider>
-    );
-  }
+  // Show login prompt if not authenticated, but still show the form
+  const showLoginPrompt = !isLoading && !isAuthenticated;
 
   const createJobMutation = useMutation({
     mutationFn: async (jobData: any) => {
@@ -115,6 +90,16 @@ export default function PostGig() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to post a gig.",
+        variant: "destructive",
+      });
+      window.location.href = "/auth";
+      return;
+    }
     
     if (!formData.title || !formData.description || !formData.talentType) {
       toast({
@@ -544,6 +529,29 @@ export default function PostGig() {
                     </div>
                   </div>
 
+                  {showLoginPrompt && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                            Login Required
+                          </h3>
+                          <p className="text-sm text-blue-600 dark:text-blue-300">
+                            You can fill out the form, but you'll need to log in to submit.
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          onClick={() => window.location.href = "/auth"}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Log In
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex gap-4 pt-6">
                     <Button
                       type="submit"
@@ -555,12 +563,12 @@ export default function PostGig() {
                       ) : (
                         <Send className="w-4 h-4 mr-2" />
                       )}
-                      Post Gig
+                      {showLoginPrompt ? "Log In to Post Gig" : "Post Gig"}
                     </Button>
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setLocation("/dashboard")}
+                      onClick={() => setLocation("/")}
                     >
                       Cancel
                     </Button>
