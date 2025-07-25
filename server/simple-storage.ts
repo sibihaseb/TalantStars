@@ -2509,6 +2509,16 @@ export class DatabaseStorage implements IStorage {
       insertData.createdAt = new Date();
       insertData.updatedAt = new Date();
       
+      // Ensure value is a string (decimal field expects string)
+      if (typeof insertData.value === 'number') {
+        insertData.value = insertData.value.toString();
+      }
+      
+      // Set default plan restriction if not provided
+      if (!insertData.planRestriction) {
+        insertData.planRestriction = 'all';
+      }
+      
       const [result] = await db
         .insert(promoCodes)
         .values(insertData)

@@ -127,26 +127,9 @@ export default function Auth() {
           description: `Successfully logged in as ${userData.username}`,
         });
         
-        // Refetch user data to update auth state
-        await refetch();
-        
-        // Redirect based on role
-        switch (userData.role) {
-          case "admin":
-            window.location.href = "/admin";
-            break;
-          case "talent":
-            window.location.href = "/talent-dashboard";
-            break;
-          case "producer":
-            window.location.href = "/producer-dashboard";
-            break;
-          case "manager":
-            window.location.href = "/manager-dashboard";
-            break;
-          default:
-            window.location.href = "/dashboard";
-        }
+        // Use the same approach as Login.tsx - direct navigation for reliability
+        // Force a complete page navigation to ensure cookies are properly set
+        window.location.href = "/admin";
       } else {
         const errorData = await response.json();
         toast({
