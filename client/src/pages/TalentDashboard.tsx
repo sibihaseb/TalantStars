@@ -128,7 +128,8 @@ import {
   Trash,
   Info,
   Palette,
-  User
+  User,
+  ArrowRight
 } from 'lucide-react';
 
 export default function TalentDashboard() {
@@ -532,6 +533,55 @@ export default function TalentDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Profile Completion Banner - Show if profile is incomplete */}
+        {(!profile?.displayName || !profile?.bio || !profile?.location) && (
+          <div className="mb-8">
+            <Card className="border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                      <User className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Complete Your Profile Setup
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        Finish setting up your profile to unlock all platform features and get matched with opportunities.
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {!profile?.displayName && (
+                          <Badge variant="outline" className="text-xs">
+                            Missing: Display Name
+                          </Badge>
+                        )}
+                        {!profile?.bio && (
+                          <Badge variant="outline" className="text-xs">
+                            Missing: Bio
+                          </Badge>
+                        )}
+                        {!profile?.location && (
+                          <Badge variant="outline" className="text-xs">
+                            Missing: Location
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={handleCompleteProfile}
+                    className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
+                  >
+                    Complete Setup
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
