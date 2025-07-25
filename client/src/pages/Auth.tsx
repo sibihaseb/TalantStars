@@ -152,6 +152,8 @@ export default function Auth() {
   const onRegister = async (data: RegisterForm) => {
     setIsSubmitting(true);
     try {
+      console.log("🔥 REGISTRATION: Starting registration process", data.username);
+      
       const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -161,18 +163,49 @@ export default function Auth() {
 
       if (response.ok) {
         const userData = await response.json();
+        console.log("✅ REGISTRATION: Account created successfully", userData);
+        
         toast({
           title: "Account created!",
-          description: `Welcome to the platform, ${userData.firstName}!`,
+          description: `Welcome to the platform, ${userData.user?.firstName || data.firstName}!`,
         });
         
-        // Refetch user data to update auth state
-        await refetch();
+        // Automatically log in the user after successful registration
+        console.log("🔑 REGISTRATION: Attempting automatic login");
         
-        // Redirect to onboarding for new users
-        window.location.href = "/onboarding";
+        const loginResponse = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            usernameOrEmail: data.username,
+            password: data.password,
+          }),
+        });
+
+        if (loginResponse.ok) {
+          const loginData = await loginResponse.json();
+          console.log("✅ REGISTRATION: Auto-login successful", loginData);
+          
+          // Refetch user data to update auth state
+          await refetch();
+          
+          // Small delay to ensure auth state is updated
+          setTimeout(() => {
+            console.log("🚀 REGISTRATION: Redirecting to onboarding");
+            window.location.href = "/onboarding";
+          }, 500);
+        } else {
+          console.log("❌ REGISTRATION: Auto-login failed, redirecting to login");
+          toast({
+            title: "Account created successfully!",
+            description: "Please log in with your new credentials.",
+          });
+          setActiveTab("login");
+        }
       } else {
         const errorData = await response.json();
+        console.error("❌ REGISTRATION: Failed", errorData);
         toast({
           title: "Registration failed",
           description: errorData.message || "Failed to create account",
@@ -180,6 +213,7 @@ export default function Auth() {
         });
       }
     } catch (error) {
+      console.error("❌ REGISTRATION: Network error", error);
       toast({
         title: "Registration failed",
         description: "Network error. Please try again.",
