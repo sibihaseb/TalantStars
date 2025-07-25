@@ -2409,16 +2409,6 @@ function Onboarding() {
                     type="submit"
                     disabled={createProfileMutation.isPending || !watchedDisplayName || !watchedBio || !watchedLocation || (watchedBio && (watchedBio as string).length < 10)}
                     className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                    onClick={async (e) => {
-                      console.log("Submit button clicked - using form.handleSubmit for proper validation");
-                      
-                      // Get all form values including questionnaire fields for debugging
-                      const allFormValues = form.getValues();
-                      console.log("All form values before validation:", allFormValues);
-                      
-                      // Let React Hook Form handle validation and submission
-                      // This will trigger form.handleSubmit(onSubmit) properly
-                    }}
                   >
                     <span>
                       {createProfileMutation.isPending ? "Creating Profile..." : "Complete Setup"}
