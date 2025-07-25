@@ -266,28 +266,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllUsers(): Promise<User[]> {
-    // Get users with their profile data for complete admin view
-    const usersWithProfiles = await db
-      .select({
-        id: users.id,
-        username: users.username,
-        email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        role: users.role,
-        isVerified: users.isVerified,
-        profileImageUrl: users.profileImageUrl,
-        pricingTierId: users.pricingTierId,
-        createdAt: users.createdAt,
-        updatedAt: users.updatedAt,
-        talentType: userProfiles.talentType,
-        location: userProfiles.location,
-        bio: userProfiles.bio
-      })
-      .from(users)
-      .leftJoin(userProfiles, eq(users.id, userProfiles.userId));
-    
-    return usersWithProfiles;
+    try {
+      // Get users with their profile data for complete admin view
+      const usersWithProfiles = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          role: users.role,
+          isVerified: users.isVerified,
+          profileImageUrl: users.profileImageUrl,
+          pricingTierId: users.pricingTierId,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+          talentType: userProfiles.talentType,
+          location: userProfiles.location,
+          bio: userProfiles.bio
+        })
+        .from(users)
+        .leftJoin(userProfiles, eq(users.id.toString(), userProfiles.userId));
+      
+      return usersWithProfiles;
+    } catch (error) {
+      console.error('Error in getAllUsers:', error);
+      // Fallback to basic user data if profile join fails
+      const basicUsers = await db.select().from(users);
+      return basicUsers;
+    }
   }
 
   async updateUser(id: number, userData: Partial<InsertUser>): Promise<User> {
