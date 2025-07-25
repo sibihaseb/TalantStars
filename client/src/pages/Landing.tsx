@@ -93,7 +93,7 @@ export default function Landing() {
               <Button 
                 size="lg"
                 className="bg-emerald-600 text-white hover:bg-emerald-700 px-8 py-4 text-lg font-semibold transform hover:scale-105 transition-all duration-300"
-                onClick={() => window.location.href = "/auth"}
+                onClick={() => window.location.href = "/post-gig"}
               >
                 <Briefcase className="h-5 w-5 mr-2" />
                 <TranslatedText text="Post a Gig" />
