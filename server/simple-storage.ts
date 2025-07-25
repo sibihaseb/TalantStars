@@ -400,30 +400,47 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateUserVerification(userId: number, verified: boolean): Promise<UserProfile> {
+  async updateUserVerification(userId: number, verified: boolean): Promise<any> {
     try {
       console.log(`🔥 VERIFICATION: ${verified ? 'Verifying' : 'Unverifying'} user ${userId}`);
       
-      // First check if profile exists
+      // First update the users table verification status
+      await db.update(users)
+        .set({ 
+          // @ts-ignore - Handle dynamic verification field
+          is_verified: verified,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId));
+      
+      // Check if profile exists
       const existingProfile = await db
         .select()
         .from(userProfiles)
         .where(eq(userProfiles.userId, userId.toString()));
       
       if (existingProfile.length === 0) {
-        // Create a basic profile if none exists
+        // Create a basic profile if none exists with valid talent_type
         console.log(`📝 Creating profile for user ${userId} to enable verification`);
+        
+        // Get user info to determine proper role and talent type
+        const [user] = await db.select().from(users).where(eq(users.id, userId));
+        const talentType = user?.role === 'talent' ? 'actor' : 'profile';
+        
         const [newProfile] = await db
           .insert(userProfiles)
           .values({ 
             userId: userId.toString(),
-            isVerified: verified,
-            location: 'Not specified',
-            talentType: 'Not specified'
+            role: user?.role || 'talent',
+            talentType: talentType as any,
+            displayName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User Profile' : 'User Profile',
+            bio: '',
+            location: '',
+            isVerified: verified
           })
           .returning();
         console.log(`✅ VERIFICATION: Created profile and set verification status to ${verified} for user ${userId}`);
-        return newProfile;
+        return { success: true, verified, profile: newProfile };
       } else {
         // Update existing profile
         const [profile] = await db
@@ -433,7 +450,7 @@ export class DatabaseStorage implements IStorage {
           .returning();
         
         console.log(`✅ VERIFICATION: User ${userId} verification status updated to ${verified}`);
-        return profile;
+        return { success: true, verified, profile };
       }
     } catch (error) {
       console.error('Error updating user verification:', error);
