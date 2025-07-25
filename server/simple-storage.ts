@@ -641,6 +641,17 @@ export class DatabaseStorage implements IStorage {
         console.log('👤 Profile location:', profile.location);
         console.log('👤 Profile skills count:', profile.skills ? profile.skills.length : 0);
         console.log('👤 Profile rates:', { daily: profile.dailyRate, weekly: profile.weeklyRate });
+        
+        // DEBUG: Check if acting fields are in the raw database response
+        console.log('🎭 Acting Fields Debug:');
+        console.log('  primarySpecialty:', profile.primarySpecialty);
+        console.log('  yearsExperience:', profile.yearsExperience);
+        console.log('  actingMethod:', profile.actingMethod);
+        console.log('  improvisationComfort:', profile.improvisationComfort);
+        console.log('  stageCombat:', profile.stageCombat);
+        console.log('  shakespeareExperience:', profile.shakespeareExperience);
+        console.log('  musicalTheater:', profile.musicalTheater);
+        
         return profile as any;
       }
       
