@@ -5237,52 +5237,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // SEO route for social media sharing - separate from main profile route  
-  app.get('/seo/profile/:username', async (req, res) => {
-    try {
-      const { username } = req.params;
-      console.log(`🔥 PROFILE SSR: Serving SEO page for ${username}`);
-      
-      const displayName = username.charAt(0).toUpperCase() + username.slice(1);
-      const talentType = 'Professional Talent';
-      const bio = `${displayName} is a professional talent available for hire through Talents & Stars platform.`;
-      const profileImage = `${req.protocol}://${req.get('host')}/images/default-profile.jpg`;
-      
-      const html = `<!DOCTYPE html>
+  // Profile route with SEO support for social media crawlers
+  app.get('/profile/:username', async (req, res, next) => {
+    const userAgent = req.get('User-Agent') || '';
+    const isCrawler = /facebookexternalhit|twitterbot|linkedinbot|slackbot|whatsappbot|telegrambot|skypeuri|discordbot|google/i.test(userAgent);
+    
+    console.log(`👀 Profile route - UA: "${userAgent}" | Crawler: ${isCrawler}`);
+    
+    if (isCrawler) {
+      try {
+        const { username } = req.params;
+        console.log(`🔥 PROFILE SSR: Serving SEO page for ${username}`);
+        
+        // Get actual profile data from database
+        let profileData;
+        try {
+          const profile = await simpleStorage.getProfileByUsername(username);
+          profileData = profile || null;
+        } catch (error) {
+          console.log(`📄 Database query failed, using fallback data for ${username}`);
+          profileData = null;
+        }
+        
+        // Use real data if available, otherwise fallback
+        const displayName = profileData?.displayName || username.charAt(0).toUpperCase() + username.slice(1);
+        const talentType = profileData?.talentType || 'Professional Talent';
+        const bio = profileData?.bio || `${displayName} is a professional talent available for hire through Talents & Stars platform.`;
+        const location = profileData?.location || 'Professional';
+        
+        // Use actual profile image if available
+        let profileImage = `${req.protocol}://${req.get('host')}/images/default-profile.jpg`;
+        if (profileData?.userId) {
+          try {
+            const userData = await simpleStorage.getUserByUsername(username);
+            if (userData?.profileImageUrl) {
+              profileImage = userData.profileImageUrl;
+            }
+          } catch (error) {
+            console.log('Could not get profile image, using default');
+          }
+        }
+        
+        const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${displayName} - ${talentType} | Talents & Stars</title>
     <meta name="description" content="${bio}">
+    <meta name="keywords" content="${talentType}, ${location}, entertainment, casting, hire, talent">
+    
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="profile">
     <meta property="og:url" content="${req.protocol}://${req.get('host')}/profile/${username}">
-    <meta property="og:title" content="${displayName} - Professional ${talentType}">
+    <meta property="og:title" content="${displayName} - ${talentType}">
     <meta property="og:description" content="${bio}">
     <meta property="og:image" content="${profileImage}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:site_name" content="Talents & Stars">
+    
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="${req.protocol}://${req.get('host')}/profile/${username}">
     <meta name="twitter:title" content="${displayName} - ${talentType}">
     <meta name="twitter:description" content="${bio}">
     <meta name="twitter:image" content="${profileImage}">
+    
+    <!-- Profile specific meta -->
+    <meta property="profile:username" content="${username}">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="${req.protocol}://${req.get('host')}/profile/${username}">
 </head>
 <body>
-    <div style="text-align: center; margin: 40px;">
-        <h1>${displayName}</h1>
-        <p>${bio}</p>
-        <a href="/profile/${username}">View Full Profile</a>
+    <div style="text-align: center; margin: 40px; font-family: Arial, sans-serif;">
+        <img src="${profileImage}" alt="${displayName}" style="width: 200px; height: 200px; border-radius: 50%; object-fit: cover; margin: 20px auto; display: block;" onerror="this.src='/images/default-profile.jpg'">
+        <h1 style="color: #333; margin-bottom: 10px;">${displayName}</h1>
+        <div style="color: #667eea; font-size: 18px; margin-bottom: 20px;">${talentType}</div>
+        <div style="color: #666; line-height: 1.6; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">${bio}</div>
+        <a href="/" style="background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">View Full Profile on Talents & Stars</a>
     </div>
+    
+    <noscript>
+        <p>This profile is part of the Talents & Stars platform. <a href="/">Visit our homepage</a> to explore more talent profiles.</p>
+    </noscript>
 </body>
 </html>`;
 
-      res.setHeader('Content-Type', 'text/html');
-      res.send(html);
-    } catch (error) {
-      console.error('Error serving SEO page:', error);
-      res.redirect('/');
+        console.log(`✅ PROFILE SSR: Served SEO-optimized profile page for ${username}`);
+        res.setHeader('Content-Type', 'text/html');
+        res.send(html);
+        return;
+      } catch (error) {
+        console.error('Error serving profile SSR:', error);
+        // Continue to serve React app if SEO fails
+      }
     }
+    
+    // For normal browsers, continue to React app
+    next();
   });
 
   return httpServer;

@@ -47,6 +47,7 @@ export interface IStorage {
   
   // Profile operations
   getUserProfile(userId: number): Promise<UserProfile | undefined>;
+  getProfileByUsername(username: string): Promise<UserProfile | undefined>;
   createUserProfile(profile: InsertUserProfile): Promise<UserProfile>;
   updateUserProfile(userId: number, profile: Partial<InsertUserProfile>): Promise<UserProfile>;
   getUsersWithProfiles(filters?: { isFeatured?: boolean }): Promise<Array<User & { profile?: UserProfile }>>;
@@ -597,6 +598,25 @@ export class DatabaseStorage implements IStorage {
       return undefined;
     } catch (error) {
       console.error('👤 Error in getUserProfile:', error);
+      throw error;
+    }
+  }
+
+  async getProfileByUsername(username: string): Promise<UserProfile | undefined> {
+    console.log('👤 Getting profile by username:', username);
+    
+    try {
+      // First get the user by username to get their ID
+      const user = await this.getUserByUsername(username);
+      if (!user) {
+        console.log('👤 User not found for username:', username);
+        return undefined;
+      }
+      
+      // Then get their profile using the user ID
+      return await this.getUserProfile(user.id);
+    } catch (error) {
+      console.error('👤 Error in getProfileByUsername:', error);
       throw error;
     }
   }
