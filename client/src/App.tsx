@@ -145,7 +145,7 @@ function Router() {
       <Route path="/talent/:id">
         {isAuthenticated ? <PlanProtectedRoute><TalentProfile /></PlanProtectedRoute> : <Auth />}
       </Route>
-      <Route path="/profile/:userId">
+      <Route path="/profile/:username">
         <ProfileViewer />
       </Route>
       <Route path="/meetings">
