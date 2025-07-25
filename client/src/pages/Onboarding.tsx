@@ -691,10 +691,29 @@ function Onboarding() {
   const createProfileMutation = useMutation({
     mutationFn: async (data: OnboardingFormData) => {
       try {
+        console.log("🔥 MUTATION: Starting profile creation with data:", data);
+        console.log("🔥 MUTATION: User authentication status:", { isAuthenticated, user: !!user, userId: user?.id });
+        
+        // Explicitly check authentication before API call
+        if (!isAuthenticated || !user?.id) {
+          console.error("🔥 MUTATION: User not authenticated - redirecting to login");
+          throw new Error("Authentication required - please log in again");
+        }
+        
         const response = await apiRequest("POST", "/api/profile", data);
+        console.log("🔥 MUTATION: API response status:", response.status);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("🔥 MUTATION: API error response:", errorText);
+          throw new Error(`API Error: ${response.status} - ${errorText}`);
+        }
+        
         const result = await response.json();
+        console.log("🔥 MUTATION: Profile creation successful:", !!result);
         return result;
       } catch (error) {
+        console.error("🔥 MUTATION: Error in mutationFn:", error);
         throw error;
       }
     },

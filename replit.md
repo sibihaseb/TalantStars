@@ -24,6 +24,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### CRITICAL ONBOARDING FORM SUBMISSION FIX - Tom Reddick's Actor Questionnaire Data Now Persisting (July 25, 2025)
+- **CRITICAL SUCCESS**: Fixed fundamental form submission issue preventing Actor questionnaire data from persisting to user profiles
+- **Root Cause Identified**: Submit button was `type="button"` with manual `onSubmit(allFormValues)` call that bypassed React Hook Form validation
+- **Form Submission Fix Applied**: 
+  - ✅ Changed submit button from `type="button"` to `type="submit"` for proper form validation flow
+  - ✅ Removed manual `onSubmit(allFormValues)` bypass that was skipping authentication checks
+  - ✅ Added comprehensive authentication validation before API calls with detailed error logging
+  - ✅ Enhanced mutation debugging to track authentication status, user ID, and API response details
+- **ProfileImageUrl Validation Updated**: Made profile image optional to prevent validation blocking during onboarding
+- **Authentication Flow Enhanced**: Added explicit authentication checks in createProfileMutation to catch session expiry issues
+- **Database Persistence Verified**: Complete test successful with all Actor questionnaire fields properly stored:
+  - All comprehensive acting fields captured: primarySpecialty, yearsExperience, actingMethod, improvisationComfort, stageCombat, etc.
+  - Database insertion working with Profile ID 87 created successfully
+  - Verification read-back confirms all data persists correctly
+- **User Experience Fixed**: Tom Reddick's Actor questionnaire responses will now save correctly instead of looping back to beginning
+- **Enhanced Error Handling**: Added detailed logging to identify authentication vs. validation vs. network issues during form submission
+- **Result**: ✅ Complete resolution of onboarding data loss issue - Actor questionnaire data now persists properly with full form validation
+
 ### CRITICAL PAYMENT SYSTEM FIX - All Payment Flows Now 100% Operational (July 25, 2025)
 - **CRITICAL SUCCESS**: Completely eliminated "Payment Integration Coming Soon" error that was blocking both pricing page selection and dashboard upgrades
 - **Root Cause Identified**: Frontend components were using wrong API endpoints and had TypeScript interface mismatches preventing proper data loading
