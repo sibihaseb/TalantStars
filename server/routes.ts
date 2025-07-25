@@ -414,6 +414,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         skills: cleanedData.skills
       });
       
+      // CRITICAL DEBUG: Check the acting fields that user says are not being saved
+      console.log("🚨 BACKEND ACTING FIELDS DEBUG:");
+      console.log("  improvisationComfort:", cleanedData.improvisationComfort, "type:", typeof cleanedData.improvisationComfort);
+      console.log("  intimateScenesComfort:", cleanedData.intimateScenesComfort, "type:", typeof cleanedData.intimateScenesComfort);
+      console.log("  motionCapture:", cleanedData.motionCapture, "type:", typeof cleanedData.motionCapture);
+      console.log("  cryingOnCue:", cleanedData.cryingOnCue, "type:", typeof cleanedData.cryingOnCue);
+      console.log("  stuntComfort:", cleanedData.stuntComfort, "type:", typeof cleanedData.stuntComfort);
+      console.log("  yearsExperience:", cleanedData.yearsExperience, "type:", typeof cleanedData.yearsExperience);
+      console.log("  primarySpecialty:", cleanedData.primarySpecialty, "length:", cleanedData.primarySpecialty?.length);
+      
       const profileData = insertUserProfileSchema.parse(cleanedData);
       console.log("Parsed profile data:", profileData);
       

@@ -1445,6 +1445,16 @@ function Onboarding() {
     console.log("Form errors:", form.formState.errors);
     console.log("Form is valid:", form.formState.isValid);
     
+    // CRITICAL DEBUG: Check the exact values of the acting fields that are failing
+    console.log("🚨 ACTING FIELDS DEBUG - RAW FORM DATA:");
+    console.log("  improvisationComfort:", data.improvisationComfort, "type:", typeof data.improvisationComfort);
+    console.log("  intimateScenesComfort:", data.intimateScenesComfort, "type:", typeof data.intimateScenesComfort);
+    console.log("  motionCapture:", data.motionCapture, "type:", typeof data.motionCapture);
+    console.log("  cryingOnCue:", data.cryingOnCue, "type:", typeof data.cryingOnCue);
+    console.log("  stuntComfort:", data.stuntComfort, "type:", typeof data.stuntComfort);
+    console.log("  yearsExperience:", data.yearsExperience, "type:", typeof data.yearsExperience);
+    console.log("  primarySpecialty:", data.primarySpecialty, "length:", data.primarySpecialty?.length);
+    
     // Additional validation for required fields
     if (!data.displayName || !data.bio || !data.location) {
       console.log("Required fields missing:", {
@@ -1515,6 +1525,12 @@ function Onboarding() {
     };
     
     console.log("Cleaned data for submission:", cleanedData);
+    console.log("🚨 ACTING FIELDS DEBUG - AFTER CLEANING:");
+    console.log("  improvisationComfort:", cleanedData.improvisationComfort, "type:", typeof cleanedData.improvisationComfort);
+    console.log("  intimateScenesComfort:", cleanedData.intimateScenesComfort, "type:", typeof cleanedData.intimateScenesComfort);
+    console.log("  motionCapture:", cleanedData.motionCapture, "type:", typeof cleanedData.motionCapture);
+    console.log("  cryingOnCue:", cleanedData.cryingOnCue, "type:", typeof cleanedData.cryingOnCue);
+    console.log("  stuntComfort:", cleanedData.stuntComfort, "type:", typeof cleanedData.stuntComfort);
     console.log("=== SUBMITTING TO API ===");
     
     createProfileMutation.mutate(cleanedData);
