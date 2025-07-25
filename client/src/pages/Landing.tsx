@@ -78,12 +78,6 @@ export default function Landing() {
                   <TranslatedText text="Join Now" />
                 </Button>
               </Link>
-              
-              <Link href="/pricing">
-                <Button size="lg" variant="outline" className="px-8 py-4 text-lg font-semibold border-2 border-white text-white hover:bg-white hover:text-gray-900 shadow-xl">
-                  View Pricing Plans
-                </Button>
-              </Link>
 
               <Link href="/find-talent">
                 <Button size="lg" variant="secondary" className="px-8 py-4 text-lg font-semibold bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 shadow-xl">
