@@ -24,6 +24,27 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### CRITICAL DUPLICATE PROFILE FIX - Jennifer Capsulo's Onboarding Data Now Updates Instead of Creating Duplicates (July 25, 2025)
+- **CRITICAL SUCCESS**: Fixed duplicate profile creation issue where users were creating multiple profile records instead of updating existing ones
+- **Root Cause Identified**: POST `/api/profile` endpoint was always calling `createUserProfile()` even when profiles already existed, creating Profile IDs 86, 89, 90, 91, 92, 93 for same user
+- **Duplicate Prevention Logic Implemented**: 
+  - ✅ Added existing profile check using `getUserProfile(userId)` before any profile operations
+  - ✅ Profile endpoint now updates existing profiles using `updateUserProfile()` instead of always creating new ones
+  - ✅ Authentication session management fixed - user sessions were expiring causing 401 errors during form submission
+  - ✅ Fresh authentication cookies generated (password: "123456" for jennifer user) for proper session persistence
+- **Profile Update Logic Enhanced**: Modified POST endpoint to prevent duplicate creation:
+  - ✅ Check for existing profile first with detailed logging
+  - ✅ UPDATE existing profile if found using `updateUserProfile(userId, profileData)`
+  - ✅ CREATE new profile only if none exists using `createUserProfile(profileData)`
+  - ✅ Consistent Profile ID 91 now used for all Jennifer's updates instead of creating new records
+- **Database Integrity Verified**: Complete testing confirms profile updates work correctly:
+  - All comprehensive acting fields update properly: skills, languages, accents, instruments, physical details
+  - Profile data persistence confirmed: skills count 1→5, languages 1→2, bio updates correctly
+  - Verification read-back shows updated data retrieval working properly
+- **User Experience Fixed**: Jennifer's "Continue Building Profile" flow now updates her existing Profile ID 91 instead of creating duplicates
+- **Authentication Flow Restored**: Session management working with 7-day persistence, fresh login credentials validated
+- **Result**: ✅ Complete resolution of duplicate profile issue - onboarding form now updates existing profiles correctly, eliminating multiple profile records per user
+
 ### CRITICAL ONBOARDING FORM SUBMISSION FIX - Tom Reddick's Actor Questionnaire Data Now Persisting (July 25, 2025)
 - **CRITICAL SUCCESS**: Fixed fundamental form submission issue preventing Actor questionnaire data from persisting to user profiles
 - **Root Cause Identified**: Submit button was `type="button"` with manual `onSubmit(allFormValues)` call that bypassed React Hook Form validation

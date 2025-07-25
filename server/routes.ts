@@ -417,7 +417,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const profileData = insertUserProfileSchema.parse(cleanedData);
       console.log("Parsed profile data:", profileData);
       
-      const profile = await simpleStorage.createUserProfile(profileData);
+      // Check if user already has a profile to prevent duplicates
+      console.log("🔥🔥🔥 JENNIFER DUPLICATE FIX: Checking for existing profile for user:", userId);
+      const existingProfile = await simpleStorage.getUserProfile(userId);
+      console.log("🔥🔥🔥 JENNIFER DUPLICATE FIX: Existing profile found:", !!existingProfile);
+      if (existingProfile) {
+        console.log("🔥🔥🔥 JENNIFER DUPLICATE FIX: Found existing profile with ID:", existingProfile.id);
+      }
+      
+      let profile;
+      if (existingProfile) {
+        // UPDATE existing profile instead of creating duplicate
+        console.log("🔄 PROFILE UPDATE: Updating existing profile to prevent duplicates");
+        profile = await simpleStorage.updateUserProfile(userId, profileData);
+        console.log("🔄 PROFILE UPDATE: Profile updated successfully");
+      } else {
+        // CREATE new profile only if none exists
+        console.log("🔄 PROFILE UPDATE: Creating new profile");
+        profile = await simpleStorage.createUserProfile(profileData);
+        console.log("🔄 PROFILE UPDATE: Profile created successfully");
+      }
       console.log("🎯 DATABASE INSERT RESULT:");
       console.log("  ✅ Profile created with ID:", profile?.id);
       console.log("  ✅ Stored displayName:", profile?.displayName);
