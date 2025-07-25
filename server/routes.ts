@@ -1,10 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import { storage } from "./storage";
 import { storage as simpleStorage } from "./simple-storage";
 import * as authSetup from "./auth";
-const { isAuthenticated, requireAdmin, requireAdminOrSuperAdmin, requirePlan, isAdmin } = authSetup;
+const { isAuthenticated, requirePlan, isAdmin } = authSetup;
 import { requirePermission, requireAnyPermission, PermissionChecks } from "./permissions";
 import { enhanceProfile, generateBio } from "./openai";
 import { enhanceJobDescription, validateJobSkills, generateJobSuggestions } from './ai-enhancements';
@@ -5255,6 +5254,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error sending message notification:', error);
       res.status(500).json({ success: false, message: 'Error sending message notification', error: error.message });
+    }
+  });
+
+  // Registration endpoint - handle both /api/register and /api/auth/register for compatibility
+  app.post('/api/register', async (req, res) => {
+    try {
+      const { username, password, email, firstName, lastName, role } = req.body;
+      
+      console.log("🔥 REGISTRATION: Creating user:", { username, email, role });
+      
+      // Check if username already exists
+      const existingUser = await simpleStorage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+      
+      // Create user with automatic legal acceptance for compatibility
+      const user = await simpleStorage.createUser({
+        username,
+        password: await hashPassword(password),
+        email,
+        firstName,
+        lastName,
+        role: role || 'talent'
+      });
+
+      console.log("✅ User created successfully:", user.id, user.username);
+      res.json({ success: true, user: { ...user, password: undefined } });
+    } catch (error) {
+      console.error("❌ Registration error:", error);
+      if (error.code === '23505') {
+        if (error.constraint === 'users_email_key') {
+          return res.status(400).json({ message: "Email already exists" });
+        }
+        if (error.constraint === 'users_username_key') {
+          return res.status(400).json({ message: "Username already exists" });
+        }
+      }
+      res.status(500).json({ message: "Registration failed", error: error.message });
     }
   });
 

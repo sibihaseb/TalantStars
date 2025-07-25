@@ -127,33 +127,46 @@ export async function setupAuth(app: Express) {
   app.use(passport.session());
 
   passport.use(
-    new LocalStrategy(async (username, password, done) => {
-      try {
-        console.log("LocalStrategy attempt for username:", username);
-        const user = await storage.getUserByUsername(username);
-        console.log("User found:", user ? "YES" : "NO");
-        
-        if (!user) {
-          console.log("User not found in database");
-          return done(null, false);
+    new LocalStrategy(
+      {
+        usernameField: 'usernameOrEmail', // Support both username and email
+        passwordField: 'password'
+      },
+      async (usernameOrEmail, password, done) => {
+        try {
+          console.log("LocalStrategy attempt for usernameOrEmail:", usernameOrEmail);
+          
+          // Try to find user by username first, then by email
+          let user = await simpleStorage.getUserByUsername(usernameOrEmail);
+          if (!user) {
+            console.log("Not found by username, trying email...");
+            user = await simpleStorage.getUserByEmail(usernameOrEmail);
+          }
+          
+          console.log("User found:", user ? "YES" : "NO");
+          
+          if (!user) {
+            console.log("User not found in database by username or email");
+            return done(null, false);
+          }
+          
+          console.log("Comparing passwords...");
+          const passwordMatch = await comparePasswords(password, user.password);
+          console.log("Password match:", passwordMatch);
+          
+          if (!passwordMatch) {
+            console.log("Password mismatch");
+            return done(null, false);
+          }
+          
+          console.log("Authentication successful for user:", user.username);
+          return done(null, user);
+        } catch (error) {
+          console.error("LocalStrategy error:", error);
+          return done(error);
         }
-        
-        console.log("Comparing passwords...");
-        const passwordMatch = await comparePasswords(password, user.password);
-        console.log("Password match:", passwordMatch);
-        
-        if (!passwordMatch) {
-          console.log("Password mismatch");
-          return done(null, false);
-        }
-        
-        console.log("Authentication successful for user:", user.username);
-        return done(null, user);
-      } catch (error) {
-        console.error("LocalStrategy error:", error);
-        return done(error);
       }
-    }),
+    )
   );
 
   passport.serializeUser((user, done) => {
@@ -163,7 +176,7 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser(async (id: number, done) => {
     try {
       console.log("Deserializing user ID:", id);
-      const user = await storage.getUser(id);
+      const user = await simpleStorage.getUser(id);
       console.log("Deserialized user:", user);
       done(null, user);
     } catch (error) {
@@ -185,18 +198,18 @@ export async function setupAuth(app: Express) {
       }
       
       // Check if username already exists
-      const existingUser = await storage.getUserByUsername(username);
+      const existingUser = await simpleStorage.getUserByUsername(username);
       if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
       }
       
       // Check if email already exists
-      const existingEmail = await storage.getUserByEmail(email);
+      const existingEmail = await simpleStorage.getUserByEmail(email);
       if (existingEmail) {
         return res.status(400).json({ message: "Email already exists" });
       }
 
-      const user = await storage.createUser({
+      const user = await simpleStorage.createUser({
         username,
         password: await hashPassword(password),
         email,
@@ -207,7 +220,7 @@ export async function setupAuth(app: Express) {
 
       // Record legal document acceptance
       try {
-        await storage.recordLegalAcceptance(user.id, {
+        await simpleStorage.recordLegalAcceptance(user.id, {
           termsAccepted: termsAccepted,
           privacyAccepted: privacyAccepted,
           termsVersion: 1, // Default version
@@ -272,7 +285,7 @@ export async function setupAuth(app: Express) {
         if (req.session && req.session.cookie) {
           if (rememberMe) {
             // Get remember me duration from admin settings or default to 30 days
-            storage.getAdminSettings().then(settings => {
+            simpleStorage.getAdminSettings().then(settings => {
               const rememberMeDurationDays = settings.find(s => s.key === 'remember_me_duration_days')?.value || '30';
               const durationMs = parseInt(rememberMeDurationDays) * 24 * 60 * 60 * 1000;
               req.session.cookie.maxAge = durationMs;
