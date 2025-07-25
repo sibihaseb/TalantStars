@@ -2304,8 +2304,11 @@ export class DatabaseStorage implements IStorage {
       const user = await this.getUser(userId);
       let defaultUsername = `user${userId}`;
       
-      if (user && user.firstName && user.lastName) {
-        // Generate username from first and last name
+      if (user && user.username) {
+        // Use the actual username instead of generating from first/last name
+        defaultUsername = user.username;
+      } else if (user && user.firstName && user.lastName) {
+        // Fallback: Generate username from first and last name only if no username exists
         defaultUsername = `${user.firstName.toLowerCase()}-${user.lastName.toLowerCase()}`
           .replace(/[^a-z0-9-]/g, '-') // Replace non-alphanumeric chars with hyphens
           .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
