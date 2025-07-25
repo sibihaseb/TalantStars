@@ -1079,14 +1079,18 @@ function Onboarding() {
     const fieldName = question.fieldName || question.field_name;
     const currentValue = form.getValues(fieldName) || '';
     
-    // Debug logging
-    console.log('Field:', fieldName, 'Current value:', currentValue, 'Question:', question.question);
+    // Debug logging - CRITICAL: Show what's actually happening
+    console.log('🔍 FIELD RENDER:', fieldName, 'Current value:', currentValue, 'Type:', typeof currentValue, 'Question:', question.question);
     
     const handleChange = (value: any) => {
-      console.log('Setting field:', fieldName, 'to value:', value);
-      form.setValue(fieldName, value);
+      console.log('🔥 USER INPUT CAPTURED - Setting field:', fieldName, 'to value:', value, 'type:', typeof value);
+      form.setValue(fieldName, value, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
       // Force trigger to update form state
       form.trigger(fieldName);
+      
+      // Verify the value was actually set
+      const verifyValue = form.getValues(fieldName);
+      console.log('🔍 VERIFICATION - Field:', fieldName, 'now contains:', verifyValue);
     };
     
     switch (question.fieldType || question.field_type) {
@@ -1500,21 +1504,21 @@ function Onboarding() {
       website: data.website?.trim() || null,
       phoneNumber: data.phoneNumber?.trim() || null,
       profileImageUrl: data.profileImageUrl?.trim() || user?.profileImageUrl || null,
-      // Acting experience fields
-      yearsExperience: data.yearsExperience?.toString() || null,
-      improvisationComfort: data.improvisationComfort?.trim() || null,
-      stageCombat: data.stageCombat?.toString() || null,
-      intimateScenesComfort: data.intimateScenesComfort?.trim() || null,
-      motionCapture: data.motionCapture?.trim() || null,
-      animalWork: data.animalWork?.trim() || null,
-      cryingOnCue: data.cryingOnCue?.trim() || null,
-      periodPieces: data.periodPieces?.trim() || null,
-      physicalComedy: data.physicalComedy?.trim() || null,
-      accentExperience: data.accentExperience?.trim() || null,
-      greenScreen: data.greenScreen?.trim() || null,
-      stuntComfort: data.stuntComfort?.trim() || null,
-      shakespeareExperience: data.shakespeareExperience?.trim() || null,
-      musicalTheater: data.musicalTheater?.trim() || null,
+      // Acting experience fields - FIXED: Preserve user input, only convert truly empty values to null
+      yearsExperience: data.yearsExperience ? String(data.yearsExperience) : null,
+      improvisationComfort: data.improvisationComfort && data.improvisationComfort.trim() ? data.improvisationComfort.trim() : null,
+      stageCombat: data.stageCombat ? String(data.stageCombat) : null,
+      intimateScenesComfort: data.intimateScenesComfort && data.intimateScenesComfort.trim() ? data.intimateScenesComfort.trim() : null,
+      motionCapture: data.motionCapture && data.motionCapture.trim() ? data.motionCapture.trim() : null,
+      animalWork: data.animalWork && data.animalWork.trim() ? data.animalWork.trim() : null,
+      cryingOnCue: data.cryingOnCue && data.cryingOnCue.trim() ? data.cryingOnCue.trim() : null,
+      periodPieces: data.periodPieces && data.periodPieces.trim() ? data.periodPieces.trim() : null,
+      physicalComedy: data.physicalComedy && data.physicalComedy.trim() ? data.physicalComedy.trim() : null,
+      accentExperience: data.accentExperience && data.accentExperience.trim() ? data.accentExperience.trim() : null,
+      greenScreen: data.greenScreen && data.greenScreen.trim() ? data.greenScreen.trim() : null,
+      stuntComfort: data.stuntComfort && data.stuntComfort.trim() ? data.stuntComfort.trim() : null,
+      shakespeareExperience: data.shakespeareExperience && data.shakespeareExperience.trim() ? data.shakespeareExperience.trim() : null,
+      musicalTheater: data.musicalTheater && data.musicalTheater.trim() ? data.musicalTheater.trim() : null,
       currentAgent: (data as any).currentAgent?.trim() || null,
       currentPublicist: (data as any).currentPublicist?.trim() || null,
       representationStatus: (data as any).representationStatus?.trim() || null,
