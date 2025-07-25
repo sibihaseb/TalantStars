@@ -63,15 +63,15 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
   });
 
   const handlePaymentRedirect = (paymentData: any) => {
-    // For now, show a message about payment requirement
+    // Redirect to pricing page for payment processing
     toast({
       title: "Payment Required",
-      description: `This plan costs $${paymentData.finalPrice}. Payment integration coming soon!`,
+      description: `Redirecting to secure payment for $${paymentData.finalPrice} plan.`,
       variant: "default",
     });
     
-    // In a real implementation, redirect to Stripe checkout
-    console.log("Payment data:", paymentData);
+    // Redirect to pricing page where payment is fully functional
+    setLocation("/pricing");
   };
 
   const createPaymentMutation = useMutation({
@@ -79,11 +79,11 @@ export function PlanRequiredModal({ isOpen, onClose, userRole }: PlanRequiredMod
       const tier = pricingTiers.find((t: any) => t.id === tierId);
       const amount = isAnnual ? parseFloat(tier.annualPrice) : parseFloat(tier.price);
       
-      const response = await apiRequest("POST", "/api/create-payment-intent", {
-        amount,
+      const response = await apiRequest("POST", "/api/payments/create-intent", {
+        amount: Math.round(amount * 100), // Convert to cents
         tierId,
         isAnnual,
-        description: `${tier.name} Plan ${isAnnual ? '(Annual)' : '(Monthly)'}`
+        currency: 'usd'
       });
       return response.json();
     },
