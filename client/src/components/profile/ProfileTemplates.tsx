@@ -7,7 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   MapPin, Phone, Globe, Star, CheckCircle, MessageCircle, DollarSign, 
   Clock, Play, Eye, Camera, Film, Award, Users, Heart, Share2, 
-  Palette, Layout, Sparkles, Zap, Crown, Music, ShieldCheck
+  Palette, Layout, Sparkles, Zap, Crown, Music, ShieldCheck, 
+  HelpCircle, Target, Lightbulb
 } from "lucide-react";
 import MediaModal from '@/components/MediaModal';
 import SkillEndorsement from '@/components/SkillEndorsement';
@@ -21,6 +22,67 @@ const capitalizeText = (text: string): string => {
   if (!text) return '';
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 };
+
+// Questionnaire Responses Display Component
+function QuestionnaireResponsesDisplay({ profile }: { profile: any }) {
+  const { data: questionnaireResponses = [] } = useQuery({
+    queryKey: ['/api/questionnaire/responses', profile?.userId],
+    queryFn: () => fetch(`/api/questionnaire/responses/${profile?.userId}`).then(res => res.json()),
+    enabled: !!profile?.userId,
+  });
+
+  if (!questionnaireResponses || questionnaireResponses.length === 0) {
+    return null;
+  }
+
+  const groupedResponses = questionnaireResponses.reduce((acc: any, response: any) => {
+    const category = response.category || 'General';
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(response);
+    return acc;
+  }, {});
+
+  return (
+    <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-3xl shadow-xl">
+      <CardHeader>
+        <CardTitle className="text-2xl bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2">
+          <Target className="w-6 h-6 text-blue-600" />
+          Professional Profile
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {Object.entries(groupedResponses).map(([category, responses]: [string, any]) => (
+          <div key={category} className="space-y-3">
+            <h4 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <Lightbulb className="w-5 h-5 text-indigo-500" />
+              {category}
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {responses.map((response: any, index: number) => (
+                <div key={index} className="p-3 bg-white rounded-xl border border-gray-200">
+                  <h5 className="font-medium text-gray-700 mb-2">{response.question}</h5>
+                  <div className="text-gray-600">
+                    {Array.isArray(response.response) ? (
+                      <div className="flex flex-wrap gap-1">
+                        {response.response.map((item: string, i: number) => (
+                          <Badge key={i} variant="outline" className="border-blue-300 text-blue-700">
+                            {item}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-sm">{response.response}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
 
 export type ProfileTemplate = 'classic' | 'modern' | 'artistic' | 'minimal' | 'cinematic';
 
@@ -593,6 +655,8 @@ export function ClassicTemplate({ profile, mediaFiles, userId, user, sharingSett
             </CardContent>
           </Card>
           
+          {/* Questionnaire Responses */}
+          <QuestionnaireResponsesDisplay profile={profile} />
 
         </div>
       </div>
@@ -907,6 +971,11 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
         )}
       </div>
 
+      {/* Questionnaire Responses Section */}
+      <div className="mb-8">
+        <QuestionnaireResponsesDisplay profile={profile} />
+      </div>
+
       {/* Modern Media Grid */}
       <Card className="border-0 shadow-2xl overflow-hidden">
         <CardHeader>
@@ -1198,6 +1267,11 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Questionnaire Responses */}
+      <div className="mb-8">
+        <QuestionnaireResponsesDisplay profile={profile} />
       </div>
 
       {/* Artistic Profile Details */}
@@ -1638,6 +1712,11 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
         )}
       </div>
 
+      {/* Questionnaire Responses */}
+      <div className="mb-12">
+        <QuestionnaireResponsesDisplay profile={profile} />
+      </div>
+
       {/* Media Modal */}
       <MediaModal
         isOpen={isMediaModalOpen}
@@ -1985,6 +2064,11 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
             </CardContent>
           </Card>
         )}
+
+        {/* Questionnaire Responses */}
+        <div className="mb-8">
+          <QuestionnaireResponsesDisplay profile={profile} />
+        </div>
 
         {/* Cinematic Media Gallery */}
         <Card className="bg-black border-yellow-500 border-2 overflow-hidden">

@@ -68,6 +68,7 @@ import {
 
 import ProfileImageUpload from "@/components/ProfileImageUpload";
 import { PricingSelection } from "@/components/PricingSelection";
+import { QuestionnaireForm } from "@/components/QuestionnaireForm";
 
 const onboardingSchema = insertUserProfileSchema.extend({
   // Required fields with enhanced validation
@@ -493,7 +494,7 @@ function Onboarding() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [showPricingSelection, setShowPricingSelection] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
-  const totalSteps = 7;
+  const totalSteps = 8;
 
   // Simplified authentication check with proper state handling
   useEffect(() => {
@@ -990,7 +991,7 @@ function Onboarding() {
 
   // Helper function to group acting questions by step
   const getActingQuestionGroups = () => {
-    if (!profileQuestions) return { step5: [], step6: [], step7: [] };
+    if (!profileQuestions) return { step6: [], step7: [], step8: [] };
     
     const actingQuestions = (profileQuestions as any[]).filter((q: any) => {
       const questionType = q.talentType;
@@ -1011,15 +1012,15 @@ function Onboarding() {
     const roleFields = ['roleTypes', 'periodPieces', 'accentExperience', 'greenScreen', 'horrorThriller', 'currentAgent', 'currentPublicist', 'representationStatus'];
 
     return {
-      step5: actingQuestions.filter(q => {
+      step6: actingQuestions.filter(q => {
         const fieldName = q.fieldName || q.field_name;
         return experienceFields.includes(fieldName);
       }).sort((a: any, b: any) => (a.order || 0) - (b.order || 0)),
-      step6: actingQuestions.filter(q => {
+      step7: actingQuestions.filter(q => {
         const fieldName = q.fieldName || q.field_name;
         return physicalFields.includes(fieldName);
       }).sort((a: any, b: any) => (a.order || 0) - (b.order || 0)),
-      step7: actingQuestions.filter(q => {
+      step8: actingQuestions.filter(q => {
         const fieldName = q.fieldName || q.field_name;
         return roleFields.includes(fieldName);
       }).sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
@@ -1034,12 +1035,12 @@ function Onboarding() {
     if (watchedRole === 'talent' && watchedTalentType === 'actor') {
       const questionGroups = getActingQuestionGroups();
       
-      if (currentStep === 5) {
-        return questionGroups.step5;
-      } else if (currentStep === 6) {
+      if (currentStep === 6) {
         return questionGroups.step6;
       } else if (currentStep === 7) {
         return questionGroups.step7;
+      } else if (currentStep === 8) {
+        return questionGroups.step8;
       }
       return [];
     }
@@ -1234,19 +1235,19 @@ function Onboarding() {
     // For authenticated users, we skip role selection step
     if (isAuthenticated) {
       if (watchedRole === "talent" && watchedTalentType === 'actor') {
-        return 8; // Actors get 3 question steps (5, 6, 7) plus final rates step (8)
+        return 9; // Actors get questionnaire step + 3 question steps (5, 6, 7) plus final rates step (8)
       } else if (watchedRole === "talent") {
-        return 7; // Other talent types get standard flow
+        return 8; // Other talent types get questionnaire + standard flow
       } else {
-        return 5; // Non-talent roles
+        return 6; // Non-talent roles get questionnaire + basic flow
       }
     } else {
       if (watchedRole === "talent" && watchedTalentType === 'actor') {
-        return 9; // +1 for role selection step
+        return 10; // +1 for role selection step
       } else if (watchedRole === "talent") {
-        return 8; // +1 for role selection step
+        return 9; // +1 for role selection step
       } else {
-        return 6; // +1 for role selection step
+        return 7; // +1 for role selection step
       }
     }
   };
@@ -2138,8 +2139,33 @@ function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 4: Profile Image */}
-              {currentStep === 4 && (
+              {/* Step 4: Questionnaire */}
+              {currentStep === 4 && watchedRole === "talent" && (
+                <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-2xl flex items-center justify-center gap-2">
+                      <Lightbulb className="h-8 w-8 text-blue-600" />
+                      Professional Questionnaire
+                    </CardTitle>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Answer some questions to enhance your profile and help casting directors find you
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <QuestionnaireForm 
+                      userRole={watchedRole}
+                      onComplete={() => {
+                        // Mark questionnaire as completed and move to next step
+                        console.log("Questionnaire completed!");
+                      }}
+                      showProgress={true}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Step 5 (or 4 for non-talent): Profile Image */}
+              {((currentStep === 5 && watchedRole === "talent") || (currentStep === 4 && watchedRole !== "talent")) && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl flex items-center justify-center gap-2">
@@ -2162,8 +2188,8 @@ function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 5: Role-specific questions */}
-              {currentStep === 5 && (
+              {/* Step 6 (or 5 for non-talent): Role-specific questions */}
+              {((currentStep === 6 && watchedRole === "talent") || (currentStep === 5 && watchedRole !== "talent")) && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">
@@ -2195,8 +2221,8 @@ function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 6: Acting Physical & Skills OR Additional Information for other talent */}
-              {currentStep === 6 && watchedRole === "talent" && (
+              {/* Step 7: Acting Physical & Skills OR Additional Information for other talent */}
+              {currentStep === 7 && watchedRole === "talent" && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">
@@ -2263,8 +2289,8 @@ function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 7: Acting Role Preferences (only for actors) */}
-              {currentStep === 7 && watchedRole === "talent" && watchedTalentType === 'actor' && (
+              {/* Step 8: Acting Role Preferences (only for actors) */}
+              {currentStep === 8 && watchedRole === "talent" && watchedTalentType === 'actor' && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">
                     <CardTitle className="text-2xl">Role Preferences</CardTitle>
@@ -2278,9 +2304,9 @@ function Onboarding() {
                 </Card>
               )}
 
-              {/* Step 8 (or 7 for non-actors, or 6 for non-talent): Rates and Availability */}
-              {((currentStep === 8 && watchedRole === "talent" && watchedTalentType === 'actor') || 
-                (currentStep === 7 && watchedRole === "talent" && watchedTalentType !== 'actor') || 
+              {/* Step 9 (or 8 for non-actors, or 6 for non-talent): Rates and Availability */}
+              {((currentStep === 9 && watchedRole === "talent" && watchedTalentType === 'actor') || 
+                (currentStep === 8 && watchedRole === "talent" && watchedTalentType !== 'actor') || 
                 (currentStep === 6 && watchedRole !== "talent")) && (
                 <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50">
                   <CardHeader className="text-center">

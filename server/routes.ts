@@ -41,6 +41,7 @@ import { subscriptionManager } from './subscription-management';
 import { cronJobManager } from './cron-jobs';
 import { automatedTesting } from './automated-testing';
 import { monitoring } from './monitoring-system';
+import { registerQuestionnaireRoutes } from './questionnaire-routes';
 import Stripe from "stripe";
 
 const scryptAsync = promisify(scrypt);
@@ -5852,6 +5853,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to confirm payment" });
     }
   });
+
+  // Register questionnaire routes
+  registerQuestionnaireRoutes(app);
 
   return httpServer;
 }
