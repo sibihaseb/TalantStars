@@ -614,6 +614,17 @@ function Onboarding() {
     enabled: !!user?.id,
     staleTime: 0, // Always fetch fresh data for profile editing
   });
+  
+  console.log("🔍 ONBOARDING: Existing profile data retrieved:", {
+    hasProfile: !!existingProfile,
+    actingFieldsPresent: existingProfile ? {
+      improvisationComfort: !!existingProfile.improvisationComfort,
+      intimateScenesComfort: !!existingProfile.intimateScenesComfort,
+      motionCapture: !!existingProfile.motionCapture,
+      currentAgent: !!existingProfile.currentAgent,
+      representationStatus: !!existingProfile.representationStatus
+    } : "NO_PROFILE"
+  });
 
   // Auto-populate role and existing profile data for authenticated users
   useEffect(() => {

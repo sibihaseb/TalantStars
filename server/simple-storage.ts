@@ -731,6 +731,10 @@ export class DatabaseStorage implements IStorage {
       console.log("    intimateScenesComfort:", userProfile.intimateScenesComfort);
       console.log("    motionCapture:", userProfile.motionCapture);
       console.log("    cryingOnCue:", userProfile.cryingOnCue);
+      console.log("    stuntComfort:", userProfile.stuntComfort);
+      console.log("    currentAgent:", userProfile.currentAgent);
+      console.log("    representationStatus:", userProfile.representationStatus);
+      console.log("    cryingOnCue:", userProfile.cryingOnCue);
       
       // CRITICAL FIX: If acting fields are missing, update them with raw SQL
       const needsActingFix = (

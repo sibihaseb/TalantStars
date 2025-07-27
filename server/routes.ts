@@ -423,9 +423,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("  stuntComfort:", cleanedData.stuntComfort, "type:", typeof cleanedData.stuntComfort);
       console.log("  yearsExperience:", cleanedData.yearsExperience, "type:", typeof cleanedData.yearsExperience);
       console.log("  primarySpecialty:", cleanedData.primarySpecialty, "length:", cleanedData.primarySpecialty?.length);
+      console.log("  currentAgent:", cleanedData.currentAgent, "type:", typeof cleanedData.currentAgent);
+      console.log("  representationStatus:", cleanedData.representationStatus, "type:", typeof cleanedData.representationStatus);
+      
+      console.log("🔍 BEFORE ZOD VALIDATION - All acting fields present:", {
+        improvisationComfort: !!cleanedData.improvisationComfort,
+        intimateScenesComfort: !!cleanedData.intimateScenesComfort,
+        motionCapture: !!cleanedData.motionCapture,
+        cryingOnCue: !!cleanedData.cryingOnCue,
+        stuntComfort: !!cleanedData.stuntComfort,
+        currentAgent: !!cleanedData.currentAgent,
+        representationStatus: !!cleanedData.representationStatus
+      });
       
       const profileData = insertUserProfileSchema.parse(cleanedData);
-      console.log("Parsed profile data:", profileData);
+      console.log("🔍 AFTER ZOD VALIDATION - Acting fields in parsed data:", {
+        improvisationComfort: !!profileData.improvisationComfort,
+        intimateScenesComfort: !!profileData.intimateScenesComfort,
+        motionCapture: !!profileData.motionCapture,
+        cryingOnCue: !!profileData.cryingOnCue,
+        stuntComfort: !!profileData.stuntComfort,
+        currentAgent: !!profileData.currentAgent,
+        representationStatus: !!profileData.representationStatus
+      });
+      console.log("🔍 Sample parsed acting field values:", {
+        improvisationComfort: profileData.improvisationComfort,
+        currentAgent: profileData.currentAgent
+      });
       
       // Check if user already has a profile to prevent duplicates
       console.log("🔥🔥🔥 JENNIFER DUPLICATE FIX: Checking for existing profile for user:", userId);
