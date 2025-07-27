@@ -3780,10 +3780,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing required fields: code, tierId, planType" });
       }
 
-      const validation = await simpleStorage.validatePromoCode(code, userId, tierId, planType);
+      console.log("🔥 PROMO: Validating promo code endpoint", { code, tierId, planType });
+
+      const promoCode = await simpleStorage.validatePromoCode(code, userId, tierId, planType);
       
-      if (!validation.valid) {
-        return res.status(400).json({ message: validation.error });
+      if (!promoCode) {
+        return res.status(400).json({ message: "Invalid or expired promo code" });
       }
 
       // Calculate discount
@@ -3793,19 +3795,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const originalAmount = planType === "annual" ? Number(tier.annualPrice) : Number(tier.price);
-      const discountAmount = await simpleStorage.calculateDiscountAmount(validation.promoCode!, originalAmount);
-      const finalAmount = originalAmount - discountAmount;
+      
+      // Calculate discount amount based on promo code type
+      let discountAmount = 0;
+      if (promoCode.type === 'percentage') {
+        discountAmount = (originalAmount * Number(promoCode.value)) / 100;
+      } else if (promoCode.type === 'fixed') {
+        discountAmount = Number(promoCode.value);
+      }
+      
+      const finalAmount = Math.max(0, originalAmount - discountAmount);
+
+      console.log("✅ PROMO: Promo code validation successful", { 
+        code, 
+        originalAmount, 
+        discountAmount, 
+        finalAmount,
+        type: promoCode.type,
+        value: promoCode.value
+      });
 
       res.json({
         valid: true,
-        promoCode: validation.promoCode,
-        originalAmount,
-        discountAmount,
-        finalAmount,
-        savings: discountAmount
+        promoCode: {
+          id: promoCode.id,
+          code: promoCode.code,
+          name: promoCode.name,
+          type: promoCode.type,
+          value: promoCode.value,
+          description: promoCode.description
+        },
+        discount: {
+          type: promoCode.type,
+          value: promoCode.value,
+          amount: discountAmount,
+          originalAmount,
+          finalAmount
+        }
       });
     } catch (error) {
-      console.error("Error validating promo code:", error);
+      console.error("❌ PROMO: Validation error:", error);
       res.status(500).json({ message: "Failed to validate promo code" });
     }
   });

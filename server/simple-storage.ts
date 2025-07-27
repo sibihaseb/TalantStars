@@ -2995,10 +2995,8 @@ export class DatabaseStorage implements IStorage {
 
   async validatePromoCode(code: string, userId?: number, tierId?: number, planType?: string): Promise<any> {
     try {
-      console.log("🔥 ADMIN: Validating promo code", { code, userId, tierId, planType });
+      console.log("🔥 PROMO: Validating promo code from database", { code, userId, tierId, planType });
       
-      // Sample promo codes for testing
-      console.log("🔥 PROMO: Validating promo code from database", code);
       const [promoCode] = await db
         .select()
         .from(promoCodes)
@@ -3011,6 +3009,20 @@ export class DatabaseStorage implements IStorage {
         console.log("❌ PROMO: Code not found or inactive");
         return null;
       }
+
+      // Check expiration
+      if (promoCode.expiresAt && new Date() > promoCode.expiresAt) {
+        console.log("❌ PROMO: Code expired");
+        return null;
+      }
+
+      // Check usage limits
+      if (promoCode.maxUses && promoCode.usedCount >= promoCode.maxUses) {
+        console.log("❌ PROMO: Code usage limit exceeded");
+        return null;
+      }
+
+      console.log("✅ PROMO: Valid promo code found", promoCode);
       
       return {
         id: promoCode.id,
