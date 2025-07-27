@@ -49,6 +49,28 @@ const profileSchema = insertUserProfileSchema.extend({
   accents: z.array(z.string()).optional(),
   instruments: z.array(z.string()).optional(),
   genres: z.array(z.string()).optional(),
+  // Acting questionnaire fields
+  primarySpecialty: z.array(z.string()).optional(),
+  yearsExperience: z.string().optional(),
+  actingMethod: z.array(z.string()).optional(),
+  improvisationComfort: z.string().optional(),
+  stageCombat: z.string().optional(),
+  intimateScenesComfort: z.string().optional(),
+  roleTypes: z.array(z.string()).optional(),
+  motionCapture: z.string().optional(),
+  animalWork: z.string().optional(),
+  cryingOnCue: z.string().optional(),
+  periodPieces: z.string().optional(),
+  physicalComedy: z.string().optional(),
+  accentExperience: z.string().optional(),
+  greenScreen: z.string().optional(),
+  stuntComfort: z.string().optional(),
+  shakespeareExperience: z.string().optional(),
+  musicalTheater: z.string().optional(),
+  horrorThriller: z.array(z.string()).optional(),
+  currentAgent: z.string().optional(),
+  currentPublicist: z.string().optional(),
+  representationStatus: z.string().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -115,19 +137,65 @@ export default function Profile() {
       dailyRate: "",
       weeklyRate: "",
       projectRate: "",
+      // Add ALL acting questionnaire field defaults
+      primarySpecialty: [],
+      yearsExperience: "",
+      actingMethod: [],
+      improvisationComfort: "",
+      stageCombat: "",
+      intimateScenesComfort: "",
+      roleTypes: [],
+      motionCapture: "",
+      animalWork: "",
+      cryingOnCue: "",
+      periodPieces: "",
+      physicalComedy: "",
+      accentExperience: "",
+      greenScreen: "",
+      stuntComfort: "",
+      shakespeareExperience: "",
+      musicalTheater: "",
+      horrorThriller: [],
+      currentAgent: "",
+      currentPublicist: "",
+      representationStatus: "",
     },
   });
 
   // Update form when profile data is loaded
   useEffect(() => {
     if (profile) {
+      console.log('🔄 Pre-populating Profile.tsx form with complete profile data:', profile);
       form.reset({
         ...profile,
+        // Ensure ALL acting questionnaire fields are pre-populated
+        primarySpecialty: profile.primarySpecialty || [],
+        yearsExperience: profile.yearsExperience || "",
+        actingMethod: profile.actingMethod || [],
+        improvisationComfort: profile.improvisationComfort || "",
+        stageCombat: profile.stageCombat || "",
+        intimateScenesComfort: profile.intimateScenesComfort || "",
+        roleTypes: profile.roleTypes || [],
+        motionCapture: profile.motionCapture || "",
+        animalWork: profile.animalWork || "",
+        cryingOnCue: profile.cryingOnCue || "",
+        periodPieces: profile.periodPieces || "",
+        physicalComedy: profile.physicalComedy || "",
+        accentExperience: profile.accentExperience || "",
+        greenScreen: profile.greenScreen || "",
+        stuntComfort: profile.stuntComfort || "",
+        shakespeareExperience: profile.shakespeareExperience || "",
+        musicalTheater: profile.musicalTheater || "",
+        horrorThriller: profile.horrorThriller || [],
+        currentAgent: profile.currentAgent || "",
+        currentPublicist: profile.currentPublicist || "",
+        representationStatus: profile.representationStatus || "",
         languages: profile.languages || [],
         accents: profile.accents || [],
         instruments: profile.instruments || [],
         genres: profile.genres || [],
       });
+      console.log('✅ Profile.tsx form reset complete with acting questionnaire fields');
     }
   }, [profile, form]);
 

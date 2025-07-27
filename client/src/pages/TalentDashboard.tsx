@@ -1176,6 +1176,8 @@ function ProfileEditForm({ profile, user, onClose, onSave }: {
 }) {
   const { toast } = useToast();
   
+  console.log('🔄 TalentDashboard ProfileEditForm - Pre-populating with profile data:', profile);
+  
   const [formData, setFormData] = useState({
     displayName: profile?.displayName || `${user?.firstName} ${user?.lastName}` || '',
     location: profile?.location || '',
@@ -1186,6 +1188,52 @@ function ProfileEditForm({ profile, user, onClose, onSave }: {
     weight: profile?.weight || '',
     eyeColor: profile?.eyeColor || [],
     hairColor: profile?.hairColor || [],
+    // CRITICAL: Add ALL acting questionnaire fields for pre-population
+    primarySpecialty: profile?.primarySpecialty || [],
+    yearsExperience: profile?.yearsExperience || "",
+    actingMethod: profile?.actingMethod || [],
+    improvisationComfort: profile?.improvisationComfort || "",
+    stageCombat: profile?.stageCombat || "",
+    intimateScenesComfort: profile?.intimateScenesComfort || "",
+    roleTypes: profile?.roleTypes || [],
+    motionCapture: profile?.motionCapture || "",
+    animalWork: profile?.animalWork || "",
+    cryingOnCue: profile?.cryingOnCue || "",
+    periodPieces: profile?.periodPieces || "",
+    physicalComedy: profile?.physicalComedy || "",
+    accentExperience: profile?.accentExperience || "",
+    greenScreen: profile?.greenScreen || "",
+    stuntComfort: profile?.stuntComfort || "",
+    shakespeareExperience: profile?.shakespeareExperience || "",
+    musicalTheater: profile?.musicalTheater || "",
+    horrorThriller: profile?.horrorThriller || [],
+    currentAgent: profile?.currentAgent || "",
+    currentPublicist: profile?.currentPublicist || "",
+    representationStatus: profile?.representationStatus || "",
+    // Additional core fields
+    languages: profile?.languages || [],
+    accents: profile?.accents || [],
+    instruments: profile?.instruments || [],
+    genres: profile?.genres || [],
+    unionStatus: profile?.unionStatus || [],
+    skills: profile?.skills || [],
+    dailyRate: profile?.dailyRate || "",
+    weeklyRate: profile?.weeklyRate || "",
+    projectRate: profile?.projectRate || "",
+  });
+  
+  console.log('🔍 TalentDashboard ProfileEditForm formData initialized with:', {
+    basicFields: {
+      displayName: formData.displayName,
+      bio: formData.bio?.substring(0, 50) + '...',
+      location: formData.location
+    },
+    actingFields: {
+      improvisationComfort: formData.improvisationComfort,
+      roleTypes: formData.roleTypes,
+      currentAgent: formData.currentAgent,
+      representationStatus: formData.representationStatus
+    }
   });
 
   const updateProfileMutation = useMutation({
