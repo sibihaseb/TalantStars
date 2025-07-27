@@ -1,8 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import { storage as simpleStorage } from "./simple-storage";
-import { unifiedStorage } from "./unified-storage";
+import { storage } from "./simple-storage";
 import * as authSetup from "./auth";
 const { isAuthenticated, requirePlan, isAdmin } = authSetup;
 import { requirePermission, requireAnyPermission, PermissionChecks } from "./permissions";
@@ -49,7 +48,7 @@ const scryptAsync = promisify(scrypt);
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
+  apiVersion: '2023-10-16',
 });
 
 async function hashPassword(password: string) {
@@ -156,16 +155,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Initialize default session duration setting
   try {
-    const settings = await simpleStorage.getAdminSettings();
+    const settings = await storage.getAdminSettings();
     const sessionDurationExists = settings.find(s => s.key === 'session_duration_hours');
     
     if (!sessionDurationExists) {
       console.log('Initializing default session duration (168 hours for testing)...');
-      await simpleStorage.updateAdminSetting('session_duration_hours', '168', 'system');
+      await storage.updateAdminSetting('session_duration_hours', '168', 'system');
     } else {
       // Force update for testing to ensure 7-day sessions
       console.log('Updating session duration to 168 hours for testing...');
-      await simpleStorage.updateAdminSetting('session_duration_hours', '168', 'system');
+      await storage.updateAdminSetting('session_duration_hours', '168', 'system');
     }
   } catch (error) {
     console.error('Error initializing session duration setting:', error);
@@ -180,7 +179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("=== HEALTH CHECK ===");
       
       // Test database connection
-      const testQuery = await simpleStorage.getUsers ? await simpleStorage.getUsers() : [];
+      const testQuery = [];
       console.log("Database connection: OK");
       
       // Test profile questions table
@@ -250,7 +249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const userId = req.user.id;
         console.log("User ID:", userId);
       
-      const user = await simpleStorage.getUser(userId);
+      const user = await storage.getUser(userId);
       console.log("User found:", !!user);
       
       if (!user) {
@@ -258,14 +257,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
-      const profile = await simpleStorage.getUserProfile(userId);
+      const profile = await storage.getUserProfile(userId);
       console.log("Profile found:", !!profile);
       
       // Get user's pricing tier limits
       let tierLimits = null;
       if (user.pricingTierId) {
         console.log("Fetching pricing tier:", user.pricingTierId);
-        tierLimits = await simpleStorage.getPricingTier(user.pricingTierId);
+        tierLimits = await storage.getPricingTier(user.pricingTierId);
         console.log("Tier limits found:", !!tierLimits);
       }
       
@@ -291,7 +290,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("🎯 SKILLS API: Get skills request", { userId });
       
-      const profile = await simpleStorage.getUserProfile(userId);
+      const profile = await storage.getUserProfile(userId);
       
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
@@ -322,7 +321,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Update user skills using storage
-      const updatedUser = await simpleStorage.updateUserSkills(userId, skills);
+      const updatedUser = await storage.updateUserSkills(userId, skills);
       
       console.log("🎯 SKILLS API: Skills updated successfully", { userId, skillCount: skills.length });
       
@@ -343,7 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       console.log("🔍 UNIFIED: Getting profile for user:", userId);
       
-      const profile = await unifiedStorage.getUserProfile(userId);
+      const profile = await storage.getUserProfile(userId);
       
       if (!profile) {
         console.log("🆕 UNIFIED: No profile found - user will see clean onboarding");
@@ -450,18 +449,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currentAgent: profileData.currentAgent
       });
       
-      // UNIFIED SYSTEM: Check for existing profile to prevent data contamination
-      console.log("🆕 UNIFIED: Checking for existing profile for user:", userId);
-      const existingProfile = await unifiedStorage.getUserProfile(userId);
-      console.log("🆕 UNIFIED: Existing profile found:", !!existingProfile);
+      // Check for existing profile to prevent duplicates
+      const existingProfile = await storage.getUserProfile(userId);
       
       let profile;
       if (existingProfile) {
-        console.log("🆕 UNIFIED: Updating existing profile - preventing data contamination");
-        profile = await unifiedStorage.updateUserProfile(userId, profileData);
+        console.log("Updating existing profile for user:", userId);
+        profile = await storage.updateUserProfile(userId, profileData);
       } else {
-        console.log("🆕 UNIFIED: Creating clean new profile - fresh slate for user");
-        profile = await unifiedStorage.createUserProfile(profileData);
+        console.log("Creating new profile for user:", userId);
+        profile = await storage.createUserProfile(profileData);
       }
       console.log("🎯 DATABASE INSERT RESULT:");
       console.log("  ✅ Profile created with ID:", profile?.id);
@@ -471,14 +468,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("  ✅ Stored languages count:", profile?.languages?.length || 0);
       console.log("  ✅ Stored skills count:", profile?.skills?.length || 0);
       
-      // Verify unified profile data was saved correctly
-      const verificationProfile = await unifiedStorage.getUserProfile(userId);
-      console.log("🔍 UNIFIED VERIFICATION:");
-      console.log("  ✅ Profile retrieved:", !!verificationProfile);
-      console.log("  ✅ Clean user data - no contamination:", verificationProfile?.userId === userId.toString());
-      
-      // After creating profile, return combined user+profile data like TalentDashboard expects
-      const user = await simpleStorage.getUser(userId);
+      // After creating profile, return combined user+profile data
+      const user = await storage.getUser(userId);
       const combinedProfile = {
         ...user,
         ...profile,
@@ -519,13 +510,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("✅ PROFILE UPDATE: Request body:", req.body);
       
       // Check if profile exists first
-      const existingProfile = await simpleStorage.getUserProfile(userId);
+      const existingProfile = await storage.getUserProfile(userId);
       if (!existingProfile) {
         console.log("✅ PROFILE UPDATE: No existing profile, creating new one");
         // Create new profile if doesn't exist
         const dataWithUserId = { ...req.body, userId: userId.toString() };
         const profileData = insertUserProfileSchema.parse(dataWithUserId);
-        const profile = await simpleStorage.createUserProfile(profileData);
+        const profile = await storage.createUserProfile(profileData);
         console.log("✅ PROFILE UPDATE: Created new profile:", profile);
         return res.json(profile);
       }
@@ -534,7 +525,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { userId: _, ...updateData } = req.body;
       console.log("✅ PROFILE UPDATE: Update data (without userId):", updateData);
       
-      const profile = await simpleStorage.updateUserProfile(userId, updateData);
+      const profile = await storage.updateUserProfile(userId, updateData);
       console.log("✅ PROFILE UPDATE: Updated profile successfully:", !!profile);
       
       res.json(profile);
@@ -553,7 +544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/user/profile-image-clear', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const updatedUser = await simpleStorage.updateUserProfileImage(userId, null);
+      const updatedUser = await storage.updateUserProfileImage(userId, null);
       res.json({ success: true, user: updatedUser });
     } catch (error) {
       console.error("Error clearing profile image:", error);
@@ -582,7 +573,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const uploadResult = await uploadFileToWasabi(file, `user-${userId}/profile`);
       
       // Update user profile image URL in database
-      const updatedUser = await simpleStorage.updateUserProfileImage(userId, uploadResult.url);
+      const updatedUser = await storage.updateUserProfileImage(userId, uploadResult.url);
       
       res.json({
         profileImageUrl: uploadResult.url,
@@ -609,7 +600,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Update user profile template
-      const updatedUser = await simpleStorage.updateUserProfileTemplate(userId, selectedTemplate);
+      const updatedUser = await storage.updateUserProfileTemplate(userId, selectedTemplate);
       
       console.log('✅ TEMPLATE: Template saved successfully:', selectedTemplate);
       res.json({ 
@@ -628,13 +619,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/profile/enhance', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const profile = await simpleStorage.getUserProfile(userId);
+      const profile = await storage.getUserProfile(userId);
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }
       
       const enhanced = await enhanceProfile(profile);
-      const updatedProfile = await simpleStorage.updateUserProfile(userId, enhanced);
+      const updatedProfile = await storage.updateUserProfile(userId, enhanced);
       res.json(updatedProfile);
     } catch (error) {
       console.error("Error enhancing profile:", error);
@@ -645,7 +636,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/profile/generate-bio', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const profile = await simpleStorage.getUserProfile(userId);
+      const profile = await storage.getUserProfile(userId);
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }
@@ -662,7 +653,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/calendar/events', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const events = await simpleStorage.getAvailabilityEvents(userId);
+      const events = await storage.getAvailabilityEvents(userId);
       res.json(events);
     } catch (error) {
       console.error("Error fetching calendar events:", error);
@@ -682,7 +673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: req.body.notes || null,
         allDay: req.body.allDay !== undefined ? req.body.allDay : true,
       };
-      const event = await simpleStorage.createAvailabilityEvent(eventData);
+      const event = await storage.createAvailabilityEvent(eventData);
       res.json(event);
     } catch (error) {
       console.error("Error creating calendar event:", error);
@@ -699,7 +690,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         startDateTime: new Date(`${req.body.startDate} ${req.body.startTime}`),
         endDateTime: req.body.endDate && req.body.endTime ? new Date(`${req.body.endDate} ${req.body.endTime}`) : null,
       };
-      const event = await simpleStorage.updateAvailabilityEvent(eventId, eventData);
+      const event = await storage.updateAvailabilityEvent(eventId, eventData);
       res.json(event);
     } catch (error) {
       console.error("Error updating calendar event:", error);
@@ -711,7 +702,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const eventId = parseInt(req.params.id);
-      await simpleStorage.deleteAvailabilityEvent(eventId, userId);
+      await storage.deleteAvailabilityEvent(eventId, userId);
       res.json({ message: "Event deleted successfully" });
     } catch (error) {
       console.error("Error deleting calendar event:", error);
@@ -723,7 +714,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/availability', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const events = await simpleStorage.getAvailabilityEvents(userId);
+      const events = await storage.getAvailabilityEvents(userId);
       res.json(events);
     } catch (error) {
       console.error("Error fetching availability events:", error);
@@ -743,7 +734,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: req.body.notes || null,
         allDay: req.body.allDay !== undefined ? req.body.allDay : true,
       };
-      const event = await simpleStorage.createAvailabilityEvent(eventData);
+      const event = await storage.createAvailabilityEvent(eventData);
       res.json(event);
     } catch (error) {
       console.error("Error creating availability entry:", error);
@@ -763,7 +754,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: req.body.notes,
         allDay: req.body.allDay !== undefined ? req.body.allDay : true,
       };
-      const event = await simpleStorage.updateAvailabilityEvent(entryId, eventData);
+      const event = await storage.updateAvailabilityEvent(entryId, eventData);
       res.json(event);
     } catch (error) {
       console.error("Error updating availability entry:", error);
@@ -775,7 +766,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const entryId = parseInt(req.params.id);
-      await simpleStorage.deleteAvailabilityEvent(entryId, userId);
+      await storage.deleteAvailabilityEvent(entryId, userId);
       res.json({ message: "Availability entry deleted successfully" });
     } catch (error) {
       console.error("Error deleting availability entry:", error);
@@ -788,7 +779,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = parseInt(req.params.userId);
       console.log(`🔥 AVAILABILITY: Getting events for user ${userId}`);
-      const events = await simpleStorage.getAvailabilityEvents(userId);
+      const events = await storage.getAvailabilityEvents(userId);
       console.log(`🔥 AVAILABILITY: Found ${events.length} events for user ${userId}`);
       res.json(events);
     } catch (error) {
@@ -894,16 +885,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check user's pricing tier limits
-      const user = await simpleStorage.getUser(userId);
+      const user = await storage.getUser(userId);
       let tierLimits = null;
       if (user?.pricingTierId) {
-        tierLimits = await simpleStorage.getPricingTier(user.pricingTierId);
+        tierLimits = await storage.getPricingTier(user.pricingTierId);
       }
 
       // For simple storage, we'll use a simplified approach
       // In a real implementation, you'd track media uploads in the database
       // Get actual media counts from database
-      const userMedia = await simpleStorage.getUserMediaFiles(userId);
+      const userMedia = await storage.getUserMediaFiles(userId);
       const photoCount = userMedia.filter(m => m.mediaType === 'image').length;
       const videoCount = userMedia.filter(m => m.mediaType === 'video').length;
       const audioCount = userMedia.filter(m => m.mediaType === 'audio').length;
@@ -1039,7 +1030,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             filename: uploadResult.key
           }, req);
           
-          const createdMedia = await simpleStorage.createMediaFile(mediaData);
+          const createdMedia = await storage.createMediaFile(mediaData);
           
           // Verify the media was created successfully
           if (!createdMedia || !createdMedia.id) {
@@ -1047,7 +1038,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Verify the media can be retrieved
-          const verificationMedia = await simpleStorage.getMediaFile(createdMedia.id);
+          const verificationMedia = await storage.getMediaFile(createdMedia.id);
           if (!verificationMedia) {
             throw new Error("Media was created but cannot be retrieved - database inconsistency");
           }
@@ -1160,7 +1151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         url
       }, req);
       
-      const media = await simpleStorage.createMediaFile(mediaData);
+      const media = await storage.createMediaFile(mediaData);
       
       // Verify the media was created successfully
       if (!media || !media.id) {
@@ -1168,7 +1159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Verify the media can be retrieved
-      const verificationMedia = await simpleStorage.getMediaFile(media.id);
+      const verificationMedia = await storage.getMediaFile(media.id);
       if (!verificationMedia) {
         throw new Error("Media was created but cannot be retrieved - database inconsistency");
       }
@@ -1235,7 +1226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }, req);
 
         // Check if media exists in database
-        media = await simpleStorage.getMediaFile(mediaId);
+        media = await storage.getMediaFile(mediaId);
         if (!media) {
           verificationResults.errors.push(`Attempt ${attempt}: Media record not found in database`);
           logger.mediaUpload(`Attempt ${attempt}: No database record`, { mediaId, userId }, req);
@@ -1412,7 +1403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/media', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const media = await simpleStorage.getUserMediaFiles(userId);
+      const media = await storage.getUserMediaFiles(userId);
       
       // Add empty tags array for now to avoid the database column issue
       const mediaWithTags = media.map(mediaFile => ({
@@ -1435,7 +1426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Get media file to verify ownership
-      const mediaFiles = await simpleStorage.getUserMediaFiles(userId);
+      const mediaFiles = await storage.getUserMediaFiles(userId);
       const mediaFile = mediaFiles.find(m => m.id === id);
       
       if (!mediaFile) {
@@ -1443,7 +1434,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Update media file
-      const updatedMedia = await simpleStorage.updateMediaFile(id, {
+      const updatedMedia = await storage.updateMediaFile(id, {
         title,
         description,
         category,
@@ -1461,7 +1452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       
       // Get media file info before deletion
-      const mediaFiles = await simpleStorage.getUserMediaFiles(req.user.id);
+      const mediaFiles = await storage.getUserMediaFiles(req.user.id);
       const mediaFile = mediaFiles.find(m => m.id === id);
       
       if (mediaFile && mediaFile.filename && !mediaFile.isExternal) {
@@ -1474,7 +1465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      await simpleStorage.deleteMediaFile(id);
+      await storage.deleteMediaFile(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting media:", error);
@@ -1487,7 +1478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       console.log('🔍 Fetching social links for userId:', userId);
-      const profile = await simpleStorage.getUserProfile(userId);
+      const profile = await storage.getUserProfile(userId);
       console.log('🔍 Profile retrieved:', !!profile);
       console.log('🔍 Full profile data:', profile);
       console.log('🔍 Profile social links:', profile?.socialLinks);
@@ -1514,7 +1505,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No social links data provided" });
       }
       
-      const profile = await simpleStorage.updateUserSocialLinks(userId, socialLinks);
+      const profile = await storage.updateUserSocialLinks(userId, socialLinks);
       res.json({ success: true, socialLinks: profile.socialLinks });
     } catch (error) {
       console.error("Error updating social links:", error);
@@ -1526,7 +1517,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/social-media-links', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const links = await simpleStorage.getSocialMediaLinks(userId);
+      const links = await storage.getSocialMediaLinks(userId);
       res.json(links);
     } catch (error) {
       console.error("Error fetching social media links:", error);
@@ -1541,7 +1532,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(userId)) {
         return res.status(400).json({ message: "Invalid user ID" });
       }
-      const links = await simpleStorage.getSocialMediaLinks(userId);
+      const links = await storage.getSocialMediaLinks(userId);
       res.json(links);
     } catch (error) {
       console.error("Error fetching social media links for user:", error);
@@ -1564,7 +1555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ success: true, message: "Own profile view not tracked" });
       }
 
-      await simpleStorage.trackProfileView(viewedUserId, viewerUserId);
+      await storage.trackProfileView(viewedUserId, viewerUserId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error tracking profile view:", error);
@@ -1576,7 +1567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const linkData = { ...req.body, userId };
-      const link = await simpleStorage.createSocialMediaLink(linkData);
+      const link = await storage.createSocialMediaLink(linkData);
       res.json(link);
     } catch (error) {
       console.error("Error creating social media link:", error);
@@ -1587,7 +1578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/social-media-links/:id', isAuthenticated, async (req: any, res) => {
     try {
       const linkId = parseInt(req.params.id);
-      const link = await simpleStorage.updateSocialMediaLink(linkId, req.body);
+      const link = await storage.updateSocialMediaLink(linkId, req.body);
       res.json(link);
     } catch (error) {
       console.error("Error updating social media link:", error);
@@ -1598,7 +1589,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/social-media-links/:id', isAuthenticated, async (req: any, res) => {
     try {
       const linkId = parseInt(req.params.id);
-      await simpleStorage.deleteSocialMediaLink(linkId);
+      await storage.deleteSocialMediaLink(linkId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting social media link:", error);
@@ -1609,7 +1600,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/social-media-links/:id/click', isAuthenticated, async (req: any, res) => {
     try {
       const linkId = parseInt(req.params.id);
-      await simpleStorage.updateSocialMediaLinkClicks(linkId);
+      await storage.updateSocialMediaLinkClicks(linkId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error updating social media link clicks:", error);
@@ -1626,7 +1617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const limit = parseInt(req.query.limit as string) || 20;
       const offset = parseInt(req.query.offset as string) || 0;
       
-      const posts = await simpleStorage.getFeedPosts(userId, limit, offset);
+      const posts = await storage.getFeedPosts(userId, limit, offset);
       res.json(posts);
     } catch (error: any) {
       res.status(500).json({ message: "Error fetching feed: " + error.message });
@@ -1637,7 +1628,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/social/posts/:userId", isAuthenticated, async (req: any, res) => {
     try {
       const userId = parseInt(req.params.userId);
-      const posts = await simpleStorage.getUserSocialPosts(userId);
+      const posts = await storage.getUserSocialPosts(userId);
       res.json(posts);
     } catch (error: any) {
       res.status(500).json({ message: "Error fetching posts: " + error.message });
@@ -1696,7 +1687,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const uploadResult = await uploadFileToWasabi(file, `user-${req.user.id}/media`);
       
       // Store media file in database
-      const mediaFile = await simpleStorage.createMediaFile({
+      const mediaFile = await storage.createMediaFile({
         userId: req.user.id,
         filename: uploadResult.originalName,
         originalName: file.originalname,
@@ -1750,7 +1741,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         privacy: req.body.privacy || 'public',
       };
       
-      const post = await simpleStorage.createSocialPost(postData);
+      const post = await storage.createSocialPost(postData);
       res.json(post);
     } catch (error: any) {
       res.status(500).json({ message: "Error creating post: " + error.message });
@@ -1763,7 +1754,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const postId = parseInt(req.params.postId);
       const userId = req.user.id;
       
-      await simpleStorage.likeSocialPost(postId, userId);
+      await storage.likeSocialPost(postId, userId);
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ message: "Error liking post: " + error.message });
@@ -1776,7 +1767,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const postId = parseInt(req.params.postId);
       const userId = req.user.id;
       
-      await simpleStorage.unlikeSocialPost(postId, userId);
+      await storage.unlikeSocialPost(postId, userId);
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ message: "Error unliking post: " + error.message });
@@ -1793,7 +1784,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content: req.body.content,
       };
       
-      const comment = await simpleStorage.commentOnPost(commentData);
+      const comment = await storage.commentOnPost(commentData);
       res.json(comment);
     } catch (error: any) {
       res.status(500).json({ message: "Error creating comment: " + error.message });
@@ -1804,7 +1795,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/social/posts/:postId/comments", isAuthenticated, async (req: any, res) => {
     try {
       const postId = parseInt(req.params.postId);
-      const comments = await simpleStorage.getPostComments(postId);
+      const comments = await storage.getPostComments(postId);
       res.json(comments);
     } catch (error: any) {
       res.status(500).json({ message: "Error fetching comments: " + error.message });
@@ -1817,7 +1808,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const postId = parseInt(req.params.postId);
       const userId = req.user.id;
       
-      await simpleStorage.bookmarkPost(postId, userId);
+      await storage.bookmarkPost(postId, userId);
       res.json({ success: true, message: "Post bookmarked successfully" });
     } catch (error: any) {
       res.status(500).json({ message: "Error bookmarking post: " + error.message });
@@ -1830,7 +1821,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const postId = parseInt(req.params.postId);
       const userId = req.user.id;
       
-      await simpleStorage.sharePost(postId, userId);
+      await storage.sharePost(postId, userId);
       res.json({ success: true, message: "Post shared successfully" });
     } catch (error: any) {
       res.status(500).json({ message: "Error sharing post: " + error.message });
@@ -1842,7 +1833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userId = req.user.id;
     
     try {
-      const activity = await simpleStorage.getRecentActivity(userId);
+      const activity = await storage.getRecentActivity(userId);
       res.json(activity);
     } catch (error) {
       console.error('Activity fetch error:', error);
@@ -1855,7 +1846,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userId = req.user.id;
     
     try {
-      const suggestions = await simpleStorage.getSuggestedConnections(userId);
+      const suggestions = await storage.getSuggestedConnections(userId);
       res.json(suggestions);
     } catch (error) {
       console.error('Suggestions fetch error:', error);
@@ -1869,7 +1860,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const targetUserId = parseInt(req.params.userId);
     
     try {
-      const result = await simpleStorage.followUser(currentUserId, targetUserId);
+      const result = await storage.followUser(currentUserId, targetUserId);
       res.json(result);
     } catch (error) {
       console.error('Follow user error:', error);
@@ -1882,7 +1873,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get friends
   app.get("/api/social/friends", isAuthenticated, async (req: any, res) => {
     try {
-      const friends = await simpleStorage.getFriends(req.user.id);
+      const friends = await storage.getFriends(req.user.id);
       res.json(friends);
     } catch (error: any) {
       res.status(500).json({ message: "Error fetching friends: " + error.message });
@@ -1892,7 +1883,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get friend requests
   app.get("/api/social/friend-requests", isAuthenticated, async (req: any, res) => {
     try {
-      const requests = await simpleStorage.getFriendRequests(req.user.id);
+      const requests = await storage.getFriendRequests(req.user.id);
       res.json(requests);
     } catch (error: any) {
       res.status(500).json({ message: "Error fetching friend requests: " + error.message });
@@ -1903,7 +1894,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/social/friend-request/:userId", isAuthenticated, async (req: any, res) => {
     try {
       const addresseeId = parseInt(req.params.userId);
-      const friendship = await simpleStorage.sendFriendRequest(req.user.id, addresseeId);
+      const friendship = await storage.sendFriendRequest(req.user.id, addresseeId);
       res.json(friendship);
     } catch (error: any) {
       res.status(500).json({ message: "Error sending friend request: " + error.message });
@@ -1914,7 +1905,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/social/friend-request/:friendshipId/accept", isAuthenticated, async (req: any, res) => {
     try {
       const friendshipId = parseInt(req.params.friendshipId);
-      const friendship = await simpleStorage.acceptFriendRequest(friendshipId);
+      const friendship = await storage.acceptFriendRequest(friendshipId);
       res.json(friendship);
     } catch (error: any) {
       res.status(500).json({ message: "Error accepting friend request: " + error.message });
@@ -1925,7 +1916,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/social/friend-request/:friendshipId", isAuthenticated, async (req: any, res) => {
     try {
       const friendshipId = parseInt(req.params.friendshipId);
-      await simpleStorage.rejectFriendRequest(friendshipId);
+      await storage.rejectFriendRequest(friendshipId);
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ message: "Error rejecting friend request: " + error.message });
@@ -1940,7 +1931,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
       
-      const users = await simpleStorage.searchUsers(query, req.user.id);
+      const users = await storage.searchUsers(query, req.user.id);
       res.json(users);
     } catch (error: any) {
       res.status(500).json({ message: "Error searching users: " + error.message });
@@ -1960,7 +1951,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const addresseeId = parseInt(req.body.addresseeId);
-      const friendship = await simpleStorage.sendFriendRequest(req.user.id, addresseeId);
+      const friendship = await storage.sendFriendRequest(req.user.id, addresseeId);
       res.json({ success: true, friendship });
     } catch (error: any) {
       res.status(500).json({ message: "Error following user: " + error.message });
@@ -1972,7 +1963,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get professional connections
   app.get("/api/social/professional-connections", isAuthenticated, async (req: any, res) => {
     try {
-      const connections = await simpleStorage.getProfessionalConnections(req.user.id);
+      const connections = await storage.getProfessionalConnections(req.user.id);
       res.json(connections);
     } catch (error: any) {
       res.status(500).json({ message: "Error fetching professional connections: " + error.message });
@@ -1990,7 +1981,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: req.body.notes,
       };
       
-      const connection = await simpleStorage.createProfessionalConnection(connectionData);
+      const connection = await storage.createProfessionalConnection(connectionData);
       res.json(connection);
     } catch (error: any) {
       res.status(500).json({ message: "Error creating professional connection: " + error.message });
@@ -2002,7 +1993,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get privacy settings
   app.get("/api/social/privacy", isAuthenticated, async (req: any, res) => {
     try {
-      const settings = await simpleStorage.getUserPrivacySettings(req.user.id);
+      const settings = await storage.getUserPrivacySettings(req.user.id);
       res.json(settings);
     } catch (error: any) {
       res.status(500).json({ message: "Error fetching privacy settings: " + error.message });
@@ -2012,7 +2003,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update privacy settings
   app.put("/api/social/privacy", isAuthenticated, async (req: any, res) => {
     try {
-      const settings = await simpleStorage.updateUserPrivacySettings(req.user.id, req.body);
+      const settings = await storage.updateUserPrivacySettings(req.user.id, req.body);
       res.json(settings);
     } catch (error: any) {
       res.status(500).json({ message: "Error updating privacy settings: " + error.message });
@@ -2029,7 +2020,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         budget: req.body.budget ? String(req.body.budget) : null,
         projectDate: req.body.projectDate ? new Date(req.body.projectDate) : null
       });
-      const job = await simpleStorage.createJob(jobData);
+      const job = await storage.createJob(jobData);
       res.json(job);
     } catch (error) {
       console.error("Error creating job:", error);
@@ -2040,7 +2031,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/jobs', async (req, res) => {
     try {
       const { talentType, location, status } = req.query;
-      const jobs = await simpleStorage.getJobs({
+      const jobs = await storage.getJobs({
         talentType: talentType as string,
         location: location as string,
         status: status as string,
@@ -2055,7 +2046,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/jobs/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const job = await simpleStorage.getJob(id);
+      const job = await storage.getJob(id);
       if (!job) {
         return res.status(404).json({ message: "Job not found" });
       }
@@ -2073,7 +2064,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // First check if job exists and user owns it
-      const existingJob = await simpleStorage.getJob(jobId);
+      const existingJob = await storage.getJob(jobId);
       if (!existingJob) {
         return res.status(404).json({ message: "Job not found" });
       }
@@ -2091,7 +2082,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updatedAt: new Date()
       };
       
-      const updatedJob = await simpleStorage.updateJob(jobId, updateData);
+      const updatedJob = await storage.updateJob(jobId, updateData);
       console.log("✅ JOB: User updated job successfully", { jobId, userId });
       res.json(updatedJob);
     } catch (error) {
@@ -2106,7 +2097,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // First check if job exists and user owns it
-      const existingJob = await simpleStorage.getJob(jobId);
+      const existingJob = await storage.getJob(jobId);
       if (!existingJob) {
         return res.status(404).json({ message: "Job not found" });
       }
@@ -2115,7 +2106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "You can only delete your own jobs" });
       }
       
-      await simpleStorage.deleteJob(jobId);
+      await storage.deleteJob(jobId);
       console.log("✅ JOB: User deleted job successfully", { jobId, userId });
       res.json({ success: true, message: "Job deleted successfully" });
     } catch (error) {
@@ -2136,7 +2127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // First check if job exists and user owns it
-      const existingJob = await simpleStorage.getJob(jobId);
+      const existingJob = await storage.getJob(jobId);
       if (!existingJob) {
         return res.status(404).json({ message: "Job not found" });
       }
@@ -2145,7 +2136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "You can only update status of your own jobs" });
       }
       
-      const updatedJob = await simpleStorage.updateJob(jobId, { status, updatedAt: new Date() });
+      const updatedJob = await storage.updateJob(jobId, { status, updatedAt: new Date() });
       console.log("✅ JOB: User updated job status successfully", { jobId, userId, status });
       res.json(updatedJob);
     } catch (error) {
@@ -2158,7 +2149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/jobs', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const jobs = await simpleStorage.getUserJobs(userId);
+      const jobs = await storage.getUserJobs(userId);
       console.log("✅ JOB: Retrieved user jobs successfully", { userId, count: jobs.length });
       res.json(jobs);
     } catch (error) {
@@ -2184,7 +2175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       console.log("🔥 JOB APPLICATION: Application data prepared", applicationData);
-      const application = await simpleStorage.createJobApplication(applicationData);
+      const application = await storage.createJobApplication(applicationData);
       console.log("✅ JOB APPLICATION: Application created successfully", { applicationId: application.id });
       res.json(application);
     } catch (error) {
@@ -2196,7 +2187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/jobs/:id/applications', isAuthenticated, async (req, res) => {
     try {
       const jobId = parseInt(req.params.id);
-      const applications = await simpleStorage.getJobApplications(jobId);
+      const applications = await storage.getJobApplications(jobId);
       res.json(applications);
     } catch (error) {
       console.error("Error fetching job applications:", error);
@@ -2215,7 +2206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Message and receiver ID are required" });
       }
 
-      const communication = await simpleStorage.createJobCommunication(jobId, senderId, receiverId, message);
+      const communication = await storage.createJobCommunication(jobId, senderId, receiverId, message);
       res.json(communication);
     } catch (error) {
       console.error("Error creating job communication:", error);
@@ -2226,7 +2217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/jobs/:id/communications', isAuthenticated, async (req, res) => {
     try {
       const jobId = parseInt(req.params.id);
-      const communications = await simpleStorage.getJobCommunications(jobId);
+      const communications = await storage.getJobCommunications(jobId);
       res.json(communications);
     } catch (error) {
       console.error("Error fetching job communications:", error);
@@ -2237,7 +2228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/job-communications/:id/read', isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      await simpleStorage.markJobCommunicationAsRead(id);
+      await storage.markJobCommunicationAsRead(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error marking communication as read:", error);
@@ -2259,7 +2250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const senderId = req.user.id;
       const messageData = insertMessageSchema.parse({ ...req.body, senderId });
-      const message = await simpleStorage.createMessage(messageData);
+      const message = await storage.createMessage(messageData);
       
       // Broadcast to WebSocket clients
       // TODO: Implement broadcastMessage when WebSocket system is ready
@@ -2276,7 +2267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const otherUserId = req.params.userId;
-      const messages = await simpleStorage.getMessages(userId, otherUserId);
+      const messages = await storage.getMessages(userId, otherUserId);
       res.json(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -2287,7 +2278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/conversations', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const conversations = await simpleStorage.getUserConversations(userId);
+      const conversations = await storage.getUserConversations(userId);
       res.json(conversations);
     } catch (error) {
       console.error("Error fetching conversations:", error);
@@ -2300,7 +2291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Talent categories routes - Database implementation
   app.get('/api/talent-categories', async (req, res) => {
     try {
-      const categories = await simpleStorage.getTalentCategories();
+      const categories = await storage.getTalentCategories();
       res.json(categories);
     } catch (error) {
       console.error("Error fetching talent categories:", error);
@@ -2313,7 +2304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const tagData = insertUserTagSchema.parse({ ...req.body, userId });
-      const tag = await simpleStorage.createUserTag(tagData);
+      const tag = await storage.createUserTag(tagData);
       res.json(tag);
     } catch (error) {
       console.error("Error creating tag:", error);
@@ -2324,7 +2315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tags', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const tags = await simpleStorage.getUserTags(userId);
+      const tags = await storage.getUserTags(userId);
       res.json(tags);
     } catch (error) {
       console.error("Error fetching tags:", error);
@@ -2338,13 +2329,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Verify tag ownership
-      const existingTag = await simpleStorage.getUserTags(userId);
+      const existingTag = await storage.getUserTags(userId);
       const tag = existingTag.find(t => t.id === id);
       if (!tag) {
         return res.status(404).json({ message: "Tag not found" });
       }
       
-      const updatedTag = await simpleStorage.updateUserTag(id, req.body);
+      const updatedTag = await storage.updateUserTag(id, req.body);
       res.json(updatedTag);
     } catch (error) {
       console.error("Error updating tag:", error);
@@ -2358,13 +2349,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Verify tag ownership
-      const existingTag = await simpleStorage.getUserTags(userId);
+      const existingTag = await storage.getUserTags(userId);
       const tag = existingTag.find(t => t.id === id);
       if (!tag) {
         return res.status(404).json({ message: "Tag not found" });
       }
       
-      await simpleStorage.deleteUserTag(id);
+      await storage.deleteUserTag(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting tag:", error);
@@ -2380,19 +2371,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Verify media file ownership
-      const mediaFile = await simpleStorage.getMediaFile(mediaId);
+      const mediaFile = await storage.getMediaFile(mediaId);
       if (!mediaFile || mediaFile.userId !== userId) {
         return res.status(404).json({ message: "Media file not found" });
       }
       
       // Verify tag ownership
-      const userTags = await simpleStorage.getUserTags(userId);
+      const userTags = await storage.getUserTags(userId);
       const tag = userTags.find(t => t.id === tagId);
       if (!tag) {
         return res.status(404).json({ message: "Tag not found" });
       }
       
-      const mediaFileTag = await simpleStorage.addTagToMediaFile(mediaId, tagId);
+      const mediaFileTag = await storage.addTagToMediaFile(mediaId, tagId);
       res.json(mediaFileTag);
     } catch (error) {
       console.error("Error adding tag to media file:", error);
@@ -2407,12 +2398,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Verify media file ownership
-      const mediaFile = await simpleStorage.getMediaFile(mediaId);
+      const mediaFile = await storage.getMediaFile(mediaId);
       if (!mediaFile || mediaFile.userId !== userId) {
         return res.status(404).json({ message: "Media file not found" });
       }
       
-      await simpleStorage.removeTagFromMediaFile(mediaId, tagId);
+      await storage.removeTagFromMediaFile(mediaId, tagId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error removing tag from media file:", error);
@@ -2426,12 +2417,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Verify media file ownership
-      const mediaFile = await simpleStorage.getMediaFile(mediaId);
+      const mediaFile = await storage.getMediaFile(mediaId);
       if (!mediaFile || mediaFile.userId !== userId) {
         return res.status(404).json({ message: "Media file not found" });
       }
       
-      const tags = await simpleStorage.getTagsForMediaFile(mediaId);
+      const tags = await storage.getTagsForMediaFile(mediaId);
       res.json(tags);
     } catch (error) {
       console.error("Error fetching media file tags:", error);
@@ -2445,13 +2436,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       
       // Verify tag ownership
-      const userTags = await simpleStorage.getUserTags(userId);
+      const userTags = await storage.getUserTags(userId);
       const tag = userTags.find(t => t.id === tagId);
       if (!tag) {
         return res.status(404).json({ message: "Tag not found" });
       }
       
-      const mediaFiles = await simpleStorage.getMediaFilesByTag(tagId);
+      const mediaFiles = await storage.getMediaFilesByTag(tagId);
       res.json(mediaFiles);
     } catch (error) {
       console.error("Error fetching media files by tag:", error);
@@ -2472,7 +2463,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         featured: featured === 'true',
       };
       
-      const talents = await simpleStorage.searchTalentsPublic(searchParams);
+      const talents = await storage.searchTalentsPublic(searchParams);
       res.json(talents);
     } catch (error) {
       console.error("Error searching talents:", error);
@@ -2494,14 +2485,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId = parseInt(userIdParam);
       } else {
         // It's a username - find user first
-        user = await simpleStorage.getUserByUsername(userIdParam);
+        user = await storage.getUserByUsername(userIdParam);
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
         userId = user.id;
       }
       
-      const mediaFiles = await simpleStorage.getUserMediaFiles(userId);
+      const mediaFiles = await storage.getUserMediaFiles(userId);
       res.json(mediaFiles);
     } catch (error) {
       console.error("Error fetching user media files:", error);
@@ -2523,16 +2514,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (/^\d+$/.test(userIdParam)) {
         // It's a numeric ID
         userId = parseInt(userIdParam);
-        user = await simpleStorage.getUser(userId);
-        profile = await simpleStorage.getUserProfile(userId);
+        user = await storage.getUser(userId);
+        profile = await storage.getUserProfile(userId);
       } else {
         // It's a username - need to find user first
-        user = await simpleStorage.getUserByUsername(userIdParam);
+        user = await storage.getUserByUsername(userIdParam);
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
         userId = user.id;
-        profile = await simpleStorage.getUserProfile(userId);
+        profile = await storage.getUserProfile(userId);
       }
       
       console.log("Found user:", user?.id, user?.username);
@@ -2571,7 +2562,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   /*
   app.get('/api/admin/featured-talents', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const featuredTalents = await simpleStorage.getFeaturedTalents();
+      const featuredTalents = await storage.getFeaturedTalents();
       res.json(featuredTalents);
     } catch (error) {
       console.error("Error fetching featured talents:", error);
@@ -2581,7 +2572,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/featured-talents', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const featuredTalent = await simpleStorage.createFeaturedTalent(req.body);
+      const featuredTalent = await storage.createFeaturedTalent(req.body);
       res.json(featuredTalent);
     } catch (error) {
       console.error("Error creating featured talent:", error);
@@ -2592,7 +2583,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/featured-talents/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const featuredTalent = await simpleStorage.updateFeaturedTalent(id, req.body);
+      const featuredTalent = await storage.updateFeaturedTalent(id, req.body);
       res.json(featuredTalent);
     } catch (error) {
       console.error("Error updating featured talent:", error);
@@ -2603,7 +2594,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/featured-talents/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      await simpleStorage.deleteFeaturedTalent(id);
+      await storage.deleteFeaturedTalent(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting featured talent:", error);
@@ -2614,7 +2605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin talent categories routes
   app.get('/api/admin/talent-categories', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const categories = await simpleStorage.getTalentCategories();
+      const categories = await storage.getTalentCategories();
       res.json(categories);
     } catch (error) {
       console.error("Error fetching talent categories:", error);
@@ -2625,7 +2616,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin user limits management routes
   app.get('/api/admin/users-with-limits', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const users = await simpleStorage.getUsersWithLimits();
+      const users = await storage.getUsersWithLimits();
       res.json(users);
     } catch (error) {
       console.error("Error fetching users with limits:", error);
@@ -2642,7 +2633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User ID and limits are required" });
       }
 
-      const result = await simpleStorage.grantUserLimits(userId, limits, adminId);
+      const result = await storage.grantUserLimits(userId, limits, adminId);
       res.json(result);
     } catch (error) {
       console.error("Error granting user limits:", error);
@@ -2653,7 +2644,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/revoke-user-limits/:userId', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const userId = req.params.userId;
-      await simpleStorage.revokeUserLimits(userId);
+      await storage.revokeUserLimits(userId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error revoking user limits:", error);
@@ -2663,7 +2654,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/talent-categories', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const category = await simpleStorage.createTalentCategory(req.body);
+      const category = await storage.createTalentCategory(req.body);
       res.json(category);
     } catch (error) {
       console.error("Error creating talent category:", error);
@@ -2674,7 +2665,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/talent-categories/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const category = await simpleStorage.updateTalentCategory(id, req.body);
+      const category = await storage.updateTalentCategory(id, req.body);
       res.json(category);
     } catch (error) {
       console.error("Error updating talent category:", error);
@@ -2685,7 +2676,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/talent-categories/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      await simpleStorage.deleteTalentCategory(id);
+      await storage.deleteTalentCategory(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting talent category:", error);
@@ -2702,7 +2693,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('Cache-Control', 'no-cache');
       
-      const settings = await simpleStorage.getAdminSettings();
+      const settings = await storage.getAdminSettings();
       console.log("✅ ADMIN SETTINGS: Returning JSON response", settings.length, "settings");
       
       // Force immediate response to bypass Vite
@@ -2724,7 +2715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { key, value, description, encrypted } = req.body;
       const updatedBy = req.user.username || req.user.email;
       
-      const setting = await simpleStorage.updateAdminSetting(key, value, updatedBy, description, encrypted);
+      const setting = await storage.updateAdminSetting(key, value, updatedBy, description, encrypted);
       console.log("✅ ADMIN SETTINGS: Updated setting", setting);
       
       // Force immediate response to bypass Vite
@@ -2738,7 +2729,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin SEO routes
   app.get('/api/admin/seo-settings', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const seoSettings = await simpleStorage.getSEOSettings();
+      const seoSettings = await storage.getSEOSettings();
       res.json(seoSettings);
     } catch (error) {
       console.error("Error fetching SEO settings:", error);
@@ -2748,7 +2739,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/seo-settings', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const seoSetting = await simpleStorage.createOrUpdateSEOSettings(req.body);
+      const seoSetting = await storage.createOrUpdateSEOSettings(req.body);
       res.json(seoSetting);
     } catch (error) {
       console.error("Error saving SEO settings:", error);
@@ -2759,7 +2750,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/generate-seo', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { pagePath } = req.body;
-      const generatedSEO = await simpleStorage.generateSEOContent(pagePath);
+      const generatedSEO = await storage.generateSEOContent(pagePath);
       res.json(generatedSEO);
     } catch (error) {
       console.error("Error generating SEO content:", error);
@@ -2769,7 +2760,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/seo-analytics', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const analytics = await simpleStorage.getSEOAnalytics();
+      const analytics = await storage.getSEOAnalytics();
       res.json(analytics);
     } catch (error) {
       console.error("Error fetching SEO analytics:", error);
@@ -2781,7 +2772,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin routes (for user management, pricing, etc.)
   app.get('/api/admin/users', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const users = await simpleStorage.getAllUsers();
+      const users = await storage.getAllUsers();
       res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify(users));
     } catch (error) {
@@ -2817,7 +2808,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       console.log("Mapped user data:", userData);
-      const user = await simpleStorage.createUser(userData);
+      const user = await storage.createUser(userData);
       console.log("Created user successfully:", user);
       res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify(user));
@@ -2833,7 +2824,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Updating user:", userId, req.body);
       
       // Get existing user to preserve required fields
-      const existingUser = await simpleStorage.getUser(userId);
+      const existingUser = await storage.getUser(userId);
       if (!existingUser) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -2847,7 +2838,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       console.log("Merged user data:", userData);
-      const user = await simpleStorage.upsertUser(userData);
+      const user = await storage.upsertUser(userData);
       res.json(user);
     } catch (error) {
       console.error("Error updating user:", error);
@@ -2861,13 +2852,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Deleting user:", userId);
       
       // Check if user exists first
-      const existingUser = await simpleStorage.getUser(parseInt(userId));
+      const existingUser = await storage.getUser(parseInt(userId));
       if (!existingUser) {
         return res.status(404).json({ message: "User not found" });
       }
       
       // Delete the user
-      await simpleStorage.deleteUser(parseInt(userId));
+      await storage.deleteUser(parseInt(userId));
       console.log("User deleted successfully:", userId);
       
       res.json({ success: true, message: "User deleted successfully" });
@@ -2883,8 +2874,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { userId } = req.params;
       console.log(`🔐 Password reset requested for user ID: ${userId}`);
       
-      // Convert userId to number for simpleStorage.getUser()
-      const user = await simpleStorage.getUser(parseInt(userId));
+      // Convert userId to number for storage.getUser()
+      const user = await storage.getUser(parseInt(userId));
       if (!user) {
         console.log(`❌ User not found: ${userId}`);
         return res.status(404).json({ message: "User not found" });
@@ -2955,10 +2946,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const organizerId = req.user.id;
       const meetingData = { ...req.body, organizerId };
       
-      const meeting = await simpleStorage.createMeeting(meetingData);
+      const meeting = await storage.createMeeting(meetingData);
       
       // Send meeting invitation email
-      const attendee = await simpleStorage.getUser(meetingData.attendeeId);
+      const attendee = await storage.getUser(meetingData.attendeeId);
       if (attendee) {
         await sendMeetingInvitation(attendee.email, {
           title: meeting.title,
@@ -2981,7 +2972,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/meetings', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const meetings = await simpleStorage.getMeetings(userId);
+      const meetings = await storage.getMeetings(userId);
       res.json(meetings);
     } catch (error) {
       console.error("Error fetching meetings:", error);
@@ -2992,7 +2983,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/meetings/:meetingId', isAuthenticated, async (req: any, res) => {
     try {
       const { meetingId } = req.params;
-      const meeting = await simpleStorage.updateMeeting(parseInt(meetingId), req.body);
+      const meeting = await storage.updateMeeting(parseInt(meetingId), req.body);
       res.json(meeting);
     } catch (error) {
       console.error("Error updating meeting:", error);
@@ -3003,7 +2994,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/meetings/:meetingId', isAuthenticated, async (req: any, res) => {
     try {
       const { meetingId } = req.params;
-      await simpleStorage.deleteMeeting(parseInt(meetingId));
+      await storage.deleteMeeting(parseInt(meetingId));
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting meeting:", error);
@@ -3015,7 +3006,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/users/:userId/permissions', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
-      const permissions = await simpleStorage.getUserPermissions(userId);
+      const permissions = await storage.getUserPermissions(userId);
       res.json(permissions);
     } catch (error) {
       console.error("Error fetching user permissions:", error);
@@ -3027,7 +3018,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       const grantedBy = req.user.id; // Use traditional auth user ID
-      const permission = await simpleStorage.createUserPermission({
+      const permission = await storage.createUserPermission({
         userId,
         category: req.body.category,
         action: req.body.action,
@@ -3042,14 +3033,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Notifications routes - now using simpleStorage with session-based storage
+  // Notifications routes - now using storage with session-based storage
   app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
       console.log(`🔔 Fetching notifications for user ID: ${userId}`);
       
       // Get or create notifications for this user in session storage
-      let userNotifications = await simpleStorage.getUserNotifications(userId);
+      let userNotifications = await storage.getUserNotifications(userId);
       
       // If no notifications exist, create default ones
       if (!userNotifications || userNotifications.length === 0) {
@@ -3084,7 +3075,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ];
         
         // Store notifications for this user
-        await simpleStorage.setUserNotifications(userId, defaultNotifications);
+        await storage.setUserNotifications(userId, defaultNotifications);
         userNotifications = defaultNotifications;
       }
       
@@ -3103,7 +3094,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔔 Marking notification ${notificationId} as read for user ${userId}`);
       
       // Get user notifications
-      const userNotifications = await simpleStorage.getUserNotifications(userId) || [];
+      const userNotifications = await storage.getUserNotifications(userId) || [];
       
       // Find and update the notification
       const updatedNotifications = userNotifications.map(notification => 
@@ -3113,7 +3104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       
       // Save updated notifications
-      await simpleStorage.setUserNotifications(userId, updatedNotifications);
+      await storage.setUserNotifications(userId, updatedNotifications);
       
       console.log(`🔔 Successfully marked notification ${notificationId} as read`);
       res.json({ success: true });
@@ -3130,13 +3121,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔔 Deleting notification ${notificationId} for user ${userId}`);
       
       // Get user notifications
-      const userNotifications = await simpleStorage.getUserNotifications(userId) || [];
+      const userNotifications = await storage.getUserNotifications(userId) || [];
       
       // Filter out the notification to delete
       const updatedNotifications = userNotifications.filter(notification => notification.id !== notificationId);
       
       // Save updated notifications
-      await simpleStorage.setUserNotifications(userId, updatedNotifications);
+      await storage.setUserNotifications(userId, updatedNotifications);
       
       console.log(`🔔 Successfully deleted notification ${notificationId}`);
       res.json({ success: true });
@@ -3152,8 +3143,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { role } = req.body;
       console.log(`🔄 Updating user ${userId} role to: ${role}`);
       
-      // Convert userId to number for simpleStorage methods
-      const updatedUser = await simpleStorage.updateUserRole(parseInt(userId), role);
+      // Convert userId to number for storage methods
+      const updatedUser = await storage.updateUserRole(parseInt(userId), role);
       console.log(`✅ User role updated successfully`);
       
       res.json({ success: true, user: updatedUser });
@@ -3168,7 +3159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Pricing tiers management
   app.get('/api/admin/pricing-tiers', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const tiers = await simpleStorage.getPricingTiers();
+      const tiers = await storage.getPricingTiers();
       res.json(tiers);
     } catch (error) {
       console.error("Error fetching pricing tiers:", error);
@@ -3180,7 +3171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { permissions, ...tierData } = req.body; // Remove permissions field that doesn't exist in schema
       console.log("Creating pricing tier:", tierData);
-      const tier = await simpleStorage.createPricingTier(tierData);
+      const tier = await storage.createPricingTier(tierData);
       res.json(tier);
     } catch (error) {
       console.error("Error creating pricing tier:", error);
@@ -3192,7 +3183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const tierId = parseInt(req.params.tierId);
       const { permissions, ...tierData } = req.body; // Remove permissions field that doesn't exist in schema
-      const tier = await simpleStorage.updatePricingTier(tierId, tierData);
+      const tier = await storage.updatePricingTier(tierId, tierData);
       res.json(tier);
     } catch (error) {
       console.error("Error updating pricing tier:", error);
@@ -3203,7 +3194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/pricing-tiers/:tierId', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const tierId = parseInt(req.params.tierId);
-      await simpleStorage.deletePricingTier(tierId);
+      await storage.deletePricingTier(tierId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting pricing tier:", error);
@@ -3214,7 +3205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Email template management routes
   app.get('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const templates = await simpleStorage.getAllEmailTemplates();
+      const templates = await storage.getAllEmailTemplates();
       res.json(templates);
     } catch (error) {
       console.error("Error fetching email templates:", error);
@@ -3225,7 +3216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const template = await simpleStorage.getEmailTemplate(id);
+      const template = await storage.getEmailTemplate(id);
       if (!template) {
         return res.status(404).json({ message: "Email template not found" });
       }
@@ -3238,7 +3229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const template = await simpleStorage.createEmailTemplate(req.body);
+      const template = await storage.createEmailTemplate(req.body);
       res.json(template);
     } catch (error) {
       console.error("Error creating email template:", error);
@@ -3249,7 +3240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const template = await simpleStorage.updateEmailTemplate(id, req.body);
+      const template = await storage.updateEmailTemplate(id, req.body);
       res.json(template);
     } catch (error) {
       console.error("Error updating email template:", error);
@@ -3260,7 +3251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      await simpleStorage.deleteEmailTemplate(id);
+      await storage.deleteEmailTemplate(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting email template:", error);
@@ -3271,7 +3262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Enhanced email template management routes
   app.get('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const templates = await simpleStorage.getAllEmailTemplates();
+      const templates = await storage.getAllEmailTemplates();
       res.json(templates);
     } catch (error) {
       console.error('Error fetching email templates:', error);
@@ -3287,7 +3278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
-      const template = await simpleStorage.createEmailTemplate({
+      const template = await storage.createEmailTemplate({
         name,
         subject,
         html_content,
@@ -3308,7 +3299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { name, subject, html_content, text_content, variables, description } = req.body;
       
-      const template = await simpleStorage.updateEmailTemplate(parseInt(id), {
+      const template = await storage.updateEmailTemplate(parseInt(id), {
         name,
         subject,
         html_content,
@@ -3337,7 +3328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Email address is required' });
       }
 
-      const template = await simpleStorage.getEmailTemplate(parseInt(id));
+      const template = await storage.getEmailTemplate(parseInt(id));
       if (!template) {
         return res.status(404).json({ error: 'Email template not found' });
       }
@@ -3356,7 +3347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Promo code management routes
   app.get('/api/admin/promo-codes', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const promoCodes = await simpleStorage.getPromoCodes();
+      const promoCodes = await storage.getPromoCodes();
       res.json(promoCodes);
     } catch (error) {
       console.error("Error fetching promo codes:", error);
@@ -3372,7 +3363,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: req.user.id,
         usedCount: 0
       };
-      const promoCode = await simpleStorage.createPromoCode(promoCodeData);
+      const promoCode = await storage.createPromoCode(promoCodeData);
       res.json(promoCode);
     } catch (error) {
       console.error("Error creating promo code:", error);
@@ -3383,7 +3374,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/promo-codes/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const promoCodeId = parseInt(req.params.id);
-      const promoCode = await simpleStorage.updatePromoCode(promoCodeId, req.body);
+      const promoCode = await storage.updatePromoCode(promoCodeId, req.body);
       res.json(promoCode);
     } catch (error) {
       console.error("Error updating promo code:", error);
@@ -3394,7 +3385,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/promo-codes/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const promoCodeId = parseInt(req.params.id);
-      await simpleStorage.deletePromoCode(promoCodeId);
+      await storage.deletePromoCode(promoCodeId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting promo code:", error);
@@ -3405,7 +3396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/promo-codes/:id/usage', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const promoCodeId = parseInt(req.params.id);
-      const usage = await simpleStorage.getPromoCodeUsage(promoCodeId);
+      const usage = await storage.getPromoCodeUsage(promoCodeId);
       res.json(usage);
     } catch (error) {
       console.error("Error fetching promo code usage:", error);
@@ -3417,7 +3408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/jobs', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("🔥 ADMIN: Getting all jobs from database");
-      const jobs = await simpleStorage.getJobs();
+      const jobs = await storage.getJobs();
       console.log("✅ ADMIN: Retrieved jobs from database", jobs.length);
       res.json(jobs);
     } catch (error) {
@@ -3430,7 +3421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const jobId = parseInt(req.params.id);
       console.log("🔥 ADMIN: Deleting job", jobId);
-      await simpleStorage.deleteJob(jobId);
+      await storage.deleteJob(jobId);
       console.log("✅ ADMIN: Job deleted successfully", jobId);
       res.json({ success: true });
     } catch (error) {
@@ -3444,7 +3435,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const jobId = parseInt(req.params.id);
       const { status } = req.body;
       console.log("🔥 ADMIN: Updating job status", { jobId, status });
-      const updatedJob = await simpleStorage.updateJobStatus(jobId, status);
+      const updatedJob = await storage.updateJobStatus(jobId, status);
       console.log("✅ ADMIN: Job status updated successfully", updatedJob);
       res.json(updatedJob);
     } catch (error) {
@@ -3456,7 +3447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Talent type management routes
   app.get('/api/admin/talent-types', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const talentTypes = await simpleStorage.getTalentTypes();
+      const talentTypes = await storage.getTalentTypes();
       res.json(talentTypes);
     } catch (error) {
       console.error("Error fetching talent types:", error);
@@ -3467,7 +3458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/talent-types', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log("Creating talent type:", req.body);
-      const talentType = await simpleStorage.createTalentType(req.body);
+      const talentType = await storage.createTalentType(req.body);
       res.json(talentType);
     } catch (error) {
       console.error("Error creating talent type:", error);
@@ -3478,7 +3469,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/talent-types/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const talentTypeId = parseInt(req.params.id);
-      const talentType = await simpleStorage.updateTalentType(talentTypeId, req.body);
+      const talentType = await storage.updateTalentType(talentTypeId, req.body);
       res.json(talentType);
     } catch (error) {
       console.error("Error updating talent type:", error);
@@ -3489,7 +3480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/talent-types/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const talentTypeId = parseInt(req.params.id);
-      await simpleStorage.deleteTalentType(talentTypeId);
+      await storage.deleteTalentType(talentTypeId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting talent type:", error);
@@ -3500,7 +3491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Email campaigns management routes
   app.get('/api/admin/email-campaigns', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const campaigns = await simpleStorage.getEmailCampaigns();
+      const campaigns = await storage.getEmailCampaigns();
       res.json(campaigns);
     } catch (error) {
       console.error("Error fetching email campaigns:", error);
@@ -3516,13 +3507,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: req.user.id,
         status: req.body.type === 'instant' ? 'sending' : 'scheduled'
       };
-      const campaign = await simpleStorage.createEmailCampaign(campaignData);
+      const campaign = await storage.createEmailCampaign(campaignData);
       
       // If it's an instant campaign, send immediately
       if (req.body.type === 'instant') {
         try {
           // Get target users based on groups
-          const targetUsers = await simpleStorage.getUsersByGroups(req.body.targetGroups);
+          const targetUsers = await storage.getUsersByGroups(req.body.targetGroups);
           
           // Send emails to all target users
           let sentCount = 0;
@@ -3544,14 +3535,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Update campaign status and stats
-          await simpleStorage.updateEmailCampaignStatus(campaign.id, 'sent', {
+          await storage.updateEmailCampaignStatus(campaign.id, 'sent', {
             sentCount,
             failedCount,
             totalTargets: targetUsers.length
           });
         } catch (sendError) {
           console.error("Error sending instant campaign:", sendError);
-          await simpleStorage.updateEmailCampaignStatus(campaign.id, 'failed');
+          await storage.updateEmailCampaignStatus(campaign.id, 'failed');
         }
       }
       
@@ -3565,7 +3556,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/email-campaigns/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const campaignId = parseInt(req.params.id);
-      const campaign = await simpleStorage.updateEmailCampaign(campaignId, req.body);
+      const campaign = await storage.updateEmailCampaign(campaignId, req.body);
       res.json(campaign);
     } catch (error) {
       console.error("Error updating email campaign:", error);
@@ -3576,7 +3567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/email-campaigns/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const campaignId = parseInt(req.params.id);
-      await simpleStorage.deleteEmailCampaign(campaignId);
+      await storage.deleteEmailCampaign(campaignId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting email campaign:", error);
@@ -3586,7 +3577,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const templates = await simpleStorage.getAllEmailTemplates();
+      const templates = await storage.getAllEmailTemplates();
       res.json(templates);
     } catch (error) {
       console.error("Error fetching email templates:", error);
@@ -3597,7 +3588,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Talent categories management routes
   app.get('/api/admin/talent-categories', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const categories = await simpleStorage.getTalentCategories();
+      const categories = await storage.getTalentCategories();
       res.json(categories);
     } catch (error) {
       console.error("Error fetching talent categories:", error);
@@ -3614,7 +3605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         color: req.body.color || 'blue',
         isActive: req.body.isActive !== undefined ? req.body.isActive : true
       };
-      const category = await simpleStorage.createTalentCategory(categoryData);
+      const category = await storage.createTalentCategory(categoryData);
       res.json(category);
     } catch (error) {
       console.error("Error creating talent category:", error);
@@ -3625,7 +3616,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/talent-categories/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const categoryId = parseInt(req.params.id);
-      const category = await simpleStorage.updateTalentCategory(categoryId, req.body);
+      const category = await storage.updateTalentCategory(categoryId, req.body);
       res.json(category);
     } catch (error) {
       console.error("Error updating talent category:", error);
@@ -3636,7 +3627,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/talent-categories/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const categoryId = parseInt(req.params.id);
-      await simpleStorage.deleteTalentCategory(categoryId);
+      await storage.deleteTalentCategory(categoryId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting talent category:", error);
@@ -3647,7 +3638,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Featured talents management routes
   app.get('/api/admin/featured-talents', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const featuredTalents = await simpleStorage.getFeaturedTalents();
+      const featuredTalents = await storage.getFeaturedTalents();
       res.json(featuredTalents);
     } catch (error) {
       console.error("Error fetching featured talents:", error);
@@ -3665,7 +3656,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isActive: req.body.isActive !== undefined ? req.body.isActive : true,
         featuredUntil: req.body.featuredUntil ? new Date(req.body.featuredUntil) : undefined
       };
-      const featured = await simpleStorage.createFeaturedTalent(featuredData);
+      const featured = await storage.createFeaturedTalent(featuredData);
       res.json(featured);
     } catch (error) {
       console.error("Error creating featured talent:", error);
@@ -3676,7 +3667,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/featured-talents/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const featuredId = parseInt(req.params.id);
-      const featured = await simpleStorage.updateFeaturedTalent(featuredId, req.body);
+      const featured = await storage.updateFeaturedTalent(featuredId, req.body);
       res.json(featured);
     } catch (error) {
       console.error("Error updating featured talent:", error);
@@ -3687,7 +3678,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/featured-talents/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const featuredId = parseInt(req.params.id);
-      await simpleStorage.deleteFeaturedTalent(featuredId);
+      await storage.deleteFeaturedTalent(featuredId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting featured talent:", error);
@@ -3698,7 +3689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/featured-talents/order', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const updates = req.body.updates;
-      await simpleStorage.updateFeaturedTalentOrder(updates);
+      await storage.updateFeaturedTalentOrder(updates);
       res.json({ success: true });
     } catch (error) {
       console.error("Error updating featured talent order:", error);
@@ -3709,7 +3700,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public API endpoints for featured talents (no authentication required)
   app.get('/api/featured-talents', async (req: any, res) => {
     try {
-      const featuredTalents = await simpleStorage.getFeaturedTalents();
+      const featuredTalents = await storage.getFeaturedTalents();
       // Limit to 6 featured talents for homepage display
       const limitedTalents = featuredTalents.slice(0, 6);
       res.json(limitedTalents);
@@ -3721,7 +3712,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/talent-categories', async (req: any, res) => {
     try {
-      const categories = await simpleStorage.getTalentCategories();
+      const categories = await storage.getTalentCategories();
       res.json(categories);
     } catch (error) {
       console.error("Error fetching talent categories:", error);
@@ -3736,7 +3727,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         createdBy: req.user.id
       };
-      const template = await simpleStorage.createEmailTemplate(templateData);
+      const template = await storage.createEmailTemplate(templateData);
       res.json(template);
     } catch (error) {
       console.error("Error creating email template:", error);
@@ -3747,7 +3738,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const templateId = parseInt(req.params.id);
-      const template = await simpleStorage.updateEmailTemplate(templateId, req.body);
+      const template = await storage.updateEmailTemplate(templateId, req.body);
       res.json(template);
     } catch (error) {
       console.error("Error updating email template:", error);
@@ -3758,7 +3749,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const templateId = parseInt(req.params.id);
-      await simpleStorage.deleteEmailTemplate(templateId);
+      await storage.deleteEmailTemplate(templateId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting email template:", error);
@@ -3777,7 +3768,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update sort order for each template
       for (const update of updates) {
         if (update.id && update.sort_order !== undefined) {
-          await simpleStorage.updateEmailTemplate(update.id, { sort_order: update.sort_order });
+          await storage.updateEmailTemplate(update.id, { sort_order: update.sort_order });
         }
       }
       
@@ -3800,14 +3791,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("🔥 PROMO: Validating promo code endpoint", { code, tierId, planType });
 
-      const promoCode = await simpleStorage.validatePromoCode(code, userId, tierId, planType);
+      const promoCode = await storage.validatePromoCode(code, userId, tierId, planType);
       
       if (!promoCode) {
         return res.status(400).json({ message: "Invalid or expired promo code" });
       }
 
       // Calculate discount
-      const tier = await simpleStorage.getPricingTier(tierId);
+      const tier = await storage.getPricingTier(tierId);
       if (!tier) {
         return res.status(404).json({ message: "Pricing tier not found" });
       }
@@ -3981,7 +3972,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // SEO Settings
   app.get('/api/admin/seo/settings', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const settings = await simpleStorage.getSeoSettings();
+      const settings = await storage.getSeoSettings();
       res.json(settings);
     } catch (error) {
       console.error("Error fetching SEO settings:", error);
@@ -3991,7 +3982,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/admin/seo/settings', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const settings = await simpleStorage.updateSeoSettings(req.body);
+      const settings = await storage.updateSeoSettings(req.body);
       res.json(settings);
     } catch (error) {
       console.error("Error updating SEO settings:", error);
@@ -4002,7 +3993,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // SEO Pages
   app.get('/api/admin/seo/pages', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const pages = await simpleStorage.getAllSeoPages();
+      const pages = await storage.getAllSeoPages();
       res.json(pages);
     } catch (error) {
       console.error("Error fetching SEO pages:", error);
@@ -4012,7 +4003,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/seo/pages', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const page = await simpleStorage.createSeoPage(req.body);
+      const page = await storage.createSeoPage(req.body);
       res.json(page);
     } catch (error) {
       console.error("Error creating SEO page:", error);
@@ -4023,7 +4014,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/seo/pages/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const pageId = parseInt(req.params.id);
-      const page = await simpleStorage.updateSeoPage(pageId, req.body);
+      const page = await storage.updateSeoPage(pageId, req.body);
       res.json(page);
     } catch (error) {
       console.error("Error updating SEO page:", error);
@@ -4034,7 +4025,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/seo/pages/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const pageId = parseInt(req.params.id);
-      await simpleStorage.deleteSeoPage(pageId);
+      await storage.deleteSeoPage(pageId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting SEO page:", error);
@@ -4045,7 +4036,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // SEO Images
   app.get('/api/admin/seo/images', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const images = await simpleStorage.getAllSeoImages();
+      const images = await storage.getAllSeoImages();
       res.json(images);
     } catch (error) {
       console.error("Error fetching SEO images:", error);
@@ -4074,7 +4065,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: req.user.id
       };
 
-      const image = await simpleStorage.createSeoImage(imageData);
+      const image = await storage.createSeoImage(imageData);
       res.json(image);
     } catch (error) {
       console.error("Error creating SEO image:", error);
@@ -4085,7 +4076,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/seo/images/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const imageId = parseInt(req.params.id);
-      const image = await simpleStorage.updateSeoImage(imageId, req.body);
+      const image = await storage.updateSeoImage(imageId, req.body);
       res.json(image);
     } catch (error) {
       console.error("Error updating SEO image:", error);
@@ -4096,7 +4087,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/seo/images/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const imageId = parseInt(req.params.id);
-      await simpleStorage.deleteSeoImage(imageId);
+      await storage.deleteSeoImage(imageId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting SEO image:", error);
@@ -4130,7 +4121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Profile SEO Data Generation
   app.post('/api/admin/seo/profiles/generate', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const users = await simpleStorage.getAllUsers();
+      const users = await storage.getAllUsers();
       const generatedProfiles = [];
       
       for (const user of users) {
@@ -4158,11 +4149,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             isActive: true
           };
           
-          const existingProfile = await simpleStorage.getProfileSeoData(user.id);
+          const existingProfile = await storage.getProfileSeoData(user.id);
           if (existingProfile) {
-            await simpleStorage.updateProfileSeoData(user.id, seoData);
+            await storage.updateProfileSeoData(user.id, seoData);
           } else {
-            await simpleStorage.createProfileSeoData(seoData);
+            await storage.createProfileSeoData(seoData);
           }
           
           generatedProfiles.push(seoData);
@@ -4183,7 +4174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/profile/sharing', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const sharing = await simpleStorage.getProfileSharingSettings(userId);
+      const sharing = await storage.getProfileSharingSettings(userId);
       res.json(sharing);
     } catch (error) {
       console.error("Error fetching profile sharing:", error);
@@ -4194,7 +4185,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/profile/sharing', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const sharing = await simpleStorage.updateProfileSharingSettings(userId, req.body);
+      const sharing = await storage.updateProfileSharingSettings(userId, req.body);
       res.json(sharing);
     } catch (error) {
       console.error("Error updating profile sharing:", error);
@@ -4206,7 +4197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/profile-sharing/:userId', async (req: any, res) => {
     try {
       const { userId } = req.params;
-      const sharing = await simpleStorage.getProfileSharing(userId);
+      const sharing = await storage.getProfileSharing(userId);
       res.json(sharing);
     } catch (error) {
       console.error("Error fetching profile sharing:", error);
@@ -4223,7 +4214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Unauthorized" });
       }
 
-      const sharing = await simpleStorage.updateProfileSharing(userId, req.body);
+      const sharing = await storage.updateProfileSharing(userId, req.body);
       res.json(sharing);
     } catch (error) {
       console.error("Error updating profile sharing:", error);
@@ -4240,7 +4231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let actualUserId = userId;
       if (isNaN(parseInt(userId))) {
         // It's a username, convert to ID
-        const user = await simpleStorage.getUserByUsername(userId);
+        const user = await storage.getUserByUsername(userId);
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
@@ -4249,7 +4240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         actualUserId = parseInt(userId);
       }
       
-      const sharing = await simpleStorage.getProfileSharingSettings(actualUserId);
+      const sharing = await storage.getProfileSharingSettings(actualUserId);
       res.json(sharing || { showSocialMedia: true }); // Default to showing social media
     } catch (error) {
       console.error("Error fetching user sharing settings:", error);
@@ -4264,13 +4255,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🔥 PROFILE: Getting profile data for username:", username);
       
       // Get user by username
-      const user = await simpleStorage.getUserByUsername(username);
+      const user = await storage.getUserByUsername(username);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
       // Get profile data
-      const profile = await simpleStorage.getUserProfile(user.id);
+      const profile = await storage.getUserProfile(user.id);
       
       // Combine user and profile data for complete profile view
       const combinedProfile = {
@@ -4306,13 +4297,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🔥 SEO: Getting profile SEO data for username:", username);
       
       // Get user by username
-      const user = await simpleStorage.getUserByUsername(username);
+      const user = await storage.getUserByUsername(username);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
       // Get user profile
-      const profile = await simpleStorage.getUserProfile(user.id);
+      const profile = await storage.getUserProfile(user.id);
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }
@@ -4346,8 +4337,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/seo/:route', async (req: any, res) => {
     try {
       const route = req.params.route;
-      const page = await simpleStorage.getSeoPageByRoute(route);
-      const settings = await simpleStorage.getSeoSettings();
+      const page = await storage.getSeoPageByRoute(route);
+      const settings = await storage.getSeoSettings();
       
       res.json({
         page,
@@ -4363,7 +4354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/representations', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const representations = await simpleStorage.getUserRepresentations(userId);
+      const representations = await storage.getUserRepresentations(userId);
       res.json(representations);
     } catch (error) {
       console.error("Error fetching user representations:", error);
@@ -4386,7 +4377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isPrimary: req.body.isPrimary || false,
       };
       
-      const representation = await simpleStorage.createUserRepresentation(representationData);
+      const representation = await storage.createUserRepresentation(representationData);
       res.json(representation);
     } catch (error) {
       console.error("Error creating user representation:", error);
@@ -4399,7 +4390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const representationId = parseInt(req.params.id);
       const representationData = req.body;
       
-      const representation = await simpleStorage.updateUserRepresentation(representationId, representationData);
+      const representation = await storage.updateUserRepresentation(representationId, representationData);
       res.json(representation);
     } catch (error) {
       console.error("Error updating user representation:", error);
@@ -4410,7 +4401,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/user/representations/:id', isAuthenticated, async (req: any, res) => {
     try {
       const representationId = parseInt(req.params.id);
-      await simpleStorage.deleteUserRepresentation(representationId);
+      await storage.deleteUserRepresentation(representationId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting user representation:", error);
@@ -4424,7 +4415,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🔥 API: Getting pricing tiers...", { role: req.query.role });
       
       // Get all pricing tiers
-      const allTiers = await simpleStorage.getPricingTiers();
+      const allTiers = await storage.getPricingTiers();
       console.log(`Found ${allTiers.length} pricing tiers`);
       
       // Enhance tiers with detailed features and descriptions
@@ -4544,7 +4535,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Tier ID is required" });
       }
       
-      const updatedUser = await simpleStorage.updateUserTier(req.user.id, parseInt(tierId));
+      const updatedUser = await storage.updateUserTier(req.user.id, parseInt(tierId));
       
       console.log("✅ API: User tier updated successfully", updatedUser);
       res.json({ success: true, user: updatedUser });
@@ -4566,7 +4557,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get the tier to check if it's free or paid
-      const allTiers = await simpleStorage.getPricingTiers();
+      const allTiers = await storage.getPricingTiers();
       const selectedTier = allTiers.find(t => t.id === parseInt(tierId));
       
       if (!selectedTier) {
@@ -4578,7 +4569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // If it's a free tier, update immediately
       if (isFree) {
-        const updatedUser = await simpleStorage.updateUserTier(req.user.id, parseInt(tierId));
+        const updatedUser = await storage.updateUserTier(req.user.id, parseInt(tierId));
         console.log("✅ API: Free tier selected successfully", updatedUser);
         return res.json({ success: true, user: updatedUser });
       }
@@ -4588,9 +4579,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let promoData = null;
 
       if (promoCode) {
-        promoData = await simpleStorage.validatePromoCode(promoCode, req.user.id, parseInt(tierId), selectedTier.category);
+        promoData = await storage.validatePromoCode(promoCode, req.user.id, parseInt(tierId), selectedTier.category);
         if (promoData) {
-          discount = await simpleStorage.calculateDiscountAmount(promoData, tierPrice);
+          discount = await storage.calculateDiscountAmount(promoData, tierPrice);
           console.log("🔥 PROMO: Applied promo code", { code: promoCode, discount });
         }
       }
@@ -4622,7 +4613,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log(`🔥 ADMIN VERIFICATION: Admin manually ${verified ? 'verifying' : 'unverifying'} user ${userId}`);
-      const profile = await simpleStorage.updateUserVerification(userId, verified);
+      const profile = await storage.updateUserVerification(userId, verified);
       
       res.json({ success: true, profile });
     } catch (error) {
@@ -4635,14 +4626,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/auto-verify-paid-users', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       console.log('🔥 AUTO-VERIFICATION: Starting bulk verification of paid users');
-      const allUsers = await simpleStorage.getAllUsers();
+      const allUsers = await storage.getAllUsers();
       let verifiedCount = 0;
       
       for (const user of allUsers) {
         // Verify users with paid plans (tier 2+)
         if (user.pricingTierId && user.pricingTierId >= 2) {
           try {
-            await simpleStorage.updateUserVerification(user.id, true);
+            await storage.updateUserVerification(user.id, true);
             verifiedCount++;
             console.log(`✅ AUTO-VERIFICATION: Verified paid user ${user.id} (${user.username})`);
           } catch (error) {
@@ -4754,7 +4745,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { userId, tierId } = paymentIntent.metadata;
         
         console.log("🔥 Stripe: Payment succeeded, updating user tier:", { userId, tierId });
-        await simpleStorage.updateUserTier(parseInt(userId), parseInt(tierId));
+        await storage.updateUserTier(parseInt(userId), parseInt(tierId));
         console.log("✅ Stripe: User tier updated successfully");
       }
 
@@ -4781,7 +4772,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const uploadResult = await uploadFileToWasabi(file.buffer, fileName, file.mimetype);
         
         if (uploadResult.success) {
-          const updatedUser = await simpleStorage.updateUserHeroImage(req.user.id, uploadResult.url);
+          const updatedUser = await storage.updateUserHeroImage(req.user.id, uploadResult.url);
           
           console.log("✅ API: Hero image uploaded successfully");
           res.json({
@@ -4813,7 +4804,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Access denied" });
       }
       
-      const jobHistory = await simpleStorage.getJobHistory(userId);
+      const jobHistory = await storage.getJobHistory(userId);
       console.log("🔥 JOB HISTORY: Found", jobHistory.length, "entries");
       
       res.setHeader('Content-Type', 'application/json');
@@ -4839,7 +4830,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ai_enhanced: false
       };
       
-      const jobEntry = await simpleStorage.createJobHistory(jobData);
+      const jobEntry = await storage.createJobHistory(jobData);
       console.log("🔥 JOB HISTORY: Created entry with ID", jobEntry.id);
       
       res.setHeader('Content-Type', 'application/json');
@@ -4860,12 +4851,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🔥 JOB HISTORY: Updating job history entry", jobId, req.body);
       
       // Verify ownership
-      const existingEntry = await simpleStorage.getJobHistoryById(jobId);
+      const existingEntry = await storage.getJobHistoryById(jobId);
       if (!existingEntry || existingEntry.userId !== userId) {
         return res.status(403).json({ message: "Access denied" });
       }
       
-      const updatedEntry = await simpleStorage.updateJobHistory(jobId, req.body);
+      const updatedEntry = await storage.updateJobHistory(jobId, req.body);
       console.log("🔥 JOB HISTORY: Updated entry", updatedEntry.id);
       
       res.setHeader('Content-Type', 'application/json');
@@ -4886,12 +4877,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🔥 JOB HISTORY: Deleting job history entry", jobId);
       
       // Verify ownership
-      const existingEntry = await simpleStorage.getJobHistoryById(jobId);
+      const existingEntry = await storage.getJobHistoryById(jobId);
       if (!existingEntry || existingEntry.userId !== userId) {
         return res.status(403).json({ message: "Access denied" });
       }
       
-      await simpleStorage.deleteJobHistory(jobId);
+      await storage.deleteJobHistory(jobId);
       console.log("🔥 JOB HISTORY: Deleted entry", jobId);
       
       res.setHeader('Content-Type', 'application/json');
@@ -4913,7 +4904,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🔥 JOB HISTORY AI: Enhancing job description for", jobId);
       
       // Verify ownership
-      const existingEntry = await simpleStorage.getJobHistoryById(jobId);
+      const existingEntry = await storage.getJobHistoryById(jobId);
       if (!existingEntry || existingEntry.userId !== userId) {
         return res.status(403).json({ message: "Access denied" });
       }
@@ -4926,7 +4917,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       
       // Update job history with enhanced description
-      const updatedEntry = await simpleStorage.updateJobHistory(jobId, {
+      const updatedEntry = await storage.updateJobHistory(jobId, {
         description: enhancedDescription,
         ai_enhanced: true
       });
@@ -4951,7 +4942,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🔥 JOB HISTORY SKILLS: Validating skills for", jobId);
       
       // Verify ownership
-      const existingEntry = await simpleStorage.getJobHistoryById(jobId);
+      const existingEntry = await storage.getJobHistoryById(jobId);
       if (!existingEntry || existingEntry.userId !== userId) {
         return res.status(403).json({ message: "Access denied" });
       }
@@ -4964,7 +4955,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       
       // Update job history with validated skills
-      const updatedEntry = await simpleStorage.updateJobHistory(jobId, {
+      const updatedEntry = await storage.updateJobHistory(jobId, {
         skill_validations: validatedSkills
       });
       
@@ -4993,14 +4984,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('👤 Getting profile for user:', userId);
       
       // Get both user account data and profile data
-      const user = await simpleStorage.getUser(userId);
+      const user = await storage.getUser(userId);
       console.log('👤 Found user:', !!user);
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      const profile = await simpleStorage.getUserProfile(userId);
+      const profile = await storage.getUserProfile(userId);
       console.log('👤 Found profile:', !!profile);
       
       // Combine user and profile data for complete user view
@@ -5045,10 +5036,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (/^\d+$/.test(userIdParam)) {
         // It's a numeric ID
         userId = parseInt(userIdParam);
-        user = await simpleStorage.getUser(userId);
+        user = await storage.getUser(userId);
       } else {
         // It's a username - need to find user first
-        user = await simpleStorage.getUserByUsername(userIdParam);
+        user = await storage.getUserByUsername(userIdParam);
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
@@ -5082,7 +5073,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get user and verify current password
-      const user = await simpleStorage.getUser(userId);
+      const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -5096,7 +5087,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Hash new password and update
       const hashedNewPassword = await hashPassword(newPassword);
-      const updatedUser = await simpleStorage.updateUser(userId, { 
+      const updatedUser = await storage.updateUser(userId, { 
         password: hashedNewPassword 
       });
       
@@ -5121,7 +5112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Valid visibility setting required (public, private, connections)" });
       }
       
-      const updatedProfile = await simpleStorage.updateUserProfile(userId, {
+      const updatedProfile = await storage.updateUserProfile(userId, {
         profileVisibility: visibility
       });
       
@@ -5141,14 +5132,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/user/usage", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const user = await simpleStorage.getUser(userId);
-      const pricingTier = user?.pricingTierId ? await simpleStorage.getPricingTier(user.pricingTierId) : null;
+      const user = await storage.getUser(userId);
+      const pricingTier = user?.pricingTierId ? await storage.getPricingTier(user.pricingTierId) : null;
       
       if (!pricingTier) {
         return res.status(404).json({ message: "Pricing tier not found" });
       }
       
-      const mediaFiles = await simpleStorage.getUserMediaFiles(userId);
+      const mediaFiles = await storage.getUserMediaFiles(userId);
       const photos = mediaFiles.filter(f => f.type === 'image');
       const videos = mediaFiles.filter(f => f.type === 'video');
       const audio = mediaFiles.filter(f => f.type === 'audio');
@@ -5554,13 +5545,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🔥 REGISTRATION: Creating user:", { username, email, role });
       
       // Check if username already exists
-      const existingUser = await simpleStorage.getUserByUsername(username);
+      const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
       }
       
       // Create user with automatic legal acceptance for compatibility
-      const user = await simpleStorage.createUser({
+      const user = await storage.createUser({
         username,
         password: await hashPassword(password),
         email,
@@ -5600,7 +5591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get actual profile data from database
         let profileData;
         try {
-          const profile = await simpleStorage.getProfileByUsername(username);
+          const profile = await storage.getProfileByUsername(username);
           profileData = profile || null;
         } catch (error) {
           console.log(`📄 Database query failed, using fallback data for ${username}`);
@@ -5619,7 +5610,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let profileImage = `${req.protocol}://${req.get('host')}/images/default-profile.jpg`;
         if (profileData?.userId) {
           try {
-            const userData = await simpleStorage.getUserByUsername(username);
+            const userData = await storage.getUserByUsername(username);
             if (userData?.profileImageUrl) {
               profileImage = userData.profileImageUrl;
             }
@@ -5733,10 +5724,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Update user's pricing tier
-      await simpleStorage.updateUserTier(req.user.id, tierId);
+      await storage.updateUserTier(req.user.id, tierId);
       
       // Get updated user data
-      const updatedUser = await simpleStorage.getUser(req.user.id);
+      const updatedUser = await storage.getUser(req.user.id);
       
       res.json({ 
         success: true, 
@@ -5752,7 +5743,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get pricing tiers (public endpoint)
   app.get('/api/pricing-tiers', async (req: any, res) => {
     try {
-      const tiers = await simpleStorage.getPricingTiers();
+      const tiers = await storage.getPricingTiers();
       res.json(tiers);
     } catch (error: any) {
       console.error('Error fetching pricing tiers:', error);
@@ -5777,7 +5768,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Record transaction in storage
-      const transaction = await simpleStorage.createPaymentTransaction({
+      const transaction = await storage.createPaymentTransaction({
         userId,
         stripePaymentIntentId,
         amount: amount.toString(),
@@ -5817,11 +5808,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isAnnual = paymentIntent.metadata?.isAnnual === 'true';
       
       // Update user's pricing tier
-      const updatedUser = await simpleStorage.updateUserPricingTier(userId, tierId);
+      const updatedUser = await storage.updateUserPricingTier(userId, tierId);
       
       // Mark user as verified for paid tiers
       if (tierId > 1) {
-        await simpleStorage.updateUserVerification(userId, true);
+        await storage.updateUserVerification(userId, true);
       }
       
       console.log("✅ PAYMENT: Payment confirmed and user tier updated:", {

@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
 import { storage } from './storage';
-import { storage as simpleStorage } from './simple-storage';
+import { storage as storage } from './simple-storage';
 import { User } from '@shared/schema';
 
 let resend: Resend | null = null;
@@ -81,7 +81,7 @@ function replaceTemplateVariables(content: string, variables: Record<string, str
 // Load email template from database
 async function loadEmailTemplate(templateName: string): Promise<any> {
   try {
-    const template = await simpleStorage.getEmailTemplateByName(templateName);
+    const template = await storage.getEmailTemplateByName(templateName);
     if (!template) {
       console.warn(`Email template '${templateName}' not found in database`);
       return null;

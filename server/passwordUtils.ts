@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { storage as simpleStorage } from './simple-storage';
+import { storage as storage } from './simple-storage';
 import { sendPasswordResetEmail } from './email';
 
 export async function generatePasswordResetToken(userId: string): Promise<string> {
@@ -19,7 +19,7 @@ export async function generatePasswordResetToken(userId: string): Promise<string
 export async function requestPasswordReset(email: string): Promise<boolean> {
   try {
     console.log(`🔐 Looking up user by email: ${email}`);
-    const user = await simpleStorage.getUserByEmail(email);
+    const user = await storage.getUserByEmail(email);
     if (!user) {
       console.log(`⚠️ User not found for email: ${email}`);
       // Don't reveal if user exists or not

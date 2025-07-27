@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
 import { storage } from './storage';
-import { storage as simpleStorage } from './simple-storage';
+import { storage as storage } from './simple-storage';
 import { User } from '@shared/schema';
 
 let resend: Resend | null = null;

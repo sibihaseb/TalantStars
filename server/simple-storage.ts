@@ -758,7 +758,7 @@ export class DatabaseStorage implements IStorage {
     console.log("🗃️ UNIFIED SYSTEM - BASIC PROFILE + QUESTIONNAIRE:", {
       basicFields: Object.keys(basicProfile),
       questionnaireFields: Object.keys(questionnaireResponses.acting),
-      unifiedStorage: !!filteredProfile.questionnaireResponses
+      storage: !!filteredProfile.questionnaireResponses
     });
     
     try {
