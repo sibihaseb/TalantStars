@@ -14,10 +14,19 @@
 5. **Save**: Your project URL and password
 
 ### Step 2: Import Database Schema (2 minutes)
-1. **In Supabase dashboard**: Go to "SQL Editor"
-2. **Click**: "New Query"
-3. **Copy & Paste** the entire content from `supabase-schema.sql` file
-4. **Click**: "Run" (creates all 51 tables automatically)
+1. **In your Supabase project dashboard**: Look for "SQL Editor" in the left sidebar menu
+2. **Click**: "SQL Editor" 
+3. **Click**: "New Query" button (usually green button on the right)
+4. **Open the file**: `supabase-schema.sql` (in your project files)
+5. **Select All**: Press Ctrl+A (or Cmd+A on Mac) to select all the text in that file
+6. **Copy**: Press Ctrl+C (or Cmd+C on Mac) 
+7. **Go back to Supabase**: Click in the large text area in SQL Editor
+8. **Paste**: Press Ctrl+V (or Cmd+V on Mac) - you should see a lot of SQL code
+9. **Click**: "Run" button (bottom right of the editor)
+10. **Wait**: 10-30 seconds for it to create all tables
+11. **Success**: You should see "Success. No rows returned" message
+
+**What this does**: Creates all 51 database tables your app needs (users, profiles, jobs, etc.)
 
 ### Step 3: Create GitHub Repository (3 minutes)
 1. **Go to**: [github.com/new](https://github.com/new)
