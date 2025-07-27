@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage as simpleStorage } from "./simple-storage";
+import { unifiedStorage } from "./unified-storage";
 import * as authSetup from "./auth";
 const { isAuthenticated, requirePlan, isAdmin } = authSetup;
 import { requirePermission, requireAnyPermission, PermissionChecks } from "./permissions";
@@ -336,36 +337,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Profile routes
+  // UNIFIED PROFILE: Get profile with clean data isolation
   app.get('/api/profile', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      console.log("Getting profile for user:", userId);
+      console.log("🔍 UNIFIED: Getting profile for user:", userId);
       
-      const profile = await simpleStorage.getUserProfile(userId);
+      const profile = await unifiedStorage.getUserProfile(userId);
       
       if (!profile) {
-        return res.status(404).json({ message: "Profile not found" });
+        console.log("🆕 UNIFIED: No profile found - user will see clean onboarding");
+        return res.status(404).json({ message: "Profile not found - clean slate" });
       }
       
+      console.log("✅ UNIFIED: Profile found - no data contamination");
       res.json(profile);
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error("Error fetching unified profile:", error);
       res.status(500).json({ message: "Failed to fetch profile" });
     }
   });
 
   app.post('/api/profile', isAuthenticated, async (req: any, res) => {
-    console.log("🔥 ENTERING /api/profile POST endpoint");
+    console.log("🆕 UNIFIED PROFILE ENDPOINT - PREVENTING DATA CONTAMINATION");
     try {
       const userId = req.user.id;
-      console.log("🔥 CRITICAL DEBUG - USER OBJECT CHECK:");
-      console.log("  req.user:", req.user);
-      console.log("  req.user.id:", req.user.id);
-      console.log("  req.user.role:", req.user.role);
-      console.log("  req.user keys:", Object.keys(req.user || {}));
-      console.log("Creating profile for user:", userId);
-      console.log("Request body:", req.body);
+      console.log("🆕 UNIFIED: Creating/updating profile for user:", userId);
+      console.log("🆕 UNIFIED: User role:", req.user.role);
       
       // Validate that userId exists
       if (!userId) {
@@ -452,25 +450,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currentAgent: profileData.currentAgent
       });
       
-      // Check if user already has a profile to prevent duplicates
-      console.log("🔥🔥🔥 JENNIFER DUPLICATE FIX: Checking for existing profile for user:", userId);
-      const existingProfile = await simpleStorage.getUserProfile(userId);
-      console.log("🔥🔥🔥 JENNIFER DUPLICATE FIX: Existing profile found:", !!existingProfile);
-      if (existingProfile) {
-        console.log("🔥🔥🔥 JENNIFER DUPLICATE FIX: Found existing profile with ID:", existingProfile.id);
-      }
+      // UNIFIED SYSTEM: Check for existing profile to prevent data contamination
+      console.log("🆕 UNIFIED: Checking for existing profile for user:", userId);
+      const existingProfile = await unifiedStorage.getUserProfile(userId);
+      console.log("🆕 UNIFIED: Existing profile found:", !!existingProfile);
       
       let profile;
       if (existingProfile) {
-        // UPDATE existing profile instead of creating duplicate
-        console.log("🔄 PROFILE UPDATE: Updating existing profile to prevent duplicates");
-        profile = await simpleStorage.updateUserProfile(userId, profileData);
-        console.log("🔄 PROFILE UPDATE: Profile updated successfully");
+        console.log("🆕 UNIFIED: Updating existing profile - preventing data contamination");
+        profile = await unifiedStorage.updateUserProfile(userId, profileData);
       } else {
-        // CREATE new profile only if none exists
-        console.log("🔄 PROFILE UPDATE: Creating new profile");
-        profile = await simpleStorage.createUserProfile(profileData);
-        console.log("🔄 PROFILE UPDATE: Profile created successfully");
+        console.log("🆕 UNIFIED: Creating clean new profile - fresh slate for user");
+        profile = await unifiedStorage.createUserProfile(profileData);
       }
       console.log("🎯 DATABASE INSERT RESULT:");
       console.log("  ✅ Profile created with ID:", profile?.id);
@@ -480,14 +471,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("  ✅ Stored languages count:", profile?.languages?.length || 0);
       console.log("  ✅ Stored skills count:", profile?.skills?.length || 0);
       
-      // Immediately verify the data was actually saved by reading it back
-      const verificationProfile = await simpleStorage.getUserProfile(userId);
-      console.log("🔍 VERIFICATION READ-BACK:");
-      console.log("  ✅ Can retrieve profile:", !!verificationProfile);
-      console.log("  ✅ Retrieved displayName:", verificationProfile?.displayName);
-      console.log("  ✅ Retrieved bio:", verificationProfile?.bio?.substring(0, 50) + "...");
-      console.log("  ✅ Retrieved languages count:", verificationProfile?.languages?.length || 0);
-      console.log("  ✅ Retrieved skills count:", verificationProfile?.skills?.length || 0);
+      // Verify unified profile data was saved correctly
+      const verificationProfile = await unifiedStorage.getUserProfile(userId);
+      console.log("🔍 UNIFIED VERIFICATION:");
+      console.log("  ✅ Profile retrieved:", !!verificationProfile);
+      console.log("  ✅ Clean user data - no contamination:", verificationProfile?.userId === userId.toString());
       
       // After creating profile, return combined user+profile data like TalentDashboard expects
       const user = await simpleStorage.getUser(userId);

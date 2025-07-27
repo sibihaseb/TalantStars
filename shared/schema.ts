@@ -123,6 +123,9 @@ export const userProfiles = pgTable("user_profiles", {
   credits: jsonb("credits"), // Past work credits
   representations: jsonb("representations"), // Manager/agency info
   
+  // UNIFIED QUESTIONNAIRE DATA - All questionnaire responses stored here as JSON
+  questionnaireResponses: jsonb("questionnaire_responses"), // Complete questionnaire data in single field
+  
   // Acting-specific questionnaire fields
   primarySpecialty: text("primary_specialty").array(), // film, theater, commercial, etc.
   yearsExperience: varchar("years_experience"), // Number of years acting

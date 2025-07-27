@@ -700,22 +700,66 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUserProfile(profile: InsertUserProfile): Promise<UserProfile> {
-    console.log("🗃️ DATABASE INSERT - PROFILE DATA (raw):", profile);
+    console.log("🗃️ UNIFIED PROFILE CREATION - PROFILE DATA (raw):", profile);
     
-    // CRITICAL FIX: Filter out undefined values which Drizzle ignores during inserts
+    // CRITICAL: Check if profile already exists to prevent duplicates
+    const existingProfile = await this.getUserProfile(parseInt(profile.userId));
+    if (existingProfile) {
+      console.log(`❌ DUPLICATE PREVENTION: Profile already exists for user ${profile.userId}, updating instead`);
+      return await this.updateUserProfile(parseInt(profile.userId), profile);
+    }
+    
+    // UNIFIED SYSTEM: Extract all questionnaire data and store in unified field
+    const { 
+      primarySpecialty, yearsExperience, actingMethod, improvisationComfort, 
+      stageCombat, intimateScenesComfort, roleTypes, motionCapture, 
+      animalWork, cryingOnCue, periodPieces, physicalComedy, 
+      accentExperience, greenScreen, stuntComfort, shakespeareExperience, 
+      musicalTheater, horrorThriller, currentAgent, currentPublicist, 
+      representationStatus, 
+      ...basicProfile 
+    } = profile;
+    
+    // Build unified questionnaire responses object
+    const questionnaireResponses = {
+      acting: {
+        primarySpecialty: primarySpecialty || [],
+        yearsExperience: yearsExperience || '',
+        actingMethod: actingMethod || [],
+        improvisationComfort: improvisationComfort || '',
+        stageCombat: stageCombat || '',
+        intimateScenesComfort: intimateScenesComfort || '',
+        roleTypes: roleTypes || [],
+        motionCapture: motionCapture || '',
+        animalWork: animalWork || '',
+        cryingOnCue: cryingOnCue || '',
+        periodPieces: periodPieces || '',
+        physicalComedy: physicalComedy || '',
+        accentExperience: accentExperience || '',
+        greenScreen: greenScreen || '',
+        stuntComfort: stuntComfort || '',
+        shakespeareExperience: shakespeareExperience || '',
+        musicalTheater: musicalTheater || '',
+        horrorThriller: horrorThriller || [],
+        currentAgent: currentAgent || '',
+        currentPublicist: currentPublicist || '',
+        representationStatus: representationStatus || ''
+      }
+    };
+    
+    // Filter out undefined values
     const filteredProfile = Object.fromEntries(
-      Object.entries(profile).filter(([_, value]) => value !== undefined)
+      Object.entries({
+        ...basicProfile,
+        questionnaireResponses // Store all questionnaire data in single JSON field
+      }).filter(([_, value]) => value !== undefined)
     ) as InsertUserProfile;
     
-    console.log("🗃️ DATABASE INSERT - PROFILE DATA (filtered):", filteredProfile);
-    console.log("  Acting fields being inserted:");
-    console.log("    improvisationComfort:", filteredProfile.improvisationComfort);
-    console.log("    intimateScenesComfort:", filteredProfile.intimateScenesComfort);
-    console.log("    motionCapture:", filteredProfile.motionCapture);
-    console.log("    cryingOnCue:", filteredProfile.cryingOnCue);
-    console.log("    stuntComfort:", filteredProfile.stuntComfort);
-    console.log("    yearsExperience:", filteredProfile.yearsExperience);
-    console.log("    primarySpecialty:", filteredProfile.primarySpecialty);
+    console.log("🗃️ UNIFIED SYSTEM - BASIC PROFILE + QUESTIONNAIRE:", {
+      basicFields: Object.keys(basicProfile),
+      questionnaireFields: Object.keys(questionnaireResponses.acting),
+      unifiedStorage: !!filteredProfile.questionnaireResponses
+    });
     
     try {
       // Use regular Drizzle insert first
