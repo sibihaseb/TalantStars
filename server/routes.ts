@@ -497,6 +497,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put('/api/profile', isAuthenticated, async (req: any, res) => {
+    console.log("🔥 ENTERING /api/profile PUT endpoint - PROFILE UPDATE");
+    console.log("🔥 PUT REQUEST USER:", req.user?.id, req.user?.username);
+    console.log("🔥 PUT REQUEST BODY:", req.body);
     try {
       const userId = req.user.id;
       console.log("✅ PROFILE UPDATE: Updating profile for user:", userId);

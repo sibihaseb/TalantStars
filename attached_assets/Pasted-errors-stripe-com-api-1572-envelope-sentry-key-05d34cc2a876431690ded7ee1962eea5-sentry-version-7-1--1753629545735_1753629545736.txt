@@ -1,0 +1,1121 @@
+errors.stripe.com/api/1572/envelope/?sentry_key=05d34cc2a876431690ded7ee1962eea5&sentry_version=7:1  Failed to load resource: the server responded with a status of 429 ()
+errors.stripe.com/api/1572/envelope/?sentry_key=05d34cc2a876431690ded7ee1962eea5&sentry_version=7:1  Failed to load resource: the server responded with a status of 429 ()
+ Error: <ellipse> attribute ry: Expected length, "undefined".
+a6 @ index-DglWGgqR.js:805
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 🔄 Periodic auto-save completed
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 💾 AUTO-SAVING form data on field change
+ 🔥 SUBMIT BUTTON CLICKED - Direct click handler
+ Form errors: Object
+ Form values: Object
+ Auth status: true jennifer
+ 🔥 FORM SUBMIT EVENT TRIGGERED
+ ✅ Session valid - proceeding with submit
+ Has form errors: false
+ 🚀 FORCING FORM SUBMISSION
+ === FORM SUBMISSION START ===
+ Form data: Object
+ Form errors: Object
+ Form is valid: false
+ User authenticated: true
+ Current user: Object
+ 🔍 CURRENT FORM VALUES: Object
+ 🔍 MERGED DATA: Object
+ 🚨 ACTING FIELDS DEBUG - MERGED DATA:
+   improvisationComfort: comfortable type: string
+   intimateScenesComfort:  type: string
+   motionCapture:  type: string
+   cryingOnCue:  type: string
+   stuntComfort:  type: string
+   yearsExperience: 2 type: string
+   primarySpecialty: Array(2) length: 2
+ Cleaned data for submission: Object
+ 🚨 ACTING FIELDS DEBUG - AFTER CLEANING:
+   improvisationComfort: comfortable type: string
+   intimateScenesComfort: null type: object
+   motionCapture: null type: object
+   cryingOnCue: null type: object
+   stuntComfort: null type: object
+ === SUBMITTING TO API ===
+ 🔥 Final submission data: Object
+ 🔥 MUTATION: Starting profile creation with data: Object
+ 🔥 MUTATION: User authentication status: Object
+ 📱 LOADING SAVED FORM DATA: Object
+ 🔍 MultiSelect Debug - Field: instruments
+ 🔍 Current values: Array(3)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 3
+ 🔍 MultiSelect Debug - Field: genres
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: vocalRange
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: languages
+ 🔍 Current values: Array(1)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 1
+ 🔍 MultiSelect Debug - Field: accents
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ 🔍 MultiSelect Debug - Field: unionStatus
+ 🔍 Current values: Array(0)
+ 🔍 Current values type: object
+ 🔍 Is array: true
+ 🔍 Values length: 0
+ ✅ Auth OK in form submit - processing...
+ === FORM SUBMISSION START ===
+ Form data: Object
+ Form errors: Object
+ Form is valid: false
+ User authenticated: true
+ Current user: Object
+ 🔍 CURRENT FORM VALUES: Object
+ 🔍 MERGED DATA: Object
+ 🚨 ACTING FIELDS DEBUG - MERGED DATA:
+   improvisationComfort: comfortable type: string
+   intimateScenesComfort:  type: string
+   motionCapture:  type: string
+   cryingOnCue:  type: string
+   stuntComfort:  type: string
+   yearsExperience: 2 type: string
+   primarySpecialty: Array(2) length: 2
+ Cleaned data for submission: Object
+index-DglWGgqR.js:859 🚨 ACTING FIELDS DEBUG - AFTER CLEANING:
+index-DglWGgqR.js:859   improvisationComfort: comfortable type: string
+index-DglWGgqR.js:859   intimateScenesComfort: null type: object
+index-DglWGgqR.js:859   motionCapture: null type: object
+index-DglWGgqR.js:859   cryingOnCue: null type: object
+index-DglWGgqR.js:859   stuntComfort: null type: object
+index-DglWGgqR.js:859 === SUBMITTING TO API ===
+index-DglWGgqR.js:859 🔥 Final submission data: Object
+index-DglWGgqR.js:859 🔥 MUTATION: Starting profile creation with data: Object
+index-DglWGgqR.js:859 🔥 MUTATION: User authentication status: Object
+index-DglWGgqR.js:859 📱 LOADING SAVED FORM DATA: Object
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: instruments
+index-DglWGgqR.js:859 🔍 Current values: Array(3)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 3
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: genres
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: vocalRange
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: languages
+index-DglWGgqR.js:859 🔍 Current values: Array(1)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 1
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: accents
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: unionStatus
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+api/profile:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+index-DglWGgqR.js:859 === FRONTEND API RESPONSE ===
+index-DglWGgqR.js:859 Status: 500, URL: /api/profile
+index-DglWGgqR.js:859 🚨 API ERROR: 500 - {"message":"Failed to create profile","error":"syntax error at or near \"s\""}
+index-DglWGgqR.js:859 🔥 MUTATION: Error in mutationFn: Error: 500: {"message":"Failed to create profile","error":"syntax error at or near \"s\""}
+    at zE (index-DglWGgqR.js:48:42938)
+    at async ce (index-DglWGgqR.js:48:43512)
+    at async Object.mutationFn (index-DglWGgqR.js:840:67689)
+console.error @ index-DglWGgqR.js:859
+await in console.error
+fn @ index-DglWGgqR.js:48
+g @ index-DglWGgqR.js:48
+start @ index-DglWGgqR.js:48
+execute @ index-DglWGgqR.js:48
+await in execute
+mutate @ index-DglWGgqR.js:48
+(anonymous) @ index-DglWGgqR.js:48
+Ne @ index-DglWGgqR.js:840
+(anonymous) @ index-DglWGgqR.js:816
+await in (anonymous)
+onClick @ index-DglWGgqR.js:840
+await in onClick
+r9 @ index-DglWGgqR.js:37
+a9 @ index-DglWGgqR.js:37
+i9 @ index-DglWGgqR.js:37
+KN @ index-DglWGgqR.js:37
+uA @ index-DglWGgqR.js:37
+(anonymous) @ index-DglWGgqR.js:37
+Ej @ index-DglWGgqR.js:40
+F5 @ index-DglWGgqR.js:37
+Mg @ index-DglWGgqR.js:37
+nj @ index-DglWGgqR.js:37
+w9 @ index-DglWGgqR.js:37
+index-DglWGgqR.js:859 === PROFILE CREATION ERROR ===
+index-DglWGgqR.js:859 Error: Error: 500: {"message":"Failed to create profile","error":"syntax error at or near \"s\""}
+    at zE (index-DglWGgqR.js:48:42938)
+    at async ce (index-DglWGgqR.js:48:43512)
+    at async Object.mutationFn (index-DglWGgqR.js:840:67689)
+console.error @ index-DglWGgqR.js:859
+await in console.error
+mutate @ index-DglWGgqR.js:48
+(anonymous) @ index-DglWGgqR.js:48
+Ne @ index-DglWGgqR.js:840
+(anonymous) @ index-DglWGgqR.js:816
+await in (anonymous)
+onClick @ index-DglWGgqR.js:840
+await in onClick
+r9 @ index-DglWGgqR.js:37
+a9 @ index-DglWGgqR.js:37
+i9 @ index-DglWGgqR.js:37
+KN @ index-DglWGgqR.js:37
+uA @ index-DglWGgqR.js:37
+(anonymous) @ index-DglWGgqR.js:37
+Ej @ index-DglWGgqR.js:40
+F5 @ index-DglWGgqR.js:37
+Mg @ index-DglWGgqR.js:37
+nj @ index-DglWGgqR.js:37
+w9 @ index-DglWGgqR.js:37
+index-DglWGgqR.js:859 Error type: object
+index-DglWGgqR.js:859 Error details: Object
+index-DglWGgqR.js:859 Final error message: 500: {"message":"Failed to create profile","error":"syntax error at or near \"s\""}
+index-DglWGgqR.js:859 📱 LOADING SAVED FORM DATA: Object
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: instruments
+index-DglWGgqR.js:859 🔍 Current values: Array(3)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 3
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: genres
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: vocalRange
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: languages
+index-DglWGgqR.js:859 🔍 Current values: Array(1)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 1
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: accents
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: unionStatus
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+api/profile:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 ()
+index-DglWGgqR.js:859 === FRONTEND API RESPONSE ===
+index-DglWGgqR.js:859 Status: 500, URL: /api/profile
+index-DglWGgqR.js:859 🚨 API ERROR: 500 - {"message":"Failed to create profile","error":"syntax error at or near \"s\""}
+index-DglWGgqR.js:859 🔥 MUTATION: Error in mutationFn: Error: 500: {"message":"Failed to create profile","error":"syntax error at or near \"s\""}
+    at zE (index-DglWGgqR.js:48:42938)
+    at async ce (index-DglWGgqR.js:48:43512)
+    at async Object.mutationFn (index-DglWGgqR.js:840:67689)
+console.error @ index-DglWGgqR.js:859
+await in console.error
+fn @ index-DglWGgqR.js:48
+g @ index-DglWGgqR.js:48
+start @ index-DglWGgqR.js:48
+execute @ index-DglWGgqR.js:48
+await in execute
+mutate @ index-DglWGgqR.js:48
+(anonymous) @ index-DglWGgqR.js:48
+Ne @ index-DglWGgqR.js:840
+(anonymous) @ index-DglWGgqR.js:816
+await in (anonymous)
+onSubmit @ index-DglWGgqR.js:840
+await in onSubmit
+r9 @ index-DglWGgqR.js:37
+a9 @ index-DglWGgqR.js:37
+i9 @ index-DglWGgqR.js:37
+KN @ index-DglWGgqR.js:37
+uA @ index-DglWGgqR.js:37
+(anonymous) @ index-DglWGgqR.js:37
+Ej @ index-DglWGgqR.js:40
+F5 @ index-DglWGgqR.js:37
+Mg @ index-DglWGgqR.js:37
+nj @ index-DglWGgqR.js:37
+w9 @ index-DglWGgqR.js:37
+index-DglWGgqR.js:859 === PROFILE CREATION ERROR ===
+index-DglWGgqR.js:859 Error: Error: 500: {"message":"Failed to create profile","error":"syntax error at or near \"s\""}
+    at zE (index-DglWGgqR.js:48:42938)
+    at async ce (index-DglWGgqR.js:48:43512)
+    at async Object.mutationFn (index-DglWGgqR.js:840:67689)
+console.error @ index-DglWGgqR.js:859
+await in console.error
+mutate @ index-DglWGgqR.js:48
+(anonymous) @ index-DglWGgqR.js:48
+Ne @ index-DglWGgqR.js:840
+(anonymous) @ index-DglWGgqR.js:816
+await in (anonymous)
+onSubmit @ index-DglWGgqR.js:840
+await in onSubmit
+r9 @ index-DglWGgqR.js:37
+a9 @ index-DglWGgqR.js:37
+i9 @ index-DglWGgqR.js:37
+KN @ index-DglWGgqR.js:37
+uA @ index-DglWGgqR.js:37
+(anonymous) @ index-DglWGgqR.js:37
+Ej @ index-DglWGgqR.js:40
+F5 @ index-DglWGgqR.js:37
+Mg @ index-DglWGgqR.js:37
+nj @ index-DglWGgqR.js:37
+w9 @ index-DglWGgqR.js:37
+index-DglWGgqR.js:859 Error type: object
+index-DglWGgqR.js:859 Error details: Object
+index-DglWGgqR.js:859 Final error message: 500: {"message":"Failed to create profile","error":"syntax error at or near \"s\""}
+index-DglWGgqR.js:859 📱 LOADING SAVED FORM DATA: Object
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: instruments
+index-DglWGgqR.js:859 🔍 Current values: Array(3)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 3
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: genres
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: vocalRange
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: languages
+index-DglWGgqR.js:859 🔍 Current values: Array(1)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 1
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: accents
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: unionStatus
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 📱 LOADING SAVED FORM DATA: Object
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: instruments
+index-DglWGgqR.js:859 🔍 Current values: Array(3)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 3
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: genres
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: vocalRange
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: languages
+index-DglWGgqR.js:859 🔍 Current values: Array(1)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 1
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: accents
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: unionStatus
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 📱 LOADING SAVED FORM DATA: Object
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: instruments
+index-DglWGgqR.js:859 🔍 Current values: Array(3)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 3
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: genres
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: vocalRange
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: languages
+index-DglWGgqR.js:859 🔍 Current values: Array(1)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 1
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: accents
+index-DglWGgqR.js:859 🔍 Current values: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔍 MultiSelect Debug - Field: unionStatus
+index-DglWGgqR.js:859 🔍 Current values: Array(0)length: 0[[Prototype]]: Array(0)
+index-DglWGgqR.js:859 🔍 Current values type: object
+index-DglWGgqR.js:859 🔍 Is array: true
+index-DglWGgqR.js:859 🔍 Values length: 0
+index-DglWGgqR.js:859 🔄 Periodic auto-save completed
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
+ 🔄 Periodic auto-save completed

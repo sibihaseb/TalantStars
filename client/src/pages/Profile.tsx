@@ -133,11 +133,33 @@ export default function Profile() {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileFormData) => {
+      console.log("🔥 PROFILE UPDATE: Starting mutation with data:", data);
+      console.log("🔥 PROFILE UPDATE: Existing profile exists:", !!profile);
+      
+      // Clean the data before sending
+      const cleanedData = {
+        ...data,
+        // Ensure arrays are not empty strings
+        languages: Array.isArray(data.languages) ? data.languages : [],
+        accents: Array.isArray(data.accents) ? data.accents : [],
+        instruments: Array.isArray(data.instruments) ? data.instruments : [],
+        genres: Array.isArray(data.genres) ? data.genres : [],
+      };
+      
+      console.log("🔥 PROFILE UPDATE: Cleaned data:", cleanedData);
+      
       const response = await apiRequest(
         profile ? "PUT" : "POST",
         "/api/profile",
-        data
+        cleanedData
       );
+      
+      if (!response.ok) {
+        const error = await response.text();
+        console.error("🔥 PROFILE UPDATE ERROR:", error);
+        throw new Error(`Profile update failed: ${response.status} - ${error}`);
+      }
+      
       return response.json();
     },
     onSuccess: () => {

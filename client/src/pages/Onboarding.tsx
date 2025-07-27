@@ -833,32 +833,8 @@ function Onboarding() {
   const watchedValues = form.watch(["role", "talentType", "displayName", "location", "bio", "website", "phoneNumber"]);
   const [watchedRole, watchedTalentType, watchedDisplayName, watchedLocation, watchedBio, watchedWebsite, watchedPhoneNumber] = watchedValues;
   
-  // Auto-save form data on field changes and periodically
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      const currentValues = form.getValues();
-      // Only save if we have some meaningful data
-      if (currentValues.displayName || currentValues.bio || currentValues.location) {
-        console.log("💾 AUTO-SAVING form data on field change");
-        localStorage.setItem('onboarding-form-data', JSON.stringify(currentValues));
-      }
-    }
-  }, [watchedDisplayName, watchedBio, watchedLocation, form, isAuthenticated, user]);
-  
-  // Periodic auto-save every 15 seconds
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      const autoSaveInterval = setInterval(() => {
-        const currentValues = form.getValues();
-        if (currentValues.displayName || currentValues.bio || currentValues.location) {
-          localStorage.setItem('onboarding-form-data', JSON.stringify(currentValues));
-          console.log("🔄 Periodic auto-save completed");
-        }
-      }, 15000); // Every 15 seconds
-      
-      return () => clearInterval(autoSaveInterval);
-    }
-  }, [form, isAuthenticated, user]);
+  // REMOVED AUTO-SAVE FUNCTIONALITY - Was causing infinite loops and conflicts
+  // Auto-save disabled to prevent form submission conflicts and Stripe rate limiting
 
   const getRoleIcon = (role: string) => {
     switch (role) {
