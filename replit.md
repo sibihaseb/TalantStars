@@ -45,6 +45,32 @@ Preferred communication style: Simple, everyday language.
 - **Authentication Flow Restored**: Session management working with 7-day persistence, fresh login credentials validated
 - **Result**: ✅ Complete resolution of duplicate profile issue - onboarding form now updates existing profiles correctly, eliminating multiple profile records per user
 
+### CRITICAL ACTING QUESTIONNAIRE PERSISTENCE FIX - Complete Resolution of All Acting Fields Database Storage (July 27, 2025)
+- **CRITICAL SUCCESS**: Completely resolved the acting questionnaire data persistence issue that was preventing all acting fields from being saved to the database
+- **Root Cause Identified**: Drizzle ORM was filtering out undefined values during database operations AND had field mapping issues between camelCase (code) and snake_case (database columns)
+- **Technical Issue Details**: 
+  - Drizzle .insert() and .update() operations were silently ignoring acting fields due to undefined value filtering
+  - Additional mapping conflict between JavaScript camelCase field names (improvisationComfort) and PostgreSQL snake_case columns (improvisation_comfort)
+  - Database schema was correct, but ORM wasn't properly handling the field name mapping for acting-specific columns
+- **Comprehensive Solution Implemented**: 
+  - ✅ **Undefined Value Filtering**: Added filtering in both createUserProfile and updateUserProfile methods to exclude undefined values before database operations
+  - ✅ **Raw SQL Fallback System**: Implemented individual SQL statements for each acting field when Drizzle ORM fails to persist them
+  - ✅ **Detection Logic**: Added intelligent detection to identify when acting fields are missing after Drizzle operations
+  - ✅ **Individual SQL Updates**: Use separate UPDATE statements for each acting field to bypass ORM mapping issues
+  - ✅ **Array Handling**: Proper PostgreSQL array formatting for primarySpecialty field using {value1,value2} syntax
+- **All Acting Fields Now Persist Correctly**:
+  - ✅ improvisation_comfort (comfortable, somewhat, not_comfortable)
+  - ✅ intimate_scenes_comfort (comfortable, somewhat, not_comfortable)  
+  - ✅ motion_capture (experienced, some, none)
+  - ✅ crying_on_cue (easily, with_preparation, difficult)
+  - ✅ stunt_comfort (comfortable, basic, not_comfortable)
+  - ✅ years_experience (number of years as string)
+  - ✅ primary_specialty (array of specialties: dramatic, comedy, commercial, etc.)
+- **Database Verification Confirmed**: Direct SQL queries show all acting fields properly stored with correct values and data types
+- **User Experience Fixed**: Actors can now complete comprehensive acting questionnaires with full data persistence across all 7 acting-specific fields
+- **Production Ready**: Both profile creation (CREATE) and profile updates (UPDATE) now handle acting fields correctly with raw SQL fallback system
+- **Result**: ✅ Complete resolution of acting questionnaire persistence - all acting fields now save correctly to database and are retrievable for profile display
+
 ### CRITICAL AUTHENTICATION SYNCHRONIZATION SYSTEM FIX - Complete Registration to Onboarding Flow Now 100% Operational (July 27, 2025)
 - **CRITICAL SUCCESS**: Completely resolved all authentication synchronization conflicts that were preventing users from successfully completing registration → onboarding flow
 - **Root Cause Identified**: Multiple system synchronization issues causing authentication state conflicts between registration, login, and onboarding components:

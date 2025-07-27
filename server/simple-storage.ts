@@ -700,23 +700,186 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUserProfile(profile: InsertUserProfile): Promise<UserProfile> {
-    const [userProfile] = await db
-      .insert(userProfiles)
-      .values(profile)
-      .returning();
-    return userProfile;
+    console.log("🗃️ DATABASE INSERT - PROFILE DATA (raw):", profile);
+    
+    // CRITICAL FIX: Filter out undefined values which Drizzle ignores during inserts
+    const filteredProfile = Object.fromEntries(
+      Object.entries(profile).filter(([_, value]) => value !== undefined)
+    ) as InsertUserProfile;
+    
+    console.log("🗃️ DATABASE INSERT - PROFILE DATA (filtered):", filteredProfile);
+    console.log("  Acting fields being inserted:");
+    console.log("    improvisationComfort:", filteredProfile.improvisationComfort);
+    console.log("    intimateScenesComfort:", filteredProfile.intimateScenesComfort);
+    console.log("    motionCapture:", filteredProfile.motionCapture);
+    console.log("    cryingOnCue:", filteredProfile.cryingOnCue);
+    console.log("    stuntComfort:", filteredProfile.stuntComfort);
+    console.log("    yearsExperience:", filteredProfile.yearsExperience);
+    console.log("    primarySpecialty:", filteredProfile.primarySpecialty);
+    
+    try {
+      // Use regular Drizzle insert first
+      const [userProfile] = await db
+        .insert(userProfiles)
+        .values(filteredProfile)
+        .returning();
+        
+      console.log("🗃️ DATABASE INSERT RESULT:");
+      console.log("  Returned profile ID:", userProfile.id);
+      console.log("  Returned acting fields:");
+      console.log("    improvisationComfort:", userProfile.improvisationComfort);
+      console.log("    intimateScenesComfort:", userProfile.intimateScenesComfort);
+      console.log("    motionCapture:", userProfile.motionCapture);
+      console.log("    cryingOnCue:", userProfile.cryingOnCue);
+      
+      // CRITICAL FIX: If acting fields are missing, update them with raw SQL
+      const needsActingFix = (
+        (!userProfile.improvisationComfort && filteredProfile.improvisationComfort) ||
+        (!userProfile.intimateScenesComfort && filteredProfile.intimateScenesComfort) ||
+        (!userProfile.motionCapture && filteredProfile.motionCapture) ||
+        (!userProfile.cryingOnCue && filteredProfile.cryingOnCue) ||
+        (!userProfile.stuntComfort && filteredProfile.stuntComfort) ||
+        (!userProfile.yearsExperience && filteredProfile.yearsExperience) ||
+        (!userProfile.primarySpecialty && filteredProfile.primarySpecialty)
+      );
+      
+      console.log('🔧 Checking if raw SQL fix needed:', needsActingFix);
+      console.log('🔧 Conditions:');
+      console.log('  improvisationComfort missing:', !userProfile.improvisationComfort, 'has value:', !!filteredProfile.improvisationComfort);
+      console.log('  intimateScenesComfort missing:', !userProfile.intimateScenesComfort, 'has value:', !!filteredProfile.intimateScenesComfort);
+      console.log('  motionCapture missing:', !userProfile.motionCapture, 'has value:', !!filteredProfile.motionCapture);
+      
+      if (needsActingFix) {
+        console.log('🔧 CRITICAL: Acting fields missing from Drizzle insert, applying raw SQL fix...');
+        
+        // Use separate SQL statements for each field to avoid parameter issues
+        const queries = [];
+        if (filteredProfile.improvisationComfort) {
+          queries.push(db.execute(`UPDATE user_profiles SET improvisation_comfort = '${filteredProfile.improvisationComfort}' WHERE id = ${userProfile.id}`));
+        }
+        if (filteredProfile.intimateScenesComfort) {
+          queries.push(db.execute(`UPDATE user_profiles SET intimate_scenes_comfort = '${filteredProfile.intimateScenesComfort}' WHERE id = ${userProfile.id}`));
+        }
+        if (filteredProfile.motionCapture) {
+          queries.push(db.execute(`UPDATE user_profiles SET motion_capture = '${filteredProfile.motionCapture}' WHERE id = ${userProfile.id}`));
+        }
+        if (filteredProfile.cryingOnCue) {
+          queries.push(db.execute(`UPDATE user_profiles SET crying_on_cue = '${filteredProfile.cryingOnCue}' WHERE id = ${userProfile.id}`));
+        }
+        if (filteredProfile.stuntComfort) {
+          queries.push(db.execute(`UPDATE user_profiles SET stunt_comfort = '${filteredProfile.stuntComfort}' WHERE id = ${userProfile.id}`));
+        }
+        if (filteredProfile.yearsExperience) {
+          queries.push(db.execute(`UPDATE user_profiles SET years_experience = '${filteredProfile.yearsExperience}' WHERE id = ${userProfile.id}`));
+        }
+        if (filteredProfile.primarySpecialty) {
+          const specialtyArray = `{${filteredProfile.primarySpecialty.map(s => `"${s}"`).join(',')}}`;
+          queries.push(db.execute(`UPDATE user_profiles SET primary_specialty = '${specialtyArray}' WHERE id = ${userProfile.id}`));
+        }
+        
+        console.log(`🔧 Applying ${queries.length} raw SQL fixes for acting fields...`);
+        await Promise.all(queries);
+        
+        // Fetch the updated profile
+        const [updatedProfile] = await db
+          .select()
+          .from(userProfiles)
+          .where(eq(userProfiles.id, userProfile.id));
+          
+        console.log('🔧 Raw SQL fix completed, updated acting fields:');
+        console.log('    improvisationComfort:', updatedProfile.improvisationComfort);
+        console.log('    intimateScenesComfort:', updatedProfile.intimateScenesComfort);
+        console.log('    motionCapture:', updatedProfile.motionCapture);
+        console.log('    cryingOnCue:', updatedProfile.cryingOnCue);
+        
+        return updatedProfile;
+      }
+      
+      return userProfile;
+    } catch (error) {
+      console.error('🗃️ Profile creation error:', error);
+      throw error;
+    }
   }
 
   async updateUserProfile(userId: number, profile: Partial<InsertUserProfile>): Promise<UserProfile> {
     console.log('📝 Updating user profile for userId:', userId);
-    console.log('📝 Profile updates:', profile);
+    console.log('📝 Profile updates (raw):', profile);
+    
+    // CRITICAL FIX: Filter out undefined values which Drizzle ignores during updates
+    const filteredProfile = Object.fromEntries(
+      Object.entries(profile).filter(([_, value]) => value !== undefined)
+    ) as Partial<InsertUserProfile>;
+    
+    console.log('📝 Profile updates (filtered):', filteredProfile);
+    console.log('📝 ACTING FIELDS BEING UPDATED:');
+    console.log('    improvisationComfort:', filteredProfile.improvisationComfort);
+    console.log('    intimateScenesComfort:', filteredProfile.intimateScenesComfort);
+    console.log('    motionCapture:', filteredProfile.motionCapture);
+    console.log('    cryingOnCue:', filteredProfile.cryingOnCue);
+    console.log('    stuntComfort:', filteredProfile.stuntComfort);
+    console.log('    yearsExperience:', filteredProfile.yearsExperience);
+    console.log('    primarySpecialty:', filteredProfile.primarySpecialty);
     
     try {
+      // CRITICAL FIX: Use individual SQL statements for acting fields (same as createUserProfile)
+      console.log('🔧 TESTING: Raw SQL update for acting fields...');
+      
+      // Use separate SQL statements for each field to avoid parameter issues
+      const queries = [];
+      if (filteredProfile.improvisationComfort) {
+        queries.push(db.execute(`UPDATE user_profiles SET improvisation_comfort = '${filteredProfile.improvisationComfort}' WHERE user_id = '${userId.toString()}'`));
+      }
+      if (filteredProfile.intimateScenesComfort) {
+        queries.push(db.execute(`UPDATE user_profiles SET intimate_scenes_comfort = '${filteredProfile.intimateScenesComfort}' WHERE user_id = '${userId.toString()}'`));
+      }
+      if (filteredProfile.motionCapture) {
+        queries.push(db.execute(`UPDATE user_profiles SET motion_capture = '${filteredProfile.motionCapture}' WHERE user_id = '${userId.toString()}'`));
+      }
+      if (filteredProfile.cryingOnCue) {
+        queries.push(db.execute(`UPDATE user_profiles SET crying_on_cue = '${filteredProfile.cryingOnCue}' WHERE user_id = '${userId.toString()}'`));
+      }
+      if (filteredProfile.stuntComfort) {
+        queries.push(db.execute(`UPDATE user_profiles SET stunt_comfort = '${filteredProfile.stuntComfort}' WHERE user_id = '${userId.toString()}'`));
+      }
+      if (filteredProfile.yearsExperience) {
+        queries.push(db.execute(`UPDATE user_profiles SET years_experience = '${filteredProfile.yearsExperience}' WHERE user_id = '${userId.toString()}'`));
+      }
+      if (filteredProfile.primarySpecialty) {
+        const specialtyArray = `{${filteredProfile.primarySpecialty.map(s => `"${s}"`).join(',')}}`;
+        queries.push(db.execute(`UPDATE user_profiles SET primary_specialty = '${specialtyArray}' WHERE user_id = '${userId.toString()}'`));
+      }
+      
+      // Also update regular profile fields
+      if (filteredProfile.displayName) {
+        queries.push(db.execute(`UPDATE user_profiles SET display_name = '${filteredProfile.displayName}' WHERE user_id = '${userId.toString()}'`));
+      }
+      if (filteredProfile.bio) {
+        queries.push(db.execute(`UPDATE user_profiles SET bio = '${filteredProfile.bio}' WHERE user_id = '${userId.toString()}'`));
+      }
+      if (filteredProfile.location) {
+        queries.push(db.execute(`UPDATE user_profiles SET location = '${filteredProfile.location}' WHERE user_id = '${userId.toString()}'`));
+      }
+      
+      console.log(`🔧 Applying ${queries.length} raw SQL fixes for profile fields...`);
+      await Promise.all(queries);
+      
+      console.log('🔧 Raw SQL update completed, now fetching updated profile...');
+      
+      // Fetch the updated profile
       const [userProfile] = await db
-        .update(userProfiles)
-        .set(profile)
-        .where(eq(userProfiles.userId, userId.toString()))
-        .returning();
+        .select()
+        .from(userProfiles)
+        .where(eq(userProfiles.userId, userId.toString()));
+      
+      console.log('📝 UPDATE RESULT - Returned acting fields:');
+      console.log('    improvisationComfort:', userProfile.improvisationComfort);
+      console.log('    intimateScenesComfort:', userProfile.intimateScenesComfort);
+      console.log('    motionCapture:', userProfile.motionCapture);
+      console.log('    cryingOnCue:', userProfile.cryingOnCue);
+      console.log('    stuntComfort:', userProfile.stuntComfort);
+      console.log('    yearsExperience:', userProfile.yearsExperience);
+      console.log('    primarySpecialty:', userProfile.primarySpecialty);
       
       console.log('📝 Updated profile:', !!userProfile);
       return userProfile;

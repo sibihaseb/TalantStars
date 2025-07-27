@@ -1517,22 +1517,30 @@ function Onboarding() {
       return;
     }
     
+    // Get current form values to ensure data persistence
+    const currentFormValues = form.getValues() as OnboardingFormData;
+    console.log("🔍 CURRENT FORM VALUES:", currentFormValues);
+    
+    // Merge with submitted data to ensure all fields are captured
+    const mergedData = { ...currentFormValues, ...data };
+    console.log("🔍 MERGED DATA:", mergedData);
+    
     // CRITICAL DEBUG: Check the exact values of the acting fields that are failing
-    console.log("🚨 ACTING FIELDS DEBUG - RAW FORM DATA:");
-    console.log("  improvisationComfort:", data.improvisationComfort, "type:", typeof data.improvisationComfort);
-    console.log("  intimateScenesComfort:", data.intimateScenesComfort, "type:", typeof data.intimateScenesComfort);
-    console.log("  motionCapture:", data.motionCapture, "type:", typeof data.motionCapture);
-    console.log("  cryingOnCue:", data.cryingOnCue, "type:", typeof data.cryingOnCue);
+    console.log("🚨 ACTING FIELDS DEBUG - MERGED DATA:");
+    console.log("  improvisationComfort:", mergedData.improvisationComfort, "type:", typeof mergedData.improvisationComfort);
+    console.log("  intimateScenesComfort:", mergedData.intimateScenesComfort, "type:", typeof mergedData.intimateScenesComfort);
+    console.log("  motionCapture:", mergedData.motionCapture, "type:", typeof mergedData.motionCapture);
+    console.log("  cryingOnCue:", mergedData.cryingOnCue, "type:", typeof mergedData.cryingOnCue);
     console.log("  stuntComfort:", data.stuntComfort, "type:", typeof data.stuntComfort);
     console.log("  yearsExperience:", data.yearsExperience, "type:", typeof data.yearsExperience);
     console.log("  primarySpecialty:", data.primarySpecialty, "length:", data.primarySpecialty?.length);
     
-    // Additional validation for required fields
-    if (!data.displayName || !data.bio || !data.location) {
+    // Additional validation for required fields - use merged data to check
+    if (!mergedData.displayName || !mergedData.bio || !mergedData.location) {
       console.log("Required fields missing:", {
-        displayName: !data.displayName,
-        bio: !data.bio,
-        location: !data.location
+        displayName: !mergedData.displayName,
+        bio: !mergedData.bio,
+        location: !mergedData.location
       });
       
       toast({
@@ -1543,8 +1551,8 @@ function Onboarding() {
       return;
     }
     
-    if (data.bio.length < 10) {
-      console.log("Bio too short:", data.bio.length);
+    if (mergedData.bio.length < 10) {
+      console.log("Bio too short:", mergedData.bio.length);
       
       toast({
         title: "Bio Too Short",
@@ -1554,46 +1562,46 @@ function Onboarding() {
       return;
     }
     
-    // Clean the data before submission - remove empty strings and convert to null
+    // Clean the merged data before submission - remove empty strings and convert to null
     const cleanedData = {
-      ...data,
+      ...mergedData,
       // Convert empty string arrays to null or filter out empty values
-      languages: Array.isArray(data.languages) && data.languages.length > 0 ? data.languages.filter(l => l.trim()) : null,
-      accents: Array.isArray(data.accents) && data.accents.length > 0 ? data.accents.filter(a => a.trim()) : null,
-      instruments: Array.isArray(data.instruments) && data.instruments.length > 0 ? data.instruments.filter(i => i.trim()) : null,
-      genres: Array.isArray(data.genres) && data.genres.length > 0 ? data.genres.filter(g => g.trim()) : null,
-      skills: Array.isArray(data.skills) && data.skills.length > 0 ? data.skills.filter(s => s.trim()) : null,
+      languages: Array.isArray(mergedData.languages) && mergedData.languages.length > 0 ? mergedData.languages.filter(l => l.trim()) : null,
+      accents: Array.isArray(mergedData.accents) && mergedData.accents.length > 0 ? mergedData.accents.filter(a => a.trim()) : null,
+      instruments: Array.isArray(mergedData.instruments) && mergedData.instruments.length > 0 ? mergedData.instruments.filter(i => i.trim()) : null,
+      genres: Array.isArray(mergedData.genres) && mergedData.genres.length > 0 ? mergedData.genres.filter(g => g.trim()) : null,
+      skills: Array.isArray(mergedData.skills) && mergedData.skills.length > 0 ? mergedData.skills.filter(s => s.trim()) : null,
       // Acting-specific array fields
-      primarySpecialty: Array.isArray(data.primarySpecialty) && data.primarySpecialty.length > 0 ? data.primarySpecialty.filter(p => p.trim()) : null,
-      actingMethod: Array.isArray(data.actingMethod) && data.actingMethod.length > 0 ? data.actingMethod.filter(m => m.trim()) : null,
-      roleTypes: Array.isArray(data.roleTypes) && data.roleTypes.length > 0 ? data.roleTypes.filter(r => r.trim()) : null,
-      horrorThriller: Array.isArray(data.horrorThriller) && data.horrorThriller.length > 0 ? data.horrorThriller.filter(h => h.trim()) : null,
+      primarySpecialty: Array.isArray(mergedData.primarySpecialty) && mergedData.primarySpecialty.length > 0 ? mergedData.primarySpecialty.filter(p => p.trim()) : null,
+      actingMethod: Array.isArray(mergedData.actingMethod) && mergedData.actingMethod.length > 0 ? mergedData.actingMethod.filter(m => m.trim()) : null,
+      roleTypes: Array.isArray(mergedData.roleTypes) && mergedData.roleTypes.length > 0 ? mergedData.roleTypes.filter(r => r.trim()) : null,
+      horrorThriller: Array.isArray(mergedData.horrorThriller) && mergedData.horrorThriller.length > 0 ? mergedData.horrorThriller.filter(h => h.trim()) : null,
       // Convert empty strings to null for optional fields
-      website: data.website?.trim() || null,
-      phoneNumber: data.phoneNumber?.trim() || null,
-      profileImageUrl: data.profileImageUrl?.trim() || user?.profileImageUrl || null,
+      website: mergedData.website?.trim() || null,
+      phoneNumber: mergedData.phoneNumber?.trim() || null,
+      profileImageUrl: mergedData.profileImageUrl?.trim() || user?.profileImageUrl || null,
       // Acting experience fields - FIXED: Preserve user input, only convert truly empty values to null
-      yearsExperience: data.yearsExperience ? String(data.yearsExperience) : null,
-      improvisationComfort: data.improvisationComfort && data.improvisationComfort.trim() ? data.improvisationComfort.trim() : null,
-      stageCombat: data.stageCombat ? String(data.stageCombat) : null,
-      intimateScenesComfort: data.intimateScenesComfort && data.intimateScenesComfort.trim() ? data.intimateScenesComfort.trim() : null,
-      motionCapture: data.motionCapture && data.motionCapture.trim() ? data.motionCapture.trim() : null,
-      animalWork: data.animalWork && data.animalWork.trim() ? data.animalWork.trim() : null,
-      cryingOnCue: data.cryingOnCue && data.cryingOnCue.trim() ? data.cryingOnCue.trim() : null,
-      periodPieces: data.periodPieces && data.periodPieces.trim() ? data.periodPieces.trim() : null,
-      physicalComedy: data.physicalComedy && data.physicalComedy.trim() ? data.physicalComedy.trim() : null,
-      accentExperience: data.accentExperience && data.accentExperience.trim() ? data.accentExperience.trim() : null,
-      greenScreen: data.greenScreen && data.greenScreen.trim() ? data.greenScreen.trim() : null,
-      stuntComfort: data.stuntComfort && data.stuntComfort.trim() ? data.stuntComfort.trim() : null,
-      shakespeareExperience: data.shakespeareExperience && data.shakespeareExperience.trim() ? data.shakespeareExperience.trim() : null,
-      musicalTheater: data.musicalTheater && data.musicalTheater.trim() ? data.musicalTheater.trim() : null,
-      currentAgent: (data as any).currentAgent?.trim() || null,
-      currentPublicist: (data as any).currentPublicist?.trim() || null,
-      representationStatus: (data as any).representationStatus?.trim() || null,
-      // Handle numeric fields as strings (backend expects strings)
-      dailyRate: data.dailyRate ? String(data.dailyRate) : null,
-      weeklyRate: data.weeklyRate ? String(data.weeklyRate) : null,
-      projectRate: data.projectRate ? String(data.projectRate) : null,
+      yearsExperience: mergedData.yearsExperience ? String(mergedData.yearsExperience) : null,
+      improvisationComfort: mergedData.improvisationComfort && mergedData.improvisationComfort.trim() ? mergedData.improvisationComfort.trim() : null,
+      stageCombat: mergedData.stageCombat ? String(mergedData.stageCombat) : null,
+      intimateScenesComfort: mergedData.intimateScenesComfort && mergedData.intimateScenesComfort.trim() ? mergedData.intimateScenesComfort.trim() : null,
+      motionCapture: mergedData.motionCapture && mergedData.motionCapture.trim() ? mergedData.motionCapture.trim() : null,  
+      animalWork: mergedData.animalWork && mergedData.animalWork.trim() ? mergedData.animalWork.trim() : null,
+      cryingOnCue: mergedData.cryingOnCue && mergedData.cryingOnCue.trim() ? mergedData.cryingOnCue.trim() : null,
+      periodPieces: mergedData.periodPieces && mergedData.periodPieces.trim() ? mergedData.periodPieces.trim() : null,
+      physicalComedy: mergedData.physicalComedy && mergedData.physicalComedy.trim() ? mergedData.physicalComedy.trim() : null,
+      accentExperience: mergedData.accentExperience && mergedData.accentExperience.trim() ? mergedData.accentExperience.trim() : null,
+      greenScreen: mergedData.greenScreen && mergedData.greenScreen.trim() ? mergedData.greenScreen.trim() : null,
+      stuntComfort: mergedData.stuntComfort && mergedData.stuntComfort.trim() ? mergedData.stuntComfort.trim() : null,
+      shakespeareExperience: mergedData.shakespeareExperience && mergedData.shakespeareExperience.trim() ? mergedData.shakespeareExperience.trim() : null,
+      musicalTheater: mergedData.musicalTheater && mergedData.musicalTheater.trim() ? mergedData.musicalTheater.trim() : null,
+      currentAgent: (mergedData as any).currentAgent?.trim() || null,
+      currentPublicist: (mergedData as any).currentPublicist?.trim() || null,
+      representationStatus: (mergedData as any).representationStatus?.trim() || null,
+      // Handle numeric fields as strings (backend expects strings)  
+      dailyRate: mergedData.dailyRate ? String(mergedData.dailyRate) : null,
+      weeklyRate: mergedData.weeklyRate ? String(mergedData.weeklyRate) : null,
+      projectRate: mergedData.projectRate ? String(mergedData.projectRate) : null,
     };
     
     console.log("Cleaned data for submission:", cleanedData);
@@ -1605,7 +1613,22 @@ function Onboarding() {
     console.log("  stuntComfort:", cleanedData.stuntComfort, "type:", typeof cleanedData.stuntComfort);
     console.log("=== SUBMITTING TO API ===");
     
-    createProfileMutation.mutate(cleanedData);
+    // Use merged data for final submission to ensure all form fields are captured
+    console.log("🔥 Final submission data:", {
+      role: mergedData.role,
+      talentType: mergedData.talentType,
+      displayName: mergedData.displayName,
+      bio: mergedData.bio,
+      location: mergedData.location,
+      languagesCount: (mergedData.languages as string[])?.length || 0,
+      skillsCount: (mergedData.skills as string[])?.length || 0,
+      improvisationComfort: mergedData.improvisationComfort,
+      intimateScenesComfort: mergedData.intimateScenesComfort,
+      motionCapture: mergedData.motionCapture,
+      cryingOnCue: mergedData.cryingOnCue
+    });
+    
+    createProfileMutation.mutate(mergedData);
   };
 
   const progressPercentage = (currentStep / getMaxSteps()) * 100;
