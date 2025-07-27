@@ -495,44 +495,28 @@ function Onboarding() {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const totalSteps = 7;
 
-  // Enhanced authentication check with session refresh
+  // Simplified authentication check with proper state handling
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      console.log("🚨 AUTH FAILED - Redirecting to login");
-      toast({
-        title: "Session Expired",
-        description: "Please log in again to continue with onboarding.",
-        variant: "destructive",
-      });
-      // Clear any existing form data to prevent confusion
-      localStorage.removeItem('onboarding-form-data');
-      setTimeout(() => {
-        window.location.href = "/auth";
-      }, 1000);
-      return;
+    // Only redirect after initial loading is complete
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        console.log("🚨 AUTH FAILED - User not authenticated, redirecting to login");
+        toast({
+          title: "Please log in",
+          description: "You need to be logged in to access onboarding.",
+          variant: "destructive",
+        });
+        // Clear any existing form data to prevent confusion
+        localStorage.removeItem('onboarding-form-data');
+        setTimeout(() => {
+          window.location.href = "/auth";
+        }, 1500);
+        return;
+      } else {
+        console.log("✅ AUTH OK - User authenticated:", user?.username);
+      }
     }
-    
-    // Session refresh every 5 minutes during onboarding
-    if (isAuthenticated) {
-      console.log("✅ AUTH OK - User authenticated:", user?.username);
-      const sessionRefresh = setInterval(() => {
-        fetch('/api/user', { credentials: 'include' })
-          .then(response => {
-            if (!response.ok) {
-              console.log("🚨 Session expired during onboarding");
-              clearInterval(sessionRefresh);
-              window.location.href = "/auth";
-            }
-          })
-          .catch(() => {
-            console.log("🚨 Session check failed");
-            clearInterval(sessionRefresh);
-          });
-      }, 300000); // 5 minutes
-      
-      return () => clearInterval(sessionRefresh);
-    }
-  }, [isAuthenticated, isLoading, user]);
+  }, [isAuthenticated, isLoading, user, toast]);
 
   // Redirect if user already has a profile
   useEffect(() => {

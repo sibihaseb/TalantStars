@@ -190,11 +190,26 @@ export default function Auth() {
           // Refetch user data to update auth state
           await refetch();
           
-          // Small delay to ensure auth state is updated
-          setTimeout(() => {
-            console.log("🚀 REGISTRATION: Redirecting to onboarding");
-            window.location.href = "/onboarding";
-          }, 500);
+          // Wait for auth state to properly update, then redirect
+          setTimeout(async () => {
+            try {
+              // Multiple refetch attempts to ensure auth state is synchronized
+              await refetch();
+              await new Promise(resolve => setTimeout(resolve, 200));
+              await refetch();
+              console.log("🚀 REGISTRATION: Auth state updated, redirecting to onboarding");
+              // Use replace to prevent back button issues and ensure clean navigation
+              window.location.replace("/onboarding");
+            } catch (error) {
+              console.error("Error during auth state update:", error);
+              // Fallback to login if auth state update fails
+              setActiveTab("login");
+              toast({
+                title: "Account created successfully!",
+                description: "Please log in with your new credentials.",
+              });
+            }
+          }, 1500);
         } else {
           console.log("❌ REGISTRATION: Auto-login failed, redirecting to login");
           toast({

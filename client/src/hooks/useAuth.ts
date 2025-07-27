@@ -18,6 +18,7 @@ export function useAuth(): AuthContextType {
           cache: 'no-cache', // Don't cache auth requests
           headers: {
             'Cache-Control': 'no-cache',
+            'Accept': 'application/json',
           },
         });
         
@@ -30,15 +31,18 @@ export function useAuth(): AuthContextType {
           return null;
         } else {
           console.error('Auth error - unexpected status:', response.status);
-          throw new Error('Failed to fetch user');
+          return null;
         }
       } catch (error) {
         console.error('Auth error - network/other:', error);
         return null;
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: false,
+    staleTime: 1 * 60 * 1000, // Reduce to 1 minute for better synchronization
+    retry: (failureCount, error) => {
+      // Only retry network errors, not auth failures
+      return failureCount < 2 && !error?.message?.includes('401');
+    },
   });
 
   return {
