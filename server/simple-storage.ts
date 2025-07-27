@@ -20,7 +20,7 @@ import {
   type TalentType,
   type InsertTalentType,
 } from "@shared/simple-schema";
-import { jobHistory, profileSharingSettings, availabilityCalendar, mediaFiles, jobApplications, jobCommunications, socialPosts, jobs, socialMediaLinks, friendships, promoCodes, promoCodeUsage, userDiscountPeriods, emailTemplates } from "@shared/schema";
+import { jobHistory, profileSharingSettings, availabilityCalendar, mediaFiles, jobApplications, jobCommunications, socialPosts, jobs, socialMediaLinks, friendships, promoCodes, promoCodeUsage, userDiscountPeriods, emailTemplates, insertMessageSchema } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc, desc, sql, and } from "drizzle-orm";
 

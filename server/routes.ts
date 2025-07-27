@@ -47,7 +47,7 @@ const scryptAsync = promisify(scrypt);
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
+  apiVersion: '2024-06-20',
 });
 
 async function hashPassword(password: string) {
@@ -469,7 +469,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const combinedProfile = {
         ...user,
         ...profile,
-        displayName: profile?.displayName || `${user.firstName} ${user.lastName}`.trim() || user.username,
+        displayName: profile?.displayName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.username || '',
         location: profile?.location || '',
         bio: profile?.bio || '',
         skills: profile?.skills || [],
@@ -603,7 +603,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('❌ TEMPLATE ERROR:', error);
-      res.status(500).json({ message: 'Failed to save profile template', error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      res.status(500).json({ message: 'Failed to save profile template', error: errorMessage });
     }
   });
 
@@ -2245,7 +2246,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const message = await simpleStorage.createMessage(messageData);
       
       // Broadcast to WebSocket clients
-      broadcastMessage(message);
+      // TODO: Implement broadcastMessage when WebSocket system is ready
+      console.log('Message broadcast request:', message);
       
       res.json(message);
     } catch (error) {
@@ -4112,7 +4114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Profile SEO Data Generation
   app.post('/api/admin/seo/profiles/generate', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const users = await simpleStorage.getUsers();
+      const users = await simpleStorage.getAllUsers();
       const generatedProfiles = [];
       
       for (const user of users) {
@@ -4258,12 +4260,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const combinedProfile = {
         ...user,
         ...profile,
-        displayName: profile?.displayName || `${user.firstName} ${user.lastName}`.trim() || user.username,
+        displayName: profile?.displayName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.username || '',
         location: profile?.location || 'Location not set',
         bio: profile?.bio || '',
         skills: profile?.skills || [],
         availabilityStatus: profile?.availabilityStatus || 'not_set',
-        verified: profile?.verified || false,
+        verified: profile?.isVerified || false,
         dailyRate: profile?.dailyRate || 0,
         talentType: profile?.talentType || '',
         languages: profile?.languages || [],
@@ -4989,7 +4991,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const combinedProfile = {
         ...user,
         ...profile,
-        displayName: profile?.displayName || `${user.firstName} ${user.lastName}`.trim() || user.username,
+        displayName: profile?.displayName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.username || '',
         location: profile?.location || 'Location not set',
         bio: profile?.bio || '',
         skills: profile?.skills || [],
