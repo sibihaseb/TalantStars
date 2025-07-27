@@ -32,49 +32,49 @@
 **What this does**: Creates all 51 database tables your app needs (users, profiles, jobs, etc.)
 
 ### Step 3: Upload Your Code to GitHub (5 minutes)
+**📖 Detailed guide available in `GITHUB_UPLOAD_GUIDE.md`**
 
-#### Option A: Use GitHub Web Interface (Easier)
-1. **Go to**: [github.com/new](https://github.com/new)
-2. **Repository Name**: `talents-stars-platform`
-3. **Set to**: Private
-4. **Click**: "Create repository"
-5. **Upload files**: Drag and drop all your project files to GitHub
-6. **Commit**: Click "Commit new files"
+#### Quick Steps:
+1. **Download from Replit**: Three dots menu → Download as ZIP
+2. **Extract ZIP file** on your computer
+3. **Create GitHub repository**: [github.com/new](https://github.com/new) → Name: `talents-stars-platform` → Private
+4. **Upload files**: Drag extracted files to GitHub → "Commit new files"
 
-#### Option B: Download and Upload Method
-1. **Download your code**: Go to Replit → More → Download as ZIP
-2. **Extract the ZIP file** on your computer
-3. **Create GitHub repository** as above
-4. **Upload the extracted files** to GitHub
+**Need help?** See `GITHUB_UPLOAD_GUIDE.md` for detailed screenshots and troubleshooting.
 
 ### Step 4: Deploy to Vercel (5 minutes)
-1. **Go to**: [vercel.com](https://vercel.com) and sign up/login
-2. **Click**: "New Project" (big button on dashboard)
-3. **Connect GitHub**: Click "Import Git Repository"
-4. **Find your repository**: `talents-stars-platform`
-5. **Click**: "Import" next to your repository
-6. **Configure build settings**:
-   - Framework Preset: "Other"
+**📖 Detailed guide available in `GITHUB_UPLOAD_GUIDE.md`**
+
+#### Quick Steps:
+1. **Go to**: [vercel.com](https://vercel.com) → Sign up with GitHub
+2. **New Project** → Import `talents-stars-platform`
+3. **IMPORTANT Build Settings**:
+   - Framework: "Other"
    - Build Command: `npm run build`
    - Output Directory: `dist`
-7. **Click**: "Deploy"
-8. **Wait**: 2-3 minutes for deployment
-9. **Copy your app URL**: Save the provided .vercel.app URL
+4. **Deploy** → Wait 3 minutes → Get your .vercel.app URL
+
+**Need help?** See detailed deployment instructions in the upload guide.
 
 ### Step 5: Configure Environment Variables (10 minutes)
-1. **In Vercel project**: Go to Settings → Environment Variables
-2. **Add each variable** by clicking "Add New":
+**📖 Detailed guide available in `GITHUB_UPLOAD_GUIDE.md`**
 
-| Variable Name | Where to Get It | Example Value |
-|--------------|----------------|---------------|
-| `DATABASE_URL` | Supabase Settings → Database | `postgresql://postgres:...` |
-| `STRIPE_SECRET_KEY` | Stripe Dashboard → API Keys | `sk_test_...` |
-| `VITE_STRIPE_PUBLIC_KEY` | Stripe Dashboard → API Keys | `pk_test_...` |
-| `RESEND_API_KEY` | Resend.com → API Keys | `re_...` |
-| `OPENAI_API_KEY` | OpenAI Platform → API Keys | `sk-...` |
-| `SESSION_SECRET` | Random.org generator | `abc123xyz...` |
+#### Quick Steps:
+1. **Vercel Settings** → Environment Variables → "Add New"
+2. **Add these 6 variables** (get exact values from guide):
 
-3. **After adding all variables**: Go to Deployments → Redeploy
+| Variable | Get From | Starts With |
+|----------|----------|-------------|
+| `DATABASE_URL` | Supabase → Settings → Database | `postgresql://` |
+| `STRIPE_SECRET_KEY` | Stripe Dashboard → API Keys | `sk_` |
+| `VITE_STRIPE_PUBLIC_KEY` | Stripe Dashboard → API Keys | `pk_` |
+| `RESEND_API_KEY` | Resend.com → API Keys | `re_` |
+| `OPENAI_API_KEY` | OpenAI Platform → API Keys | `sk-` |
+| `SESSION_SECRET` | Random.org 32-char generator | Any string |
+
+3. **Redeploy**: Deployments → Redeploy
+
+**Need help?** See step-by-step instructions with exact links in the upload guide.
 
 ## 🔗 GET YOUR CONNECTION STRINGS
 
