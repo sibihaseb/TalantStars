@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "build": {
+    "builder": "nixpacks"
+  },
+  "deploy": {
+    "startCommand": "npm run dev",
+    "restartPolicyType": "never"
+  },
+  "variables": {
+    "NODE_ENV": "production",
+    "PORT": "${{PORT}}"
+  }
+}
