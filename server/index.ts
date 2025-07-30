@@ -66,12 +66,12 @@ app.use((req, res, next) => {
       console.error('Status:', status);
       console.error('Message:', message);
       console.error('==============================');
-      
+
       // Don't send error details in production
-      const errorResponse = process.env.NODE_ENV === 'production' 
+      const errorResponse = process.env.NODE_ENV === 'production'
         ? { message: "Internal Server Error" }
         : { message, error: err.message, stack: err.stack };
-      
+
       res.status(status).json(errorResponse);
     });
 
@@ -88,13 +88,16 @@ app.use((req, res, next) => {
     // this serves both the API and the client.
     // It is the only port that is not firewalled.
     const port = 5000;
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
-      log(`serving on port ${port}`);
+    server.listen(port, 'localhost', () => {
+      log(`Server running on http://localhost:${port}`);
     });
+    // server.listen({
+    //   port,
+    //   host: "0.0.0.0",
+    //   reusePort: true,
+    // }, () => {
+    //   log(`serving on port ${port}`);
+    // });
 
     // Handle server errors
     server.on('error', (error) => {
