@@ -150,7 +150,7 @@ export async function setupAuth(app: Express) {
             return done(null, false);
           }
           
-          console.log("Comparing passwords...");
+          console.log("Comparing passsssssswords...");
           const passwordMatch = await comparePasswords(password, user.password);
           console.log("Password match:", passwordMatch);
           

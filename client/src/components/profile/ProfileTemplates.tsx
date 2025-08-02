@@ -121,7 +121,7 @@ export function TemplateSelector({
 
   return (
     <Card className="mb-6">
-      <CardHeader>
+      {/* <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Palette className="w-5 h-5" />
           Choose Your Profile Style
@@ -192,7 +192,7 @@ export function TemplateSelector({
             );
           })}
         </div>
-      </CardContent>
+      </CardContent> */}
     </Card>
   );
 }

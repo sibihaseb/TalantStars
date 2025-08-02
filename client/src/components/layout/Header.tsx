@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import PNG_FILE_6 from "@assets/PNG FILE 6_1752621700970.png";
 
-export function Header() {
+export function Header({backShown = true}) {
   const { isAuthenticated, user } = useAuth();
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
@@ -31,14 +31,14 @@ export function Header() {
     }
   };
 
-  const showBackButton = location !== '/' && location !== '/dashboard' && isAuthenticated;
+  const showBackButton =    (location !== '/' && location !== '/dashboard' && isAuthenticated);
 
   return (
     <header className="fixed w-full top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
-            {showBackButton && (
+            {backShown && showBackButton && (
               <Button
                 variant="ghost"
                 size="sm"

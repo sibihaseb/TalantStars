@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
 import { UserJobManager } from "@/components/UserJobManager";
-
+import { ThemeProvider } from '@/components/ui/theme-provider';
 // Dynamic Availability Status Component
 function DynamicAvailabilityStatus({ userId }: { userId: number }) {
   const { data: availabilityEntries = [] } = useQuery({
@@ -131,6 +131,7 @@ import {
   User,
   ArrowRight
 } from 'lucide-react';
+import { Header } from '@/components/layout/Header';
 
 export default function TalentDashboard() {
   const { user } = useAuth();
@@ -220,14 +221,14 @@ export default function TalentDashboard() {
         points: 15,
         category: 'profile' as const
       },
-      {
-        id: 'verification',
-        title: 'Get Verified',
-        description: 'Complete identity verification',
-        completed: !!profile.verified,
-        points: 40,
-        category: 'achievement' as const
-      }
+      // {
+      //   id: 'verification',
+      //   title: 'Get Verified',
+      //   description: 'Complete identity verification',
+      //   completed: !!profile.verified,
+      //   points: 40,
+      //   category: 'achievement' as const
+      // }
     ];
 
     return progressItems;
@@ -455,9 +456,11 @@ export default function TalentDashboard() {
   const recentOpportunities = opportunities?.slice(0, 4) || [];
 
   return (
+     <ThemeProvider>
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
-      <div className="max-w-7xl mx-auto px-4 pt-4">
-        {/* Enhanced Header with larger profile and better layout */}
+      <Header  backShown={false}/>
+      <div className="max-w-7xl mx-auto px-4 pt-20">
+       
         <div className="mb-6">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
             {/* Hero background section */}
@@ -1164,6 +1167,7 @@ export default function TalentDashboard() {
         </DialogContent>
       </Dialog>
     </div>
+    </ThemeProvider>
   );
 }
 
