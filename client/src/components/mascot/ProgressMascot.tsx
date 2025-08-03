@@ -282,7 +282,7 @@ export function ProgressMascot({
               </Button>
             )}
             
-            <Button 
+            {/* <Button 
               variant="ghost" 
               size="sm"
               onClick={() => {
@@ -299,7 +299,7 @@ export function ProgressMascot({
             >
               <Heart className="w-4 h-4 mr-2" />
               Get Motivated
-            </Button>
+            </Button> */}
           </div>
         )}
       </CardContent>
