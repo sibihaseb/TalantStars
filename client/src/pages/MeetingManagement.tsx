@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertMeetingSchema } from "@shared/schema";
 import { z } from "zod";
+import { ThemeProvider } from "@/components/ui/theme-provider";
 
 const meetingFormSchema = insertMeetingSchema.extend({
   meetingDate: z.string().min(1, "Meeting date is required"),
@@ -147,13 +148,16 @@ export default function MeetingManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <>
+    <Header  backShown={false}/>
+    <ThemeProvider>
+    <div className="bg-gray-50 dark:bg-gray-900 pt-20">
+      
       
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Meeting Management</h1>
+            <h1 className="text-3xl font-bold text-white-500">Meetings Management</h1>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
@@ -181,7 +185,7 @@ export default function MeetingManagement() {
                           <SelectValue placeholder="Select attendee" />
                         </SelectTrigger>
                         <SelectContent>
-                          {users.map((user: any) => (
+                          {users?.map((user: any) => (
                             <SelectItem key={user.id} value={user.id}>
                               {user.firstName} {user.lastName} ({user.email})
                             </SelectItem>
@@ -491,5 +495,7 @@ export default function MeetingManagement() {
         </DialogContent>
       </Dialog>
     </div>
+    </ThemeProvider>
+    </>
   );
 }
