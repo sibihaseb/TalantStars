@@ -170,6 +170,7 @@ export default function TalentDashboard() {
 
   // Calculate dynamic progress based on user profile
   const calculateProfileProgress = () => {
+    console.log('Profile Progress:', JSON.stringify(profile))
     if (!profile) return [];
     
     const progressItems = [
@@ -201,7 +202,7 @@ export default function TalentDashboard() {
         id: 'skills',
         title: 'Add Skills & Talents',
         description: 'List your key abilities and expertise',
-        completed: !!(profile.skills && profile.skills.length > 0),
+        completed: !!(profile.skills ),
         points: 25,
         category: 'profile' as const
       },
@@ -235,7 +236,7 @@ export default function TalentDashboard() {
   };
 
   const profileProgress = useMemo(() => calculateProfileProgress(), [profile, jobHistory]);
-
+  
   const handleProgressItemClick = (item: any) => {
     // Navigate to appropriate section based on item
     switch (item.id) {
@@ -650,7 +651,7 @@ export default function TalentDashboard() {
             <TabsTrigger value="billing">Billing</TabsTrigger>
             <TabsTrigger value="usage">Usage</TabsTrigger>
             <TabsTrigger value="calendar">Calendar</TabsTrigger>
-            <TabsTrigger value="settings">Settings & Sharing</TabsTrigger>
+            <TabsTrigger value="settings" className="ml-2" >Settings/Share</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -988,7 +989,7 @@ export default function TalentDashboard() {
           <TabsContent value="portfolio">
             <div className="space-y-6">
               {/* Profile Template Selection */}
-              <TemplateSelector 
+              {/* <TemplateSelector 
                 selectedTemplate={profile?.profileTemplate || "classic"}
                 onTemplateChange={async (template) => {
                   console.log('Template changed to:', template);
@@ -1023,7 +1024,7 @@ export default function TalentDashboard() {
                 }}
                 userTier={user?.pricingTierId ? { id: user.pricingTierId, features: ['profile_templates_all'] } : null}
                 onUpgrade={handleUpgrade}
-              />
+              /> */}
               
 
 
@@ -1142,7 +1143,7 @@ export default function TalentDashboard() {
           <TabsContent value="settings">
             <div className="space-y-6">
               {/* Profile Sharing Section */}
-              <ProfileSharing />
+              <ProfileSharing  backButtonSharing={false}/>
             </div>
           </TabsContent>
         </Tabs>

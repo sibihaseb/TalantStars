@@ -52,24 +52,26 @@ export function ProgressMascot({
   const progressPercentage = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
 
   useEffect(() => {
-    showProgress(progressPercentage);
-    
-    // Check if we just completed something
-    if (progressPercentage > previousProgress) {
-      const newlyCompleted = items.find(item => 
-        item.completed && !completedItems.slice(0, completedItems.length - 1).includes(item)
-      );
-      
-      if (newlyCompleted) {
-        setJustCompleted(newlyCompleted.id);
-        celebrateAchievement(`${newlyCompleted.title} completed!`);
-        setTimeout(() => setJustCompleted(null), 3000);
-      }
-    }
-    
-    setPreviousProgress(progressPercentage);
-  }, [progressPercentage, previousProgress, items, completedItems, showProgress, celebrateAchievement]);
+  showProgress(progressPercentage);
 
+  // Only run if progress increased
+  if (progressPercentage > previousProgress) {
+    const newlyCompleted = items.find(
+      (item) => item.completed && !completedItems.slice(0, completedItems.length - 1).includes(item)
+    );
+
+    if (newlyCompleted) {
+      setJustCompleted(newlyCompleted.id);
+      celebrateAchievement(`${newlyCompleted.title} completed!`);
+
+      // Reset after delay
+      setTimeout(() => setJustCompleted(null), 3000);
+    }
+
+    setPreviousProgress(progressPercentage); // ← Only update when increased
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [progressPercentage]);
   const getCategoryIcon = (category: ProgressItem['category']) => {
     switch (category) {
       case 'profile':

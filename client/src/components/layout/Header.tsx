@@ -115,7 +115,7 @@ export function Header({backShown = true}) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => window.location.href = "/login"}
+                  onClick={() => window.location.href = "/auth"}
                 >
                   Login
                 </Button>

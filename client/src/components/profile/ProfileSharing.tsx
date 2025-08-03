@@ -55,7 +55,7 @@ interface ProfileSharingSettings {
   showSkills?: boolean;
 }
 
-export default function ProfileSharing() {
+export default function ProfileSharing({backButtonSharing=true}) {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -235,7 +235,9 @@ export default function ProfileSharing() {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
+      {backButtonSharing &&
       <div className="flex items-center gap-3 mb-6">
+
         <Button 
           variant="ghost" 
           size="sm"
@@ -246,6 +248,7 @@ export default function ProfileSharing() {
           Back to Dashboard
         </Button>
       </div>
+      }
 
       <div className="flex items-center gap-3 mb-6">
         <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">

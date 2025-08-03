@@ -877,6 +877,7 @@ function Onboarding() {
   };
 
   const addSkill = (field: keyof OnboardingFormData) => {
+    console.log('[DEBUG] addSkill called for field:', field, 'with value:', newValue);
     if (!newSkill.trim()) return;
     
     const currentSkills = form.getValues(field) as string[] || [];
@@ -1073,35 +1074,50 @@ function Onboarding() {
   }, [watchedRole, watchedTalentType, profileQuestions, currentStep]);
 
   // Render questions directly without inline component
-  const renderRoleSpecificQuestions = () => {
-    if (!watchedRole || relevantQuestions.length === 0) {
-      return (
-        <div className="text-gray-500 text-center py-8">
-          <p>No questions available for this role.</p>
-        </div>
-      );
-    }
+ const renderRoleSpecificQuestions = () => {
+  // Handle case when no role is selected or no questions are available
+  if (!watchedRole || (watchedRole !== 'talent' && relevantQuestions.length === 0)) {
+    return (
+      <div className="text-gray-500 text-center py-8">
+        <p>No questions available for this role.</p>
+      </div>
+    );
+  }
+
+  // For talent roles, call getTalentSpecificQuestions
+  if (watchedRole === 'talent' && watchedTalentType) {
+    const talentQuestions = getTalentSpecificQuestions(watchedTalentType);
+    console.log('Rendering talent questions for', watchedTalentType, ':', talentQuestions);
 
     return (
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {relevantQuestions.map((question) => (
-            <div key={`q-${question.id}`} className="space-y-2">
+          {talentQuestions.map((question) => (
+            <div key={question.field} className="space-y-2">
               <Label className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                {question.question}
-                {question.required && <span className="text-red-500 text-xs">*</span>}
+                {question.label}
+                {question.field === 'skills' && <span className="text-red-500 text-xs">*</span>}
               </Label>
-              <div className="relative">
-                {renderDynamicFormField(question)}
-                {question.required && (
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
-                )}
-              </div>
+              {question.type === 'custom' ? (
+                renderCustomField(question.field as keyof OnboardingFormData, question.label)
+              ) : question.type === 'multiSelect' ? (
+                renderMultiSelectField(
+                  question.field as keyof OnboardingFormData,
+                  question.label,
+                  question.options || [],
+                  `Select ${question.label.toLowerCase()}...`
+                )
+              ) : question.type === 'input' ? (
+                <Input
+                  {...form.register(question.field as keyof OnboardingFormData)}
+                  placeholder={question.placeholder || `Enter ${question.label.toLowerCase()}...`}
+                />
+              ) : null}
             </div>
           ))}
         </div>
-        
-        {relevantQuestions.length > 0 && (
+
+        {talentQuestions.length > 0 && (
           <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
             <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
               <Info className="h-4 w-4" />
@@ -1113,8 +1129,41 @@ function Onboarding() {
         )}
       </div>
     );
-  };
+  }
 
+  // For non-talent roles or when talentType is not selected, render API-fetched questions
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {relevantQuestions.map((question) => (
+          <div key={`q-${question.id}`} className="space-y-2">
+            <Label className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
+              {question.question}
+              {question.required && <span className="text-red-500 text-xs">*</span>}
+            </Label>
+            <div className="relative">
+              {renderDynamicFormField(question)}
+              {question.required && (
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {relevantQuestions.length > 0 && (
+        <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
+            <Info className="h-4 w-4" />
+            <span>
+              <strong>Tip:</strong> Complete as many fields as possible to improve your profile visibility and match with better opportunities.
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
   const renderDynamicFormField = (question: any) => {
     const fieldName = question.fieldName || question.field_name;
     const currentValue = form.getValues(fieldName) || '';
