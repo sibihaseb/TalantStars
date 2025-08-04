@@ -39,14 +39,14 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
   rememberMe: z.boolean().optional(),
 });
-
+//role: z.enum(["talent", "manager", "agent", "producer", "admin"]),
 const registerSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  role: z.enum(["talent", "manager", "agent", "producer", "admin"]),
+  role: z.enum(["talent"]),
   termsAccepted: z.boolean().refine((val) => val === true, {
     message: "You must accept the Terms of Service to proceed",
   }),
@@ -544,7 +544,7 @@ export default function Auth() {
                                 Talent
                               </div>
                             </SelectItem>
-                            <SelectItem value="manager">
+                            {/* <SelectItem value="manager">
                               <div className="flex items-center">
                                 <Settings className="h-4 w-4 mr-2" />
                                 Manager
@@ -561,7 +561,7 @@ export default function Auth() {
                                 <Camera className="h-4 w-4 mr-2" />
                                 Producer
                               </div>
-                            </SelectItem>
+                            </SelectItem> */}
                           </SelectContent>
                         </Select>
                         {registerForm.formState.errors.role && (

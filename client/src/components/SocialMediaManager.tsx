@@ -45,7 +45,6 @@ const socialPlatforms = [
   { key: 'youtube', name: 'YouTube', icon: Youtube, placeholder: 'https://youtube.com/channel/username' },
   { key: 'spotify', name: 'Spotify', icon: Music, placeholder: 'https://open.spotify.com/artist/username' },
   { key: 'tiktok', name: 'TikTok', icon: Music, placeholder: 'https://tiktok.com/@username' },
-
 ];
 
 export function SocialMediaManager() {
@@ -54,38 +53,37 @@ export function SocialMediaManager() {
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({});
   const [isEditing, setIsEditing] = useState(false);
 
-  // Fetch current social links
-  const { data: socialLinksData, isLoading } = useQuery({
+  const { data: initialLinks, isLoading } = useQuery({
     queryKey: ['/api/user/social-links'],
-    select: (data) => data?.socialLinks || {},
-    onSuccess: (data) => {
-      setSocialLinks(data || {});
+    select: (data) => data?.socialLinks?.socialLinks || {},
+    onSuccess: (links) => {
+      setSocialLinks(links || {});
     }
   });
 
-  // Update social links mutation
-  const updateSocialLinksMutation = useMutation({
-    mutationFn: async (links: SocialLinks) => {
-      const response = await apiRequest('PUT', '/api/user/social-links', { socialLinks: links });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user/social-links'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/user/profile'] });
-      setIsEditing(false);
-      toast({
-        title: "Success!",
-        description: "Social media links updated successfully",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to update social media links",
-        variant: "destructive",
-      });
-    },
-  });
+const updateSocialLinksMutation = useMutation({
+  mutationFn: async (links: SocialLinks) => {
+    const response = await apiRequest('PUT', '/api/user/social-links', { socialLinks: links });
+    return response.json();
+  },
+  onSuccess: async () => {
+    await queryClient.invalidateQueries({ queryKey: ['/api/user/social-links'] , refetchType: 'all',
+  exact: true,});
+    setIsEditing(false); // wait for the latest data to come back
+    toast({
+      title: "Success!",
+      description: "Social media links updated successfully",
+    });
+    
+  },
+  onError: () => {
+    toast({
+      title: "Error",
+      description: "Failed to update social media links",
+      variant: "destructive",
+    });
+  },
+});
 
   const handleInputChange = (platform: string, value: string) => {
     setSocialLinks(prev => ({
@@ -95,20 +93,16 @@ export function SocialMediaManager() {
   };
 
   const handleSave = () => {
-    // Validate URLs
     const validatedLinks: SocialLinks = {};
-    
     Object.entries(socialLinks).forEach(([key, value]) => {
-      if (value && value.trim()) {
+      if (value?.trim()) {
         let url = value.trim();
-        // Add https:// if not present
         if (!url.startsWith('http://') && !url.startsWith('https://')) {
           url = 'https://' + url;
         }
         validatedLinks[key] = url;
       }
     });
-
     updateSocialLinksMutation.mutate(validatedLinks);
   };
 
@@ -148,10 +142,10 @@ export function SocialMediaManager() {
           <div className="space-y-4">
             {socialPlatforms.map((platform) => {
               const Icon = platform.icon;
-              const currentLink = (socialLinksData?.socialLinks || {})[platform.key];
-              
+              const currentLink = initialLinks?.[platform.key];
+
               if (!currentLink) return null;
-              
+
               return (
                 <div key={platform.key} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-3">
@@ -173,19 +167,19 @@ export function SocialMediaManager() {
                 </div>
               );
             })}
-            
-            {Object.keys(socialLinksData?.socialLinks || {}).length === 0 && (
+
+            {Object.keys(initialLinks || {}).length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 <Globe className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No social media links added yet</p>
                 <p className="text-sm">Add your social profiles to showcase your presence</p>
               </div>
             )}
-            
+
             <div className="flex gap-2">
               <Button onClick={() => setIsEditing(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                {Object.keys(socialLinksData?.socialLinks || {}).length === 0 ? 'Add Social Links' : 'Edit Social Links'}
+                {Object.keys(initialLinks || {}).length === 0 ? 'Add Social Links' : 'Edit Social Links'}
               </Button>
             </div>
           </div>
@@ -197,7 +191,7 @@ export function SocialMediaManager() {
             {socialPlatforms.map((platform) => {
               const Icon = platform.icon;
               const currentValue = socialLinks[platform.key] || '';
-              
+
               return (
                 <div key={platform.key} className="space-y-2">
                   <Label className="flex items-center gap-2">
@@ -224,7 +218,7 @@ export function SocialMediaManager() {
                 </div>
               );
             })}
-            
+
             <div className="flex gap-2 pt-4">
               <Button 
                 onClick={handleSave}
@@ -237,7 +231,7 @@ export function SocialMediaManager() {
                 variant="outline" 
                 onClick={() => {
                   setIsEditing(false);
-                  setSocialLinks(socialLinksData?.socialLinks || {});
+                  setSocialLinks(initialLinks || {});
                 }}
                 disabled={updateSocialLinksMutation.isPending}
               >

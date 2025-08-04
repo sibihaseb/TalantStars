@@ -464,6 +464,7 @@ export default function ProfileImageUpload({
 
               <div className="flex justify-center gap-4">
                 <Button
+                type='button'
                   onClick={handleCrop}
                   disabled={uploadMutation.isPending}
                   className="bg-green-600 hover:bg-green-700"

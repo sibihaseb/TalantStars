@@ -667,8 +667,8 @@ function Onboarding() {
         // Actor-specific fields
         height: existingProfile.height || currentFormValues.height,
         weight: existingProfile.weight || currentFormValues.weight,
-        eyeColor: existingProfile.eyeColor || currentFormValues.eyeColor,
-        hairColor: existingProfile.hairColor || currentFormValues.hairColor,
+        eyeColor: existingProfile.eye_color || currentFormValues.eyeColor,
+        hairColor: existingProfile.hair_color || currentFormValues.hairColor,
         
         // Arrays and multi-select fields
         languages: existingProfile.languages || currentFormValues.languages,
@@ -677,6 +677,7 @@ function Onboarding() {
         genres: existingProfile.genres || currentFormValues.genres,
         unionStatus: existingProfile.unionStatus || currentFormValues.unionStatus,
         skills: existingProfile.skills || currentFormValues.skills,
+        vocalRange: existingProfile.vocal_range || currentFormValues.vocalRange,
         
         // Rates
         dailyRate: existingProfile.dailyRate || currentFormValues.dailyRate,
@@ -1683,7 +1684,7 @@ function Onboarding() {
   if (!isAuthenticated) {
     return null;
   }
-
+   
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
@@ -2088,7 +2089,9 @@ function Onboarding() {
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="eyeColor">Eye Color</Label>
-                            <Select onValueChange={(value) => form.setValue("eyeColor", [value])}>
+                            <Select onValueChange={(value) => form.setValue("eyeColor", [value])}
+                              
+                              value={form.watch("eyeColor")?.[0] || ""}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select eye color" />
                               </SelectTrigger>
@@ -2103,7 +2106,9 @@ function Onboarding() {
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="hairColor">Hair Color</Label>
-                            <Select onValueChange={(value) => form.setValue("hairColor", [value])}>
+                            <Select onValueChange={(value) => form.setValue("hairColor", [value])}
+                              
+                              value={form.watch("hairColor")?.[0] || ""}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select hair color" />
                               </SelectTrigger>
@@ -2231,6 +2236,7 @@ function Onboarding() {
                         currentImage={form.getValues('profileImageUrl') || ''}
                         onImageUpdate={(imageUrl) => form.setValue('profileImageUrl', imageUrl)}
                         mandatory={false}
+                        aspectRatio={16/9}
                       />
                     </div>
                   </CardContent>
