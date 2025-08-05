@@ -532,7 +532,7 @@ export default function Profile() {
                           <div className="space-y-2">
                             <Label htmlFor="displayName">Display Name</Label>
                             <Input
-                              {...form.register("display_name")}
+                              {...form.register("displayName")}
                               placeholder="Your professional name"
                             />
                           </div>
