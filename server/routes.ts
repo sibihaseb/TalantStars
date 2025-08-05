@@ -2456,14 +2456,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { q, talentType, location, featured } = req.query;
       
       // Build search parameters
-      const searchParams = {
-        query: q as string,
-        talentType: talentType as string,
-        location: location as string,
-        featured: featured === 'true',
-      };
+       const searchParams = {
+      query: q && q !== 'undefined' ? q : null,
+      talentType: talentType && talentType !== 'undefined' ? talentType : null,
+      location: location && location !== 'undefined' ? location : null,
+      featured: featured === 'true' ? true : featured === 'false' ? false : null,
+    };
+
       
       const talents = await storage.searchTalentsPublic(searchParams);
+      console.log("Search talents with params:", searchParams);
       res.json(talents);
     } catch (error) {
       console.error("Error searching talents:", error);
@@ -5140,9 +5142,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const mediaFiles = await storage.getUserMediaFiles(userId);
-      const photos = mediaFiles.filter(f => f.type === 'image');
-      const videos = mediaFiles.filter(f => f.type === 'video');
-      const audio = mediaFiles.filter(f => f.type === 'audio');
+      console.log("MEdia FIles", mediaFiles)
+      const photos = mediaFiles.filter(f => f.mediaType === 'image');
+      const videos = mediaFiles.filter(f => f.mediaType === 'video');
+      const audio = mediaFiles.filter(f => f.mediaType === 'audio');
       const externalLinks = mediaFiles.filter(f => f.externalUrl);
       
       const totalStorage = mediaFiles.reduce((sum, file) => sum + (file.size || 0), 0);

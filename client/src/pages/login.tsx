@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { Lock, User, Eye, EyeOff, LogIn } from "lucide-react";
 
+// Validation Schema
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
@@ -24,8 +26,17 @@ export default function Login() {
   const [error, setError] = useState("");
   const { toast } = useToast();
 
-  const { data: user } = useQuery({
+  // 🟢 FIX: Proper query function to check if user is already logged in
+  const {
+    data: user,
+    isLoading: isUserLoading,
+  } = useQuery({
     queryKey: ["/api/user"],
+    queryFn: async () => {
+      const res = await fetch("/api/user");
+      if (!res.ok) return null;
+      return res.json();
+    },
     retry: false,
   });
 
@@ -50,13 +61,14 @@ export default function Login() {
         body: JSON.stringify(data),
       });
 
+      console.log("Login response:", response);
+
       if (response.ok) {
         const userData = await response.json();
         toast({
           title: "Login Successful",
           description: `Welcome back, ${userData.username}!`,
         });
-        // Redirect to admin dashboard
         window.location.href = "/admin/dashboard";
       } else {
         const errorData = await response.json();
@@ -69,10 +81,20 @@ export default function Login() {
     }
   };
 
-  // If user is already logged in, redirect to admin dashboard
-  if (user) {
-    window.location.href = "/admin/dashboard";
-    return null;
+  // ✅ Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      window.location.href = "/admin/dashboard";
+    }
+  }, [user]);
+
+  // Optional: show loading screen while checking user
+  if (isUserLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-700 dark:text-white">
+        Checking session...
+      </div>
+    );
   }
 
   return (
@@ -89,6 +111,7 @@ export default function Login() {
             Sign in to access the admin dashboard
           </p>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {error && (
@@ -96,7 +119,8 @@ export default function Login() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
+
+            {/* Username Field */}
             <div className="space-y-2">
               <Label htmlFor="username" className="text-sm font-medium">
                 Username
@@ -116,6 +140,7 @@ export default function Login() {
               )}
             </div>
 
+            {/* Password Field */}
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-medium">
                 Password
@@ -146,6 +171,7 @@ export default function Login() {
               )}
             </div>
 
+            {/* Submit Button */}
             <Button
               type="submit"
               disabled={isLoading}
@@ -165,11 +191,12 @@ export default function Login() {
             </Button>
           </form>
 
+          {/* Auth Info */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               For general users, use{" "}
-              <a 
-                href="/api/login" 
+              <a
+                href="/api/login"
                 className="text-blue-600 hover:text-blue-800 font-medium"
               >
                 Replit Auth

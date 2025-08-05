@@ -37,10 +37,11 @@ export function QuestionnaireForm({ userRole = 'talent', onComplete, showProgres
     queryKey: ['/api/questionnaire/responses/my'],
     queryFn: () => apiRequest('GET', '/api/questionnaire/responses/my'),
   });
-
+     
   // Pre-populate responses with existing data
   useEffect(() => {
     if (existingProfile && categories.length > 0) {
+         console.log("🧠 existingProfile:", existingProfile);
       const initialResponses: Record<number, any> = {};
       categories.forEach((category: CategoryWithQuestions) => {
         category.questions.forEach((question: FormattedQuestion) => {
@@ -49,6 +50,7 @@ export function QuestionnaireForm({ userRole = 'talent', onComplete, showProgres
           }
         });
       });
+        console.log("✅ Pre-filled responses:", initialResponses); 
       setResponses(initialResponses);
     }
   }, [existingProfile, categories]);

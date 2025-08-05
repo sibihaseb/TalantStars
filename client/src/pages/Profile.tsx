@@ -109,7 +109,7 @@ export default function Profile() {
     enabled: isAuthenticated,
     retry: false,
   });
-
+  console.log("Profile here ",profile)
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -532,7 +532,7 @@ export default function Profile() {
                           <div className="space-y-2">
                             <Label htmlFor="displayName">Display Name</Label>
                             <Input
-                              {...form.register("displayName")}
+                              {...form.register("display_name")}
                               placeholder="Your professional name"
                             />
                           </div>

@@ -669,13 +669,14 @@ function Onboarding() {
         weight: existingProfile.weight || currentFormValues.weight,
         eyeColor: existingProfile.eye_color || currentFormValues.eyeColor,
         hairColor: existingProfile.hair_color || currentFormValues.hairColor,
+       
         
         // Arrays and multi-select fields
         languages: existingProfile.languages || currentFormValues.languages,
         accents: existingProfile.accents || currentFormValues.accents,
         instruments: existingProfile.instruments || currentFormValues.instruments,
         genres: existingProfile.genres || currentFormValues.genres,
-        unionStatus: existingProfile.unionStatus || currentFormValues.unionStatus,
+        unionStatus: existingProfile.union_status || currentFormValues.unionStatus,
         skills: existingProfile.skills || currentFormValues.skills,
         vocalRange: existingProfile.vocal_range || currentFormValues.vocalRange,
         
@@ -898,9 +899,11 @@ function Onboarding() {
     if (!currentSkills.includes(value)) {
       const newValues = [...currentSkills, value];
       form.setValue(field, newValues);
+      console.log(`Updated ${field}:`, form.getValues(field));
+  
     }
   };
-
+   console.log('Current unionStatus:', form.getValues('unionStatus'));
   const renderMultiSelectField = (
     field: keyof OnboardingFormData,
     label: string,
@@ -1075,50 +1078,125 @@ function Onboarding() {
   }, [watchedRole, watchedTalentType, profileQuestions, currentStep]);
 
   // Render questions directly without inline component
- const renderRoleSpecificQuestions = () => {
-  // Handle case when no role is selected or no questions are available
-  if (!watchedRole || (watchedRole !== 'talent' && relevantQuestions.length === 0)) {
-    return (
-      <div className="text-gray-500 text-center py-8">
-        <p>No questions available for this role.</p>
-      </div>
-    );
-  }
+//  const renderRoleSpecificQuestions = () => {
+//   // Handle case when no role is selected or no questions are available
+//   if (!watchedRole || (watchedRole !== 'talent' && relevantQuestions.length === 0)) {
+//     return (
+//       <div className="text-gray-500 text-center py-8">
+//         <p>No questions available for this role.</p>
+//       </div>
+//     );
+//   }
 
-  // For talent roles, call getTalentSpecificQuestions
-  if (watchedRole === 'talent' && watchedTalentType) {
-    const talentQuestions = getTalentSpecificQuestions(watchedTalentType);
-    console.log('Rendering talent questions for', watchedTalentType, ':', talentQuestions);
+//   // For talent roles, call getTalentSpecificQuestions
+//   if (watchedRole === 'talent' && watchedTalentType) {
+//     const talentQuestions = getTalentSpecificQuestions(watchedTalentType);
+//     console.log('Rendering talent questions for', watchedTalentType, ':', talentQuestions);
+
+//     return (
+//       <div className="space-y-4">
+//         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//           {talentQuestions.map((question) => (
+//             <div key={question.field} className="space-y-2">
+//               <Label className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
+//                 {question.label}
+//                 {question.field === 'skills' && <span className="text-red-500 text-xs">*</span>}
+//               </Label>
+//               {question.type === 'custom' ? (
+//                 renderCustomField(question.field as keyof OnboardingFormData, question.label)
+//               ) : question.type === 'multiSelect' ? (
+//                 renderMultiSelectField(
+//                   question.field as keyof OnboardingFormData,
+//                   question.label,
+//                   question.options || [],
+//                   `Select ${question.label.toLowerCase()}...`
+//                 )
+//               ) : question.type === 'input' ? (
+//                 <Input
+//                   {...form.register(question.field as keyof OnboardingFormData)}
+//                   placeholder={question.placeholder || `Enter ${question.label.toLowerCase()}...`}
+//                 />
+//               ) : null}
+//             </div>
+//           ))}
+//         </div>
+
+//         {talentQuestions.length > 0 && (
+//           <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+//             <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
+//               <Info className="h-4 w-4" />
+//               <span>
+//                 <strong>Tip:</strong> Complete as many fields as possible to improve your profile visibility and match with better opportunities.
+//               </span>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     );
+//   }
+
+//   // For non-talent roles or when talentType is not selected, render API-fetched questions
+//   return (
+//     <div className="space-y-4">
+//       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//         {relevantQuestions.map((question) => (
+//           <div key={`q-${question.id}`} className="space-y-2">
+//             <Label className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
+//               {question.question}
+//               {question.required && <span className="text-red-500 text-xs">*</span>}
+//             </Label>
+//             <div className="relative">
+//               {renderDynamicFormField(question)}
+//               {question.required && (
+//                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+//               )}
+//             </div>
+//           </div>
+//         ))}
+//       </div>
+
+//       {relevantQuestions.length > 0 && (
+//         <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+//           <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
+//             <Info className="h-4 w-4" />
+//             <span>
+//               <strong>Tip:</strong> Complete as many fields as possible to improve your profile visibility and match with better opportunities.
+//             </span>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+ const renderRoleSpecificQuestions = () => {
+    if (!watchedRole || relevantQuestions.length === 0) {
+      return (
+        <div className="text-gray-500 text-center py-8">
+          <p>No questions available for this role.</p>
+        </div>
+      );
+    }
 
     return (
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {talentQuestions.map((question) => (
-            <div key={question.field} className="space-y-2">
+          {relevantQuestions.map((question) => (
+            <div key={`q-${question.id}`} className="space-y-2">
               <Label className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                {question.label}
-                {question.field === 'skills' && <span className="text-red-500 text-xs">*</span>}
+                {question.question}
+                {question.required && <span className="text-red-500 text-xs">*</span>}
               </Label>
-              {question.type === 'custom' ? (
-                renderCustomField(question.field as keyof OnboardingFormData, question.label)
-              ) : question.type === 'multiSelect' ? (
-                renderMultiSelectField(
-                  question.field as keyof OnboardingFormData,
-                  question.label,
-                  question.options || [],
-                  `Select ${question.label.toLowerCase()}...`
-                )
-              ) : question.type === 'input' ? (
-                <Input
-                  {...form.register(question.field as keyof OnboardingFormData)}
-                  placeholder={question.placeholder || `Enter ${question.label.toLowerCase()}...`}
-                />
-              ) : null}
+              <div className="relative">
+                {renderDynamicFormField(question)}
+                {question.required && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+                )}
+              </div>
             </div>
           ))}
         </div>
-
-        {talentQuestions.length > 0 && (
+        
+        {relevantQuestions.length > 0 && (
           <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
             <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
               <Info className="h-4 w-4" />
@@ -1130,41 +1208,7 @@ function Onboarding() {
         )}
       </div>
     );
-  }
-
-  // For non-talent roles or when talentType is not selected, render API-fetched questions
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {relevantQuestions.map((question) => (
-          <div key={`q-${question.id}`} className="space-y-2">
-            <Label className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
-              {question.question}
-              {question.required && <span className="text-red-500 text-xs">*</span>}
-            </Label>
-            <div className="relative">
-              {renderDynamicFormField(question)}
-              {question.required && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {relevantQuestions.length > 0 && (
-        <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-          <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
-            <Info className="h-4 w-4" />
-            <span>
-              <strong>Tip:</strong> Complete as many fields as possible to improve your profile visibility and match with better opportunities.
-            </span>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+  };
   const renderDynamicFormField = (question: any) => {
     const fieldName = question.fieldName || question.field_name;
     const currentValue = form.getValues(fieldName) || '';
@@ -1604,6 +1648,7 @@ function Onboarding() {
     const cleanedData = {
       ...mergedData,
       // Convert empty string arrays to null or filter out empty values
+      unionStatus: Array.isArray(mergedData.unionStatus) ? mergedData.unionStatus.filter(u => u.trim()) : [],
       languages: Array.isArray(mergedData.languages) && mergedData.languages.length > 0 ? mergedData.languages.filter(l => l.trim()) : null,
       accents: Array.isArray(mergedData.accents) && mergedData.accents.length > 0 ? mergedData.accents.filter(a => a.trim()) : null,
       instruments: Array.isArray(mergedData.instruments) && mergedData.instruments.length > 0 ? mergedData.instruments.filter(i => i.trim()) : null,

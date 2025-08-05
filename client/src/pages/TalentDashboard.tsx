@@ -202,7 +202,7 @@ export default function TalentDashboard() {
         id: 'skills',
         title: 'Add Skills & Talents',
         description: 'List your key abilities and expertise',
-        completed: !!(profile.skills ),
+        completed: !!(profile.skills && profile.skills.length > 0),
         points: 25,
         category: 'profile' as const
       },
@@ -1057,6 +1057,7 @@ export default function TalentDashboard() {
                         description: "Your media has been added to your portfolio",
                       });
                       queryClient.invalidateQueries({ queryKey: ['/api/media'] });
+                      queryClient.invalidateQueries({queryKey:['/api/user/usage']});
                     }}
                   />
                 </CardContent>

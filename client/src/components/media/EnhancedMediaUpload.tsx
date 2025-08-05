@@ -174,7 +174,7 @@ export function EnhancedMediaUpload({ onUploadComplete, showGallery = true }: Me
     onSuccess: async (data) => {
       console.log("=== UPLOAD SUCCESS - INVALIDATING QUERIES ===");
       queryClient.invalidateQueries({ queryKey: ["/api/media"] });
-      
+      queryClient.invalidateQueries({ queryKey: ['/api/user/usage'], exact: true });
       // Trigger automatic verification for uploaded media
       // Server returns a single media object directly
       if (data && data.id) {

@@ -2404,49 +2404,64 @@ export class DatabaseStorage implements IStorage {
     return { userId, ...settings };
   }
 
-  async searchTalentsPublic(searchParams: any): Promise<any[]> {
-    try {
-      console.log("🔥 SEARCH: Searching talents publicly", { searchParams });
-      const { query, talentType, location, minExperience, maxExperience } = searchParams;
-      
-      // Build dynamic search query
-      let whereConditions = [`u.role = 'talent'`];
-      
-      if (query) {
-        whereConditions.push(`(
-          LOWER(u.username) LIKE LOWER('%${query}%') OR
-          LOWER(u.first_name) LIKE LOWER('%${query}%') OR
-          LOWER(u.last_name) LIKE LOWER('%${query}%') OR
-          LOWER(up.display_name) LIKE LOWER('%${query}%')
-        )`);
-      }
-      
-      if (talentType) {
-        whereConditions.push(`up.talent_type = '${talentType}'`);
-      }
-      
-      if (location) {
-        whereConditions.push(`LOWER(up.location) LIKE LOWER('%${location}%')`);
-      }
-      
-      const whereClause = whereConditions.join(' AND ');
-      
-      const results = await db.execute(sql`
-        SELECT u.id, u.username, u.first_name, u.last_name, u.profile_image_url,
-               up.display_name, up.bio, up.location, up.talent_type, up.is_verified
-        FROM users u
-        LEFT JOIN user_profiles up ON u.id = up.user_id
-        WHERE ${sql.raw(whereClause)}
-        ORDER BY up.is_verified DESC, u.created_at DESC
-        LIMIT 50
-      `);
-      
-      return results.rows || [];
-    } catch (error) {
-      console.error('Database talent search error:', error);
-      return [];
+ async searchTalentsPublic(searchParams: any): Promise<any[]> {
+  try {
+    console.log("🔥 SEARCH: Searching talents publicly", { searchParams });
+
+    const {
+      query = null,
+      talentType = null,
+      location = null,
+      featured = null, // leave null to skip
+    } = searchParams;
+
+    const whereConditions = [`u.role = 'talent'`];
+
+    if (query) {
+      const safeQuery = query.toLowerCase().replace(/'/g, "''"); // Prevent SQL injection
+      whereConditions.push(`(
+        LOWER(u.username) LIKE '%${safeQuery}%' OR
+        LOWER(u.first_name) LIKE '%${safeQuery}%' OR
+        LOWER(u.last_name) LIKE '%${safeQuery}%' OR
+        LOWER(up.display_name) LIKE '%${safeQuery}%'
+      )`);
     }
+
+    if (talentType) {
+      const safeTalentType = talentType.replace(/'/g, "''");
+      whereConditions.push(`up.talent_type = '${safeTalentType}'`);
+    }
+
+    if (location) {
+      const safeLocation = location.toLowerCase().replace(/'/g, "''");
+      whereConditions.push(`LOWER(up.location) LIKE '%${safeLocation}%'`);
+    }
+
+    if (typeof featured === 'boolean') {
+      whereConditions.push(`up.featured = ${featured ? 'TRUE' : 'FALSE'}`);
+    }
+
+    const whereClause = whereConditions.join(' AND ');
+
+    const results = await db.execute(sql`
+      SELECT u.id, u.username, u.first_name, u.last_name, u.profile_image_url,
+             up.display_name, up.bio, up.location, up.talent_type, up.is_verified
+      FROM users u
+      LEFT JOIN user_profiles up ON u.id::text = up.user_id -- Cast u.id to text to match user_id type
+      WHERE ${sql.raw(whereClause)}
+      ORDER BY up.is_verified DESC, u.created_at DESC
+      LIMIT 50
+    `);
+
+    return results.rows || [];
+  } catch (error) {
+    console.error('❌ Database talent search error:', error);
+    return [];
   }
+}
+
+
+
 
   // Add the missing getPricingTiersByRole method
   async getPricingTiersByRole(role: string): Promise<any[]> {

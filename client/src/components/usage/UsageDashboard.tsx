@@ -36,7 +36,7 @@ export default function UsageDashboard() {
     queryKey: ['/api/user/usage'],
     enabled: !!user,
   });
-
+  
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -56,7 +56,7 @@ export default function UsageDashboard() {
       </div>
     );
   }
-
+  console.log("Usage Data:", usage);
   if (!usage) {
     return (
       <Card>

@@ -92,6 +92,7 @@ export default function PostGig() {
         description: "Your gig has been published and is now visible to talent.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/jobs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/jobs"] });
       setLocation("/dashboard");
     },
     onError: (error: any) => {
@@ -361,7 +362,7 @@ export default function PostGig() {
                         <SelectContent>
                           <SelectItem value="male">Male</SelectItem>
                           <SelectItem value="female">Female</SelectItem>
-                          <SelectItem value="non-binary">Non-Binary</SelectItem>
+                          {/* <SelectItem value="non-binary">Non-Binary</SelectItem> */}
                           <SelectItem value="any">Any</SelectItem>
                         </SelectContent>
                       </Select>
