@@ -422,7 +422,7 @@ export default function Profile() {
                   <EmotionalProgress
                     currentStep={Math.floor(completeness / 10)}
                     totalSteps={10}
-                    stepTitle="Profile Completeness"
+                    stepTitle="Profile"
                     completedSteps={[
                       ...(form.watch('displayName') ? ["Display Name"] : []),
                       ...(form.watch('bio') ? ["Bio"] : []),
@@ -532,7 +532,7 @@ export default function Profile() {
                           <div className="space-y-2">
                             <Label htmlFor="displayName">Display Name</Label>
                             <Input
-                              {...form.register("displayName")}
+                              {...form.register("display_name")}
                               placeholder="Your professional name"
                             />
                           </div>
@@ -579,7 +579,7 @@ export default function Profile() {
                           <div className="space-y-2">
                             <Label htmlFor="phoneNumber">Phone Number</Label>
                             <Input
-                              {...form.register("phoneNumber")}
+                              {...form.register("phone_number")}
                               placeholder="+1 (555) 123-4567"
                             />
                           </div>
@@ -730,7 +730,7 @@ export default function Profile() {
                               <div className="space-y-2">
                                 <Label htmlFor="dailyRate">Daily Rate</Label>
                                 <Input
-                                  {...form.register("dailyRate")}
+                                  {...form.register("daily_rate")}
                                   placeholder="500"
                                   type="number"
                                 />
@@ -738,7 +738,7 @@ export default function Profile() {
                               <div className="space-y-2">
                                 <Label htmlFor="weeklyRate">Weekly Rate</Label>
                                 <Input
-                                  {...form.register("weeklyRate")}
+                                  {...form.register("weekly_rate")}
                                   placeholder="2500"
                                   type="number"
                                 />
@@ -746,7 +746,7 @@ export default function Profile() {
                               <div className="space-y-2">
                                 <Label htmlFor="projectRate">Project Rate</Label>
                                 <Input
-                                  {...form.register("projectRate")}
+                                  {...form.register("project_rate")}
                                   placeholder="10000"
                                   type="number"
                                 />

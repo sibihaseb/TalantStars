@@ -154,7 +154,7 @@ export function registerQuestionnaireRoutes(app: Express) {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ error: "Authentication required" });
     }
-
+    console.log("Fetching user responses for:", req.user.id);
     try {
       const profile = await questionnaireStorage.getUserProfile(req.user.id.toString());
       res.json(profile);

@@ -170,7 +170,7 @@ export function EmotionalProgress({
               </div>
             </div>
             
-            <div className="flex items-center space-x-2">
+            {/* <div className="flex items-center space-x-2">
               <Badge 
                 variant="secondary" 
                 className={`bg-gradient-to-r ${currentStage.color} text-white border-0`}
@@ -183,7 +183,7 @@ export function EmotionalProgress({
                   {currentStage.achievement}
                 </Badge>
               )}
-            </div>
+            </div> */}
           </div>
 
           {/* Progress Bar */}

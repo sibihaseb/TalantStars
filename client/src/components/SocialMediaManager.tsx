@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
@@ -52,7 +52,7 @@ export function SocialMediaManager() {
   const queryClient = useQueryClient();
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({});
   const [isEditing, setIsEditing] = useState(false);
-
+   
   const { data: initialLinks, isLoading } = useQuery({
     queryKey: ['/api/user/social-links'],
     select: (data) => data?.socialLinks?.socialLinks || {},
@@ -61,21 +61,72 @@ export function SocialMediaManager() {
     }
   });
 
+  const { data: profile } = useQuery({
+    queryKey: ['/api/user/profile'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/user/profile');
+      return response.json();
+    },
+  onSuccess: (data) => {
+  
+  if (data?.social_links?.socialLinks) {
+     queryClient.setQueryData(['/api/user/social-links'], {
+    socialLinks: {
+      socialLinks: data?.social_links?.socialLinks
+    }
+  });
+  }
+}
+  });
+
+  useEffect(() => {
+  // If /api/user/social-links didn't return anything,
+  // but profile.social_links did, use the profile as fallback
+  if (
+    (!initialLinks || Object.keys(initialLinks).length === 0) &&
+    profile?.social_links?.socialLinks
+  ) {
+    const fallbackLinks = profile.social_links.socialLinks;
+
+    queryClient.setQueryData(['/api/user/social-links'], {
+      socialLinks: {
+        socialLinks: fallbackLinks
+      }
+    });
+
+    setSocialLinks(fallbackLinks);
+  } else if (initialLinks) {
+    // If initialLinks exist, use them
+    setSocialLinks(initialLinks);
+  }
+}, [initialLinks, profile, queryClient]);
+
+
+
+  
 const updateSocialLinksMutation = useMutation({
   mutationFn: async (links: SocialLinks) => {
     const response = await apiRequest('PUT', '/api/user/social-links', { socialLinks: links });
     return response.json();
   },
-  onSuccess: async () => {
-    await queryClient.invalidateQueries({ queryKey: ['/api/user/social-links'] , refetchType: 'all',
-  exact: true,});
-    setIsEditing(false); // wait for the latest data to come back
-    toast({
-      title: "Success!",
-      description: "Social media links updated successfully",
-    });
-    
-  },
+ onSuccess: async (data) => {
+  const newLinks = data?.socialLinks?.socialLinks || {};
+  
+  // Manually update query cache
+  queryClient.setQueryData(['/api/user/social-links'], {
+    socialLinks: {
+      socialLinks: newLinks
+    }
+  });
+
+  setSocialLinks(newLinks); // Update local state
+  setIsEditing(false);
+
+  toast({
+    title: "Success!",
+    description: "Social media links updated successfully",
+  });
+},
   onError: () => {
     toast({
       title: "Error",

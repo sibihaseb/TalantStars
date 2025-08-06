@@ -1492,7 +1492,7 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
   };
 
   const availabilityDisplay = getAvailabilityDisplay(currentAvailability);
-
+  console.log("Dsplay profile",profile)
   return (
     <div className="max-w-5xl mx-auto space-y-12 py-8">
       {/* Ultra Clean Header */}
@@ -1500,16 +1500,16 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
         <Avatar className="w-24 h-24 mx-auto">
           <AvatarImage src={user?.profileImageUrl || user?.mainImageUrl || mediaFiles.find(m => m.category === 'headshot')?.url} />
           <AvatarFallback className="bg-gray-900 text-white text-xl font-light">
-            {profile?.displayName?.split(' ').map((n: string) => n[0]).join('') || 'U'}
+            {profile?.display_name?.split(' ').map((n: string) => n[0]).join('') || 'U'}
           </AvatarFallback>
         </Avatar>
         
         <div>
           <div className="flex items-center justify-center gap-2 mb-2">
-            <h1 className="text-5xl font-light text-gray-900">{profile?.displayName}</h1>
+            <h1 className="text-5xl font-light text-gray-900">{profile?.display_name}</h1>
             {profile?.isVerified && <ShieldCheck className="w-8 h-8 text-blue-500" />}
           </div>
-          <p className="text-xl text-gray-600 font-light">{capitalizeText(profile?.talentType)} • {profile?.location}</p>
+          <p className="text-xl text-gray-600 font-light">{capitalizeText(profile?.talent_type)} • {profile?.location}</p>
         </div>
         
         <div className="max-w-2xl mx-auto">
@@ -1544,7 +1544,7 @@ export function MinimalTemplate({ profile, mediaFiles, userId, user, sharingSett
       {/* Minimal Stats */}
       <div className="grid grid-cols-3 gap-8 py-8 border-y border-gray-200">
         <div className="text-center">
-          <div className="text-3xl font-light text-gray-900">${profile?.dailyRate}</div>
+          <div className="text-3xl font-light text-gray-900">${profile?.daily_rate}</div>
           <div className="text-sm text-gray-500 uppercase tracking-wide">Daily Rate</div>
         </div>
         <div className="text-center">

@@ -482,6 +482,7 @@ export default function ProfileSharing({backButtonSharing=true}) {
                     queryClient.invalidateQueries({ queryKey: ['/api/user'] });
                   }}
                   mandatory={false}
+                  aspectRatio={16/9}
                 />
               </CardContent>
             </Card>

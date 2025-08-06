@@ -1481,9 +1481,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const profile = await storage.getUserProfile(userId);
       console.log('🔍 Profile retrieved:', !!profile);
       console.log('🔍 Full profile data:', profile);
-      console.log('🔍 Profile social links:', profile?.socialLinks);
-      const socialLinks = profile?.socialLinks || {};
-      console.log('🔍 Returning social links:', socialLinks);
+      
+      console.log('🔍 Profile social links:', profile?.social_links?.socialLinks);
+      const socialLinks = profile?.social_links?.socialLinks|| {};
+    console.log("Check:", profile?.social_links, profile?.social_links?.socialLinks);
+    res.set('Cache-Control', 'no-store');
       res.json({ socialLinks });
     } catch (error) {
       console.error("Error getting social links:", error);
