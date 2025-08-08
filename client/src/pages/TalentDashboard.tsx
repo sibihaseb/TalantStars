@@ -755,6 +755,10 @@ export default function TalentDashboard() {
                   )}
                 </CardContent>
                 </Card>
+                <div>
+                <AvailabilityCalendar showAddAvailablity={false} showactiveTabBar={true} setActiveTab={setActiveTab}/>
+                 
+                </div>
               </div>
             </div>
           </TabsContent>

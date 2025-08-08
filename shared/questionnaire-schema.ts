@@ -12,7 +12,7 @@ export const questionnaireCategories = pgTable("questionnaire_categories", {
   slug: varchar("slug").notNull().unique(), // "acting", "music", "modeling"
   description: text("description"),
   targetRoles: text("target_roles").array(), // ["talent"] or ["talent", "manager"]
-  isActive: boolean("is_active").default(true),
+  isActive: boolean("is_active").default(true), 
   sortOrder: integer("sort_order").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

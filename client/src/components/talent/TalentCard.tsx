@@ -40,9 +40,17 @@ export function TalentCard({
       <CardContent className="p-6">
         <div className="flex items-start space-x-4">
           <div className="relative">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-              {avatarInitial}
-            </div>
+            {profile?.profile_image_url ? (
+  <img
+    src={profile.profile_image_url}
+    alt="Profile"
+    className="w-16 h-16 rounded-full object-cover"
+  />
+) : (
+  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+    {avatarInitial}
+  </div>
+)}
             {profile.is_verified && (
               <CheckCircle className="absolute -top-1 -right-1 h-5 w-5 text-green-500 fill-current" />
             )}

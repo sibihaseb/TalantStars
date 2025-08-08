@@ -682,7 +682,7 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
 
   // Convert user profile social links to the expected format (handle double nesting)
   const socialLinksData = React.useMemo(() => {
-    const profileSocialLinks = profile?.socialLinks?.socialLinks || profile?.socialLinks;
+    const profileSocialLinks = profile?.social_links?.socialLinks || profile?.social_links;
     if (!profileSocialLinks) return [];
     
     return Object.entries(profileSocialLinks).map(([platform, url], index) => ({
@@ -769,7 +769,7 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
   };
 
   const availabilityDisplay = getAvailabilityDisplay(currentAvailability);
-
+  console.log("Profile of",profile)
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Hero Section with Glass Morphism */}

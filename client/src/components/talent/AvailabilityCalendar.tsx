@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Calendar, Clock, Plus, Edit, Trash2, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
-
+import { Eye } from "lucide-react";
 interface AvailabilityEntry {
   id: number;
   startDate: string;
@@ -24,7 +24,7 @@ interface AvailabilityEntry {
   allDay: boolean;
 }
 
-export function AvailabilityCalendar() {
+export function AvailabilityCalendar({showAddAvailablity=true,showactiveTabBar=false,setActiveTab}) {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -147,6 +147,7 @@ export function AvailabilityCalendar() {
             Availability Calendar
           </span>
           <Dialog open={isEditingEntry} onOpenChange={setIsEditingEntry}>
+            {showAddAvailablity &&
             <DialogTrigger asChild>
               <Button onClick={() => {
                 setEditingEntry(null);
@@ -156,6 +157,7 @@ export function AvailabilityCalendar() {
                 Add Availability
               </Button>
             </DialogTrigger>
+}
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
@@ -313,6 +315,15 @@ export function AvailabilityCalendar() {
             ))}
           </div>
         )}
+        <Button 
+                                variant="outline" 
+                                className="w-full py-2 mt-4" 
+                                size="sm" 
+                                onClick={() => setActiveTab('calendar')}
+                              >
+                                <Eye className="w-4 h-4 mr-2" />
+                                View  All 
+                              </Button>
       </CardContent>
     </Card>
   );

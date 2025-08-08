@@ -92,7 +92,13 @@ const onboardingSchema = insertUserProfileSchema.extend({
   
   // Optional fields with validation
   website: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  phoneNumber: z.string().regex(/^[\+]?[1-9][\d]{0,15}$/, "Invalid phone number format").optional().or(z.literal("")),
+ phoneNumber: z.string()
+  .regex(
+    /^(\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/,
+    "Invalid phone number format (e.g., use +1 (555) 123-4567 or 555-123-4567)"
+  )
+  .optional()
+  .or(z.literal("")),
   
   // Rate validation
   dailyRate: z.string().regex(/^\d*\.?\d*$/, "Must be a valid number").optional().or(z.literal("")),
