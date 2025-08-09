@@ -263,7 +263,7 @@ export default function TalentDashboard() {
         break;
       case 'skills':
         if (!item.completed) {
-          setLocation('/onboarding');
+         setActiveTab('experience');
         } else {
           setActiveTab('overview');
         }

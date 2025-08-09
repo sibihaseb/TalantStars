@@ -1518,30 +1518,49 @@ function Onboarding() {
   };
 
   // Function to validate required fields for current step
-  const validateCurrentStep = async (): Promise<{ isValid: boolean; errors: string[] }> => {
-    const requiredFields = requiredFieldsByStep[currentStep] || [];
-    const errors: string[] = [];
-    
-    for (const field of requiredFields) {
-      const value = form.getValues(field as keyof OnboardingFormData);
-      
-      if (!value || (typeof value === 'string' && value.trim() === '')) {
-        // Special error messages for specific fields
-        if (field === 'profileImageUrl') {
-          errors.push('Profile image is required');
-        } else {
-          errors.push(`${field.charAt(0).toUpperCase() + field.slice(1)} is required`);
-        }
-      }
-      
-      // Special validation for bio minimum length
-      if (field === 'bio' && typeof value === 'string' && value.trim().length < 10) {
-        errors.push('Bio must be at least 10 characters');
+ const validateCurrentStep = async (): Promise<{ isValid: boolean; errors: string[] }> => {
+  const requiredFields = requiredFieldsByStep[currentStep] || [];
+  const errors: string[] = [];
+
+  // Validate static required fields from requiredFieldsByStep
+  for (const field of requiredFields) {
+    const value = form.getValues(field as keyof OnboardingFormData);
+
+    if (!value || (typeof value === 'string' && value.trim() === '')) {
+      if (field === 'profileImageUrl') {
+        errors.push('Profile image is required');
+      } else {
+        errors.push(`${field.charAt(0).toUpperCase() + field.slice(1)} is required`);
       }
     }
-    
-    return { isValid: errors.length === 0, errors };
-  };
+
+    // Special validation for bio minimum length
+    if (field === 'bio' && typeof value === 'string' && value.trim().length < 10) {
+      errors.push('Bio must be at least 10 characters');
+    }
+  }
+
+  // Validate dynamic required fields from relevantQuestions (for steps with role-specific questions)
+  if ([5, 6, 7, 8].includes(currentStep)) { // Adjust step numbers based on your flow
+    relevantQuestions.forEach((question) => {
+      if (question.required) {
+        const fieldName = question.fieldName || question.field_name;
+        const value = form.getValues(fieldName as keyof OnboardingFormData);
+
+        // Handle different field types
+        if (question.fieldType === 'multiselect' || question.fieldType === 'checkbox') {
+          if (!Array.isArray(value) || value.length === 0) {
+            errors.push(`${question.question} is required`);
+          }
+        } else if (!value || (typeof value === 'string' && value.trim() === '')) {
+          errors.push(`${question.question} is required`);
+        }
+      }
+    });
+  }
+
+  return { isValid: errors.length === 0, errors };
+};
 
   const nextStep = async () => {
     const maxSteps = getMaxSteps();
