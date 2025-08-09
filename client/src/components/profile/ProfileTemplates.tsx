@@ -322,7 +322,7 @@ function useProfileActions() {
       if (result.success) {
         toast({
           title: "Follow Request Sent",
-          description: `You are now following ${targetProfile.displayName}!`,
+          description: `You are now following ${targetProfile.display_name}!`,
           variant: "default"
         });
       } else if (result.requiresAuth) {

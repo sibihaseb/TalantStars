@@ -117,6 +117,7 @@ export default function Dashboard() {
                 Complete Profile Setup
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
+              {!needsOnboarding() && 
               <Button 
                 variant="outline"
                 onClick={() => setLocation("/dashboard?skip_onboarding=true")}
@@ -124,6 +125,7 @@ export default function Dashboard() {
               >
                 Skip for Now
               </Button>
+              }
             </CardContent>
           </Card>
         </div>
