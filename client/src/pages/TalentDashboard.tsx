@@ -315,6 +315,8 @@ export default function TalentDashboard() {
     enabled: !!user,
   });
 
+  console.log("TalentDashboard - applications:", applications);
+
   const { data: opportunities } = useQuery({
     queryKey: ['/api/opportunities'],
     queryFn: async () => {

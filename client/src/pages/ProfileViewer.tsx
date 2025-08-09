@@ -17,7 +17,7 @@ import {
 } from "@/components/profile/ProfileTemplates";
 
 export default function ProfileViewer() {
-  const { username } = useParams<{ username: string }>();
+  const { userId } = useParams<{ userId: string }>();
   const { user } = useAuth();
   
   // Get template from URL params or default to modern
@@ -25,30 +25,30 @@ export default function ProfileViewer() {
   const templateFromUrl = urlParams.get('template') as ProfileTemplate || 'modern';
   const [selectedTemplate, setSelectedTemplate] = useState<ProfileTemplate>(templateFromUrl);
   
-  console.log("ProfileViewer - username from params:", username);
+  console.log("ProfileViewer - userId from params:", userId);
   
-  // Fetch profile data using the talent endpoint which handles both usernames and IDs
+  // Fetch profile data using the talent endpoint which handles both userIds and IDs
   const { data: profile, isLoading, error } = useQuery<any>({
-    queryKey: [`/api/talent/${username}`],
-    enabled: !!username,
+    queryKey: [`/api/talent/${userId}`],
+    enabled: !!userId,
   });
 
   // Fetch user account data to get profileImageUrl and other user account fields
   const { data: userData } = useQuery<any>({
-    queryKey: [`/api/user/profile/${username}`],
-    enabled: !!username,
+    queryKey: [`/api/user/profile/${userId}`],
+    enabled: !!userId,
   });
 
   // Fetch media files for the user using the talent endpoint
   const { data: mediaFiles = [] } = useQuery<any[]>({
-    queryKey: [`/api/media/user/${username}`],
-    enabled: !!username,
+    queryKey: [`/api/media/user/${userId}`],
+    enabled: !!userId,
   });
 
   // Fetch sharing settings for the user
   const { data: sharingSettings = {} } = useQuery<any>({
-    queryKey: [`/api/user/sharing-settings/${username}`],
-    enabled: !!username,
+    queryKey: [`/api/user/sharing-settings/${userId}`],
+    enabled: !!userId,
   });
   
   console.log("ProfileViewer - profile data:", profile);
