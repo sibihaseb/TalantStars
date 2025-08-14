@@ -16,7 +16,7 @@ export function Header({backShown = true}) {
 
   const navigation = [
     { name: "Find Talent", href: "/search", icon: Search },
-    { name: "Featured Talents", href: "/featured-talents", icon: Star },
+    // { name: "Featured Talents", href: "/featured-talents", icon: Star },
     { name: "Browse Jobs", href: "/jobs", icon: Briefcase },
     { name: "Post Gig", href: "/post-gig", icon: Plus },
   ];
