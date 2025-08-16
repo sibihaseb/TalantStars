@@ -2774,7 +2774,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   */
 
   // Admin routes (for user management, pricing, etc.)
-  app.get('/api/admin/users', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
     try {
       const users = await storage.getAllUsers();
       res.setHeader('Content-Type', 'application/json');
@@ -2949,7 +2949,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const organizerId = req.user.id;
       const meetingData = { ...req.body, organizerId };
-      
+      console.log("Creating meeting with data:", req.user);
       const meeting = await storage.createMeeting(meetingData);
       
       // Send meeting invitation email
@@ -2961,7 +2961,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           time: new Date(meeting.meetingDate).toLocaleTimeString(),
           location: meeting.location,
           virtualLink: meeting.virtualLink,
-          organizer: req.user.claims.name || req.user.claims.email,
+          organizer: req.user.name || req.user.email,
           description: meeting.description,
         });
       }

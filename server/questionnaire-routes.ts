@@ -10,6 +10,7 @@ export function registerQuestionnaireRoutes(app: Express) {
     try {
       const targetRole = req.query.role as string;
       const categories = await questionnaireStorage.getCategoriesWithQuestions(targetRole);
+      console.log("Fetched categories with questions:", categories);
       res.json(categories);
     } catch (error) {
       console.error("Error fetching categories:", error);

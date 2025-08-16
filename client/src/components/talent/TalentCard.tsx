@@ -84,14 +84,14 @@ export function TalentCard({
                 </div>
               )}
 
-              <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
+              {/* <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
                 <Star className="h-3 w-3 fill-current text-yellow-500" />
                 <span>4.9 (127 reviews)</span>
-              </div>
+              </div> */}
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <Badge
                   variant={profile.availability_status === "available" ? "default" : "secondary"}
                   className={
@@ -100,20 +100,20 @@ export function TalentCard({
                       : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
                   }
                 >
-                  {profile.availability_status === "available" ? "Available" : "Busy"}
+                  {profile.availability_status === "available" ? "Available" : "Bsusy"}
                 </Badge>
-              </div>
+              </div> */}
 
               {showActions && (
                 <div className="flex space-x-2">
-                  <Button
+                  {/* <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onMessage?.(profile.id)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <MessageCircle className="h-4 w-4" />
-                  </Button>
+                  </Button> */}
                   <Button
                     size="sm"
                     onClick={() => onViewProfile?.(profile.id)}

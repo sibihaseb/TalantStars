@@ -42,6 +42,7 @@ export default function MeetingManagement() {
     queryKey: ["/api/admin/users"],
     enabled: true,
   });
+  console.log("Users fetched:", users);
 
   // Create meeting mutation
   const createMeetingMutation = useMutation({
@@ -56,7 +57,7 @@ export default function MeetingManagement() {
         virtualLink: formData.get("virtualLink") as string,
         status: "scheduled" as const,
       };
-
+      console.log("Creating meeting with data:", data);
       const response = await apiRequest("POST", "/api/meetings", data);
       if (!response.ok) {
         const error = await response.json();
@@ -118,19 +119,35 @@ export default function MeetingManagement() {
   };
 
   const handleUpdateMeeting = (formData: FormData) => {
-    const data = {
-      id: selectedMeeting.id,
-      attendeeId: formData.get("attendeeId") as string,
-      title: formData.get("title") as string,
-      description: formData.get("description") as string,
-      meetingDate: new Date(`${formData.get("meetingDate")}T${formData.get("meetingTime")}`).toISOString(),
-      type: formData.get("type") as "in_person" | "virtual",
-      location: formData.get("location") as string,
-      virtualLink: formData.get("virtualLink") as string,
-      status: formData.get("status") as string,
-    };
-    updateMeetingMutation.mutate(data);
+  const date = formData.get("meetingDate") as string;
+  const time = formData.get("meetingTime") as string;
+
+  if (!date || !time) {
+    console.error("Date or time is missing", { date, time });
+    return; // prevent sending invalid data
+  }
+
+  const meetingDate = new Date(`${date}T${time}`);
+  if (isNaN(meetingDate.getTime())) {
+    console.error("Invalid date/time format", { date, time });
+    return;
+  }
+
+  const data = {
+    id: selectedMeeting.id,
+    attendeeId: formData.get("attendeeId") as string,
+    title: formData.get("title") as string,
+    description: formData.get("description") as string,
+    meetingDate: meetingDate.toISOString(),
+    type: formData.get("type") as "in_person" | "virtual",
+    location: formData.get("location") as string,
+    virtualLink: formData.get("virtualLink") as string,
+    status: formData.get("status") as string,
   };
+
+  updateMeetingMutation.mutate(data);
+};
+
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -180,7 +197,7 @@ export default function MeetingManagement() {
                     </div>
                     <div>
                       <Label htmlFor="attendeeId">Attendee</Label>
-                      <Select name="attendeeId" required>
+                      <Select name="attendeeId" required >
                         <SelectTrigger>
                           <SelectValue placeholder="Select attendee" />
                         </SelectTrigger>
@@ -347,12 +364,12 @@ export default function MeetingManagement() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                             <div className="flex items-center gap-2">
                               <Clock className="w-4 h-4 text-gray-500" />
-                              <span>{formatDate(meeting.meetingDate)}</span>
+                              <span>{formatDate(meeting.meeting_date)}</span>
                             </div>
-                            <div className="flex items-center gap-2">
+                            {/* <div className="flex items-center gap-2">
                               <Users className="w-4 h-4 text-gray-500" />
                               <span>Attendee: {meeting.attendeeId}</span>
-                            </div>
+                            </div> */}
                             <div className="flex items-center gap-2">
                               {meeting.type === "virtual" ? (
                                 <Video className="w-4 h-4 text-gray-500" />
@@ -361,7 +378,7 @@ export default function MeetingManagement() {
                               )}
                               <span>
                                 {meeting.type === "virtual" 
-                                  ? `Virtual - ${meeting.virtualLink}` 
+                                  ? `Virtual - ${meeting.virtual_link}` 
                                   : `In-Person - ${meeting.location}`
                                 }
                               </span>

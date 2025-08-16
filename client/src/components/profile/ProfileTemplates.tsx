@@ -769,7 +769,7 @@ export function ModernTemplate({ profile, mediaFiles, userId, user, sharingSetti
   };
 
   const availabilityDisplay = getAvailabilityDisplay(currentAvailability);
-  console.log("Profile of",profile)
+  
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Hero Section with Glass Morphism */}
@@ -1073,7 +1073,7 @@ export function ArtisticTemplate({ profile, mediaFiles, userId, user, sharingSet
       }
     },
     onSuccess: () => {
-      // Silently track view - no user feedback needed
+      console.log('Profile view tracked successfully'); 
     },
   });
 
@@ -1764,7 +1764,10 @@ export function CinematicTemplate({ profile, mediaFiles, userId, user, sharingSe
       }
     },
     onSuccess: () => {
-      // Silently track view - no user feedback needed
+     console.log("Profile view tracked successfully");
+    },
+    onError: (error) => {
+      console.error("Error tracking profile view:", error);
     },
   });
 

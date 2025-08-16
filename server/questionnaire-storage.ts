@@ -182,7 +182,7 @@ export class QuestionnaireStorage {
   // Combined data retrieval
   async getCategoriesWithQuestions(targetRole?: string): Promise<CategoryWithQuestions[]> {
     let categories = await this.getCategories();
-    
+    console.log("Fetched categories:", categories);
     // Filter by target role if specified
     if (targetRole) {
       categories = categories.filter(cat => 

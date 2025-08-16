@@ -402,7 +402,19 @@ export default function TalentDashboard() {
 
 
 
-
+const tabOptions = [
+  { value: "overview", label: "Overview" },
+  { value: "applications", label: "Applications" },
+  { value: "opportunities", label: "Opportunities" },
+  { value: "job-management", label: "My Jobs" },
+  { value: "social", label: "Social" },
+  { value: "portfolio", label: "Portfolio" },
+  { value: "experience", label: "Experience" },
+  { value: "billing", label: "Billing" },
+  { value: "usage", label: "Usage" },
+  { value: "calendar", label: "Calendar" },
+  { value: "settings", label: "Settings/Share" },
+];
 
   const handleCompleteProfile = () => {
     // Navigate to onboarding page for profile completion
@@ -641,8 +653,22 @@ export default function TalentDashboard() {
         </div>
 
         {/* Main Content */}
+        <div className="sm:hidden mb-6">
+  <Select value={activeTab} onValueChange={setActiveTab}>
+    <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+      <SelectValue placeholder="Select a tab" />
+    </SelectTrigger>
+    <SelectContent>
+      {tabOptions.map((option) => (
+        <SelectItem key={option.value} value={option.value}>
+          {option.label}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-11 mb-8">
+          <TabsList className="hidden sm:grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-11 w-full gap-2 mb-6 sticky top-[80px] z-10 bg-white dark:bg-gray-800">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
@@ -656,8 +682,8 @@ export default function TalentDashboard() {
             <TabsTrigger value="settings" className="ml-2" >Settings/Share</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <TabsContent value="overview" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
               {/* Interactive Mascot Progress */}
               <div className="lg:col-span-1">
                 <ProgressMascot
@@ -822,25 +848,25 @@ export default function TalentDashboard() {
           <TabsContent value="opportunities">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Recommended Opportunities</CardTitle>
-                    <CardDescription>Discover jobs that match your skills and interests</CardDescription>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm">
-                      <Filter className="w-4 h-4 mr-2" />
-                      Filter
-                    </Button>
-                    <Button 
-                      onClick={() => setLocation('/jobs')}
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Browse More
-                    </Button>
-                  </div>
-                </div>
+                <div className="flex flex-col items-start justify-between md:flex-row md:items-center">
+  <div className="mb-4 md:mb-0">
+    <CardTitle>Recommended Opportunities</CardTitle>
+    <CardDescription>Discover jobs that match your skills and interests</CardDescription>
+  </div>
+  <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+    <Button variant="outline" size="sm">
+      <Filter className="w-4 h-4 mr-2" />
+      Filter
+    </Button>
+    <Button 
+      onClick={() => setLocation('/jobs')}
+      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+    >
+      <Plus className="w-4 h-4 mr-2" />
+      Browse More
+    </Button>
+  </div>
+</div>
               </CardHeader>
               <CardContent>
                 {!opportunities || opportunities.length === 0 ? (

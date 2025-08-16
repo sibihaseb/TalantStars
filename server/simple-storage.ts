@@ -20,6 +20,7 @@ import {
   type TalentType,
   type InsertTalentType,
 } from "@shared/simple-schema";
+import { meetings } from "@shared/schema";
 import { jobHistory, profileSharingSettings, availabilityCalendar, mediaFiles, jobApplications, jobCommunications, socialPosts, jobs, socialMediaLinks, friendships, promoCodes, promoCodeUsage, userDiscountPeriods, emailTemplates, insertMessageSchema } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc, desc, sql, and } from "drizzle-orm";
@@ -3442,30 +3443,51 @@ export class DatabaseStorage implements IStorage {
 
   // Meeting operations - MISSING METHODS
   async createMeeting(meeting: any): Promise<any> {
-    try {
-      console.log("🔥 ADMIN: Creating meeting", meeting);
-      const newMeeting = {
-        id: Date.now(),
-        ...meeting,
-        createdAt: new Date()
-      };
-      console.log("✅ ADMIN: Meeting created", newMeeting);
-      return newMeeting;
-    } catch (error) {
-      console.error('Error creating meeting:', error);
-      throw error;
-    }
+  try {
+    console.log("🔥 ADMIN: Creating meeting", meeting);
+
+    const insertQuery = sql`
+      INSERT INTO meetings 
+        (title, description, organizer_id, attendee_id, meeting_date, duration, type, status, location, virtual_link, platform, notes, created_at, updated_at)
+      VALUES 
+        (${meeting.title}, 
+         ${meeting.description}, 
+         ${meeting.organizerId}, 
+         ${meeting.attendeeId}, 
+         ${meeting.meetingDate}, 
+         ${meeting.duration ?? 60}, 
+         ${meeting.type}, 
+         ${meeting.status ?? 'scheduled'}, 
+         ${meeting.location}, 
+         ${meeting.virtualLink ?? null}, 
+         ${meeting.platform ?? null}, 
+         ${meeting.notes ?? null}, 
+         NOW(), 
+         NOW()
+        )
+      RETURNING *;
+    `;
+
+    const result = await db.execute(insertQuery);
+    const newMeeting = result.rows[0];
+
+    console.log("✅ ADMIN: Meeting created", newMeeting);
+    return newMeeting;
+  } catch (error: any) {
+    console.error("Error creating meeting:", error);
+    throw new Error(error.message || "Failed to create meeting");
   }
+}
 
   async getMeetings(userId: number): Promise<any[]> {
     try {
       console.log("🔥 ADMIN: Getting meetings", { userId });
       // Get meetings from database
       const meetings = await db.execute(sql`
-        SELECT * FROM meetings 
-        WHERE (organizer_id = ${userId} OR attendee_ids::text LIKE '%${userId}%')
-        ORDER BY meeting_date DESC
-      `);
+      SELECT * FROM meetings 
+      WHERE organizer_id = ${userId} OR attendee_id = ${userId}
+      ORDER BY meeting_date DESC
+    `);
       return meetings.rows || [];
     } catch (error) {
       console.error('Error getting meetings:', error);
