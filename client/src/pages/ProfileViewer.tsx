@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Header } from "@/components/layout/Header";
@@ -24,8 +24,7 @@ export default function ProfileViewer() {
   const urlParams = new URLSearchParams(window.location.search);
   const templateFromUrl = urlParams.get('template') as ProfileTemplate || 'modern';
   const [selectedTemplate, setSelectedTemplate] = useState<ProfileTemplate>(templateFromUrl);
-  
-  console.log("ProfileViewer - userId from params:", userId);
+ 
   
   // Fetch profile data using the talent endpoint which handles both userIds and IDs
   const { data: profile, isLoading, error } = useQuery<any>({
@@ -50,11 +49,30 @@ export default function ProfileViewer() {
     queryKey: [`/api/user/sharing-settings/${userId}`],
     enabled: !!userId,
   });
+
+   const { mutate: trackView } = useMutation({
+    mutationFn: async () => {
+      if (!isOwnProfile) {
+        await fetch(`/api/profile/view/${userId}`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+      }
+    },
+    onSuccess: () => {
+     console.log("Profile view tracked successfully");
+    },
+    onError: (error) => {
+      console.error("Error tracking profile view:", error);
+    },
+  });
+
+  useEffect(() => {
+  if (userId) {
+    trackView();
+  }
+}, [userId, trackView]);
   
-  console.log("ProfileViewer - profile data:", profile);
-  console.log("ProfileViewer - media files:", mediaFiles);
-  console.log("ProfileViewer - isLoading:", isLoading);
-  console.log("ProfileViewer - error:", error);
 
   if (isLoading) {
     return (
@@ -107,7 +125,7 @@ export default function ProfileViewer() {
       id: userData?.id || profile?.userId || userId,
       userId: userData?.id || profile?.userId || userId
     };
-
+    console.log("Combined User Data:", combinedUserData);
     const templateProps: any = {
       profile: combinedUserData,
       mediaFiles: displayMedia,

@@ -6,17 +6,15 @@ import { Star, Search, Briefcase, Plus, Menu, Calendar, MessageCircle, ArrowLeft
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-
 import PNG_FILE_6 from "@assets/PNG FILE 6_1752621700970.png";
 
-export function Header({backShown = true}) {
-  const { isAuthenticated, user } = useAuth();
+export function Header({ backShown = true }) {
+  const { isAuthenticated } = useAuth();
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
   const navigation = [
     { name: "Find Talent", href: "/search", icon: Search },
-    // { name: "Featured Talents", href: "/featured-talents", icon: Star },
     { name: "Browse Jobs", href: "/jobs", icon: Briefcase },
     { name: "Post Gig", href: "/post-gig", icon: Plus },
   ];
@@ -27,16 +25,18 @@ export function Header({backShown = true}) {
     if (window.history.length > 1) {
       window.history.back();
     } else {
-      window.location.href = '/dashboard';
+      window.location.href = "/dashboard";
     }
   };
 
-  const showBackButton =    (location !== '/' && location !== '/dashboard' && isAuthenticated);
+  const showBackButton =
+    location !== "/" && location !== "/dashboard" && isAuthenticated;
 
   return (
     <header className="fixed w-full top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
+          {/* Left section */}
           <div className="flex items-center space-x-8">
             {backShown && showBackButton && (
               <Button
@@ -50,9 +50,14 @@ export function Header({backShown = true}) {
               </Button>
             )}
             <Link href="/" className="flex items-center space-x-2">
-              <img src={PNG_FILE_6} alt="Talents & Stars" className="h-8 sm:h-10 md:h-12 w-auto object-contain max-w-[120px] sm:max-w-[140px] md:max-w-none" />
+              <img
+                src={PNG_FILE_6}
+                alt="Talents & Stars"
+                className="h-8 sm:h-10 md:h-12 w-auto object-contain max-w-[120px] sm:max-w-[140px] md:max-w-none"
+              />
             </Link>
-            
+
+            {/* Desktop navigation */}
             <div className="hidden md:flex space-x-6">
               {navigation.map((item) => (
                 <Link
@@ -71,15 +76,15 @@ export function Header({backShown = true}) {
             </div>
           </div>
 
+          {/* Right section */}
           <div className="flex items-center space-x-4">
             <ModeToggle />
-            
+
+            {/* Desktop Auth Actions */}
             {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
+              <div className="hidden md:flex items-center space-x-4">
                 <Link href="/dashboard">
-                  <Button variant="ghost" size="sm">
-                    Dashboard
-                  </Button>
+                  <Button variant="ghost" size="sm">Dashboard</Button>
                 </Link>
                 <Link href="/meetings">
                   <Button variant="ghost" size="sm">
@@ -88,22 +93,20 @@ export function Header({backShown = true}) {
                   </Button>
                 </Link>
                 <Link href="/profile">
-                  <Button variant="ghost" size="sm">
-                    Profile
-                  </Button>
+                  <Button variant="ghost" size="sm">Profile</Button>
                 </Link>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={async () => {
                     try {
-                      await fetch('/api/logout', {
-                        method: 'POST',
-                        credentials: 'include'
+                      await fetch("/api/logout", {
+                        method: "POST",
+                        credentials: "include",
                       });
                       window.location.href = "/";
                     } catch (error) {
-                      console.error('Logout failed:', error);
+                      console.error("Logout failed:", error);
                     }
                   }}
                 >
@@ -111,17 +114,17 @@ export function Header({backShown = true}) {
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center space-x-4">
+              <div className="hidden md:flex items-center space-x-4">
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => window.location.href = "/auth"}
+                  onClick={() => (window.location.href = "/auth")}
                 >
                   Login
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => window.location.href = "/auth"}
+                  onClick={() => (window.location.href = "/auth")}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 >
                   Get Started
@@ -153,8 +156,9 @@ export function Header({backShown = true}) {
                       <span>{item.name}</span>
                     </Link>
                   ))}
-                  
-                  {isAuthenticated && (
+
+                  {/* Mobile Auth Actions */}
+                  {isAuthenticated ? (
                     <>
                       <Link
                         href="/meetings"
@@ -190,6 +194,48 @@ export function Header({backShown = true}) {
                       >
                         <span>Profile</span>
                       </Link>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            await fetch("/api/logout", {
+                              method: "POST",
+                              credentials: "include",
+                            });
+                            window.location.href = "/";
+                          } catch (error) {
+                            console.error("Logout failed:", error);
+                          }
+                        }}
+                        className="justify-start"
+                      >
+                        Logout
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          window.location.href = "/auth";
+                          setIsOpen(false);
+                        }}
+                        className="justify-start"
+                      >
+                        Login
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          window.location.href = "/auth";
+                          setIsOpen(false);
+                        }}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 justify-start"
+                      >
+                        Get Started
+                      </Button>
                     </>
                   )}
                 </div>
